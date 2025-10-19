@@ -46,9 +46,16 @@
     <label>Difficulty (1–5) <select id="difficulty"></select></label>
     <div>
       <button onclick="addTask()">Add Task</button>
+      <button onclick="saveAsTemplate()">Add as Template</button>
       <button onclick="startFocus()" id="startBtn" disabled>Get started</button>
       <button onclick="reset()">Reset</button>
+      
     </div>
+    <div id="templateSection" style="margin-top:1rem;">
+  <h3>Templates</h3>
+  <div id="templateButtons"></div>
+    </div>
+    
     <details class="peek">
       <summary>🔍 Peek at tasks</summary>
       <div id="taskList"></div>
@@ -81,6 +88,7 @@
     let supabase = null;
 
     let tasks = [];
+    let templates = [];
     let focusQueue = [];
 
     async function init() {
@@ -97,6 +105,9 @@
       } else {
         const saved = localStorage.getItem("tasks");
         if (saved) tasks = JSON.parse(saved);
+        const savedTemplates = localStorage.getItem("templates");
+if (savedTemplates) templates = JSON.parse(savedTemplates);
+renderTemplates();
         updateUI();
       }
     }
@@ -127,7 +138,8 @@
         timeToStart: +$("timeToStart").value,
         difficulty: +$("difficulty").value,
         completed: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        addedAt: new Date().toISOString(),
       };
       task.priority = computePriority(task);
       tasks.push(task);
@@ -197,6 +209,40 @@
       if (supabase) supabase.from("tasks").delete().neq("id", ""); 
       updateUI();
     }
+    function saveAsTemplate() {
+  const name = $("name").value.trim();
+  if (!name) return alert("Task name is required");
+
+  const template = {
+    name,
+    importance: +$("importance").value,
+    urgency: +$("urgency").value,
+    dopamine: +$("dopamine").value,
+    timeToStart: +$("timeToStart").value,
+    difficulty: +$("difficulty").value
+  };
+  templates.push(template);
+  localStorage.setItem("templates", JSON.stringify(templates));
+  renderTemplates();
+}
+
+function renderTemplates() {
+  const container = $("templateButtons");
+  container.innerHTML = "";
+  templates.forEach((t, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = t.name;
+    btn.onclick = () => {
+      $("name").value = t.name;
+      $("importance").value = t.importance;
+      $("urgency").value = t.urgency;
+      $("dopamine").value = t.dopamine;
+      $("timeToStart").value = t.timeToStart;
+      $("difficulty").value = t.difficulty;
+    };
+    container.appendChild(btn);
+  });
+}
 
     init();
   </script>
