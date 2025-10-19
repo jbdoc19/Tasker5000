@@ -45,11 +45,14 @@
     <label>Dopamine – Interest (1–5) <select id="interest"></select></label>
     <label>Dopamine – External Pressure
   <select id="externalPressure">
+    <option value="" disabled selected>⬇️ Select external pressure</option>
     <option value="0">🧘 No one is waiting</option>
     <option value="2">📆 Soft deadline</option>
     <option value="3">🧍 Peer is waiting on me</option>
     <option value="5">🧠 Boss is watching</option>
     <option value="5">🚨 Patient emergency</option>
+  </select>
+    </label>
   </select>
     </label>
     <label>Time to Start (1–5) <select id="timeToStart"></select></label>
@@ -83,7 +86,7 @@
 
   <script>
     const $ = id => document.getElementById(id);
-    const selects = ["importance", "urgency", "novelty", "interest", "externalPressure", "timeToStart", "difficulty"];
+    const selects = ["importance", "urgency", "novelty", "interest", "timeToStart", "difficulty"];
     selects.forEach(id => {
       for (let i = 1; i <= 5; i++) {
         const opt = document.createElement("option");
