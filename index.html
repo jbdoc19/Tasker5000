@@ -41,7 +41,17 @@
     <label>Task Name <input id="name" type="text" /></label>
     <label>Importance (1–5) <select id="importance"></select></label>
     <label>Urgency (1–5) <select id="urgency"></select></label>
-    <label>Dopamine Potential (1–5) <select id="dopamine"></select></label>
+    <label>Dopamine – Novelty (1–5) <select id="novelty"></select></label>
+    <label>Dopamine – Interest (1–5) <select id="interest"></select></label>
+    <label>Dopamine – External Pressure
+  <select id="externalPressure">
+    <option value="0">🧘 No one is waiting</option>
+    <option value="2">📆 Soft deadline</option>
+    <option value="3">🧍 Peer is waiting on me</option>
+    <option value="5">🧠 Boss is watching</option>
+    <option value="5">🚨 Patient emergency</option>
+  </select>
+    </label>
     <label>Time to Start (1–5) <select id="timeToStart"></select></label>
     <label>Difficulty (1–5) <select id="difficulty"></select></label>
     <div>
@@ -73,7 +83,7 @@
 
   <script>
     const $ = id => document.getElementById(id);
-    const selects = ["importance", "urgency", "dopamine", "timeToStart", "difficulty"];
+    const selects = ["importance", "urgency", "novelty", "interest", "externalPressure", "timeToStart", "difficulty"];
     selects.forEach(id => {
       for (let i = 1; i <= 5; i++) {
         const opt = document.createElement("option");
@@ -113,7 +123,14 @@ renderTemplates();
     }
 
     function computePriority(t) {
-      return (t.importance * 2) + (t.urgency * 2) + (t.dopamine * 5) + (t.timeToStart * 1.5) - (t.difficulty * 1.5);
+  const dopamine = t.novelty + t.interest;
+  const pressure = t.externalPressure;
+  const frictionScore = (6 - t.timeToStart) + (6 - t.difficulty);
+  return (t.importance * 2)
+       + (t.urgency * 2)
+       + (dopamine * 2)
+       + (pressure * 5)
+       + (frictionScore * 1.5);
     }
 
     async function persist() {
@@ -134,7 +151,9 @@ renderTemplates();
         name,
         importance: +$("importance").value,
         urgency: +$("urgency").value,
-        dopamine: +$("dopamine").value,
+        novelty: +$("novelty").value,
+        interest: +$("interest").value,
+        externalPressure: +$("externalPressure").value,
         timeToStart: +$("timeToStart").value,
         difficulty: +$("difficulty").value,
         completed: false,
@@ -217,7 +236,9 @@ renderTemplates();
     name,
     importance: +$("importance").value,
     urgency: +$("urgency").value,
-    dopamine: +$("dopamine").value,
+    novelty: +$("novelty").value,
+    interest: +$("interest").value,
+    externalPressure: +$("externalPressure").value,
     timeToStart: +$("timeToStart").value,
     difficulty: +$("difficulty").value
   };
@@ -230,17 +251,50 @@ function renderTemplates() {
   const container = $("templateButtons");
   container.innerHTML = "";
   templates.forEach((t, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = t.name;
-    btn.onclick = () => {
+    const wrapper = document.createElement("div");
+    wrapper.style.marginBottom = "0.5rem";
+
+    const useBtn = document.createElement("button");
+    useBtn.textContent = `📋 ${t.name}`;
+    useBtn.onclick = () => {
       $("name").value = t.name;
+      $("novelty").value = t.novelty;
+      $("interest").value = t.interest;
+      $("externalPressure").value = t.externalPressure;
       $("importance").value = t.importance;
       $("urgency").value = t.urgency;
-      $("dopamine").value = t.dopamine;
       $("timeToStart").value = t.timeToStart;
       $("difficulty").value = t.difficulty;
     };
-    container.appendChild(btn);
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️ Edit";
+    editBtn.onclick = () => {
+      const newName = prompt("Edit task name:", t.name);
+      if (!newName) return;
+      t.name = newName;
+      localStorage.setItem("templates", JSON.stringify(templates));
+      renderTemplates();
+    };
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️ Delete";
+    deleteBtn.onclick = () => {
+      if (!confirm("Delete this template?")) return;
+      templates.splice(i, 1);
+      localStorage.setItem("templates", JSON.stringify(templates));
+      renderTemplates();
+    };
+
+    [useBtn, editBtn, deleteBtn].forEach(b => {
+      b.style.marginRight = "0.3rem";
+      b.style.fontSize = "0.9rem";
+    });
+
+    wrapper.appendChild(useBtn);
+    wrapper.appendChild(editBtn);
+    wrapper.appendChild(deleteBtn);
+    container.appendChild(wrapper);
   });
 }
 
