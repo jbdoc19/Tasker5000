@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Focus</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1, h2, h3 { color: #fff; }
+    .hidden { display: none; }
+    label { display: block; margin-top: 0.5rem; }
+    input[type="text"], select {
+      background: #222; color: #eee; border: 1px solid #555;
+      padding: 0.5rem; width: 100%;
+    }
+    button {
+      background: #333; color: #fff; border: none; padding: 0.6rem 1rem;
+      margin: 0.5rem 0.25rem; cursor: pointer; border-radius: 4px;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .peek { background: #222; margin-top: 1rem; padding: 1rem; border-radius: 6px; max-width: 600px; }
+    .peek summary { cursor: pointer; }
+    .task { margin: 0.25rem 0; }
+    .score { font-size: 0.8rem; color: #ccc; }
+    .focus { font-size: 1.5rem; margin: 1rem 0; }
+    [aria-live] { outline: none; }
+  </style>
+</head>
+<body>
+  <h1>🎯 Task Focus</h1>
+
+  <section id="capture">
+    <label>Task Name <input id="name" type="text" /></label>
+    <label>Importance (1–5) <select id="importance"></select></label>
+    <label>Urgency (1–5) <select id="urgency"></select></label>
+    <label>Dopamine Potential (1–5) <select id="dopamine"></select></label>
+    <label>Time to Start (1–5) <select id="timeToStart"></select></label>
+    <label>Difficulty (1–5) <select id="difficulty"></select></label>
+    <div>
+      <button onclick="addTask()">Add Task</button>
+      <button onclick="startFocus()" id="startBtn" disabled>Get started</button>
+      <button onclick="reset()">Reset</button>
+    </div>
+    <details class="peek">
+      <summary>🔍 Peek at tasks</summary>
+      <div id="taskList"></div>
+    </details>
+  </section>
+
+  <section id="focus" class="hidden">
+    <div class="focus" tabindex="0" aria-live="polite"></div>
+    <div class="score" id="scoreView"></div>
+    <div>
+      <button onclick="completeTask()">Task complete</button>
+      <button onclick="backToCapture()">Back to capture</button>
+    </div>
+  </section>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const selects = ["importance", "urgency", "dopamine", "timeToStart", "difficulty"];
+    selects.forEach(id => {
+      for (let i = 1; i <= 5; i++) {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = i;
+        $(id).appendChild(opt);
+      }
+    });
+
+    const MODE = localStorage.getItem("MODE") || "local";
+    const SUPABASE_URL = localStorage.getItem("SUPABASE_URL");
+    const SUPABASE_ANON_KEY = localStorage.getItem("SUPABASE_ANON_KEY");
+    let supabase = null;
+
+    let tasks = [];
+    let focusQueue = [];
+
+    async function init() {
+      if (MODE === "supabase" && SUPABASE_URL && SUPABASE_ANON_KEY) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js';
+        script.onload = async () => {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          const { data, error } = await supabase.from('tasks').select('*');
+          if (data) tasks = data;
+          updateUI();
+        };
+        document.head.appendChild(script);
+      } else {
+        const saved = localStorage.getItem("tasks");
+        if (saved) tasks = JSON.parse(saved);
+        updateUI();
+      }
+    }
+
+    function computePriority(t) {
+      return (t.importance * 2) + (t.urgency * 2) + (t.dopamine * 5) + (t.timeToStart * 1.5) - (t.difficulty * 1.5);
+    }
+
+    async function persist() {
+      if (supabase) {
+        for (const task of tasks) {
+          await supabase.from('tasks').upsert(task, { onConflict: 'id' });
+        }
+      } else {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+      }
+    }
+
+    function addTask() {
+      const name = $("name").value.trim();
+      if (!name) return;
+      const task = {
+        id: Date.now().toString(),
+        name,
+        importance: +$("importance").value,
+        urgency: +$("urgency").value,
+        dopamine: +$("dopamine").value,
+        timeToStart: +$("timeToStart").value,
+        difficulty: +$("difficulty").value,
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      task.priority = computePriority(task);
+      tasks.push(task);
+      persist();
+      $("name").value = "";
+      updateUI();
+    }
+
+    function updateUI() {
+      const taskList = $("taskList");
+      taskList.innerHTML = "";
+      const remaining = tasks.filter(t => !t.completed);
+      $("startBtn").disabled = remaining.length === 0;
+      tasks.sort((a, b) => b.priority - a.priority);
+      for (const t of tasks) {
+        const div = document.createElement("div");
+        div.className = "task";
+        div.textContent = `${t.name} ${t.completed ? "(✓)" : ""}`;
+        const score = document.createElement("span");
+        score.className = "score";
+        score.textContent = ` — ${t.priority.toFixed(1)}`;
+        div.appendChild(score);
+        taskList.appendChild(div);
+      }
+    }
+
+    function startFocus() {
+      $("capture").classList.add("hidden");
+      $("focus").classList.remove("hidden");
+      focusQueue = tasks.filter(t => !t.completed).sort((a, b) => b.priority - a.priority);
+      showNextTask();
+    }
+
+    function showNextTask() {
+      const display = document.querySelector(".focus");
+      const scoreView = $("scoreView");
+      if (focusQueue.length === 0) {
+        display.textContent = "✅ All tasks complete!";
+        scoreView.textContent = "";
+        return;
+      }
+      const current = focusQueue[0];
+      display.textContent = current.name;
+      scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
+      display.focus();
+    }
+
+    function completeTask() {
+      if (focusQueue.length === 0) return;
+      focusQueue[0].completed = true;
+      persist();
+      updateUI();
+      focusQueue.shift();
+      showNextTask();
+    }
+
+    function backToCapture() {
+      $("focus").classList.add("hidden");
+      $("capture").classList.remove("hidden");
+      updateUI();
+    }
+
+    function reset() {
+      if (!confirm("Clear all tasks?")) return;
+      tasks = [];
+      localStorage.removeItem("tasks");
+      if (supabase) supabase.from("tasks").delete().neq("id", ""); 
+      updateUI();
+    }
+
+    init();
+  </script>
+</body>
+</html>
