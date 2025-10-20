@@ -31,6 +31,45 @@
     .task { margin: 0.25rem 0; }
     .score { font-size: 0.8rem; color: #ccc; }
     .focus { font-size: 1.5rem; margin: 1rem 0; }
+    .category-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .category-filter button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .category-filter button.active {
+      background: #666;
+    }
+    .category-progress {
+      margin-top: 0.5rem;
+      width: 100%;
+      max-width: 600px;
+    }
+    .category-progress .line {
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .category-progress .bar {
+      background: #333;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .category-progress .bar .fill {
+      background: #0a84ff;
+      height: 100%;
+      display: block;
+      width: 0%;
+    }
     [aria-live] { outline: none; }
   </style>
 </head>
@@ -40,6 +79,17 @@
   <!-- Task entry form -->
   <section id="capture">
     <label>Task Name <input id="name" type="text" /></label>
+    <label>Category
+      <select id="taskCategory">
+        <option value="General" selected>General</option>
+        <option value="Charts">Charts</option>
+        <option value="Admin">Admin</option>
+        <option value="Inbox">Inbox</option>
+        <option value="Calls">Calls</option>
+        <option value="Teaching">Teaching</option>
+        <option value="Personal">Personal</option>
+      </select>
+    </label>
     <label>Importance (1–5) <select id="importance"></select></label>
     <label>Urgency (1–5) <select id="urgency"></select></label>
     <label>Dopamine – Novelty (1–5) <select id="novelty"></select></label>
@@ -67,6 +117,10 @@
       <h3>Templates</h3>
       <div id="templateButtons"></div>
     </div>
+    <!-- Category filter bar -->
+    <div id="categoryFilter" class="category-filter"></div>
+    <!-- Progress per category -->
+    <div id="categoryProgress" class="category-progress"></div>
     <details class="peek">
       <summary>🔍 Peek at tasks</summary>
       <div id="taskList"></div>
@@ -89,10 +143,14 @@
   </section>
 
   <script>
-  // Simple DOM helper
+  // DOM helper
   const $ = id => document.getElementById(id);
 
-  // Populate dropdowns 1–5
+  // Category list (excluding "All")
+  const categories = ["General","Charts","Admin","Inbox","Calls","Teaching","Personal"];
+  let activeCategory = "All";
+
+  // Populate numeric dropdowns 1–5
   const scales = ["importance","urgency","novelty","interest","timeToStart","difficulty"];
   scales.forEach(id => {
     const sel = $(id);
@@ -109,7 +167,7 @@
   let templates = [];
   let focusQueue = [];
 
-  // Priority formula; if sub‑tasks exist, average remaining sub‑task priorities
+  // Compute priority; average pending sub‑tasks if present
   function computePriority(t) {
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
@@ -127,7 +185,7 @@
          + (friction     * 1.5);
   }
 
-  // Save tasks to localStorage
+  // Persist tasks
   function persist() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
@@ -139,6 +197,7 @@
     const task = {
       id: Date.now().toString(),
       name,
+      category: $("taskCategory").value || "General",
       importance: +$("importance").value,
       urgency: +$("urgency").value,
       novelty: +$("novelty").value,
@@ -159,15 +218,73 @@
     updateUI();
   }
 
-  // Main UI refresh
+  // Render category filter buttons
+  function renderCategoryFilter() {
+    const bar = $("categoryFilter");
+    bar.innerHTML = "";
+    ["All", ...categories].forEach(cat => {
+      const btn = document.createElement("button");
+      btn.textContent = cat;
+      btn.className = (cat === activeCategory) ? "active" : "";
+      btn.onclick = () => {
+        activeCategory = cat;
+        updateUI();
+      };
+      bar.appendChild(btn);
+    });
+  }
+
+  // Render per‑category progress
+  function renderCategoryProgress() {
+    const cont = $("categoryProgress");
+    cont.innerHTML = "";
+    categories.forEach(cat => {
+      const total = tasks.filter(t => t.category === cat).length;
+      if (total === 0) return;
+      const done = tasks.filter(t => t.category === cat && t.completed).length;
+      const percent = (done / total) * 100;
+
+      const line = document.createElement("div");
+      line.className = "line";
+      const title = document.createElement("span");
+      title.textContent = `${cat}: ${done}/${total} complete`;
+      line.appendChild(title);
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const fill = document.createElement("span");
+      fill.className = "fill";
+      fill.style.width = percent + "%";
+      bar.appendChild(fill);
+
+      line.appendChild(bar);
+      cont.appendChild(line);
+    });
+  }
+
+  // Main UI update
   function updateUI() {
+    renderCategoryFilter();
+    renderCategoryProgress();
+
     const taskList = $("taskList");
     taskList.innerHTML = "";
-    const remaining = tasks.filter(t => !t.completed);
-    $("startBtn").disabled = remaining.length === 0;
-    tasks.sort((a, b) => b.priority - a.priority);
 
-    tasks.forEach((t, i) => {
+    // Filter tasks by active category
+    const filtered = tasks.filter(t =>
+      activeCategory === "All" || t.category === activeCategory
+    );
+
+    const remaining = filtered.filter(t => !t.completed);
+    $("startBtn").disabled = remaining.length === 0;
+
+    // Sort by priority
+    filtered.sort((a,b) => b.priority - a.priority);
+
+    // Render tasks
+    tasks.forEach((t, idx) => {
+      if (activeCategory !== "All" && t.category !== activeCategory) return;
+
       const div = document.createElement("div");
       div.className = "task";
       const row = document.createElement("div");
@@ -179,7 +296,7 @@
       delBtn.textContent = "🗑️";
       delBtn.onclick = () => {
         if (!confirm("Delete this task?")) return;
-        tasks.splice(i, 1);
+        tasks.splice(idx, 1);
         persist();
         updateUI();
       };
@@ -200,8 +317,8 @@
         div.appendChild(dd);
       }
 
-      // sub‑task progress and list
-      if (t.subTasks && t.subTasks.length > 0) {
+      // Show sub‑task progress and list
+      if (t.subTasks && t.subTasks.length) {
         const completedCount = t.subTasks.filter(s => s.completed).length;
         const progress = document.createElement("div");
         progress.className = "score";
@@ -216,7 +333,7 @@
           const chk = document.createElement("input");
           chk.type = "checkbox";
           chk.checked = sub.completed;
-          chk.onchange = () => completeSubTask(i, subIndex);
+          chk.onchange = () => completeSubTask(idx, subIndex);
           const label = document.createElement("span");
           label.textContent = sub.name;
           label.style.marginLeft = "0.25rem";
@@ -226,17 +343,17 @@
         });
       }
 
-      // button to add a sub‑task
+      // Button to add sub‑task
       const addSubBtn = document.createElement("button");
       addSubBtn.textContent = "➕ Step";
       addSubBtn.style.marginTop = "0.25rem";
-      addSubBtn.onclick = () => addSubTask(i);
+      addSubBtn.onclick = () => addSubTask(idx);
       div.appendChild(addSubBtn);
 
       taskList.appendChild(div);
     });
 
-    // tasks due today
+    // Tasks due today (filtered)
     const dueTodayList = $("dueTodayList");
     dueTodayList.innerHTML = "";
     const now = new Date();
@@ -244,7 +361,8 @@
     const today = now.toISOString().split("T")[0];
 
     tasks.forEach((task, idx) => {
-      if (task.dueDate === today && !task.completed) {
+      if ((activeCategory !== "All" && task.category !== activeCategory) || task.completed) return;
+      if (task.dueDate === today) {
         const wrap = document.createElement("div");
         wrap.textContent = `${task.name} — due today`;
 
@@ -273,23 +391,24 @@
           });
         }
 
-        const addSubBtn = document.createElement("button");
-        addSubBtn.textContent = "➕ Step";
-        addSubBtn.style.marginTop = "0.25rem";
-        addSubBtn.onclick = () => addSubTask(idx);
-        wrap.appendChild(addSubBtn);
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "➕ Step";
+        addBtn.style.marginTop = "0.25rem";
+        addBtn.onclick = () => addSubTask(idx);
+        wrap.appendChild(addBtn);
 
         dueTodayList.appendChild(wrap);
       }
     });
   }
 
-  // Focus mode
+  // Focus mode functions
   function startFocus() {
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
-    // clone remaining tasks sorted by priority
-    focusQueue = tasks.filter(t => !t.completed).sort((a,b) => b.priority - a.priority);
+    focusQueue = tasks
+      .filter(t => !t.completed && (activeCategory === "All" || t.category === activeCategory))
+      .sort((a,b) => b.priority - a.priority);
     showNextTask();
   }
 
@@ -306,14 +425,12 @@
     const current = focusQueue[0];
     display.textContent = current.name;
     scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
-    display.focus();
 
     // find index of current task in tasks array
     const idx = tasks.findIndex(t => t.id === current.id);
 
-    // render sub‑tasks in focus view
     subTaskView.innerHTML = "";
-    if (current.subTasks && current.subTasks.length > 0) {
+    if (current.subTasks && current.subTasks.length) {
       current.subTasks.forEach((sub, subIndex) => {
         const row = document.createElement("div");
         row.style.display = "flex";
@@ -349,7 +466,7 @@
     updateUI();
   }
 
-  // Reset all tasks
+  // Reset tasks
   function reset() {
     if (!confirm("Clear all tasks?")) return;
     tasks = [];
@@ -363,6 +480,7 @@
     if (!name) return alert("Task name is required");
     const template = {
       name,
+      category: $("taskCategory").value || "General",
       importance: +$("importance").value,
       urgency: +$("urgency").value,
       novelty: +$("novelty").value,
@@ -385,6 +503,7 @@
       useBtn.textContent = `📋 ${t.name}`;
       useBtn.onclick = () => {
         $("name").value = t.name;
+        $("taskCategory").value = t.category;
         $("importance").value = t.importance;
         $("urgency").value = t.urgency;
         $("novelty").value = t.novelty;
@@ -396,7 +515,7 @@
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️ Edit";
       editBtn.onclick = () => {
-        const newName = prompt("Edit task name:", t.name);
+        const newName = prompt("Edit template name:", t.name);
         if (!newName) return;
         t.name = newName;
         localStorage.setItem("templates", JSON.stringify(templates));
@@ -454,7 +573,7 @@
     updateUI();
   }
 
-  // Initialize on load: restore tasks/templates from localStorage
+  // Initialization: load tasks and templates from localStorage
   window.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem("tasks");
     if (saved) tasks = JSON.parse(saved);
