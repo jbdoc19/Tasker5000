@@ -1,97 +1,77 @@
- </style>
- </head>
- <body>
-   <h1>🎯 Tasker 5000</h1>
- 
-   <section id="capture">
-     <label>Task Name <input id="name" type="text" /></label>
--    <label>Importance (1–5) <select id="importance"></select></label>
--    <label>Urgency (1–5) <select id="urgency"></select></label>
--    <label>Dopamine – Novelty (1–5) <select id="novelty"></select></label>
--    <label>Dopamine – Interest (1–5) <select id="interest"></select></label>
-+    <label>Importance (1–5)
-+      <select id="importance">
-+        <option value="1">1 — Minimal</option>
-+        <option value="2">2</option>
-+        <option value="3" selected>3 — Moderate</option>
-+        <option value="4">4</option>
-+        <option value="5">5 — Critical</option>
-+      </select>
-+    </label>
-+    <label>Urgency (1–5)
-+      <select id="urgency">
-+        <option value="1">1 — No rush</option>
-+        <option value="2">2</option>
-+        <option value="3" selected>3 — Soon</option>
-+        <option value="4">4</option>
-+        <option value="5">5 — Immediate</option>
-+      </select>
-+    </label>
-+    <label>Dopamine – Novelty (1–5)
-+      <select id="novelty">
-+        <option value="1">1 — Familiar</option>
-+        <option value="2">2</option>
-+        <option value="3" selected>3 — Mixed</option>
-+        <option value="4">4</option>
-+        <option value="5">5 — Exciting</option>
-+      </select>
-+    </label>
-+    <label>Dopamine – Interest (1–5)
-+      <select id="interest">
-+        <option value="1">1 — Boring</option>
-+        <option value="2">2</option>
-+        <option value="3" selected>3 — Neutral</option>
-+        <option value="4">4</option>
-+        <option value="5">5 — Fascinating</option>
-+      </select>
-+    </label>
-     <label>Dopamine – External Pressure
-   <select id="externalPressure">
-     <option value="" disabled selected>⬇️ Select external pressure</option>
-     <option value="0">🧘 No one is waiting</option>
-     <option value="2">📆 Soft deadline</option>
-     <option value="3">🧍 Peer is waiting on me</option>
-     <option value="5">🧠 Boss is watching</option>
-     <option value="5">🚨 Patient emergency</option>
-   </select>
-     </label>
--    <label>Time to Start (1–5) <select id="timeToStart"></select></label>
--    <label>Difficulty (1–5) <select id="difficulty"></select></label>
-+    <label>Time to Start (1–5)
-+      <select id="timeToStart">
-+        <option value="1">1 — Requires prep</option>
-+        <option value="2">2</option>
-+        <option value="3" selected>3 — Ready soon</option>
-+        <option value="4">4</option>
-+        <option value="5">5 — Ready now</option>
-+      </select>
-+    </label>
-+    <label>Difficulty (1–5)
-+      <select id="difficulty">
-+        <option value="1">1 — Easy</option>
-+        <option value="2">2</option>
-+        <option value="3" selected>3 — Manageable</option>
-+        <option value="4">4</option>
-+        <option value="5">5 — Very hard</option>
-+      </select>
-+    </label>
-     <label>Optional Due Date
-   <input type="date" id="dueDate" />
-     </label>
-     <div>
-       <button onclick="addTask()">Add Task</button>
-       <button onclick="saveAsTemplate()">Add as Template</button>
-       <button onclick="startFocus()" id="startBtn" disabled>Get started</button>
-       <button onclick="reset()">Reset</button>
-       
-     </div>
-     <div id="templateSection" style="margin-top:1rem;">
-   <h3>Templates</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Focus</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1, h2, h3 { color: #fff; }
+    .hidden { display: none; }
+    label { display: block; margin-top: 0.5rem; }
+    input[type="text"], select {
+      background: #222; color: #eee; border: 1px solid #555;
+      padding: 0.5rem; width: 100%;
+    }
+    button {
+      background: #333; color: #fff; border: none; padding: 0.6rem 1rem;
+      margin: 0.5rem 0.25rem; cursor: pointer; border-radius: 4px;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .peek { background: #222; margin-top: 1rem; padding: 1rem; border-radius: 6px; max-width: 600px; }
+    .peek summary { cursor: pointer; }
+    .task { margin: 0.25rem 0; }
+    .score { font-size: 0.8rem; color: #ccc; }
+    .focus { font-size: 1.5rem; margin: 1rem 0; }
+    [aria-live] { outline: none; }
+  </style>
+</head>
+<body>
+  <h1>🎯 Task Focus</h1>
+
+  <section id="capture">
+    <label>Task Name <input id="name" type="text" /></label>
+    <label>Importance (1–5) <select id="importance"></select></label>
+    <label>Urgency (1–5) <select id="urgency"></select></label>
+    <label>Dopamine – Novelty (1–5) <select id="novelty"></select></label>
+    <label>Dopamine – Interest (1–5) <select id="interest"></select></label>
+    <label>Dopamine – External Pressure
+  <select id="externalPressure">
+    <option value="" disabled selected>⬇️ Select external pressure</option>
+    <option value="0">🧘 No one is waiting</option>
+    <option value="2">📆 Soft deadline</option>
+    <option value="3">🧍 Peer is waiting on me</option>
+    <option value="5">🧠 Boss is watching</option>
+    <option value="5">🚨 Patient emergency</option>
+  </select>
+    </label>
+    <label>Time to Start (1–5) <select id="timeToStart"></select></label>
+    <label>Difficulty (1–5) <select id="difficulty"></select></label>
+    <label>Optional Due Date
+  <input type="date" id="dueDate" />
+    </label>
+    <div>
+      <button onclick="addTask()">Add Task</button>
+      <button onclick="saveAsTemplate()">Add as Template</button>
+      <button onclick="startFocus()" id="startBtn" disabled>Get started</button>
+      <button onclick="reset()">Reset</button>
+      
+    </div>
+    <div id="templateSection" style="margin-top:1rem;">
+    
+ <h3>Templates</h3>
    <div id="templateButtons"></div>
      </div>
      
--    <details class="peek">
-+    <details class="peek" open>
+     <details class="peek">
        <summary>🔍 Peek at tasks</summary>
        <div id="taskList"></div>
      </details>
@@ -112,8 +92,6 @@
  
    <script>
  const $ = id => document.getElementById(id);
--
--// populate the numeric dropdowns
 +const coerceNumber = (value, fallback = 0) => {
 +  const parsed = Number(value);
 +  return Number.isFinite(parsed) ? parsed : fallback;
@@ -126,33 +104,21 @@
 +  const parsed = Number(raw);
 +  return Number.isFinite(parsed) ? parsed : fallback;
 +};
-+
-+// ensure the numeric dropdowns have usable defaults even if stored HTML was edited
+ 
+ // populate the numeric dropdowns
  const selects = ["importance", "urgency", "novelty", "interest", "timeToStart", "difficulty"];
--selects.forEach(id => {
--  for (let i = 1; i <= 5; i++) {
--    const opt = document.createElement("option");
--    opt.value = opt.textContent = i;
+ selects.forEach(id => {
++  const selectEl = $(id);
+   for (let i = 1; i <= 5; i++) {
+     const opt = document.createElement("option");
+     opt.value = opt.textContent = i;
 -    $(id).appendChild(opt);
--  }
--});
-+function ensureScaleControls() {
-+  selects.forEach(id => {
-+    const selectEl = $(id);
-+    if (!selectEl) return;
-+    if (selectEl.options.length === 0) {
-+      for (let i = 1; i <= 5; i++) {
-+        const opt = document.createElement("option");
-+        opt.value = String(i);
-+        opt.textContent = String(i);
-+        selectEl.appendChild(opt);
-+      }
-+    }
-+    if (!selectEl.value) {
-+      selectEl.value = "3";
-+    }
-+  });
-+}
++    selectEl.appendChild(opt);
++  }
++  if (selectEl.selectedIndex === -1) {
++    selectEl.value = "3";
+   }
+ });
  
  // Supabase / local storage set‑up
  const MODE = localStorage.getItem("MODE") || "local";
@@ -295,23 +261,7 @@
      div.className = "task";
      const row = document.createElement("div");
      row.style.display = "flex";
-@@ -206,165 +299,133 @@ function updateUI() {
-     const delBtn = document.createElement("button");
-     delBtn.textContent = "🗑️";
-     delBtn.onclick = () => {
-       if (!confirm("Delete this task?")) return;
-       tasks.splice(i, 1);
-       persist();
-       updateUI();
-     };
-     row.appendChild(info);
-     row.appendChild(delBtn);
-     div.appendChild(row);
- 
-     if (t.addedAt) {
-       const ts = document.createElement("div");
-       ts.className = "score";
-       ts.textContent = `Added: ${new Date(t.addedAt).toLocaleString()}`;
+@@ -222,209 +261,175 @@ function updateUI() {
        div.appendChild(ts);
      }
      if (t.dueDate) {
@@ -321,69 +271,64 @@
        div.appendChild(dd);
      }
      // show sub‑task progress and list for all tasks
--if (t.subTasks && t.subTasks.length > 0) {
--  const completedCount = t.subTasks.filter(s => s.completed).length;
--  const progress = document.createElement("div");
--  progress.className = "score";
--  progress.textContent = `${completedCount}/${t.subTasks.length} steps done`;
--  div.appendChild(progress);
--
--  // render each sub‑task as a checkbox + label
--  t.subTasks.forEach((sub, subIndex) => {
--    const subRow = document.createElement("div");
--    subRow.style.display = "flex";
--    subRow.style.alignItems = "center";
--    subRow.style.marginLeft = "1rem";
--    const chk = document.createElement("input");
--    chk.type = "checkbox";
--    chk.checked = sub.completed;
+ if (t.subTasks && t.subTasks.length > 0) {
+   const completedCount = t.subTasks.filter(s => s.completed).length;
+   const progress = document.createElement("div");
+   progress.className = "score";
+   progress.textContent = `${completedCount}/${t.subTasks.length} steps done`;
+   div.appendChild(progress);
+ 
+   // render each sub‑task as a checkbox + label
+   t.subTasks.forEach((sub, subIndex) => {
+     const subRow = document.createElement("div");
+     subRow.style.display = "flex";
+     subRow.style.alignItems = "center";
+     subRow.style.marginLeft = "1rem";
+     const chk = document.createElement("input");
+     chk.type = "checkbox";
+     chk.checked = sub.completed;
 -    chk.onchange = () => completeSubTask(i, subIndex);
--    const label = document.createElement("span");
--    label.textContent = sub.name;
--    label.style.marginLeft = "0.25rem";
--    subRow.appendChild(chk);
--    subRow.appendChild(label);
--    div.appendChild(subRow);
--  });
--}
--// add a button to create a new sub‑task for this task
--const addSubBtn = document.createElement("button");
--addSubBtn.textContent = "➕ Step";
--addSubBtn.style.marginTop = "0.25rem";
--addSubBtn.onclick = () => addSubTask(i);
--div.appendChild(addSubBtn);
--
--    taskList.appendChild(div);
--  }
--
--// tasks due today
--const dueTodayList = $("dueTodayList");
--dueTodayList.innerHTML = "";
--const now = new Date();
--// adjust to local timezone so ISO date matches <input type="date">
--now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
--const today = now.toISOString().split("T")[0];
--
--tasks.forEach((task, idx) => {
--  if (task.dueDate === today && !task.completed) {
--    const wrap = document.createElement("div");
--    wrap.textContent = `${task.name} — due today`;
--
--    // show sub‑task progress and list if present
--    if (task.subTasks && task.subTasks.length > 0) {
--      const completedCount = task.subTasks.filter(s => s.completed).length;
-+    if (t.subTasks && t.subTasks.length > 0) {
-+      const completedCount = t.subTasks.filter(s => s.completed).length;
++    chk.onchange = event => completeSubTask(i, subIndex, event.target.checked);
+     const label = document.createElement("span");
+     label.textContent = sub.name;
+     label.style.marginLeft = "0.25rem";
+     subRow.appendChild(chk);
+     subRow.appendChild(label);
+     div.appendChild(subRow);
+   });
+ }
+ // add a button to create a new sub‑task for this task
+ const addSubBtn = document.createElement("button");
+ addSubBtn.textContent = "➕ Step";
+ addSubBtn.style.marginTop = "0.25rem";
+ addSubBtn.onclick = () => addSubTask(i);
+ div.appendChild(addSubBtn);
+ 
+     taskList.appendChild(div);
+   }
+ 
+ // tasks due today
+ const dueTodayList = $("dueTodayList");
+ dueTodayList.innerHTML = "";
+ const now = new Date();
+ // adjust to local timezone so ISO date matches <input type="date">
+ now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+ const today = now.toISOString().split("T")[0];
+ 
+ tasks.forEach((task, idx) => {
+   if (task.dueDate === today && !task.completed) {
+     const wrap = document.createElement("div");
+     wrap.textContent = `${task.name} — due today`;
+ 
+     // show sub‑task progress and list if present
+     if (task.subTasks && task.subTasks.length > 0) {
+       const completedCount = task.subTasks.filter(s => s.completed).length;
        const progress = document.createElement("div");
        progress.className = "score";
--      progress.textContent = `${completedCount}/${task.subTasks.length} steps done`;
--      wrap.appendChild(progress);
-+      progress.textContent = `${completedCount}/${t.subTasks.length} steps done`;
-+      div.appendChild(progress);
+       progress.textContent = `${completedCount}/${task.subTasks.length} steps done`;
+       wrap.appendChild(progress);
  
--      task.subTasks.forEach((sub, subIndex) => {
-+      // render each sub‑task as a checkbox + label
-+      t.subTasks.forEach((sub, subIndex) => {
+       task.subTasks.forEach((sub, subIndex) => {
          const subRow = document.createElement("div");
          subRow.style.display = "flex";
          subRow.style.alignItems = "center";
@@ -392,32 +337,26 @@
          chk.type = "checkbox";
          chk.checked = sub.completed;
 -        chk.onchange = () => completeSubTask(idx, subIndex);
-+        chk.onchange = event => completeSubTask(i, subIndex, event.target.checked);
++        chk.onchange = event => completeSubTask(idx, subIndex, event.target.checked);
          const label = document.createElement("span");
          label.textContent = sub.name;
          label.style.marginLeft = "0.25rem";
          subRow.appendChild(chk);
          subRow.appendChild(label);
--        wrap.appendChild(subRow);
-+        div.appendChild(subRow);
+         wrap.appendChild(subRow);
        });
      }
--
--    // add a button to create a new sub‑task for this due task
-+    // add a button to create a new sub‑task for this task
-     const addSubBtn = document.createElement("button");
--    addSubBtn.textContent = "➕ Step";
-+    addSubBtn.textContent = "➕ Add sub-task";
-     addSubBtn.style.marginTop = "0.25rem";
--    addSubBtn.onclick = () => addSubTask(idx);
--    wrap.appendChild(addSubBtn);
-+    addSubBtn.onclick = () => addSubTask(i);
-+    div.appendChild(addSubBtn);
  
--    dueTodayList.appendChild(wrap);
-+    taskList.appendChild(div);
+     // add a button to create a new sub‑task for this due task
+     const addSubBtn = document.createElement("button");
+     addSubBtn.textContent = "➕ Step";
+     addSubBtn.style.marginTop = "0.25rem";
+     addSubBtn.onclick = () => addSubTask(idx);
+     wrap.appendChild(addSubBtn);
+ 
+     dueTodayList.appendChild(wrap);
    }
--});
+ });
 -
 -
 -
@@ -440,7 +379,7 @@
 -    chk.type = "checkbox";
 -    chk.checked = s.completed;
 -    chk.onchange = () => completeSubTask(i, subIndex);
- 
+-
 -    const label = document.createElement("span");
 -    label.textContent = s.name;
 -    label.style.marginLeft = "0.25rem";
@@ -449,57 +388,9 @@
 -    subRow.appendChild(label);
 -    div.appendChild(subRow);
 -  
-+  // tasks due today
-+  const dueTodayList = $("dueTodayList");
-+  dueTodayList.innerHTML = "";
-+  const now = new Date();
-+  // adjust to local timezone so ISO date matches <input type="date">
-+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-+  const today = now.toISOString().split("T")[0];
-+
-+  tasks.forEach((task, idx) => {
-+    if (task.dueDate === today && !task.completed) {
-+      const wrap = document.createElement("div");
-+      wrap.textContent = `${task.name} — due today`;
-+
-+      // show sub‑task progress and list if present
-+      if (task.subTasks && task.subTasks.length > 0) {
-+        const completedCount = task.subTasks.filter(s => s.completed).length;
-+        const progress = document.createElement("div");
-+        progress.className = "score";
-+        progress.textContent = `${completedCount}/${task.subTasks.length} steps done`;
-+        wrap.appendChild(progress);
-+
-+        task.subTasks.forEach((sub, subIndex) => {
-+          const subRow = document.createElement("div");
-+          subRow.style.display = "flex";
-+          subRow.style.alignItems = "center";
-+          subRow.style.marginLeft = "1rem";
-+          const chk = document.createElement("input");
-+          chk.type = "checkbox";
-+          chk.checked = sub.completed;
-+          chk.onchange = event => completeSubTask(idx, subIndex, event.target.checked);
-+          const label = document.createElement("span");
-+          label.textContent = sub.name;
-+          label.style.marginLeft = "0.25rem";
-+          subRow.appendChild(chk);
-+          subRow.appendChild(label);
-+          wrap.appendChild(subRow);
-+        });
-+      }
-+
-+      // add a button to create a new sub‑task for this due task
-+      const addSubBtn = document.createElement("button");
-+      addSubBtn.textContent = "➕ Add sub-task";
-+      addSubBtn.style.marginTop = "0.25rem";
-+      addSubBtn.onclick = () => addSubTask(idx);
-+      wrap.appendChild(addSubBtn);
-+
-+      dueTodayList.appendChild(wrap);
-+    }
-   });
- }
- 
+-  });
+-}
+-
  // These functions are now global so button handlers can find them
  function startFocus() {
    $("capture").classList.add("hidden");
@@ -522,7 +413,9 @@
    display.focus();
  }
  
-@@ -374,57 +435,57 @@ function completeTask() {
+ function completeTask() {
+   if (!focusQueue.length) return;
+   focusQueue[0].completed = true;
    persist();
    updateUI();
    focusQueue.shift();
@@ -587,8 +480,7 @@
      };
      const editBtn = document.createElement("button");
      editBtn.textContent = "✏️ Edit";
-@@ -432,58 +493,76 @@ function renderTemplates() {
-       const newName = prompt("Edit task name:", t.name);
+@@ -433,57 +438,72 @@ function renderTemplates() {
        if (!newName) return;
        t.name = newName;
        localStorage.setItem("templates", JSON.stringify(templates));
@@ -613,12 +505,8 @@
    });
  }
  
--window.addEventListener('DOMContentLoaded', init);
+ window.addEventListener('DOMContentLoaded', init);
 -    function addSubTask(taskIndex) {
-+window.addEventListener('DOMContentLoaded', () => {
-+  ensureScaleControls();
-+  init();
-+});
 +
 +function addSubTask(taskIndex) {
    const name = prompt("Sub-task name?");
@@ -628,12 +516,12 @@
 +
    const parent = tasks[taskIndex];
 +  if (!parent) return;
-+
+ 
+-  // create a sub-task; use parent’s priority as a starting point
 +  if (!Array.isArray(parent.subTasks)) {
 +    parent.subTasks = [];
 +  }
- 
--  // create a sub-task; use parent’s priority as a starting point
++
 +  const basePriority = computePriority({ ...parent, subTasks: [] });
    const subTask = {
      id: Date.now().toString(),
@@ -664,12 +552,8 @@
    updateUI();
  }
  
- </script>
-   
  
- 
-   
- </body>
- </html> 
-EOF
-)
+</script>
+  
+</body>
+</html>
