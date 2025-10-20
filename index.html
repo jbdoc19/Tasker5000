@@ -17,10 +17,11 @@
     h1, h3 { color: #fff; }
     .hidden { display: none; }
     label { display: block; margin-top: 0.5rem; }
-    input[type="text"], select, input[type="date"] {
+    input[type="text"], select, input[type="date"], textarea {
       background: #222; color: #eee; border: 1px solid #555;
       padding: 0.5rem; width: 100%;
     }
+    textarea { resize: vertical; }
     button {
       background: #333; color: #fff; border: none; padding: 0.6rem 1rem;
       margin: 0.5rem 0.25rem; cursor: pointer; border-radius: 4px;
@@ -107,6 +108,9 @@
     <label>Time to Start (1–5) <select id="timeToStart"></select></label>
     <label>Difficulty (1–5) <select id="difficulty"></select></label>
     <label>Optional Due Date <input type="date" id="dueDate" /></label>
+    <label>Sub‑tasks (one per line)
+      <textarea id="initialSubTasks" rows="3" placeholder="Enter one sub‑task per line"></textarea>
+    </label>
     <div>
       <button onclick="addTask()">Add Task</button>
       <button onclick="saveAsTemplate()">Add as Template</button>
@@ -143,14 +147,12 @@
   </section>
 
   <script>
-  // DOM helper
   const $ = id => document.getElementById(id);
 
-  // Category list (excluding "All")
   const categories = ["General","Charts","Admin","Inbox","Calls","Teaching","Personal"];
   let activeCategory = "All";
 
-  // Populate numeric dropdowns 1–5
+  // populate numeric dropdowns
   const scales = ["importance","urgency","novelty","interest","timeToStart","difficulty"];
   scales.forEach(id => {
     const sel = $(id);
@@ -162,12 +164,10 @@
     }
   });
 
-  // Task data
   let tasks = [];
   let templates = [];
   let focusQueue = [];
 
-  // Compute priority; average pending sub‑tasks if present
   function computePriority(t) {
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
@@ -185,12 +185,11 @@
          + (friction     * 1.5);
   }
 
-  // Persist tasks
   function persist() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
-  // Add a new task
+  // create a new task with optional sub‑tasks from textarea
   function addTask() {
     const name = $("name").value.trim();
     if (!name) return;
@@ -211,14 +210,33 @@
       addedAt: new Date().toISOString(),
       subTasks: []
     };
+
+    // base priority for sub‑tasks
+    const basePriority = computePriority(task);
+
+    // parse sub‑tasks from textarea (one per line)
+    const subLines = $("initialSubTasks").value.split('\n')
+      .map(l => l.trim())
+      .filter(Boolean);
+    task.subTasks = subLines.map(line => ({
+      id: Date.now().toString() + Math.random().toString(36).slice(2,8),
+      name: line,
+      completed: false,
+      priority: basePriority
+    }));
+
+
     task.priority = computePriority(task);
     tasks.push(task);
     persist();
+
+    // clear form
     $("name").value = "";
+    $("initialSubTasks").value = "";
     updateUI();
   }
 
-  // Render category filter buttons
+  // render filter bar
   function renderCategoryFilter() {
     const bar = $("categoryFilter");
     bar.innerHTML = "";
@@ -226,15 +244,12 @@
       const btn = document.createElement("button");
       btn.textContent = cat;
       btn.className = (cat === activeCategory) ? "active" : "";
-      btn.onclick = () => {
-        activeCategory = cat;
-        updateUI();
-      };
+      btn.onclick = () => { activeCategory = cat; updateUI(); };
       bar.appendChild(btn);
     });
   }
 
-  // Render per‑category progress
+  // render progress per category
   function renderCategoryProgress() {
     const cont = $("categoryProgress");
     cont.innerHTML = "";
@@ -262,7 +277,7 @@
     });
   }
 
-  // Main UI update
+  // main UI update
   function updateUI() {
     renderCategoryFilter();
     renderCategoryProgress();
@@ -270,21 +285,14 @@
     const taskList = $("taskList");
     taskList.innerHTML = "";
 
-    // Filter tasks by active category
-    const filtered = tasks.filter(t =>
-      activeCategory === "All" || t.category === activeCategory
-    );
-
-    const remaining = filtered.filter(t => !t.completed);
+    const remaining = tasks.filter(t => !t.completed && (activeCategory === "All" || t.category === activeCategory));
     $("startBtn").disabled = remaining.length === 0;
 
-    // Sort by priority
-    filtered.sort((a,b) => b.priority - a.priority);
-
-    // Render tasks
-    tasks.forEach((t, idx) => {
+    // sort tasks by priority for display (use copy)
+    const displayTasks = tasks.slice().sort((a,b) => b.priority - a.priority);
+    displayTasks.forEach(t => {
       if (activeCategory !== "All" && t.category !== activeCategory) return;
-
+      const idx = tasks.findIndex(item => item.id === t.id);
       const div = document.createElement("div");
       div.className = "task";
       const row = document.createElement("div");
@@ -317,7 +325,6 @@
         div.appendChild(dd);
       }
 
-      // Show sub‑task progress and list
       if (t.subTasks && t.subTasks.length) {
         const completedCount = t.subTasks.filter(s => s.completed).length;
         const progress = document.createElement("div");
@@ -343,7 +350,6 @@
         });
       }
 
-      // Button to add sub‑task
       const addSubBtn = document.createElement("button");
       addSubBtn.textContent = "➕ Step";
       addSubBtn.style.marginTop = "0.25rem";
@@ -353,7 +359,7 @@
       taskList.appendChild(div);
     });
 
-    // Tasks due today (filtered)
+    // tasks due today
     const dueTodayList = $("dueTodayList");
     dueTodayList.innerHTML = "";
     const now = new Date();
@@ -361,7 +367,8 @@
     const today = now.toISOString().split("T")[0];
 
     tasks.forEach((task, idx) => {
-      if ((activeCategory !== "All" && task.category !== activeCategory) || task.completed) return;
+      if (task.completed) return;
+      if (activeCategory !== "All" && task.category !== activeCategory) return;
       if (task.dueDate === today) {
         const wrap = document.createElement("div");
         wrap.textContent = `${task.name} — due today`;
@@ -402,12 +409,10 @@
     });
   }
 
-  // Focus mode functions
   function startFocus() {
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
-    focusQueue = tasks
-      .filter(t => !t.completed && (activeCategory === "All" || t.category === activeCategory))
+    focusQueue = tasks.filter(t => !t.completed && (activeCategory === "All" || t.category === activeCategory))
       .sort((a,b) => b.priority - a.priority);
     showNextTask();
   }
@@ -426,7 +431,6 @@
     display.textContent = current.name;
     scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
 
-    // find index of current task in tasks array
     const idx = tasks.findIndex(t => t.id === current.id);
 
     subTaskView.innerHTML = "";
@@ -466,7 +470,6 @@
     updateUI();
   }
 
-  // Reset tasks
   function reset() {
     if (!confirm("Clear all tasks?")) return;
     tasks = [];
@@ -474,7 +477,6 @@
     updateUI();
   }
 
-  // Template functions
   function saveAsTemplate() {
     const name = $("name").value.trim();
     if (!name) return alert("Task name is required");
@@ -540,7 +542,6 @@
     });
   }
 
-  // Sub‑task functions
   function addSubTask(taskIndex) {
     const name = prompt("Sub-task name?");
     if (!name) return;
@@ -550,13 +551,12 @@
     if (!parent) return;
     if (!Array.isArray(parent.subTasks)) parent.subTasks = [];
     const basePriority = computePriority({ ...parent, subTasks: [] });
-    const subTask = {
-      id: Date.now().toString(),
+    parent.subTasks.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2,8),
       name: trimmed,
       completed: false,
       priority: basePriority
-    };
-    parent.subTasks.push(subTask);
+    });
     parent.priority = computePriority(parent);
     persist();
     updateUI();
@@ -565,15 +565,14 @@
   function completeSubTask(taskIndex, subIndex) {
     const parent = tasks[taskIndex];
     if (!parent || !parent.subTasks) return;
-    const subTask = parent.subTasks[subIndex];
-    if (!subTask) return;
-    subTask.completed = true;
+    const sub = parent.subTasks[subIndex];
+    if (!sub) return;
+    sub.completed = true;
     parent.priority = computePriority(parent);
     persist();
     updateUI();
   }
 
-  // Initialization: load tasks and templates from localStorage
   window.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem("tasks");
     if (saved) tasks = JSON.parse(saved);
