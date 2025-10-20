@@ -227,19 +227,92 @@ function updateUI() {
       dd.textContent = `Due: ${t.dueDate}`;
       div.appendChild(dd);
     }
+    // show sub‑task progress and list for all tasks
+if (t.subTasks && t.subTasks.length > 0) {
+  const completedCount = t.subTasks.filter(s => s.completed).length;
+  const progress = document.createElement("div");
+  progress.className = "score";
+  progress.textContent = `${completedCount}/${t.subTasks.length} steps done`;
+  div.appendChild(progress);
+
+  // render each sub‑task as a checkbox + label
+  t.subTasks.forEach((sub, subIndex) => {
+    const subRow = document.createElement("div");
+    subRow.style.display = "flex";
+    subRow.style.alignItems = "center";
+    subRow.style.marginLeft = "1rem";
+    const chk = document.createElement("input");
+    chk.type = "checkbox";
+    chk.checked = sub.completed;
+    chk.onchange = () => completeSubTask(i, subIndex);
+    const label = document.createElement("span");
+    label.textContent = sub.name;
+    label.style.marginLeft = "0.25rem";
+    subRow.appendChild(chk);
+    subRow.appendChild(label);
+    div.appendChild(subRow);
+  });
+}
+// add a button to create a new sub‑task for this task
+const addSubBtn = document.createElement("button");
+addSubBtn.textContent = "➕ Step";
+addSubBtn.style.marginTop = "0.25rem";
+addSubBtn.onclick = () => addSubTask(i);
+div.appendChild(addSubBtn);
+
     taskList.appendChild(div);
   }
 
-  // tasks due today
-  const dueTodayList = $("dueTodayList");
-  dueTodayList.innerHTML = "";
-  const now = new Date();
+// tasks due today
+const dueTodayList = $("dueTodayList");
+dueTodayList.innerHTML = "";
+const now = new Date();
+// adjust to local timezone so ISO date matches <input type="date">
 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 const today = now.toISOString().split("T")[0];
-  tasks.filter(t => t.dueDate === today && !t.completed).forEach(t => {
-    const div = document.createElement("div");
-    div.textContent = `${t.name} — due today`;
-    dueTodayList.appendChild(div);
+
+tasks.forEach((task, idx) => {
+  if (task.dueDate === today && !task.completed) {
+    const wrap = document.createElement("div");
+    wrap.textContent = `${task.name} — due today`;
+
+    // show sub‑task progress and list if present
+    if (task.subTasks && task.subTasks.length > 0) {
+      const completedCount = task.subTasks.filter(s => s.completed).length;
+      const progress = document.createElement("div");
+      progress.className = "score";
+      progress.textContent = `${completedCount}/${task.subTasks.length} steps done`;
+      wrap.appendChild(progress);
+
+      task.subTasks.forEach((sub, subIndex) => {
+        const subRow = document.createElement("div");
+        subRow.style.display = "flex";
+        subRow.style.alignItems = "center";
+        subRow.style.marginLeft = "1rem";
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.checked = sub.completed;
+        chk.onchange = () => completeSubTask(idx, subIndex);
+        const label = document.createElement("span");
+        label.textContent = sub.name;
+        label.style.marginLeft = "0.25rem";
+        subRow.appendChild(chk);
+        subRow.appendChild(label);
+        wrap.appendChild(subRow);
+      });
+    }
+
+    // add a button to create a new sub‑task for this due task
+    const addSubBtn = document.createElement("button");
+    addSubBtn.textContent = "➕ Step";
+    addSubBtn.style.marginTop = "0.25rem";
+    addSubBtn.onclick = () => addSubTask(idx);
+    wrap.appendChild(addSubBtn);
+
+    dueTodayList.appendChild(wrap);
+  }
+});
+
 
 
 // show sub-task progress and list
@@ -269,16 +342,7 @@ if (t.subTasks && t.subTasks.length > 0) {
     subRow.appendChild(chk);
     subRow.appendChild(label);
     div.appendChild(subRow);
-  });
-}
-
-// add a button to create a new sub-task
-const addSubBtn = document.createElement("button");
-addSubBtn.textContent = "➕ Step";
-addSubBtn.style.marginTop = "0.25rem";
-addSubBtn.onclick = () => addSubTask(i);
-div.appendChild(addSubBtn);
-
+  
   });
 }
 
