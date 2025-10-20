@@ -135,13 +135,21 @@ function init() {
 }
 
 function computePriority(t) {
-  const dopamine = t.novelty + t.interest;
-  const friction = (6 - t.timeToStart) + (6 - t.difficulty);
+  // if this task has sub-tasks, average their priorities
+  if (Array.isArray(t.subTasks) && t.subTasks.length > 0) {
+    const total = t.subTasks.reduce((sum, s) => sum + s.priority, 0);
+    return total / t.subTasks.length;
+  }
+
+  // original calculation
+  const dopamine     = t.novelty + t.interest;
+  const pressure     = t.externalPressure;
+  const friction     = (6 - t.timeToStart) + (6 - t.difficulty);
   return (t.importance * 2)
-       + (t.urgency * 2)
-       + (dopamine * 2)
-       + (t.externalPressure * 5)
-       + (friction * 1.5);
+       + (t.urgency    * 2)
+       + (dopamine     * 2)
+       + (pressure     * 5)
+       + (friction     * 1.5);
 }
 
 async function persist() {
@@ -171,6 +179,7 @@ function addTask() {
     completed: false,
     createdAt: new Date().toISOString(),
     addedAt: new Date().toISOString(),
+    subTasks: [],
   };
   task.priority = computePriority(task);
   tasks.push(task);
@@ -231,6 +240,45 @@ const today = now.toISOString().split("T")[0];
     const div = document.createElement("div");
     div.textContent = `${t.name} — due today`;
     dueTodayList.appendChild(div);
+
+
+// show sub-task progress and list
+if (t.subTasks && t.subTasks.length > 0) {
+  const completedCount = t.subTasks.filter(s => s.completed).length;
+  const progress = document.createElement("div");
+  progress.className = "score";
+  progress.textContent = `${completedCount}/${t.subTasks.length} steps done`;
+  div.appendChild(progress);
+
+  // render each sub-task as a checkbox + label
+  t.subTasks.forEach((s, subIndex) => {
+    const subRow = document.createElement("div");
+    subRow.style.display = "flex";
+    subRow.style.alignItems = "center";
+    subRow.style.marginLeft = "1rem";
+
+    const chk = document.createElement("input");
+    chk.type = "checkbox";
+    chk.checked = s.completed;
+    chk.onchange = () => completeSubTask(i, subIndex);
+
+    const label = document.createElement("span");
+    label.textContent = s.name;
+    label.style.marginLeft = "0.25rem";
+
+    subRow.appendChild(chk);
+    subRow.appendChild(label);
+    div.appendChild(subRow);
+  });
+}
+
+// add a button to create a new sub-task
+const addSubBtn = document.createElement("button");
+addSubBtn.textContent = "➕ Step";
+addSubBtn.style.marginTop = "0.25rem";
+addSubBtn.onclick = () => addSubTask(i);
+div.appendChild(addSubBtn);
+
   });
 }
 
@@ -343,6 +391,31 @@ function renderTemplates() {
 }
 
 window.addEventListener('DOMContentLoaded', init);
+    function addSubTask(taskIndex) {
+  const name = prompt("Sub-task name?");
+  if (!name) return;
+  const parent = tasks[taskIndex];
+
+  // create a sub-task; use parent’s priority as a starting point
+  const subTask = {
+    id: Date.now().toString(),
+    name,
+    completed: false,
+    priority: parent.priority
+  };
+
+  parent.subTasks.push(subTask);
+  persist();
+  updateUI();
+}
+
+function completeSubTask(taskIndex, subIndex) {
+  const parent = tasks[taskIndex];
+  parent.subTasks[subIndex].completed = true;
+  persist();
+  updateUI();
+}
+
 </script>
   
 
