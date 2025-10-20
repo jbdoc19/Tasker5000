@@ -14,10 +14,10 @@
       flex-direction: column;
       align-items: center;
     }
-    h1, h2, h3 { color: #fff; }
+    h1, h3 { color: #fff; }
     .hidden { display: none; }
     label { display: block; margin-top: 0.5rem; }
-    input[type="text"], select {
+    input[type="text"], select, input[type="date"] {
       background: #222; color: #eee; border: 1px solid #555;
       padding: 0.5rem; width: 100%;
     }
@@ -37,6 +37,7 @@
 <body>
   <h1>🎯 Task Focus</h1>
 
+  <!-- Task entry form -->
   <section id="capture">
     <label>Task Name <input id="name" type="text" /></label>
     <label>Importance (1–5) <select id="importance"></select></label>
@@ -55,9 +56,7 @@
     </label>
     <label>Time to Start (1–5) <select id="timeToStart"></select></label>
     <label>Difficulty (1–5) <select id="difficulty"></select></label>
-    <label>Optional Due Date
-      <input type="date" id="dueDate" />
-    </label>
+    <label>Optional Due Date <input type="date" id="dueDate" /></label>
     <div>
       <button onclick="addTask()">Add Task</button>
       <button onclick="saveAsTemplate()">Add as Template</button>
@@ -68,7 +67,6 @@
       <h3>Templates</h3>
       <div id="templateButtons"></div>
     </div>
-
     <details class="peek">
       <summary>🔍 Peek at tasks</summary>
       <div id="taskList"></div>
@@ -79,9 +77,11 @@
     </div>
   </section>
 
+  <!-- Focus mode -->
   <section id="focus" class="hidden">
     <div class="focus" tabindex="0" aria-live="polite"></div>
     <div class="score" id="scoreView"></div>
+    <div id="subTaskView"></div>
     <div>
       <button onclick="completeTask()">Task complete</button>
       <button onclick="backToCapture()">Back to capture</button>
@@ -89,11 +89,12 @@
   </section>
 
   <script>
+  // Simple DOM helper
   const $ = id => document.getElementById(id);
 
-  // populate numeric dropdowns 1–5
-  const selects = ["importance","urgency","novelty","interest","timeToStart","difficulty"];
-  selects.forEach(id => {
+  // Populate dropdowns 1–5
+  const scales = ["importance","urgency","novelty","interest","timeToStart","difficulty"];
+  scales.forEach(id => {
     const sel = $(id);
     for (let i = 1; i <= 5; i++) {
       const opt = document.createElement("option");
@@ -103,41 +104,14 @@
     }
   });
 
-  // local storage / Supabase placeholders
-  const MODE = localStorage.getItem("MODE") || "local";
-  const SUPABASE_URL = localStorage.getItem("SUPABASE_URL");
-  const SUPABASE_ANON_KEY = localStorage.getItem("SUPABASE_ANON_KEY");
-  let supabase = null;
-
+  // Task data
   let tasks = [];
   let templates = [];
   let focusQueue = [];
 
-  function init() {
-    if (MODE === "supabase" && SUPABASE_URL && SUPABASE_ANON_KEY) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js';
-      script.onload = async () => {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data } = await supabase.from('tasks').select('*');
-        tasks = Array.isArray(data) ? data : [];
-        renderTemplates();
-        updateUI();
-      };
-      document.head.appendChild(script);
-    } else {
-      const saved = localStorage.getItem("tasks");
-      if (saved) tasks = JSON.parse(saved);
-      const savedTemplates = localStorage.getItem("templates");
-      if (savedTemplates) templates = JSON.parse(savedTemplates);
-      renderTemplates();
-      updateUI();
-    }
-  }
-
+  // Priority formula; if sub‑tasks exist, average remaining sub‑task priorities
   function computePriority(t) {
-    // if task has sub‑tasks, average their priorities
-    if (Array.isArray(t.subTasks) && t.subTasks.length > 0) {
+    if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
       if (remaining.length === 0) return 0;
       const total = remaining.reduce((sum,s) => sum + s.priority, 0);
@@ -153,16 +127,12 @@
          + (friction     * 1.5);
   }
 
-  async function persist() {
-    if (supabase) {
-      for (const task of tasks) {
-        await supabase.from('tasks').upsert(task, { onConflict: 'id' });
-      }
-    } else {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-    }
+  // Save tasks to localStorage
+  function persist() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
+  // Add a new task
   function addTask() {
     const name = $("name").value.trim();
     if (!name) return;
@@ -189,6 +159,7 @@
     updateUI();
   }
 
+  // Main UI refresh
   function updateUI() {
     const taskList = $("taskList");
     taskList.innerHTML = "";
@@ -255,7 +226,7 @@
         });
       }
 
-      // “Step” button to add a sub‑task
+      // button to add a sub‑task
       const addSubBtn = document.createElement("button");
       addSubBtn.textContent = "➕ Step";
       addSubBtn.style.marginTop = "0.25rem";
@@ -277,7 +248,7 @@
         const wrap = document.createElement("div");
         wrap.textContent = `${task.name} — due today`;
 
-        if (task.subTasks && task.subTasks.length > 0) {
+        if (task.subTasks && task.subTasks.length) {
           const completedCount = task.subTasks.filter(s => s.completed).length;
           const progress = document.createElement("div");
           progress.className = "score";
@@ -313,25 +284,54 @@
     });
   }
 
+  // Focus mode
   function startFocus() {
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
-    focusQueue = tasks.filter(t => !t.completed).sort((a, b) => b.priority - a.priority);
+    // clone remaining tasks sorted by priority
+    focusQueue = tasks.filter(t => !t.completed).sort((a,b) => b.priority - a.priority);
     showNextTask();
   }
 
   function showNextTask() {
     const display = document.querySelector(".focus");
     const scoreView = $("scoreView");
+    const subTaskView = $("subTaskView");
     if (focusQueue.length === 0) {
       display.textContent = "✅ All tasks complete!";
       scoreView.textContent = "";
+      subTaskView.innerHTML = "";
       return;
     }
     const current = focusQueue[0];
     display.textContent = current.name;
     scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
     display.focus();
+
+    // find index of current task in tasks array
+    const idx = tasks.findIndex(t => t.id === current.id);
+
+    // render sub‑tasks in focus view
+    subTaskView.innerHTML = "";
+    if (current.subTasks && current.subTasks.length > 0) {
+      current.subTasks.forEach((sub, subIndex) => {
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.checked = sub.completed;
+        chk.onchange = () => completeSubTask(idx, subIndex);
+        const label = document.createElement("span");
+        label.textContent = sub.name;
+        label.style.marginLeft = "0.25rem";
+        row.appendChild(chk);
+        row.appendChild(label);
+        subTaskView.appendChild(row);
+      });
+    } else {
+      subTaskView.textContent = "No sub‑tasks for this task.";
+    }
   }
 
   function completeTask() {
@@ -349,14 +349,15 @@
     updateUI();
   }
 
+  // Reset all tasks
   function reset() {
     if (!confirm("Clear all tasks?")) return;
     tasks = [];
     localStorage.removeItem("tasks");
-    if (supabase) supabase.from("tasks").delete().neq("id", "");
     updateUI();
   }
 
+  // Template functions
   function saveAsTemplate() {
     const name = $("name").value.trim();
     if (!name) return alert("Task name is required");
@@ -384,11 +385,11 @@
       useBtn.textContent = `📋 ${t.name}`;
       useBtn.onclick = () => {
         $("name").value = t.name;
+        $("importance").value = t.importance;
+        $("urgency").value = t.urgency;
         $("novelty").value = t.novelty;
         $("interest").value = t.interest;
         $("externalPressure").value = t.externalPressure;
-        $("importance").value = t.importance;
-        $("urgency").value = t.urgency;
         $("timeToStart").value = t.timeToStart;
         $("difficulty").value = t.difficulty;
       };
@@ -420,6 +421,7 @@
     });
   }
 
+  // Sub‑task functions
   function addSubTask(taskIndex) {
     const name = prompt("Sub-task name?");
     if (!name) return;
@@ -452,7 +454,15 @@
     updateUI();
   }
 
-  window.addEventListener('DOMContentLoaded', init);
+  // Initialize on load: restore tasks/templates from localStorage
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem("tasks");
+    if (saved) tasks = JSON.parse(saved);
+    const savedTemplates = localStorage.getItem("templates");
+    if (savedTemplates) templates = JSON.parse(savedTemplates);
+    renderTemplates();
+    updateUI();
+  });
   </script>
 </body>
 </html>
