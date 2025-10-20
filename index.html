@@ -57,6 +57,9 @@
     </label>
     <label>Time to Start (1–5) <select id="timeToStart"></select></label>
     <label>Difficulty (1–5) <select id="difficulty"></select></label>
+    <label>Optional Due Date
+  <input type="date" id="dueDate" />
+    </label>
     <div>
       <button onclick="addTask()">Add Task</button>
       <button onclick="saveAsTemplate()">Add as Template</button>
@@ -73,6 +76,10 @@
       <summary>🔍 Peek at tasks</summary>
       <div id="taskList"></div>
     </details>
+    <div id="dueTodaySection" style="margin-top:1rem;">
+  <h3>🗂️ Charts Due Today</h3>
+  <div id="dueTodayList"></div>
+    </div>
   </section>
 
   <section id="focus" class="hidden">
@@ -159,6 +166,7 @@ renderTemplates();
         externalPressure: +$("externalPressure").value,
         timeToStart: +$("timeToStart").value,
         difficulty: +$("difficulty").value,
+        dueDate: $("dueDate").value || null,
         completed: false,
         createdAt: new Date().toISOString(),
         addedAt: new Date().toISOString(),
@@ -170,21 +178,91 @@ renderTemplates();
       updateUI();
     }
 
-    function updateUI() {
-      const taskList = $("taskList");
-      taskList.innerHTML = "";
-      const remaining = tasks.filter(t => !t.completed);
-      $("startBtn").disabled = remaining.length === 0;
-      tasks.sort((a, b) => b.priority - a.priority);
-      for (const t of tasks) {
-        const div = document.createElement("div");
-        div.className = "task";
-        div.textContent = `${t.name} ${t.completed ? "(✓)" : ""}`;
-        const score = document.createElement("span");
-        score.className = "score";
-        score.textContent = ` — ${t.priority.toFixed(1)}`;
-        div.appendChild(score);
-        taskList.appendChild(div);
+    for (const [i, t] of tasks.entries()) {
+  const div = document.createElement("div");
+  div.className = "task";
+  div.style.display = "flex";
+  div.style.flexDirection = "column";
+  div.style.marginBottom = "0.5rem";
+
+  const row = document.createElement("div");
+  row.style.display = "flex";
+  row.style.justifyContent = "space-between";
+  row.style.alignItems = "center";
+
+  const info = document.createElement("span");
+  info.textContent = `${t.name} ${t.completed ? "(✓)" : ""} — ${t.priority.toFixed(1)}`;
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "🗑️";
+  delBtn.onclick = () => {
+    if (!confirm("Delete this task?")) return;
+    tasks.splice(i, 1);
+    persist();
+    updateUI();
+  };
+
+  row.appendChild(info);
+  row.appendChild(delBtn);
+  div.appendChild(row);
+
+  if (t.addedAt) {
+    const ts = document.createElement("div");
+    ts.className = "score";
+    ts.textContent = `Added: ${new Date(t.addedAt).toLocaleString()}`;
+    div.appendChild(ts);
+  }
+
+  if (t.dueDate) {
+    const dd = document.createElement("div");
+    dd.className = "score";
+    dd.textContent = `Due: ${t.dueDate}`;
+    div.appendChild(dd);
+  }
+
+  taskList.appendChild(div);
+    }
+
+    const dueTodayList = $("dueTodayList");
+dueTodayList.innerHTML = "";
+const today = new Date().toISOString().split("T")[0];
+
+tasks
+  .filter(t => t.dueDate === today && !t.completed)
+  .forEach(t => {
+    const div = document.createElement("div");
+    div.textContent = `${t.name} — due today`;
+    dueTodayList.appendChild(div);
+  });
+    
+  const div = document.createElement("div");
+  div.className = "task";
+  div.style.display = "flex";
+  div.style.justifyContent = "space-between";
+  div.style.alignItems = "center";
+  div.style.marginBottom = "0.3rem";
+
+  const info = document.createElement("span");
+  info.textContent = `${t.name} ${t.completed ? "(✓)" : ""} — ${t.priority.toFixed(1)}`;
+  if (t.addedAt) {
+  const ts = document.createElement("div");
+  ts.className = "score";
+  ts.textContent = `Added: ${new Date(t.addedAt).toLocaleString()}`;
+  div.appendChild(ts);
+  }
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "🗑️";
+  delBtn.onclick = () => {
+    if (!confirm("Delete this task?")) return;
+    tasks.splice(i, 1);
+    persist();
+    updateUI();
+  };
+
+  div.appendChild(info);
+  div.appendChild(delBtn);
+  taskList.appendChild(div);
+}
       }
     }
 
