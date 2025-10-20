@@ -90,91 +90,96 @@
   </section>
 
   <script>
-    const $ = id => document.getElementById(id);
-    const selects = ["importance", "urgency", "novelty", "interest", "timeToStart", "difficulty"];
-    selects.forEach(id => {
-      for (let i = 1; i <= 5; i++) {
-        const opt = document.createElement("option");
-        opt.value = opt.textContent = i;
-        $(id).appendChild(opt);
-      }
-    });
+const $ = id => document.getElementById(id);
 
-    const MODE = localStorage.getItem("MODE") || "local";
-    const SUPABASE_URL = localStorage.getItem("SUPABASE_URL");
-    const SUPABASE_ANON_KEY = localStorage.getItem("SUPABASE_ANON_KEY");
-    let supabase = null;
+// populate the numeric dropdowns
+const selects = ["importance", "urgency", "novelty", "interest", "timeToStart", "difficulty"];
+selects.forEach(id => {
+  for (let i = 1; i <= 5; i++) {
+    const opt = document.createElement("option");
+    opt.value = opt.textContent = i;
+    $(id).appendChild(opt);
+  }
+});
 
-    let tasks = [];
-    let templates = [];
-    let focusQueue = [];
-      if (MODE === "supabase" && SUPABASE_URL && SUPABASE_ANON_KEY) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js';
-        script.onload = async () => {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          const { data, error } = await supabase.from('tasks').select('*');
-          if (data) tasks = data;
-          updateUI();
-        };
-        document.head.appendChild(script);
-      } else {
-        const saved = localStorage.getItem("tasks");
-        if (saved) tasks = JSON.parse(saved);
-        const savedTemplates = localStorage.getItem("templates");
-if (savedTemplates) templates = JSON.parse(savedTemplates);
-renderTemplates();
-        updateUI();
-      }
-    }
+// Supabase / local storage set‑up
+const MODE = localStorage.getItem("MODE") || "local";
+const SUPABASE_URL = localStorage.getItem("SUPABASE_URL");
+const SUPABASE_ANON_KEY = localStorage.getItem("SUPABASE_ANON_KEY");
+let supabase = null;
 
-    function computePriority(t) {
+let tasks = [];
+let templates = [];
+let focusQueue = [];
+
+function init() {
+  if (MODE === "supabase" && SUPABASE_URL && SUPABASE_ANON_KEY) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js';
+    script.onload = async () => {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data } = await supabase.from('tasks').select('*');
+      if (data) tasks = data;
+      renderTemplates();
+      updateUI();
+    };
+    document.head.appendChild(script);
+  } else {
+    const saved = localStorage.getItem("tasks");
+    if (saved) tasks = JSON.parse(saved);
+    const savedTemplates = localStorage.getItem("templates");
+    if (savedTemplates) templates = JSON.parse(savedTemplates);
+    renderTemplates();
+    updateUI();
+  }
+}
+
+function computePriority(t) {
   const dopamine = t.novelty + t.interest;
-  const pressure = t.externalPressure;
-  const frictionScore = (6 - t.timeToStart) + (6 - t.difficulty);
+  const friction = (6 - t.timeToStart) + (6 - t.difficulty);
   return (t.importance * 2)
        + (t.urgency * 2)
        + (dopamine * 2)
-       + (pressure * 5)
-       + (frictionScore * 1.5);
-    }
+       + (t.externalPressure * 5)
+       + (friction * 1.5);
+}
 
-    async function persist() {
-      if (supabase) {
-        for (const task of tasks) {
-          await supabase.from('tasks').upsert(task, { onConflict: 'id' });
-        }
-      } else {
-        localStorage.setItem("tasks", JSON.stringify(tasks));
-      }
+async function persist() {
+  if (supabase) {
+    for (const task of tasks) {
+      await supabase.from('tasks').upsert(task, { onConflict: 'id' });
     }
+  } else {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+}
 
-    function addTask() {
-      const name = $("name").value.trim();
-      if (!name) return;
-      const task = {
-        id: Date.now().toString(),
-        name,
-        importance: +$("importance").value,
-        urgency: +$("urgency").value,
-        novelty: +$("novelty").value,
-        interest: +$("interest").value,
-        externalPressure: +$("externalPressure").value,
-        timeToStart: +$("timeToStart").value,
-        difficulty: +$("difficulty").value,
-        dueDate: $("dueDate").value || null,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        addedAt: new Date().toISOString(),
-      };
-      task.priority = computePriority(task);
-      tasks.push(task);
-      persist();
-      $("name").value = "";
-      updateUI();
-    }
+function addTask() {
+  const name = $("name").value.trim();
+  if (!name) return;
+  const task = {
+    id: Date.now().toString(),
+    name,
+    importance: +$("importance").value,
+    urgency: +$("urgency").value,
+    novelty: +$("novelty").value,
+    interest: +$("interest").value,
+    externalPressure: +$("externalPressure").value,
+    timeToStart: +$("timeToStart").value,
+    difficulty: +$("difficulty").value,
+    dueDate: $("dueDate").value || null,
+    completed: false,
+    createdAt: new Date().toISOString(),
+    addedAt: new Date().toISOString(),
+  };
+  task.priority = computePriority(task);
+  tasks.push(task);
+  persist();
+  $("name").value = "";
+  updateUI();
+}
 
-    function updateUI() {
+function updateUI() {
   const taskList = $("taskList");
   taskList.innerHTML = "";
   const remaining = tasks.filter(t => !t.completed);
@@ -184,18 +189,11 @@ renderTemplates();
   for (const [i, t] of tasks.entries()) {
     const div = document.createElement("div");
     div.className = "task";
-    div.style.display = "flex";
-    div.style.flexDirection = "column";
-    div.style.marginBottom = "0.5rem";
-
     const row = document.createElement("div");
     row.style.display = "flex";
     row.style.justifyContent = "space-between";
-    row.style.alignItems = "center";
-
     const info = document.createElement("span");
     info.textContent = `${t.name} ${t.completed ? "(✓)" : ""} — ${t.priority.toFixed(1)}`;
-
     const delBtn = document.createElement("button");
     delBtn.textContent = "🗑️";
     delBtn.onclick = () => {
@@ -204,7 +202,6 @@ renderTemplates();
       persist();
       updateUI();
     };
-
     row.appendChild(info);
     row.appendChild(delBtn);
     div.appendChild(row);
@@ -215,77 +212,74 @@ renderTemplates();
       ts.textContent = `Added: ${new Date(t.addedAt).toLocaleString()}`;
       div.appendChild(ts);
     }
-
     if (t.dueDate) {
       const dd = document.createElement("div");
       dd.className = "score";
       dd.textContent = `Due: ${t.dueDate}`;
       div.appendChild(dd);
     }
-
     taskList.appendChild(div);
-  
-    }
-const dueTodayList = $("dueTodayList");
+  }
+
+  // tasks due today
+  const dueTodayList = $("dueTodayList");
   dueTodayList.innerHTML = "";
   const today = new Date().toISOString().split("T")[0];
+  tasks.filter(t => t.dueDate === today && !t.completed).forEach(t => {
+    const div = document.createElement("div");
+    div.textContent = `${t.name} — due today`;
+    dueTodayList.appendChild(div);
+  });
+}
 
-  tasks
-    .filter(t => t.dueDate === today && !t.completed)
-    .forEach(t => {
-      const div = document.createElement("div");
-      div.textContent = `${t.name} — due today`;
-      dueTodayList.appendChild(div);
-    });
-      
+// These functions are now global so button handlers can find them
+function startFocus() {
+  $("capture").classList.add("hidden");
+  $("focus").classList.remove("hidden");
+  focusQueue = tasks.filter(t => !t.completed).sort((a, b) => b.priority - a.priority);
+  showNextTask();
+}
 
-    function startFocus() {
-      $("capture").classList.add("hidden");
-      $("focus").classList.remove("hidden");
-      focusQueue = tasks.filter(t => !t.completed).sort((a, b) => b.priority - a.priority);
-      showNextTask();
-    }
+function showNextTask() {
+  const display = document.querySelector(".focus");
+  const scoreView = $("scoreView");
+  if (focusQueue.length === 0) {
+    display.textContent = "✅ All tasks complete!";
+    scoreView.textContent = "";
+    return;
+  }
+  const current = focusQueue[0];
+  display.textContent = current.name;
+  scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
+  display.focus();
+}
 
-    function showNextTask() {
-      const display = document.querySelector(".focus");
-      const scoreView = $("scoreView");
-      if (focusQueue.length === 0) {
-        display.textContent = "✅ All tasks complete!";
-        scoreView.textContent = "";
-        return;
-      }
-      const current = focusQueue[0];
-      display.textContent = current.name;
-      scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
-      display.focus();
-    }
+function completeTask() {
+  if (!focusQueue.length) return;
+  focusQueue[0].completed = true;
+  persist();
+  updateUI();
+  focusQueue.shift();
+  showNextTask();
+}
 
-    function completeTask() {
-      if (focusQueue.length === 0) return;
-      focusQueue[0].completed = true;
-      persist();
-      updateUI();
-      focusQueue.shift();
-      showNextTask();
-    }
+function backToCapture() {
+  $("focus").classList.add("hidden");
+  $("capture").classList.remove("hidden");
+  updateUI();
+}
 
-    function backToCapture() {
-      $("focus").classList.add("hidden");
-      $("capture").classList.remove("hidden");
-      updateUI();
-    }
+function reset() {
+  if (!confirm("Clear all tasks?")) return;
+  tasks = [];
+  localStorage.removeItem("tasks");
+  if (supabase) supabase.from("tasks").delete().neq("id", "");
+  updateUI();
+}
 
-    function reset() {
-      if (!confirm("Clear all tasks?")) return;
-      tasks = [];
-      localStorage.removeItem("tasks");
-      if (supabase) supabase.from("tasks").delete().neq("id", ""); 
-      updateUI();
-    }
-    function saveAsTemplate() {
+function saveAsTemplate() {
   const name = $("name").value.trim();
   if (!name) return alert("Task name is required");
-
   const template = {
     name,
     importance: +$("importance").value,
@@ -306,8 +300,6 @@ function renderTemplates() {
   container.innerHTML = "";
   templates.forEach((t, i) => {
     const wrapper = document.createElement("div");
-    wrapper.style.marginBottom = "0.5rem";
-
     const useBtn = document.createElement("button");
     useBtn.textContent = `📋 ${t.name}`;
     useBtn.onclick = () => {
@@ -320,7 +312,6 @@ function renderTemplates() {
       $("timeToStart").value = t.timeToStart;
       $("difficulty").value = t.difficulty;
     };
-
     const editBtn = document.createElement("button");
     editBtn.textContent = "✏️ Edit";
     editBtn.onclick = () => {
@@ -330,7 +321,6 @@ function renderTemplates() {
       localStorage.setItem("templates", JSON.stringify(templates));
       renderTemplates();
     };
-
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "🗑️ Delete";
     deleteBtn.onclick = () => {
@@ -339,12 +329,10 @@ function renderTemplates() {
       localStorage.setItem("templates", JSON.stringify(templates));
       renderTemplates();
     };
-
     [useBtn, editBtn, deleteBtn].forEach(b => {
       b.style.marginRight = "0.3rem";
       b.style.fontSize = "0.9rem";
     });
-
     wrapper.appendChild(useBtn);
     wrapper.appendChild(editBtn);
     wrapper.appendChild(deleteBtn);
@@ -352,6 +340,11 @@ function renderTemplates() {
   });
 }
 
-  </script>
+window.addEventListener('DOMContentLoaded', init);
+</script>
+  
+
+
+  
 </body>
 </html>
