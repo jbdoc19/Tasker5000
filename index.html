@@ -226,62 +226,7 @@ renderTemplates();
     }
 
     taskList.appendChild(div);
-  }
-
-  // Charts Due Today section
-  const dueTodayList = $("dueTodayList");
-  dueTodayList.innerHTML = "";
-  const today = new Date().toISOString().split("T")[0];
-  tasks
-    .filter(t => t.dueDate === today && !t.completed)
-    .forEach(t => {
-      const div = document.createElement("div");
-      div.textContent = `${t.name} — due today`;
-      dueTodayList.appendChild(div);
-    });
-    }
-
-    const dueTodayList = $("dueTodayList");
-dueTodayList.innerHTML = "";
-const today = new Date().toISOString().split("T")[0];
-
-tasks
-  .filter(t => t.dueDate === today && !t.completed)
-  .forEach(t => {
-    const div = document.createElement("div");
-    div.textContent = `${t.name} — due today`;
-    dueTodayList.appendChild(div);
-  });
-    
-  const div = document.createElement("div");
-  div.className = "task";
-  div.style.display = "flex";
-  div.style.justifyContent = "space-between";
-  div.style.alignItems = "center";
-  div.style.marginBottom = "0.3rem";
-
-  const info = document.createElement("span");
-  info.textContent = `${t.name} ${t.completed ? "(✓)" : ""} — ${t.priority.toFixed(1)}`;
-  if (t.addedAt) {
-  const ts = document.createElement("div");
-  ts.className = "score";
-  ts.textContent = `Added: ${new Date(t.addedAt).toLocaleString()}`;
-  div.appendChild(ts);
-  }
-  const delBtn = document.createElement("button");
-  delBtn.textContent = "🗑️";
-  delBtn.onclick = () => {
-    if (!confirm("Delete this task?")) return;
-    tasks.splice(i, 1);
-    persist();
-    updateUI();
-  };
-
-  div.appendChild(info);
-  div.appendChild(delBtn);
-  taskList.appendChild(div);
-}
-      }
+  
     }
 
     function startFocus() {
