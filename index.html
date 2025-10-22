@@ -115,16 +115,23 @@
     </label>
     <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
       <select id="patientType">
-        <option value="non-complex" selected>Non-Complex</option>
-        <option value="complex">Complex</option>
+        <option value="Non-Complex" selected>Non-Complex</option>
+        <option value="Complex">Complex</option>
       </select>
     </label>
     <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
       <select id="visitType">
-        <option value="follow-up" selected>Follow-Up</option>
-        <option value="establish">Establish Care</option>
-        <option value="well-child">Well Child Visit</option>
-        <option value="acute">Acute Visit</option>
+        <option value="Follow-Up" selected>Follow-Up</option>
+        <option value="Establish Care">Establish Care</option>
+        <option value="Well Child Visit">Well Child Visit</option>
+        <option value="Acute Visit">Acute Visit</option>
+      </select>
+    </label>
+    <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
+      <select id="clinicSite">
+        <option value="General Clinic" selected>General Clinic</option>
+        <option value="St PJ’s Shelter">St PJ’s Shelter</option>
+        <option value="Craniofacial Clinic">Craniofacial Clinic</option>
       </select>
     </label>
     <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
@@ -342,9 +349,11 @@
     const authorField = $("authorType");
     if (authorField) authorField.value = "attending";
     const patientField = $("patientType");
-    if (patientField) patientField.value = "non-complex";
+    if (patientField) patientField.value = "Non-Complex";
     const visitField = $("visitType");
-    if (visitField) visitField.value = "follow-up";
+    if (visitField) visitField.value = "Follow-Up";
+    const clinicField = $("clinicSite");
+    if (clinicField) clinicField.value = "General Clinic";
     NUMERIC_SCALE_FIELDS.forEach(id => {
       const field = $(id);
       if (field) field.value = "1";
@@ -390,40 +399,62 @@
     return Number.isFinite(num) ? num : fallback;
   }
 
-  function getDeadlineMultiplier(daysSinceVisit) {
-    if (daysSinceVisit === null || daysSinceVisit === undefined || daysSinceVisit === "") return 1;
-    const days = Number(daysSinceVisit);
-    if (!Number.isFinite(days) || days < 0) return 1;
-    if (days >= 90 && days <= 95) return 2;
-    if (days > 95) return 1.1;
-    if (days >= 2 && days <= 4) return 1.6;
-    if (days < 30) return 1.3;
+  function clampScale(value, fallback = 1) {
+    const base = toNumber(value, fallback);
+    return Math.min(5, Math.max(1, base));
+  }
+
+  function normalizePatientType(value) {
+    const normalized = (value || "").toString().toLowerCase();
+    return normalized === "complex" ? "Complex" : "Non-Complex";
+  }
+
+  function getPatientTypeWeight(patientType) {
+    return normalizePatientType(patientType) === "Complex" ? 1.2 : 1;
+  }
+
+  function normalizeVisitType(value) {
+    const normalized = (value || "").toString().toLowerCase();
+    if (normalized === "establish" || normalized === "establish care") return "Establish Care";
+    if (normalized === "well-child" || normalized === "well child visit") return "Well Child Visit";
+    if (normalized === "acute" || normalized === "acute visit") return "Acute Visit";
+    return "Follow-Up";
+  }
+
+  function getVisitTypeWeight(visitType) {
+    const normalized = normalizeVisitType(visitType);
+    if (normalized === "Establish Care") return 1.3;
+    if (normalized === "Well Child Visit") return 1.1;
+    if (normalized === "Acute Visit") return 0.9;
     return 1;
   }
 
-  function getAuthorMultiplier(authorType) {
-    if (!authorType) return 1;
-    return String(authorType).toLowerCase() === "resident" ? 1.5 : 1;
+  function normalizeClinicSite(value) {
+    const normalized = (value || "").toString().toLowerCase().replace(/[’]/g, "'").trim();
+    if (normalized.includes("cranio")) return "Craniofacial Clinic";
+    if (normalized.includes("pj")) return "St PJ’s Shelter";
+    if (normalized.includes("general")) return "General Clinic";
+    return "General Clinic";
   }
 
-  function getPatientTypeMultiplier(patientType) {
-    if (!patientType) return 1;
-    return String(patientType).toLowerCase() === "complex" ? 1.2 : 1;
+  function isSameLocalDay(dateA, dateB) {
+    if (!(dateA instanceof Date) || !(dateB instanceof Date)) return false;
+    if (Number.isNaN(dateA.getTime()) || Number.isNaN(dateB.getTime())) return false;
+    return dateA.getFullYear() === dateB.getFullYear()
+      && dateA.getMonth() === dateB.getMonth()
+      && dateA.getDate() === dateB.getDate();
   }
 
-  function getVisitTypeMultiplier(visitType) {
-    if (!visitType) return 1;
-    const normalized = String(visitType).toLowerCase();
-    if (normalized === "establish") return 1.25;
-    if (normalized === "well-child") return 1.1;
-    if (normalized === "acute") return 0.9;
-    return 1; // follow-up baseline
-  }
-
-  function getUrgencyMultiplier(urgency) {
-    const value = Number(urgency);
-    if (!Number.isFinite(value) || value <= 0) return 1;
-    return Math.max(1, value);
+  function getSameDayBonus(clinicSite, createdAt) {
+    const normalizedClinic = normalizeClinicSite(clinicSite);
+    if (normalizedClinic !== "St PJ’s Shelter" && normalizedClinic !== "Craniofacial Clinic") {
+      return 1;
+    }
+    if (!createdAt) return 1;
+    const createdDate = new Date(createdAt);
+    if (Number.isNaN(createdDate.getTime())) return 1;
+    const now = new Date();
+    return isSameLocalDay(createdDate, now) ? 2 : 1;
   }
 
   function computePriority(t) {
@@ -433,37 +464,35 @@
       const total = remaining.reduce((sum,s) => sum + s.priority, 0);
       return total / remaining.length;
     }
-    const importance = toNumber(t.importance, 1);
-    const urgency = toNumber(t.urgency, 3);
-    const novelty = toNumber(t.novelty, 1);
-    const interest = toNumber(t.interest, 1);
-    const pressure = toNumber(t.externalPressure, 1);
-    const timeToStart = toNumber(t.timeToStart, 1);
-    const difficulty = toNumber(t.difficulty, 1);
-    const daysSinceVisit = (t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === "")
-      ? null
-      : Number(t.daysSinceVisit);
+    const importance = clampScale(t.importance, 1);
+    const urgency = clampScale(t.urgency, 3);
+    const novelty = clampScale(t.novelty, 1);
+    const interest = clampScale(t.interest, 1);
+    const pressure = clampScale(t.externalPressure, 1);
+    const timeToStart = clampScale(t.timeToStart, 1);
+    const difficulty = clampScale(t.difficulty, 1);
     const dopamine = novelty + interest;
     const friction = (6 - timeToStart) + (6 - difficulty);
     const baseScore = (importance * 2)
+         + (urgency * 2)
          + (dopamine * 2)
-         + (pressure * 4)
+         + (pressure * 5)
          + (friction * 1.5);
-    const deadlineMultiplier = getDeadlineMultiplier(daysSinceVisit);
-    const authorMultiplier = getAuthorMultiplier(t.authorType);
-    const patientMultiplier = getPatientTypeMultiplier(t.patientType);
-    const visitMultiplier = getVisitTypeMultiplier(t.visitType);
-    const urgencyMultiplier = getUrgencyMultiplier(urgency);
-    return baseScore * deadlineMultiplier * authorMultiplier * patientMultiplier * visitMultiplier * urgencyMultiplier;
+    const patientWeight = getPatientTypeWeight(t.patientType);
+    const visitWeight = getVisitTypeWeight(t.visitType);
+    const sameDayBonus = getSameDayBonus(t.clinicSite, t.createdAt);
+    return baseScore * patientWeight * visitWeight * sameDayBonus;
   }
 
   function recalcTaskPriority(task) {
     if (!task) return task;
     const normalized = { ...task };
     normalized.authorType = normalized.authorType || "attending";
-    normalized.patientType = normalized.patientType || "non-complex";
-    normalized.visitType = normalized.visitType || "follow-up";
+    normalized.patientType = normalizePatientType(normalized.patientType);
+    normalized.visitType = normalizeVisitType(normalized.visitType);
+    normalized.clinicSite = normalizeClinicSite(normalized.clinicSite);
     normalized.dateOfService = normalized.dateOfService || null;
+    normalized.createdAt = normalized.createdAt || normalized.addedAt || new Date().toISOString();
     if (normalized.category === "Charts") normalized.category = "Chart";
     if (normalized.dateOfService) {
       normalized.daysSinceVisit = calculateDaysSince(normalized.dateOfService);
@@ -473,13 +502,13 @@
         ? null
         : parsedDays;
     }
-    normalized.urgency = toNumber(normalized.urgency, 3);
-    normalized.importance = toNumber(normalized.importance, 1);
-    normalized.novelty = toNumber(normalized.novelty, 1);
-    normalized.interest = toNumber(normalized.interest, 1);
-    normalized.externalPressure = toNumber(normalized.externalPressure, 1);
-    normalized.timeToStart = toNumber(normalized.timeToStart, 1);
-    normalized.difficulty = toNumber(normalized.difficulty, 1);
+    normalized.urgency = clampScale(normalized.urgency, 3);
+    normalized.importance = clampScale(normalized.importance, 1);
+    normalized.novelty = clampScale(normalized.novelty, 1);
+    normalized.interest = clampScale(normalized.interest, 1);
+    normalized.externalPressure = clampScale(normalized.externalPressure, 1);
+    normalized.timeToStart = clampScale(normalized.timeToStart, 1);
+    normalized.difficulty = clampScale(normalized.difficulty, 1);
     if (Array.isArray(normalized.subTasks) && normalized.subTasks.length) {
       const base = computePriority({ ...normalized, subTasks: [] });
       normalized.subTasks = normalized.subTasks.map(sub => ({
@@ -502,9 +531,11 @@
     const authorField = $("authorType");
     const authorType = authorField ? (authorField.value || "attending") : "attending";
     const patientField = $("patientType");
-    const patientType = patientField ? (patientField.value || "non-complex") : "non-complex";
+    const patientType = normalizePatientType(patientField ? patientField.value : "Non-Complex");
     const visitField = $("visitType");
-    const visitType = visitField ? (visitField.value || "follow-up") : "follow-up";
+    const visitType = normalizeVisitType(visitField ? visitField.value : "Follow-Up");
+    const clinicField = $("clinicSite");
+    const clinicSite = normalizeClinicSite(clinicField ? clinicField.value : "General Clinic");
     const dateField = $("dateOfService");
     const dateOfService = dateField && dateField.value ? dateField.value : null;
     const daysSinceVisit = calculateDaysSince(dateOfService);
@@ -515,15 +546,16 @@
       authorType,
       patientType,
       visitType,
+      clinicSite,
       dateOfService,
       daysSinceVisit,
-      importance: toNumber($("importance").value, 1),
-      urgency: toNumber($("urgency").value, 3),
-      novelty: toNumber($("novelty").value, 1),
-      interest: toNumber($("interest").value, 1),
-      externalPressure: toNumber($("externalPressure").value, 1),
-      timeToStart: toNumber($("timeToStart").value, 1),
-      difficulty: toNumber($("difficulty").value, 1),
+      importance: clampScale($("importance").value, 1),
+      urgency: clampScale($("urgency").value, 3),
+      novelty: clampScale($("novelty").value, 1),
+      interest: clampScale($("interest").value, 1),
+      externalPressure: clampScale($("externalPressure").value, 1),
+      timeToStart: clampScale($("timeToStart").value, 1),
+      difficulty: clampScale($("difficulty").value, 1),
       dueDate: $("dueDate").value || null,
       completed: false,
       createdAt: new Date().toISOString(),
@@ -569,9 +601,11 @@
     const authorField = $("authorType");
     if (authorField) authorField.value = task.authorType || "attending";
     const patientField = $("patientType");
-    if (patientField) patientField.value = task.patientType || "non-complex";
+    if (patientField) patientField.value = normalizePatientType(task.patientType);
     const visitField = $("visitType");
-    if (visitField) visitField.value = task.visitType || "follow-up";
+    if (visitField) visitField.value = normalizeVisitType(task.visitType);
+    const clinicField = $("clinicSite");
+    if (clinicField) clinicField.value = normalizeClinicSite(task.clinicSite);
     const dateField = $("dateOfService");
     if (dateField) {
       if (task.dateOfService) {
@@ -610,19 +644,21 @@
     const authorField = $("authorType");
     task.authorType = authorField ? (authorField.value || "attending") : "attending";
     const patientField = $("patientType");
-    task.patientType = patientField ? (patientField.value || "non-complex") : "non-complex";
+    task.patientType = normalizePatientType(patientField ? patientField.value : task.patientType);
     const visitField = $("visitType");
-    task.visitType = visitField ? (visitField.value || "follow-up") : "follow-up";
+    task.visitType = normalizeVisitType(visitField ? visitField.value : task.visitType);
+    const clinicField = $("clinicSite");
+    task.clinicSite = normalizeClinicSite(clinicField ? clinicField.value : task.clinicSite);
     const dateField = $("dateOfService");
     task.dateOfService = dateField && dateField.value ? dateField.value : null;
     task.daysSinceVisit = calculateDaysSince(task.dateOfService);
-    task.importance = toNumber($("importance").value, 1);
-    task.urgency = toNumber($("urgency").value, 3);
-    task.novelty = toNumber($("novelty").value, 1);
-    task.interest = toNumber($("interest").value, 1);
-    task.externalPressure = toNumber($("externalPressure").value, 1);
-    task.timeToStart = toNumber($("timeToStart").value, 1);
-    task.difficulty = toNumber($("difficulty").value, 1);
+    task.importance = clampScale($("importance").value, 1);
+    task.urgency = clampScale($("urgency").value, 3);
+    task.novelty = clampScale($("novelty").value, 1);
+    task.interest = clampScale($("interest").value, 1);
+    task.externalPressure = clampScale($("externalPressure").value, 1);
+    task.timeToStart = clampScale($("timeToStart").value, 1);
+    task.difficulty = clampScale($("difficulty").value, 1);
     task.dueDate = $("dueDate").value || null;
     task.updatedAt = new Date().toISOString();
 
@@ -945,22 +981,25 @@
     const authorField = $("authorType");
     const authorType = authorField ? (authorField.value || "attending") : "attending";
     const patientField = $("patientType");
-    const patientType = patientField ? (patientField.value || "non-complex") : "non-complex";
+    const patientType = normalizePatientType(patientField ? patientField.value : "Non-Complex");
     const visitField = $("visitType");
-    const visitType = visitField ? (visitField.value || "follow-up") : "follow-up";
+    const visitType = normalizeVisitType(visitField ? visitField.value : "Follow-Up");
+    const clinicField = $("clinicSite");
+    const clinicSite = normalizeClinicSite(clinicField ? clinicField.value : "General Clinic");
     const template = {
       name,
       category: $("taskCategory").value || "General",
       authorType,
       patientType,
       visitType,
-      importance: toNumber($("importance").value, 1),
-      urgency: toNumber($("urgency").value, 3),
-      novelty: toNumber($("novelty").value, 1),
-      interest: toNumber($("interest").value, 1),
-      externalPressure: toNumber($("externalPressure").value, 1),
-      timeToStart: toNumber($("timeToStart").value, 1),
-      difficulty: toNumber($("difficulty").value, 1)
+      clinicSite,
+      importance: clampScale($("importance").value, 1),
+      urgency: clampScale($("urgency").value, 3),
+      novelty: clampScale($("novelty").value, 1),
+      interest: clampScale($("interest").value, 1),
+      externalPressure: clampScale($("externalPressure").value, 1),
+      timeToStart: clampScale($("timeToStart").value, 1),
+      difficulty: clampScale($("difficulty").value, 1)
     };
     templates.push(template);
     localStorage.setItem("templates", JSON.stringify(templates));
@@ -983,9 +1022,11 @@
         const authorField = $("authorType");
         if (authorField) authorField.value = t.authorType || "attending";
         const patientField = $("patientType");
-        if (patientField) patientField.value = t.patientType || "non-complex";
+        if (patientField) patientField.value = normalizePatientType(t.patientType);
         const visitField = $("visitType");
-        if (visitField) visitField.value = t.visitType || "follow-up";
+        if (visitField) visitField.value = normalizeVisitType(t.visitType);
+        const clinicField = $("clinicSite");
+        if (clinicField) clinicField.value = normalizeClinicSite(t.clinicSite);
         const urgencyField = $("urgency");
         if (urgencyField) urgencyField.value = String(t.urgency || 3);
         const pressureField = $("externalPressure");
@@ -1079,9 +1120,11 @@
         const normalizedTask = {
           ...task,
           authorType: task.authorType || "attending",
-          patientType: task.patientType || "non-complex",
-          visitType: task.visitType || "follow-up",
-          dateOfService: task.dateOfService || null
+          patientType: normalizePatientType(task.patientType),
+          visitType: normalizeVisitType(task.visitType),
+          clinicSite: normalizeClinicSite(task.clinicSite),
+          dateOfService: task.dateOfService || null,
+          createdAt: task.createdAt || task.addedAt || new Date().toISOString()
         };
         if (normalizedTask.dateOfService) {
           normalizedTask.daysSinceVisit = calculateDaysSince(normalizedTask.dateOfService);
@@ -1094,8 +1137,9 @@
       templates = JSON.parse(savedTemplates).map(template => ({
         ...template,
         authorType: template.authorType || "attending",
-        patientType: template.patientType || "non-complex",
-        visitType: template.visitType || "follow-up"
+        patientType: normalizePatientType(template.patientType),
+        visitType: normalizeVisitType(template.visitType),
+        clinicSite: normalizeClinicSite(template.clinicSite)
       }));
     }
     renderTemplates();
