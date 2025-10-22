@@ -15,6 +15,12 @@
       align-items: center;
     }
     h1, h3 { color: #fff; }
+    .billing-reminder {
+      color: #ff6b6b;
+      font-weight: 600;
+      margin: 0.25rem 0 1rem;
+      text-align: center;
+    }
     .hidden { display: none; }
     label { display: block; margin-top: 0.5rem; }
     input[type="text"], select, input[type="date"], textarea {
@@ -76,6 +82,7 @@
 </head>
 <body>
   <h1>🎯 Task Focus</h1>
+  <p id="billingReminder" class="billing-reminder"></p>
 
   <!-- Task entry form -->
   <section id="capture">
@@ -91,6 +98,13 @@
         <option value="Personal">Personal</option>
       </select>
     </label>
+    <label>Chart Author
+      <select id="authorType">
+        <option value="attending" selected>Attending</option>
+        <option value="resident">Resident</option>
+      </select>
+    </label>
+    <label>Days Since Visit <input id="daysSinceVisit" type="number" min="0" inputmode="numeric" /></label>
     <label>Importance (1–5) <select id="importance"></select></label>
     <label>Urgency (1–5) <select id="urgency"></select></label>
     <label>Dopamine – Novelty (1–5) <select id="novelty"></select></label>
@@ -176,6 +190,10 @@
     $("initialSubTasks").value = "";
     const dueDateField = $("dueDate");
     if (dueDateField) dueDateField.value = "";
+    const authorField = $("authorType");
+    if (authorField) authorField.value = "attending";
+    const daysField = $("daysSinceVisit");
+    if (daysField) daysField.value = "";
     const pressureField = $("externalPressure");
     if (pressureField) {
       pressureField.value = "";
@@ -193,6 +211,27 @@
     cancelBtn.classList.toggle("hidden", !isEditing);
   }
 
+  function toNumber(value, fallback = 0) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+  }
+
+  function getDeadlineMultiplier(daysSinceVisit) {
+    if (daysSinceVisit === null || daysSinceVisit === undefined || daysSinceVisit === "") return 1;
+    const days = Number(daysSinceVisit);
+    if (!Number.isFinite(days) || days < 0) return 1;
+    if (days >= 90 && days <= 95) return 2;
+    if (days > 95) return 1.1;
+    if (days >= 2 && days <= 4) return 1.6;
+    if (days < 30) return 1.3;
+    return 1;
+  }
+
+  function getAuthorMultiplier(authorType) {
+    if (!authorType) return 1;
+    return String(authorType).toLowerCase() === "resident" ? 1.5 : 1;
+  }
+
   function computePriority(t) {
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
@@ -200,14 +239,42 @@
       const total = remaining.reduce((sum,s) => sum + s.priority, 0);
       return total / remaining.length;
     }
-    const dopamine = t.novelty + t.interest;
-    const pressure = t.externalPressure;
-    const friction = (6 - t.timeToStart) + (6 - t.difficulty);
-    return (t.importance * 2)
-         + (t.urgency    * 2)
-         + (dopamine     * 2)
-         + (pressure     * 5)
-         + (friction     * 1.5);
+    const importance = toNumber(t.importance, 1);
+    const urgency = toNumber(t.urgency, 1);
+    const novelty = toNumber(t.novelty, 1);
+    const interest = toNumber(t.interest, 1);
+    const pressure = toNumber(t.externalPressure, 0);
+    const timeToStart = toNumber(t.timeToStart, 3);
+    const difficulty = toNumber(t.difficulty, 3);
+    const daysSinceVisit = (t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === "")
+      ? null
+      : Number(t.daysSinceVisit);
+    const dopamine = novelty + interest;
+    const friction = (6 - timeToStart) + (6 - difficulty);
+    const urgencyBase = urgency * 2;
+    const urgencyScore = urgency >= 4 ? urgencyBase * 1.5 : urgencyBase;
+    const baseScore = (importance * 2)
+         + urgencyScore
+         + (dopamine * 2)
+         + (pressure * 5)
+         + (friction * 1.5);
+    const deadlineMultiplier = getDeadlineMultiplier(daysSinceVisit);
+    const authorMultiplier = getAuthorMultiplier(t.authorType);
+    return baseScore * deadlineMultiplier * authorMultiplier;
+  }
+
+  function recalcTaskPriority(task) {
+    if (!task) return task;
+    const normalized = { ...task };
+    if (Array.isArray(normalized.subTasks) && normalized.subTasks.length) {
+      const base = computePriority({ ...normalized, subTasks: [] });
+      normalized.subTasks = normalized.subTasks.map(sub => ({
+        ...sub,
+        priority: base
+      }));
+    }
+    normalized.priority = computePriority(normalized);
+    return normalized;
   }
 
   function persist() {
@@ -218,17 +285,28 @@
   function addTask() {
     const name = $("name").value.trim();
     if (!name) return;
+    const authorField = $("authorType");
+    const authorType = authorField ? (authorField.value || "attending") : "attending";
+    const daysField = $("daysSinceVisit");
+    let daysSinceVisit = null;
+    if (daysField) {
+      const rawDays = daysField.value.trim();
+      const parsedDays = Number(rawDays);
+      daysSinceVisit = rawDays === "" || !Number.isFinite(parsedDays) ? null : parsedDays;
+    }
     const task = {
       id: Date.now().toString(),
       name,
       category: $("taskCategory").value || "General",
-      importance: +$("importance").value,
-      urgency: +$("urgency").value,
-      novelty: +$("novelty").value,
-      interest: +$("interest").value,
-      externalPressure: +$("externalPressure").value,
-      timeToStart: +$("timeToStart").value,
-      difficulty: +$("difficulty").value,
+      authorType,
+      daysSinceVisit,
+      importance: toNumber($("importance").value, 1),
+      urgency: toNumber($("urgency").value, 1),
+      novelty: toNumber($("novelty").value, 1),
+      interest: toNumber($("interest").value, 1),
+      externalPressure: toNumber($("externalPressure").value, 0),
+      timeToStart: toNumber($("timeToStart").value, 3),
+      difficulty: toNumber($("difficulty").value, 3),
       dueDate: $("dueDate").value || null,
       completed: false,
       createdAt: new Date().toISOString(),
@@ -271,6 +349,16 @@
     $("urgency").value = String(task.urgency || 1);
     $("novelty").value = String(task.novelty || 1);
     $("interest").value = String(task.interest || 1);
+    const authorField = $("authorType");
+    if (authorField) authorField.value = task.authorType || "attending";
+    const daysField = $("daysSinceVisit");
+    if (daysField) {
+      if (task.daysSinceVisit === null || task.daysSinceVisit === undefined || task.daysSinceVisit === "") {
+        daysField.value = "";
+      } else {
+        daysField.value = String(task.daysSinceVisit);
+      }
+    }
     const pressureField = $("externalPressure");
     if (pressureField) {
       const pressureValue = task.externalPressure;
@@ -299,13 +387,23 @@
     const task = tasks[idx];
     task.name = name;
     task.category = $("taskCategory").value || "General";
-    task.importance = +$("importance").value;
-    task.urgency = +$("urgency").value;
-    task.novelty = +$("novelty").value;
-    task.interest = +$("interest").value;
-    task.externalPressure = +$("externalPressure").value;
-    task.timeToStart = +$("timeToStart").value;
-    task.difficulty = +$("difficulty").value;
+    const authorField = $("authorType");
+    task.authorType = authorField ? (authorField.value || "attending") : "attending";
+    const daysField = $("daysSinceVisit");
+    if (daysField) {
+      const rawDays = daysField.value.trim();
+      const parsedDays = Number(rawDays);
+      task.daysSinceVisit = rawDays === "" || !Number.isFinite(parsedDays) ? null : parsedDays;
+    } else if (task.daysSinceVisit === undefined) {
+      task.daysSinceVisit = null;
+    }
+    task.importance = toNumber($("importance").value, 1);
+    task.urgency = toNumber($("urgency").value, 1);
+    task.novelty = toNumber($("novelty").value, 1);
+    task.interest = toNumber($("interest").value, 1);
+    task.externalPressure = toNumber($("externalPressure").value, 0);
+    task.timeToStart = toNumber($("timeToStart").value, 3);
+    task.difficulty = toNumber($("difficulty").value, 3);
     task.dueDate = $("dueDate").value || null;
     task.updatedAt = new Date().toISOString();
 
@@ -454,6 +552,21 @@
         div.appendChild(dd);
       }
 
+      if (t.daysSinceVisit !== null && t.daysSinceVisit !== undefined && t.daysSinceVisit !== "") {
+        const daysInfo = document.createElement("div");
+        daysInfo.className = "score";
+        daysInfo.textContent = `Days since visit: ${t.daysSinceVisit}`;
+        div.appendChild(daysInfo);
+      }
+
+      if (t.authorType) {
+        const authorInfo = document.createElement("div");
+        authorInfo.className = "score";
+        const label = String(t.authorType).toLowerCase() === "resident" ? "Resident" : "Attending";
+        authorInfo.textContent = `Author: ${label}`;
+        div.appendChild(authorInfo);
+      }
+
       if (t.subTasks && t.subTasks.length) {
         const completedCount = t.subTasks.filter(s => s.completed).length;
         const progress = document.createElement("div");
@@ -599,16 +712,27 @@
   function saveAsTemplate() {
     const name = $("name").value.trim();
     if (!name) return alert("Task name is required");
+    const authorField = $("authorType");
+    const authorType = authorField ? (authorField.value || "attending") : "attending";
+    const daysField = $("daysSinceVisit");
+    let daysSinceVisit = null;
+    if (daysField) {
+      const rawDays = daysField.value.trim();
+      const parsedDays = Number(rawDays);
+      daysSinceVisit = rawDays === "" || !Number.isFinite(parsedDays) ? null : parsedDays;
+    }
     const template = {
       name,
       category: $("taskCategory").value || "General",
-      importance: +$("importance").value,
-      urgency: +$("urgency").value,
-      novelty: +$("novelty").value,
-      interest: +$("interest").value,
-      externalPressure: +$("externalPressure").value,
-      timeToStart: +$("timeToStart").value,
-      difficulty: +$("difficulty").value
+      authorType,
+      daysSinceVisit,
+      importance: toNumber($("importance").value, 1),
+      urgency: toNumber($("urgency").value, 1),
+      novelty: toNumber($("novelty").value, 1),
+      interest: toNumber($("interest").value, 1),
+      externalPressure: toNumber($("externalPressure").value, 0),
+      timeToStart: toNumber($("timeToStart").value, 3),
+      difficulty: toNumber($("difficulty").value, 3)
     };
     templates.push(template);
     localStorage.setItem("templates", JSON.stringify(templates));
@@ -629,9 +753,26 @@
         $("urgency").value = t.urgency;
         $("novelty").value = t.novelty;
         $("interest").value = t.interest;
-        $("externalPressure").value = t.externalPressure;
-        $("timeToStart").value = t.timeToStart;
-        $("difficulty").value = t.difficulty;
+        const authorField = $("authorType");
+        if (authorField) authorField.value = t.authorType || "attending";
+        const daysField = $("daysSinceVisit");
+        if (daysField) {
+          if (t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === "") {
+            daysField.value = "";
+          } else {
+            daysField.value = String(t.daysSinceVisit);
+          }
+        }
+        const pressureField = $("externalPressure");
+        if (pressureField) {
+          if (t.externalPressure === null || t.externalPressure === undefined || t.externalPressure === "") {
+            pressureField.selectedIndex = 0;
+          } else {
+            pressureField.value = String(t.externalPressure);
+          }
+        }
+        $("timeToStart").value = String(t.timeToStart ?? "");
+        $("difficulty").value = String(t.difficulty ?? "");
       };
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️ Edit";
@@ -672,11 +813,52 @@
     updateUI();
   }
 
+  function updateBillingReminder() {
+    const reminder = $("billingReminder");
+    if (!reminder) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cutoff = new Date(today);
+    cutoff.setDate(cutoff.getDate() - 95);
+    const formatted = cutoff.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+    reminder.textContent = `Make sure that "all charts from ${formatted} must be completed today to be eligible for billing".`;
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
+    updateBillingReminder();
     const saved = localStorage.getItem("tasks");
-    if (saved) tasks = JSON.parse(saved);
+    if (saved) {
+      tasks = JSON.parse(saved).map(task => {
+        const parsedDays = Number(task.daysSinceVisit);
+        const normalizedDays = (task.daysSinceVisit === null || task.daysSinceVisit === undefined || task.daysSinceVisit === "" || !Number.isFinite(parsedDays))
+          ? null
+          : parsedDays;
+        const normalizedTask = {
+          ...task,
+          authorType: task.authorType || "attending",
+          daysSinceVisit: normalizedDays
+        };
+        return recalcTaskPriority(normalizedTask);
+      });
+    }
     const savedTemplates = localStorage.getItem("templates");
-    if (savedTemplates) templates = JSON.parse(savedTemplates);
+    if (savedTemplates) {
+      templates = JSON.parse(savedTemplates).map(template => {
+        const parsedDays = Number(template.daysSinceVisit);
+        const normalizedDays = (template.daysSinceVisit === null || template.daysSinceVisit === undefined || template.daysSinceVisit === "" || !Number.isFinite(parsedDays))
+          ? null
+          : parsedDays;
+        return {
+          ...template,
+          authorType: template.authorType || "attending",
+          daysSinceVisit: normalizedDays
+        };
+      });
+    }
     renderTemplates();
     updateUI();
   });
