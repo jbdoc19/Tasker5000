@@ -35,7 +35,128 @@
     button:disabled { opacity: 0.4; cursor: not-allowed; }
     .peek { background: #222; margin-top: 1rem; padding: 1rem; border-radius: 6px; max-width: 600px; }
     .peek summary { cursor: pointer; }
-    .task { margin: 0.25rem 0; }
+    .task-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .task-view-label {
+      color: #a0a0a0;
+      font-size: 0.85rem;
+    }
+    .task-view-select {
+      background: #1a1a1a;
+      color: #eee;
+      border: 1px solid #444;
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+    }
+    .task-card {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 0.85rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .task-card.is-completed {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+    }
+    .task-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .task-card-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      flex: 1;
+      min-width: 0;
+    }
+    .task-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+      line-height: 1.4;
+      color: #fff;
+      word-break: break-word;
+    }
+    .task-complete-indicator {
+      color: #8fc97a;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .task-card-actions {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+    .task-card-actions button {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.5rem;
+    }
+    .task-descriptors {
+      font-size: 0.8rem;
+      color: #b0b0b0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .task-descriptors span::before {
+      content: "•";
+      margin-right: 0.25rem;
+      color: #555;
+    }
+    .task-descriptors span:first-child::before {
+      content: "";
+      margin: 0;
+    }
+    .task-progress {
+      font-size: 0.82rem;
+      color: #d0dcff;
+      font-weight: 500;
+    }
+    .task-meta {
+      font-size: 0.75rem;
+      color: #8f9aa8;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .task-detail-toggle {
+      align-self: flex-start;
+      background: #2a2a2a;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.6rem;
+    }
+    .task-details {
+      font-size: 0.8rem;
+      color: #ccc;
+      background: #111;
+      border-radius: 6px;
+      padding: 0.6rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .task-details h5 {
+      margin: 0 0 0.4rem;
+      font-size: 0.85rem;
+      color: #eee;
+    }
+    .task-details ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+    .task-details li {
+      margin: 0.25rem 0;
+    }
     .score { font-size: 0.8rem; color: #ccc; }
     .chart-age, .urgency-hint {
       display: block;
@@ -257,6 +378,13 @@
     <div id="categoryProgress" class="category-progress"></div>
     <details class="peek">
       <summary>🔍 Peek at tasks</summary>
+      <div class="task-list-header">
+        <label class="task-view-label" for="taskViewMode">View</label>
+        <select id="taskViewMode" class="task-view-select">
+          <option value="active" selected>Active Tasks</option>
+          <option value="completed">Completed Tasks</option>
+        </select>
+      </div>
       <div id="taskList"></div>
     </details>
     <div id="dueTodaySection" style="margin-top:1rem;">
@@ -281,6 +409,8 @@
 
   const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal"];
   let activeCategory = "All";
+  const TASK_LIST_MODES = { ACTIVE: "active", COMPLETED: "completed" };
+  let taskListMode = TASK_LIST_MODES.ACTIVE;
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
   const runningTimers = new Map();
@@ -399,6 +529,23 @@
     return Number((diff / (1000 * 60)).toFixed(2));
   }
 
+  function isTaskCompleted(task) {
+    if (!task) return false;
+    return Boolean(task.completed || task.completedAt);
+  }
+
+  function getCompletionTimestamp(task) {
+    if (!task) return null;
+    return task.completedAt || task.completionTime || null;
+  }
+
+  function formatDateTime(dateString) {
+    if (!dateString) return null;
+    const parsed = new Date(dateString);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toLocaleString();
+  }
+
   function formatDuration(minutes) {
     if (minutes === null || minutes === undefined) return "--";
     const num = Number(minutes);
@@ -455,6 +602,21 @@
     }, 0).toFixed(2));
   }
 
+  function getTaskTotalDuration(task) {
+    if (!task) return null;
+    if (isChartTask(task)) {
+      const value = Number(task.chartDurationMinutes);
+      return Number.isFinite(value) && value > 0 ? value : null;
+    }
+    if (!Array.isArray(task.subTasks) || task.subTasks.length === 0) return null;
+    const total = task.subTasks.reduce((sum, sub) => {
+      const value = Number(sub.durationMinutes);
+      return Number.isFinite(value) ? sum + value : sum;
+    }, 0);
+    if (total <= 0) return null;
+    return Number(total.toFixed(2));
+  }
+
   function updateChartDurationForTask(task) {
     if (!isChartTask(task)) {
       delete task.chartDurationMinutes;
@@ -501,16 +663,68 @@
     runningTimers.set(sub.id, intervalId);
   }
 
-  function ensureChartSubTasks(task) {
+  function ensureChartSubTasks(task, options = {}) {
     if (!isChartTask(task)) return false;
     if (!Array.isArray(task.subTasks)) {
       task.subTasks = [];
     }
-    if (task.subTasks.length > 0) return false;
-    const basePriority = computePriority({ ...task, subTasks: [] });
+    const basePriority = options.basePriority !== undefined
+      ? options.basePriority
+      : computePriority({ ...task, subTasks: [] });
     const defaults = buildChartSteps(task.authorType);
-    task.subTasks = defaults.map(step => createSubTask(step, basePriority));
-    return true;
+    const lowerDefaults = defaults.map(step => step.toLowerCase());
+    const requiredSet = new Set(lowerDefaults);
+    const attestationKey = RESIDENT_ATTESTATION_STEP.toLowerCase();
+    let changed = false;
+
+    if (!requiredSet.has(attestationKey)) {
+      const filtered = task.subTasks.filter(sub => String(sub?.name || "").toLowerCase() !== attestationKey);
+      if (filtered.length !== task.subTasks.length) {
+        task.subTasks = filtered;
+        changed = true;
+      }
+    }
+
+    const existingByName = new Map();
+    task.subTasks.forEach((sub, index) => {
+      const key = String(sub?.name || "").toLowerCase();
+      if (!existingByName.has(key)) {
+        existingByName.set(key, { sub, index });
+      }
+    });
+
+    const orderedDefaults = defaults.map(step => {
+      const key = step.toLowerCase();
+      const existing = existingByName.get(key);
+      if (existing) {
+        existingByName.delete(key);
+        return existing.sub;
+      }
+      changed = true;
+      return createSubTask(step, basePriority);
+    });
+
+    const extras = task.subTasks.filter(sub => {
+      const key = String(sub?.name || "").toLowerCase();
+      return !requiredSet.has(key);
+    });
+
+    const nextSubTasks = [...orderedDefaults, ...extras];
+    const sameOrder = nextSubTasks.length === task.subTasks.length
+      && nextSubTasks.every((sub, idx) => sub === task.subTasks[idx]);
+    if (!sameOrder) {
+      task.subTasks = nextSubTasks;
+      if (!changed) changed = true;
+    }
+
+    task.subTasks.forEach(sub => {
+      if (sub.priority !== basePriority) {
+        sub.priority = basePriority;
+        changed = true;
+      }
+    });
+
+    return changed;
   }
 
   function resolveTaskAndSub(taskIndex, subIndex, options = {}) {
@@ -653,6 +867,11 @@
       container.appendChild(empty);
       return container;
     }
+    const completedCount = task.subTasks.filter(sub => sub.completed).length;
+    const progressSummary = document.createElement("div");
+    progressSummary.className = "task-progress";
+    progressSummary.textContent = `${completedCount}/${task.subTasks.length} steps done`;
+    container.appendChild(progressSummary);
     task.subTasks.forEach((sub, subIndex) => {
       const row = document.createElement("div");
       row.className = "subtask-row";
@@ -736,6 +955,11 @@
       container.textContent = "No sub-tasks for this task.";
       return container;
     }
+    const completedCount = task.subTasks.filter(sub => sub.completed).length;
+    const progressSummary = document.createElement("div");
+    progressSummary.className = "task-progress";
+    progressSummary.textContent = `${completedCount}/${task.subTasks.length} steps done`;
+    container.appendChild(progressSummary);
     task.subTasks.forEach((sub, subIndex) => {
       const row = document.createElement("div");
       row.className = "subtask-row";
@@ -1095,7 +1319,19 @@
     if (!Array.isArray(task.subTasks)) {
       task.subTasks = [];
     }
+    task.completedAt = task.completedAt || null;
+    if (task.completed && !task.completedAt) {
+      task.completedAt = null;
+    }
+    if (task.completedAt && !task.completed) {
+      task.completed = true;
+    } else {
+      task.completed = Boolean(task.completed);
+    }
     const base = computePriority({ ...task, subTasks: [] });
+    if (isChartTask(task)) {
+      ensureChartSubTasks(task, { basePriority: base });
+    }
     if (task.subTasks.length) {
       task.subTasks = task.subTasks.map(sub => {
         const normalizedSub = normalizeSubTask(sub, base);
@@ -1146,19 +1382,27 @@
       difficulty: clampScale($("difficulty").value, 1),
       dueDate: $("dueDate").value || null,
       completed: false,
+      completedAt: null,
       createdAt: new Date().toISOString(),
       addedAt: new Date().toISOString(),
       subTasks: []
     };
 
     // base priority for sub‑tasks
-    const basePriority = computePriority(task);
+    const basePriority = computePriority({ ...task, subTasks: [] });
 
     // parse sub‑tasks from textarea (one per line)
     const subLines = $("initialSubTasks").value.split('\n')
       .map(l => l.trim())
       .filter(Boolean);
     task.subTasks = subLines.map(line => createSubTask(line, basePriority));
+
+    if (isChartTask(task)) {
+      const defaultsAdded = ensureChartSubTasks(task, { basePriority });
+      if (defaultsAdded) {
+        task.subTasks = task.subTasks.map(sub => normalizeSubTask(sub, basePriority));
+      }
+    }
 
     task.priority = computePriority(task);
     updateChartDurationForTask(task);
@@ -1265,6 +1509,12 @@
     });
 
     task.subTasks = newSubTasks;
+    if (isChartTask(task)) {
+      const defaultsChanged = ensureChartSubTasks(task, { basePriority });
+      if (defaultsChanged) {
+        task.subTasks = task.subTasks.map(sub => normalizeSubTask(sub, basePriority));
+      }
+    }
     task.priority = computePriority(task);
     updateChartDurationForTask(task);
     persist();
@@ -1301,7 +1551,7 @@
     categories.forEach(cat => {
       const total = tasks.filter(t => t.category === cat).length;
       if (total === 0) return;
-      const done = tasks.filter(t => t.category === cat && t.completed).length;
+      const done = tasks.filter(t => t.category === cat && isTaskCompleted(t)).length;
       const percent = (done / total) * 100;
 
       const line = document.createElement("div");
@@ -1322,6 +1572,183 @@
     });
   }
 
+  function buildTaskDescriptors(task) {
+    const descriptors = [];
+    if (task.patientType) descriptors.push(`Patient: ${task.patientType}`);
+    if (task.visitType) descriptors.push(`Visit: ${task.visitType}`);
+    if (task.clinicSite) descriptors.push(task.clinicSite);
+    if (task.urgency) descriptors.push(`Urgency ${task.urgency}`);
+    return descriptors;
+  }
+
+  function createProgressElement(task) {
+    if (!Array.isArray(task.subTasks) || task.subTasks.length === 0) return null;
+    const completed = task.subTasks.filter(sub => sub.completed).length;
+    const progress = document.createElement("div");
+    progress.className = "task-progress";
+    progress.textContent = `${completed}/${task.subTasks.length} steps done`;
+    return progress;
+  }
+
+  function createMetaItem(text) {
+    const span = document.createElement("span");
+    span.textContent = text;
+    return span;
+  }
+
+  function createTaskDetails(task) {
+    if (!Array.isArray(task.subTasks) || task.subTasks.length === 0) return null;
+    const details = document.createElement("div");
+    details.className = "task-details hidden";
+    const heading = document.createElement("h5");
+    heading.textContent = "Subtasks";
+    details.appendChild(heading);
+    const list = document.createElement("ul");
+    task.subTasks.forEach(sub => {
+      const item = document.createElement("li");
+      const marker = sub.completed ? "✓" : "•";
+      item.textContent = `${marker} ${sub.name}`;
+      list.appendChild(item);
+    });
+    details.appendChild(list);
+    return details;
+  }
+
+  function renderTaskListCard(task, mode) {
+    const card = document.createElement("article");
+    card.className = "task-card";
+    if (mode === TASK_LIST_MODES.COMPLETED) {
+      card.classList.add("is-completed");
+    }
+
+    const header = document.createElement("div");
+    header.className = "task-card-header";
+
+    const titleGroup = document.createElement("div");
+    titleGroup.className = "task-card-title-group";
+
+    const title = document.createElement("h4");
+    title.className = "task-title";
+    title.textContent = task.name;
+    titleGroup.appendChild(title);
+
+    if (mode === TASK_LIST_MODES.COMPLETED) {
+      const indicator = document.createElement("span");
+      indicator.className = "task-complete-indicator";
+      indicator.textContent = "✓ Completed";
+      titleGroup.appendChild(indicator);
+    }
+
+    header.appendChild(titleGroup);
+
+    const actions = document.createElement("div");
+    actions.className = "task-card-actions";
+
+    if (mode === TASK_LIST_MODES.ACTIVE) {
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "✏️";
+      editBtn.title = "Edit task";
+      editBtn.onclick = () => startEditTask(task.id);
+      actions.appendChild(editBtn);
+    }
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.title = "Delete task";
+    deleteBtn.onclick = () => {
+      if (!confirm("Delete this task?")) return;
+      const idx = tasks.findIndex(t => t.id === task.id);
+      if (idx !== -1) {
+        if (editingTaskId === task.id) {
+          cancelEdit();
+        }
+        tasks.splice(idx, 1);
+        persist();
+        updateUI();
+      }
+    };
+    actions.appendChild(deleteBtn);
+
+    header.appendChild(actions);
+    card.appendChild(header);
+
+    const descriptors = buildTaskDescriptors(task);
+    if (descriptors.length) {
+      const descriptorContainer = document.createElement("div");
+      descriptorContainer.className = "task-descriptors";
+      descriptors.forEach(text => {
+        const span = document.createElement("span");
+        span.textContent = text;
+        descriptorContainer.appendChild(span);
+      });
+      card.appendChild(descriptorContainer);
+    }
+
+    const progress = createProgressElement(task);
+    if (progress) {
+      card.appendChild(progress);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "task-meta";
+    const metaItems = [];
+
+    if (mode === TASK_LIST_MODES.ACTIVE) {
+      metaItems.push(`Score ${task.priority.toFixed(1)}`);
+      if (task.dueDate) metaItems.push(`Due ${task.dueDate}`);
+      if (task.addedAt) {
+        const formatted = formatDateTime(task.addedAt);
+        if (formatted) metaItems.push(`Added ${formatted}`);
+      }
+      const age = task.dateOfService ? calculateDaysSince(task.dateOfService) : (
+        task.daysSinceVisit === null || task.daysSinceVisit === undefined || task.daysSinceVisit === ""
+          ? null
+          : Number(task.daysSinceVisit)
+      );
+      if (age !== null && Number.isFinite(age)) {
+        const ageLabel = age < 0 ? `${Math.abs(age)} day(s) until visit` : `${age} day(s) since visit`;
+        metaItems.push(ageLabel);
+      }
+      if (isChartTask(task) && Number.isFinite(Number(task.chartDurationMinutes)) && Number(task.chartDurationMinutes) > 0) {
+        metaItems.push(`Chart time ${formatDuration(Number(task.chartDurationMinutes))}`);
+      }
+    } else {
+      const completedAt = formatDateTime(getCompletionTimestamp(task));
+      metaItems.push(`Completed ${completedAt || "--"}`);
+      const totalDuration = getTaskTotalDuration(task);
+      metaItems.push(`Duration ${formatDuration(totalDuration)}`);
+      if (task.dueDate) metaItems.push(`Due ${task.dueDate}`);
+    }
+
+    metaItems.forEach(text => meta.appendChild(createMetaItem(text)));
+    if (metaItems.length) {
+      card.appendChild(meta);
+    }
+
+    if (mode === TASK_LIST_MODES.COMPLETED) {
+      const details = createTaskDetails(task);
+      if (details) {
+        const toggle = document.createElement("button");
+        toggle.className = "task-detail-toggle";
+        toggle.textContent = "View details";
+        toggle.onclick = () => {
+          const isHidden = details.classList.contains("hidden");
+          if (isHidden) {
+            details.classList.remove("hidden");
+            toggle.textContent = "Hide details";
+          } else {
+            details.classList.add("hidden");
+            toggle.textContent = "View details";
+          }
+        };
+        card.appendChild(toggle);
+        card.appendChild(details);
+      }
+    }
+
+    return card;
+  }
+
   // main UI update
   function updateUI() {
     tasks = tasks.map(recalcTaskPriority);
@@ -1332,121 +1759,41 @@
     const taskList = $("taskList");
     taskList.innerHTML = "";
 
-    const remaining = tasks.filter(t => !t.completed && (activeCategory === "All" || t.category === activeCategory));
+    const taskViewSelect = $("taskViewMode");
+    if (taskViewSelect) {
+      taskViewSelect.value = taskListMode;
+    }
+
+    const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
+    const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     $("startBtn").disabled = remaining.length === 0;
 
-    // sort tasks by priority for display (use copy)
-    const displayTasks = tasks.slice().sort((a,b) => b.priority - a.priority);
-    displayTasks.forEach(t => {
-      if (activeCategory !== "All" && t.category !== activeCategory) return;
-      const idx = tasks.findIndex(item => item.id === t.id);
-      const div = document.createElement("div");
-      div.className = "task";
-      const row = document.createElement("div");
-      row.style.display = "flex";
-      row.style.justifyContent = "space-between";
-      row.style.alignItems = "center";
-      row.style.gap = "0.5rem";
-      const info = document.createElement("span");
-      info.textContent = `${t.name} ${t.completed ? "(✓)" : ""} — ${t.priority.toFixed(1)}`;
-      const actions = document.createElement("span");
-      actions.style.display = "flex";
-      actions.style.gap = "0.25rem";
-      const editBtn = document.createElement("button");
-      editBtn.textContent = "✏️";
-      editBtn.title = "Edit task";
-      editBtn.onclick = () => {
-        startEditTask(t.id);
-      };
-      const delBtn = document.createElement("button");
-      delBtn.textContent = "🗑️";
-      delBtn.title = "Delete task";
-      delBtn.onclick = () => {
-        if (!confirm("Delete this task?")) return;
-        if (editingTaskId === t.id) {
-          cancelEdit();
-        }
-        tasks.splice(idx, 1);
-        persist();
-        updateUI();
-      };
-      actions.appendChild(editBtn);
-      actions.appendChild(delBtn);
-      row.appendChild(info);
-      row.appendChild(actions);
-      div.appendChild(row);
-
-      if (t.addedAt) {
-        const ts = document.createElement("div");
-        ts.className = "score";
-        ts.textContent = `Added: ${new Date(t.addedAt).toLocaleString()}`;
-        div.appendChild(ts);
-      }
-      if (t.dueDate) {
-        const dd = document.createElement("div");
-        dd.className = "score";
-        dd.textContent = `Due: ${t.dueDate}`;
-        div.appendChild(dd);
-      }
-
-      const age = t.dateOfService ? calculateDaysSince(t.dateOfService) : (
-        t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === ""
-          ? null
-          : Number(t.daysSinceVisit)
-      );
-      if (age !== null && Number.isFinite(age)) {
-        const daysInfo = document.createElement("div");
-        daysInfo.className = "score";
-        const ageLabel = age < 0
-          ? `${Math.abs(age)} day(s) until visit`
-          : `${age} day(s) since visit`;
-        const visitLabel = t.dateOfService ? `Visit: ${t.dateOfService}` : "Chart age";
-        daysInfo.textContent = `${visitLabel} — ${ageLabel}`;
-        div.appendChild(daysInfo);
-      }
-
-      if (t.authorType) {
-        const authorInfo = document.createElement("div");
-        authorInfo.className = "score";
-        const label = String(t.authorType).toLowerCase() === "resident" ? "Resident" : "Attending";
-        authorInfo.textContent = `Author: ${label}`;
-        div.appendChild(authorInfo);
-      }
-
-      if (t.subTasks && t.subTasks.length) {
-        const completedCount = t.subTasks.filter(s => s.completed).length;
-        const progress = document.createElement("div");
-        progress.className = "score";
-        progress.textContent = `${completedCount}/${t.subTasks.length} steps done`;
-        div.appendChild(progress);
-
-        t.subTasks.forEach((sub, subIndex) => {
-          const subRow = document.createElement("div");
-          subRow.style.display = "flex";
-          subRow.style.alignItems = "center";
-          subRow.style.marginLeft = "1rem";
-          const chk = document.createElement("input");
-          chk.type = "checkbox";
-          chk.checked = sub.completed;
-          chk.onchange = event => toggleSubTaskCompletion(idx, subIndex, event.target.checked, { taskId: t.id, subId: sub.id });
-          const label = document.createElement("span");
-          label.textContent = sub.name;
-          label.style.marginLeft = "0.25rem";
-          subRow.appendChild(chk);
-          subRow.appendChild(label);
-          div.appendChild(subRow);
+    let displayTasks = [];
+    if (taskListMode === TASK_LIST_MODES.COMPLETED) {
+      displayTasks = eligibleTasks
+        .filter(t => isTaskCompleted(t))
+        .sort((a, b) => {
+          const aDate = getCompletionTimestamp(a) ? new Date(getCompletionTimestamp(a)).getTime() : 0;
+          const bDate = getCompletionTimestamp(b) ? new Date(getCompletionTimestamp(b)).getTime() : 0;
+          return bDate - aDate;
         });
-      }
+    } else {
+      displayTasks = remaining.sort((a, b) => b.priority - a.priority);
+    }
 
-      if (isChartTask(t) && Number.isFinite(Number(t.chartDurationMinutes)) && Number(t.chartDurationMinutes) > 0) {
-        const totalRow = document.createElement("div");
-        totalRow.className = "score";
-        totalRow.textContent = `Chart time: ${formatDuration(Number(t.chartDurationMinutes))}`;
-        div.appendChild(totalRow);
-      }
-
-      taskList.appendChild(div);
-    });
+    if (!displayTasks.length) {
+      const empty = document.createElement("p");
+      empty.className = "score";
+      empty.textContent = taskListMode === TASK_LIST_MODES.COMPLETED
+        ? "No completed tasks yet."
+        : "No active tasks to show.";
+      taskList.appendChild(empty);
+    } else {
+      displayTasks.forEach(task => {
+        const card = renderTaskListCard(task, taskListMode);
+        taskList.appendChild(card);
+      });
+    }
 
     // tasks due today
     const dueTodayList = $("dueTodayList");
@@ -1456,7 +1803,7 @@
     const today = now.toISOString().split("T")[0];
 
     tasks.forEach((task, idx) => {
-      if (task.completed) return;
+      if (isTaskCompleted(task)) return;
       if (activeCategory !== "All" && task.category !== activeCategory) return;
       if (task.dueDate === today) {
         const wrap = document.createElement("div");
@@ -1503,7 +1850,7 @@
     if (editingTaskId) cancelEdit();
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
-    focusQueue = tasks.filter(t => !t.completed && (activeCategory === "All" || t.category === activeCategory))
+    focusQueue = tasks.filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
       .sort((a,b) => b.priority - a.priority);
     showNextTask();
   }
@@ -1530,7 +1877,20 @@
 
   function completeTask() {
     if (!focusQueue.length) return;
-    focusQueue[0].completed = true;
+    const nowIso = new Date().toISOString();
+    const current = focusQueue[0];
+    current.completed = true;
+    current.completedAt = nowIso;
+    const idx = tasks.findIndex(t => t.id === current.id);
+    if (idx !== -1) {
+      tasks[idx].completed = true;
+      tasks[idx].completedAt = nowIso;
+      updateChartDurationForTask(tasks[idx]);
+      if (Array.isArray(tasks[idx].subTasks)) {
+        tasks[idx].subTasks.forEach(sub => stopTimerForSubTask(sub.id));
+      }
+    }
+    clearRunningTimers();
     persist();
     updateUI();
     focusQueue.shift();
@@ -1684,9 +2044,20 @@
     }
   }
 
+  function registerTaskListModeControl() {
+    const modeSelect = $("taskViewMode");
+    if (!modeSelect) return;
+    modeSelect.addEventListener("change", event => {
+      const value = String(event.target.value || TASK_LIST_MODES.ACTIVE).toLowerCase();
+      taskListMode = value === TASK_LIST_MODES.COMPLETED ? TASK_LIST_MODES.COMPLETED : TASK_LIST_MODES.ACTIVE;
+      updateUI();
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     initializeChartFields();
     registerFieldListeners();
+    registerTaskListModeControl();
     setDefaultFieldValues();
     updateBillingReminder();
     const saved = localStorage.getItem("tasks");
