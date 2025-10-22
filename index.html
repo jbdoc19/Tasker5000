@@ -37,6 +37,13 @@
     .peek summary { cursor: pointer; }
     .task { margin: 0.25rem 0; }
     .score { font-size: 0.8rem; color: #ccc; }
+    .chart-age, .urgency-hint {
+      display: block;
+      margin-top: 0.25rem;
+      color: #aaa;
+      font-size: 0.85rem;
+      max-width: 600px;
+    }
     .focus { font-size: 1.5rem; margin: 1rem 0; }
     .category-filter {
       display: flex;
@@ -86,44 +93,59 @@
 
   <!-- Task entry form -->
   <section id="capture">
-    <label>Task Name <input id="name" type="text" /></label>
-    <label>Category
+    <label for="name">Task Name
+      <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
+    </label>
+    <label for="taskCategory">Category
       <select id="taskCategory">
         <option value="General" selected>General</option>
-        <option value="Charts">Charts</option>
         <option value="Admin">Admin</option>
+        <option value="Chart">Chart</option>
         <option value="Inbox">Inbox</option>
         <option value="Calls">Calls</option>
         <option value="Teaching">Teaching</option>
         <option value="Personal">Personal</option>
       </select>
     </label>
-    <label>Chart Author
+    <label for="authorType">Chart Author
       <select id="authorType">
         <option value="attending" selected>Attending</option>
         <option value="resident">Resident</option>
       </select>
     </label>
-    <label>Days Since Visit <input id="daysSinceVisit" type="number" min="0" inputmode="numeric" /></label>
-    <label>Importance (1–5) <select id="importance"></select></label>
-    <label>Urgency (1–5) <select id="urgency"></select></label>
-    <label>Dopamine – Novelty (1–5) <select id="novelty"></select></label>
-    <label>Dopamine – Interest (1–5) <select id="interest"></select></label>
-    <label>Dopamine – External Pressure
-      <select id="externalPressure">
-        <option value="" disabled selected>⬇️ Select external pressure</option>
-        <option value="0">No one is waiting</option>
-        <option value="2">Soft deadline</option>
-        <option value="3">Peer is waiting on me</option>
-        <option value="5">Boss is watching</option>
-        <option value="5">Patient emergency</option>
+    <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
+      <select id="patientType">
+        <option value="non-complex" selected>Non-Complex</option>
+        <option value="complex">Complex</option>
       </select>
     </label>
-    <label>Time to Start (1–5) <select id="timeToStart"></select></label>
-    <label>Difficulty (1–5) <select id="difficulty"></select></label>
-    <label>Optional Due Date <input type="date" id="dueDate" /></label>
-    <label>Sub‑tasks (one per line)
-      <textarea id="initialSubTasks" rows="3" placeholder="Enter one sub‑task per line"></textarea>
+    <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
+      <select id="visitType">
+        <option value="follow-up" selected>Follow-Up</option>
+        <option value="establish">Establish Care</option>
+        <option value="well-child">Well Child Visit</option>
+        <option value="acute">Acute Visit</option>
+      </select>
+    </label>
+    <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
+      <input type="date" id="dateOfService" />
+    </label>
+    <small id="chartAgeDisplay" class="chart-age"></small>
+    <label for="importance">Importance (1–5) <select id="importance"></select></label>
+    <label for="urgency">Urgency (1–5)
+      <select id="urgency"></select>
+    </label>
+    <small id="urgencyHint" class="urgency-hint"></small>
+    <label for="novelty">Novelty (1–5) <select id="novelty"></select></label>
+    <label for="interest">Interest (1–5) <select id="interest"></select></label>
+    <label for="externalPressure">External Pressure (1–5)
+      <select id="externalPressure"></select>
+    </label>
+    <label for="timeToStart">Time to Start (1–5) <select id="timeToStart"></select></label>
+    <label for="difficulty">Difficulty (1–5) <select id="difficulty"></select></label>
+    <label for="dueDate" title="Optional specific target date; used for personal scheduling.">Due Date (Optional) <input type="date" id="dueDate" /></label>
+    <label for="initialSubTasks">Subtasks
+      <textarea id="initialSubTasks" rows="3" placeholder="One subtask per line."></textarea>
     </label>
     <div>
       <button id="addTaskBtn" onclick="addTask()">Add Task</button>
@@ -165,20 +187,184 @@
   <script>
   const $ = id => document.getElementById(id);
 
-  const categories = ["General","Charts","Admin","Inbox","Calls","Teaching","Personal"];
+  const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal"];
   let activeCategory = "All";
+  let derivedDaysSinceVisit = null;
+  let urgencyAuto = true;
 
-  // populate numeric dropdowns
-  const scales = ["importance","urgency","novelty","interest","timeToStart","difficulty"];
-  scales.forEach(id => {
+  const URGENCY_OPTIONS = [
+    { value: 5, text: "5 – Critical Billing Window or Immediate Patient Need" },
+    { value: 4, text: "4 – High Priority – Near-Term Deadline" },
+    { value: 3, text: "3 – Moderate Priority – Monthly Closure" },
+    { value: 2, text: "2 – Low Billing Value – Already Overdue" },
+    { value: 1, text: "1 – Routine Follow-Up Work" }
+  ];
+
+  const PRESSURE_OPTIONS = [
+    { value: 1, text: "1 – Solo responsibility" },
+    { value: 2, text: "2 – Soft deadline / courtesy check" },
+    { value: 3, text: "3 – Peer or team waiting" },
+    { value: 4, text: "4 – Leadership expectation" },
+    { value: 5, text: "5 – Patient or compliance critical" }
+  ];
+
+  const NUMERIC_SCALE_FIELDS = ["importance","novelty","interest","timeToStart","difficulty"];
+
+  function populateNumericSelect(id) {
     const sel = $(id);
+    if (!sel) return;
+    sel.innerHTML = "";
     for (let i = 1; i <= 5; i++) {
       const opt = document.createElement("option");
       opt.value = String(i);
       opt.textContent = String(i);
       sel.appendChild(opt);
     }
-  });
+  }
+
+  function populateUrgencySelect() {
+    const sel = $("urgency");
+    if (!sel) return;
+    sel.innerHTML = "";
+    URGENCY_OPTIONS.forEach(option => {
+      const opt = document.createElement("option");
+      opt.value = String(option.value);
+      opt.textContent = option.text;
+      sel.appendChild(opt);
+    });
+  }
+
+  function populateExternalPressureSelect() {
+    const sel = $("externalPressure");
+    if (!sel) return;
+    sel.innerHTML = "";
+    PRESSURE_OPTIONS.forEach(option => {
+      const opt = document.createElement("option");
+      opt.value = String(option.value);
+      opt.textContent = option.text;
+      sel.appendChild(opt);
+    });
+  }
+
+  function populateScales() {
+    NUMERIC_SCALE_FIELDS.forEach(populateNumericSelect);
+    populateUrgencySelect();
+    populateExternalPressureSelect();
+  }
+
+  populateScales();
+
+  function formatDateForInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function calculateDaysSince(dateString) {
+    if (!dateString) return null;
+    const parsed = new Date(dateString + "T00:00:00");
+    if (Number.isNaN(parsed.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = today.getTime() - parsed.getTime();
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  }
+
+  function getUrgencyDescriptor(value) {
+    const option = URGENCY_OPTIONS.find(opt => Number(opt.value) === Number(value));
+    return option ? option.text : null;
+  }
+
+  function getSuggestedUrgency(days) {
+    if (days === null || days === undefined || Number.isNaN(days)) return 3;
+    if (days < 0) return 3;
+    if (days >= 90 && days <= 95) return 5;
+    if (days > 95) return 2;
+    if (days >= 30 && days < 90) return 1;
+    if (days >= 2 && days <= 4) return 4;
+    if (days < 30) return 3;
+    return 3;
+  }
+
+  function updateChartAgeDisplay(days) {
+    const display = $("chartAgeDisplay");
+    if (!display) return;
+    if (days === null || days === undefined) {
+      display.textContent = "";
+      return;
+    }
+    if (days < 0) {
+      display.textContent = `Service date is ${Math.abs(days)} day(s) in the future.`;
+      return;
+    }
+    display.textContent = `Chart age: ${days} day(s) since visit.`;
+  }
+
+  function updateUrgencyHint(suggested) {
+    const hint = $("urgencyHint");
+    const urgencyField = $("urgency");
+    if (!hint || !urgencyField) return;
+    const current = Number(urgencyField.value || 3);
+    const suggestedDescriptor = getUrgencyDescriptor(suggested);
+    const currentDescriptor = getUrgencyDescriptor(current);
+    if (!suggestedDescriptor) {
+      hint.textContent = currentDescriptor ? `Urgency set to ${currentDescriptor}.` : "";
+      return;
+    }
+    if (current !== suggested) {
+      hint.textContent = `Suggested: ${suggestedDescriptor}. (Current: ${currentDescriptor || current})`;
+    } else {
+      hint.textContent = `Suggested: ${suggestedDescriptor}.`;
+    }
+  }
+
+  function updateDerivedFields() {
+    const dateField = $("dateOfService");
+    if (!dateField) return;
+    const value = dateField.value;
+    const days = calculateDaysSince(value);
+    derivedDaysSinceVisit = days;
+    updateChartAgeDisplay(days);
+    const suggested = getSuggestedUrgency(days);
+    const urgencyField = $("urgency");
+    if (urgencyField && (urgencyAuto || !urgencyField.value)) {
+      urgencyField.value = String(suggested);
+    }
+    updateUrgencyHint(suggested);
+  }
+
+  function setDefaultFieldValues() {
+    const nameField = $("name");
+    if (nameField) nameField.value = "";
+    const categoryField = $("taskCategory");
+    if (categoryField) categoryField.value = "General";
+    const authorField = $("authorType");
+    if (authorField) authorField.value = "attending";
+    const patientField = $("patientType");
+    if (patientField) patientField.value = "non-complex";
+    const visitField = $("visitType");
+    if (visitField) visitField.value = "follow-up";
+    NUMERIC_SCALE_FIELDS.forEach(id => {
+      const field = $(id);
+      if (field) field.value = "1";
+    });
+    const urgencyField = $("urgency");
+    if (urgencyField) urgencyField.value = "3";
+    const pressureField = $("externalPressure");
+    if (pressureField) pressureField.value = "1";
+    const dueDateField = $("dueDate");
+    if (dueDateField) dueDateField.value = "";
+    const subField = $("initialSubTasks");
+    if (subField) subField.value = "";
+    const dateField = $("dateOfService");
+    if (dateField) {
+      dateField.value = formatDateForInput(new Date());
+    }
+    derivedDaysSinceVisit = calculateDaysSince($("dateOfService")?.value || null);
+    urgencyAuto = true;
+    updateDerivedFields();
+  }
 
   let tasks = [];
   let templates = [];
@@ -186,19 +372,7 @@
   let editingTaskId = null;
 
   function clearFormFields() {
-    $("name").value = "";
-    $("initialSubTasks").value = "";
-    const dueDateField = $("dueDate");
-    if (dueDateField) dueDateField.value = "";
-    const authorField = $("authorType");
-    if (authorField) authorField.value = "attending";
-    const daysField = $("daysSinceVisit");
-    if (daysField) daysField.value = "";
-    const pressureField = $("externalPressure");
-    if (pressureField) {
-      pressureField.value = "";
-      pressureField.selectedIndex = 0;
-    }
+    setDefaultFieldValues();
   }
 
   function toggleEditMode(isEditing) {
@@ -232,6 +406,26 @@
     return String(authorType).toLowerCase() === "resident" ? 1.5 : 1;
   }
 
+  function getPatientTypeMultiplier(patientType) {
+    if (!patientType) return 1;
+    return String(patientType).toLowerCase() === "complex" ? 1.2 : 1;
+  }
+
+  function getVisitTypeMultiplier(visitType) {
+    if (!visitType) return 1;
+    const normalized = String(visitType).toLowerCase();
+    if (normalized === "establish") return 1.25;
+    if (normalized === "well-child") return 1.1;
+    if (normalized === "acute") return 0.9;
+    return 1; // follow-up baseline
+  }
+
+  function getUrgencyMultiplier(urgency) {
+    const value = Number(urgency);
+    if (!Number.isFinite(value) || value <= 0) return 1;
+    return Math.max(1, value);
+  }
+
   function computePriority(t) {
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
@@ -240,32 +434,52 @@
       return total / remaining.length;
     }
     const importance = toNumber(t.importance, 1);
-    const urgency = toNumber(t.urgency, 1);
+    const urgency = toNumber(t.urgency, 3);
     const novelty = toNumber(t.novelty, 1);
     const interest = toNumber(t.interest, 1);
-    const pressure = toNumber(t.externalPressure, 0);
-    const timeToStart = toNumber(t.timeToStart, 3);
-    const difficulty = toNumber(t.difficulty, 3);
+    const pressure = toNumber(t.externalPressure, 1);
+    const timeToStart = toNumber(t.timeToStart, 1);
+    const difficulty = toNumber(t.difficulty, 1);
     const daysSinceVisit = (t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === "")
       ? null
       : Number(t.daysSinceVisit);
     const dopamine = novelty + interest;
     const friction = (6 - timeToStart) + (6 - difficulty);
-    const urgencyBase = urgency * 2;
-    const urgencyScore = urgency >= 4 ? urgencyBase * 1.5 : urgencyBase;
     const baseScore = (importance * 2)
-         + urgencyScore
          + (dopamine * 2)
-         + (pressure * 5)
+         + (pressure * 4)
          + (friction * 1.5);
     const deadlineMultiplier = getDeadlineMultiplier(daysSinceVisit);
     const authorMultiplier = getAuthorMultiplier(t.authorType);
-    return baseScore * deadlineMultiplier * authorMultiplier;
+    const patientMultiplier = getPatientTypeMultiplier(t.patientType);
+    const visitMultiplier = getVisitTypeMultiplier(t.visitType);
+    const urgencyMultiplier = getUrgencyMultiplier(urgency);
+    return baseScore * deadlineMultiplier * authorMultiplier * patientMultiplier * visitMultiplier * urgencyMultiplier;
   }
 
   function recalcTaskPriority(task) {
     if (!task) return task;
     const normalized = { ...task };
+    normalized.authorType = normalized.authorType || "attending";
+    normalized.patientType = normalized.patientType || "non-complex";
+    normalized.visitType = normalized.visitType || "follow-up";
+    normalized.dateOfService = normalized.dateOfService || null;
+    if (normalized.category === "Charts") normalized.category = "Chart";
+    if (normalized.dateOfService) {
+      normalized.daysSinceVisit = calculateDaysSince(normalized.dateOfService);
+    } else {
+      const parsedDays = Number(normalized.daysSinceVisit);
+      normalized.daysSinceVisit = (normalized.daysSinceVisit === null || normalized.daysSinceVisit === undefined || normalized.daysSinceVisit === "" || !Number.isFinite(parsedDays))
+        ? null
+        : parsedDays;
+    }
+    normalized.urgency = toNumber(normalized.urgency, 3);
+    normalized.importance = toNumber(normalized.importance, 1);
+    normalized.novelty = toNumber(normalized.novelty, 1);
+    normalized.interest = toNumber(normalized.interest, 1);
+    normalized.externalPressure = toNumber(normalized.externalPressure, 1);
+    normalized.timeToStart = toNumber(normalized.timeToStart, 1);
+    normalized.difficulty = toNumber(normalized.difficulty, 1);
     if (Array.isArray(normalized.subTasks) && normalized.subTasks.length) {
       const base = computePriority({ ...normalized, subTasks: [] });
       normalized.subTasks = normalized.subTasks.map(sub => ({
@@ -287,26 +501,29 @@
     if (!name) return;
     const authorField = $("authorType");
     const authorType = authorField ? (authorField.value || "attending") : "attending";
-    const daysField = $("daysSinceVisit");
-    let daysSinceVisit = null;
-    if (daysField) {
-      const rawDays = daysField.value.trim();
-      const parsedDays = Number(rawDays);
-      daysSinceVisit = rawDays === "" || !Number.isFinite(parsedDays) ? null : parsedDays;
-    }
+    const patientField = $("patientType");
+    const patientType = patientField ? (patientField.value || "non-complex") : "non-complex";
+    const visitField = $("visitType");
+    const visitType = visitField ? (visitField.value || "follow-up") : "follow-up";
+    const dateField = $("dateOfService");
+    const dateOfService = dateField && dateField.value ? dateField.value : null;
+    const daysSinceVisit = calculateDaysSince(dateOfService);
     const task = {
       id: Date.now().toString(),
       name,
       category: $("taskCategory").value || "General",
       authorType,
+      patientType,
+      visitType,
+      dateOfService,
       daysSinceVisit,
       importance: toNumber($("importance").value, 1),
-      urgency: toNumber($("urgency").value, 1),
+      urgency: toNumber($("urgency").value, 3),
       novelty: toNumber($("novelty").value, 1),
       interest: toNumber($("interest").value, 1),
-      externalPressure: toNumber($("externalPressure").value, 0),
-      timeToStart: toNumber($("timeToStart").value, 3),
-      difficulty: toNumber($("difficulty").value, 3),
+      externalPressure: toNumber($("externalPressure").value, 1),
+      timeToStart: toNumber($("timeToStart").value, 1),
+      difficulty: toNumber($("difficulty").value, 1),
       dueDate: $("dueDate").value || null,
       completed: false,
       createdAt: new Date().toISOString(),
@@ -346,27 +563,30 @@
     $("name").value = task.name;
     $("taskCategory").value = task.category || "General";
     $("importance").value = String(task.importance || 1);
-    $("urgency").value = String(task.urgency || 1);
+    $("urgency").value = String(task.urgency || 3);
     $("novelty").value = String(task.novelty || 1);
     $("interest").value = String(task.interest || 1);
     const authorField = $("authorType");
     if (authorField) authorField.value = task.authorType || "attending";
-    const daysField = $("daysSinceVisit");
-    if (daysField) {
-      if (task.daysSinceVisit === null || task.daysSinceVisit === undefined || task.daysSinceVisit === "") {
-        daysField.value = "";
+    const patientField = $("patientType");
+    if (patientField) patientField.value = task.patientType || "non-complex";
+    const visitField = $("visitType");
+    if (visitField) visitField.value = task.visitType || "follow-up";
+    const dateField = $("dateOfService");
+    if (dateField) {
+      if (task.dateOfService) {
+        dateField.value = task.dateOfService;
       } else {
-        daysField.value = String(task.daysSinceVisit);
+        dateField.value = formatDateForInput(new Date());
       }
     }
+    urgencyAuto = false;
+    derivedDaysSinceVisit = task.daysSinceVisit ?? calculateDaysSince($("dateOfService")?.value || null);
+    updateDerivedFields();
     const pressureField = $("externalPressure");
     if (pressureField) {
       const pressureValue = task.externalPressure;
-      if (pressureValue === undefined || pressureValue === null || pressureValue === "") {
-        pressureField.selectedIndex = 0;
-      } else {
-        pressureField.value = String(pressureValue);
-      }
+      pressureField.value = String(pressureValue || 1);
     }
     $("timeToStart").value = String(task.timeToStart || 1);
     $("difficulty").value = String(task.difficulty || 1);
@@ -389,21 +609,20 @@
     task.category = $("taskCategory").value || "General";
     const authorField = $("authorType");
     task.authorType = authorField ? (authorField.value || "attending") : "attending";
-    const daysField = $("daysSinceVisit");
-    if (daysField) {
-      const rawDays = daysField.value.trim();
-      const parsedDays = Number(rawDays);
-      task.daysSinceVisit = rawDays === "" || !Number.isFinite(parsedDays) ? null : parsedDays;
-    } else if (task.daysSinceVisit === undefined) {
-      task.daysSinceVisit = null;
-    }
+    const patientField = $("patientType");
+    task.patientType = patientField ? (patientField.value || "non-complex") : "non-complex";
+    const visitField = $("visitType");
+    task.visitType = visitField ? (visitField.value || "follow-up") : "follow-up";
+    const dateField = $("dateOfService");
+    task.dateOfService = dateField && dateField.value ? dateField.value : null;
+    task.daysSinceVisit = calculateDaysSince(task.dateOfService);
     task.importance = toNumber($("importance").value, 1);
-    task.urgency = toNumber($("urgency").value, 1);
+    task.urgency = toNumber($("urgency").value, 3);
     task.novelty = toNumber($("novelty").value, 1);
     task.interest = toNumber($("interest").value, 1);
-    task.externalPressure = toNumber($("externalPressure").value, 0);
-    task.timeToStart = toNumber($("timeToStart").value, 3);
-    task.difficulty = toNumber($("difficulty").value, 3);
+    task.externalPressure = toNumber($("externalPressure").value, 1);
+    task.timeToStart = toNumber($("timeToStart").value, 1);
+    task.difficulty = toNumber($("difficulty").value, 1);
     task.dueDate = $("dueDate").value || null;
     task.updatedAt = new Date().toISOString();
 
@@ -489,6 +708,8 @@
 
   // main UI update
   function updateUI() {
+    tasks = tasks.map(recalcTaskPriority);
+    persist();
     renderCategoryFilter();
     renderCategoryProgress();
 
@@ -552,10 +773,19 @@
         div.appendChild(dd);
       }
 
-      if (t.daysSinceVisit !== null && t.daysSinceVisit !== undefined && t.daysSinceVisit !== "") {
+      const age = t.dateOfService ? calculateDaysSince(t.dateOfService) : (
+        t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === ""
+          ? null
+          : Number(t.daysSinceVisit)
+      );
+      if (age !== null && Number.isFinite(age)) {
         const daysInfo = document.createElement("div");
         daysInfo.className = "score";
-        daysInfo.textContent = `Days since visit: ${t.daysSinceVisit}`;
+        const ageLabel = age < 0
+          ? `${Math.abs(age)} day(s) until visit`
+          : `${age} day(s) since visit`;
+        const visitLabel = t.dateOfService ? `Visit: ${t.dateOfService}` : "Chart age";
+        daysInfo.textContent = `${visitLabel} — ${ageLabel}`;
         div.appendChild(daysInfo);
       }
 
@@ -714,25 +944,23 @@
     if (!name) return alert("Task name is required");
     const authorField = $("authorType");
     const authorType = authorField ? (authorField.value || "attending") : "attending";
-    const daysField = $("daysSinceVisit");
-    let daysSinceVisit = null;
-    if (daysField) {
-      const rawDays = daysField.value.trim();
-      const parsedDays = Number(rawDays);
-      daysSinceVisit = rawDays === "" || !Number.isFinite(parsedDays) ? null : parsedDays;
-    }
+    const patientField = $("patientType");
+    const patientType = patientField ? (patientField.value || "non-complex") : "non-complex";
+    const visitField = $("visitType");
+    const visitType = visitField ? (visitField.value || "follow-up") : "follow-up";
     const template = {
       name,
       category: $("taskCategory").value || "General",
       authorType,
-      daysSinceVisit,
+      patientType,
+      visitType,
       importance: toNumber($("importance").value, 1),
-      urgency: toNumber($("urgency").value, 1),
+      urgency: toNumber($("urgency").value, 3),
       novelty: toNumber($("novelty").value, 1),
       interest: toNumber($("interest").value, 1),
-      externalPressure: toNumber($("externalPressure").value, 0),
-      timeToStart: toNumber($("timeToStart").value, 3),
-      difficulty: toNumber($("difficulty").value, 3)
+      externalPressure: toNumber($("externalPressure").value, 1),
+      timeToStart: toNumber($("timeToStart").value, 1),
+      difficulty: toNumber($("difficulty").value, 1)
     };
     templates.push(template);
     localStorage.setItem("templates", JSON.stringify(templates));
@@ -748,31 +976,28 @@
       useBtn.textContent = `📋 ${t.name}`;
       useBtn.onclick = () => {
         $("name").value = t.name;
-        $("taskCategory").value = t.category;
-        $("importance").value = t.importance;
-        $("urgency").value = t.urgency;
-        $("novelty").value = t.novelty;
-        $("interest").value = t.interest;
+        $("taskCategory").value = t.category || "General";
+        $("importance").value = String(t.importance || 1);
+        $("novelty").value = String(t.novelty || 1);
+        $("interest").value = String(t.interest || 1);
         const authorField = $("authorType");
         if (authorField) authorField.value = t.authorType || "attending";
-        const daysField = $("daysSinceVisit");
-        if (daysField) {
-          if (t.daysSinceVisit === null || t.daysSinceVisit === undefined || t.daysSinceVisit === "") {
-            daysField.value = "";
-          } else {
-            daysField.value = String(t.daysSinceVisit);
-          }
-        }
+        const patientField = $("patientType");
+        if (patientField) patientField.value = t.patientType || "non-complex";
+        const visitField = $("visitType");
+        if (visitField) visitField.value = t.visitType || "follow-up";
+        const urgencyField = $("urgency");
+        if (urgencyField) urgencyField.value = String(t.urgency || 3);
         const pressureField = $("externalPressure");
         if (pressureField) {
-          if (t.externalPressure === null || t.externalPressure === undefined || t.externalPressure === "") {
-            pressureField.selectedIndex = 0;
-          } else {
-            pressureField.value = String(t.externalPressure);
-          }
+          pressureField.value = String(t.externalPressure || 1);
         }
-        $("timeToStart").value = String(t.timeToStart ?? "");
-        $("difficulty").value = String(t.difficulty ?? "");
+        $("timeToStart").value = String(t.timeToStart || 1);
+        $("difficulty").value = String(t.difficulty || 1);
+        const dateField = $("dateOfService");
+        if (dateField) dateField.value = formatDateForInput(new Date());
+        urgencyAuto = false;
+        updateDerivedFields();
       };
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️ Edit";
@@ -828,39 +1053,54 @@
     reminder.textContent = `Make sure that "all charts from ${formatted} must be completed today to be eligible for billing".`;
   }
 
+  function registerFieldListeners() {
+    const dateField = $("dateOfService");
+    if (dateField) {
+      dateField.addEventListener("change", () => {
+        updateDerivedFields();
+      });
+    }
+    const urgencyField = $("urgency");
+    if (urgencyField) {
+      urgencyField.addEventListener("change", () => {
+        urgencyAuto = false;
+        updateUrgencyHint(getSuggestedUrgency(derivedDaysSinceVisit));
+      });
+    }
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
+    registerFieldListeners();
+    setDefaultFieldValues();
     updateBillingReminder();
     const saved = localStorage.getItem("tasks");
     if (saved) {
       tasks = JSON.parse(saved).map(task => {
-        const parsedDays = Number(task.daysSinceVisit);
-        const normalizedDays = (task.daysSinceVisit === null || task.daysSinceVisit === undefined || task.daysSinceVisit === "" || !Number.isFinite(parsedDays))
-          ? null
-          : parsedDays;
         const normalizedTask = {
           ...task,
           authorType: task.authorType || "attending",
-          daysSinceVisit: normalizedDays
+          patientType: task.patientType || "non-complex",
+          visitType: task.visitType || "follow-up",
+          dateOfService: task.dateOfService || null
         };
+        if (normalizedTask.dateOfService) {
+          normalizedTask.daysSinceVisit = calculateDaysSince(normalizedTask.dateOfService);
+        }
         return recalcTaskPriority(normalizedTask);
       });
     }
     const savedTemplates = localStorage.getItem("templates");
     if (savedTemplates) {
-      templates = JSON.parse(savedTemplates).map(template => {
-        const parsedDays = Number(template.daysSinceVisit);
-        const normalizedDays = (template.daysSinceVisit === null || template.daysSinceVisit === undefined || template.daysSinceVisit === "" || !Number.isFinite(parsedDays))
-          ? null
-          : parsedDays;
-        return {
-          ...template,
-          authorType: template.authorType || "attending",
-          daysSinceVisit: normalizedDays
-        };
-      });
+      templates = JSON.parse(savedTemplates).map(template => ({
+        ...template,
+        authorType: template.authorType || "attending",
+        patientType: template.patientType || "non-complex",
+        visitType: template.visitType || "follow-up"
+      }));
     }
     renderTemplates();
     updateUI();
+    updateDerivedFields();
   });
   </script>
 </body>
