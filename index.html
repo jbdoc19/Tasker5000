@@ -141,6 +141,19 @@
       border: 1px solid #0a84ff;
       background: #0a1a33;
     }
+    .chart-fields {
+      width: 100%;
+      overflow: hidden;
+      max-height: 1000px;
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 250ms ease, max-height 250ms ease;
+    }
+    .chart-fields.is-hidden {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
     .chart-total {
       margin-top: 0.5rem;
       font-weight: 600;
@@ -177,37 +190,39 @@
         <option value="Personal">Personal</option>
       </select>
     </label>
-    <label for="authorType">Chart Author
-      <select id="authorType">
-        <option value="attending" selected>Attending</option>
-        <option value="resident">Resident</option>
-      </select>
-    </label>
-    <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
-      <select id="patientType">
-        <option value="Non-Complex" selected>Non-Complex</option>
-        <option value="Complex">Complex</option>
-      </select>
-    </label>
-    <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
-      <select id="visitType">
-        <option value="Follow-Up" selected>Follow-Up</option>
-        <option value="Establish Care">Establish Care</option>
-        <option value="Well Child Visit">Well Child Visit</option>
-        <option value="Acute Visit">Acute Visit</option>
-      </select>
-    </label>
-    <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
-      <select id="clinicSite">
-        <option value="General Clinic" selected>General Clinic</option>
-        <option value="St PJ’s Shelter">St PJ’s Shelter</option>
-        <option value="Craniofacial Clinic">Craniofacial Clinic</option>
-      </select>
-    </label>
-    <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
-      <input type="date" id="dateOfService" />
-    </label>
-    <small id="chartAgeDisplay" class="chart-age"></small>
+    <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
+      <label for="authorType">Chart Author
+        <select id="authorType">
+          <option value="attending" selected>Attending</option>
+          <option value="resident">Resident</option>
+        </select>
+      </label>
+      <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
+        <select id="patientType">
+          <option value="Non-Complex" selected>Non-Complex</option>
+          <option value="Complex">Complex</option>
+        </select>
+      </label>
+      <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
+        <select id="visitType">
+          <option value="Follow-Up" selected>Follow-Up</option>
+          <option value="Establish Care">Establish Care</option>
+          <option value="Well Child Visit">Well Child Visit</option>
+          <option value="Acute Visit">Acute Visit</option>
+        </select>
+      </label>
+      <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
+        <select id="clinicSite">
+          <option value="General Clinic" selected>General Clinic</option>
+          <option value="St PJ’s Shelter">St PJ’s Shelter</option>
+          <option value="Craniofacial Clinic">Craniofacial Clinic</option>
+        </select>
+      </label>
+      <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
+        <input type="date" id="dateOfService" />
+      </label>
+      <small id="chartAgeDisplay" class="chart-age"></small>
+    </div>
     <label for="importance">Importance (1–5) <select id="importance"></select></label>
     <label for="urgency">Urgency (1–5)
       <select id="urgency"></select>
@@ -269,6 +284,81 @@
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
   const runningTimers = new Map();
+  const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
+  let storedChartFieldValues = null;
+
+  function getChartFields() {
+    return chartFieldIds
+      .map(id => $(id))
+      .filter(Boolean);
+  }
+
+  function setChartFieldsDisabled(isDisabled) {
+    getChartFields().forEach(field => {
+      field.disabled = isDisabled;
+    });
+  }
+
+  function storeChartFieldValues() {
+    storedChartFieldValues = {};
+    chartFieldIds.forEach(id => {
+      const field = $(id);
+      if (field) {
+        storedChartFieldValues[id] = field.value;
+      }
+    });
+  }
+
+  function restoreChartFieldValues() {
+    if (!storedChartFieldValues) return;
+    chartFieldIds.forEach(id => {
+      if (Object.prototype.hasOwnProperty.call(storedChartFieldValues, id)) {
+        const field = $(id);
+        if (field) {
+          field.value = storedChartFieldValues[id];
+        }
+      }
+    });
+    storedChartFieldValues = null;
+  }
+
+  function showChartFields() {
+    const container = $("chartFields");
+    if (!container) return;
+    container.classList.remove("is-hidden");
+    container.setAttribute("aria-hidden", "false");
+    setChartFieldsDisabled(false);
+    restoreChartFieldValues();
+    updateDerivedFields();
+  }
+
+  function hideChartFields() {
+    const container = $("chartFields");
+    if (!container) return;
+    storeChartFieldValues();
+    container.classList.add("is-hidden");
+    container.setAttribute("aria-hidden", "true");
+    setChartFieldsDisabled(true);
+  }
+
+  function handleCategoryChange(value) {
+    const categoryValue = (value ?? $("taskCategory")?.value ?? "").toString().toLowerCase();
+    if (categoryValue === "chart") {
+      showChartFields();
+    } else {
+      hideChartFields();
+    }
+  }
+
+  function initializeChartFields() {
+    const container = $("chartFields");
+    if (!container) return;
+    storedChartFieldValues = null;
+    container.classList.add("is-hidden");
+    container.setAttribute("aria-hidden", "true");
+    setChartFieldsDisabled(true);
+  }
+
   const BASE_CHART_STEPS = [
     "Load Abridge (dictation)",
     "Review/modify HPI",
@@ -866,6 +956,7 @@
     derivedDaysSinceVisit = calculateDaysSince($("dateOfService")?.value || null);
     urgencyAuto = true;
     updateDerivedFields();
+    handleCategoryChange($("taskCategory")?.value);
   }
 
   let tasks = [];
@@ -1086,6 +1177,7 @@
     editingTaskId = taskId;
     $("name").value = task.name;
     $("taskCategory").value = task.category || "General";
+    handleCategoryChange(task.category || "General");
     $("importance").value = String(task.importance || 1);
     $("urgency").value = String(task.urgency || 3);
     $("novelty").value = String(task.novelty || 1);
@@ -1502,6 +1594,7 @@
       useBtn.onclick = () => {
         $("name").value = t.name;
         $("taskCategory").value = t.category || "General";
+        handleCategoryChange(t.category || "General");
         $("importance").value = String(t.importance || 1);
         $("novelty").value = String(t.novelty || 1);
         $("interest").value = String(t.interest || 1);
@@ -1576,6 +1669,12 @@
         updateDerivedFields();
       });
     }
+    const categoryField = $("taskCategory");
+    if (categoryField) {
+      categoryField.addEventListener("change", event => {
+        handleCategoryChange(event.target.value);
+      });
+    }
     const urgencyField = $("urgency");
     if (urgencyField) {
       urgencyField.addEventListener("change", () => {
@@ -1586,6 +1685,7 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    initializeChartFields();
     registerFieldListeners();
     setDefaultFieldValues();
     updateBillingReminder();
