@@ -84,6 +84,76 @@
       display: block;
       width: 0%;
     }
+    .subtask-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.4rem 0;
+      padding: 0.5rem;
+      background: #1a1a1a;
+      border-radius: 6px;
+    }
+    .subtask-row.completed {
+      opacity: 0.7;
+    }
+    .subtask-name {
+      flex: 1;
+      margin-left: 0.35rem;
+    }
+    .subtask-actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .subtask-actions button {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.5rem;
+    }
+    .timer-label {
+      font-size: 0.75rem;
+      color: #9aa0a6;
+      min-width: 110px;
+      text-align: right;
+      margin-left: auto;
+    }
+    .chart-summary {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #181818;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 600px;
+    }
+    .chart-summary h4 {
+      margin: 0 0 0.5rem;
+    }
+    .chart-summary ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .chart-summary li {
+      margin: 0.25rem 0;
+      padding: 0.35rem;
+      background: #202020;
+      border-radius: 4px;
+    }
+    .chart-summary li.longest-step {
+      border: 1px solid #0a84ff;
+      background: #0a1a33;
+    }
+    .chart-total {
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+    .chart-step-controls {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .chart-step-controls button {
+      font-size: 0.85rem;
+    }
     [aria-live] { outline: none; }
   </style>
 </head>
@@ -198,6 +268,429 @@
   let activeCategory = "All";
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
+  const runningTimers = new Map();
+  const BASE_CHART_STEPS = [
+    "Load Abridge (dictation)",
+    "Review/modify HPI",
+    "Review/modify PE",
+    "Review/modify A/P",
+    "Review/submit orders",
+    "Enter billing code",
+    "Sign off"
+  ];
+  const RESIDENT_ATTESTATION_STEP = "Add Attestation";
+  let currentFocusTaskIndex = null;
+
+  function generateSubTaskId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function isChartTask(task) {
+    return task && String(task.category).toLowerCase() === "chart";
+  }
+
+  function buildChartSteps(authorType) {
+    const steps = [...BASE_CHART_STEPS];
+    if (String(authorType).toLowerCase() === "resident") {
+      const billingIndex = steps.indexOf("Enter billing code");
+      const insertIndex = billingIndex === -1 ? steps.length - 1 : billingIndex;
+      steps.splice(insertIndex, 0, RESIDENT_ATTESTATION_STEP);
+    }
+    return steps;
+  }
+
+  function calculateDurationMinutes(start, end) {
+    if (!start || !end) return null;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return null;
+    const diff = endDate.getTime() - startDate.getTime();
+    if (diff < 0) return null;
+    return Number((diff / (1000 * 60)).toFixed(2));
+  }
+
+  function formatDuration(minutes) {
+    if (minutes === null || minutes === undefined) return "--";
+    const num = Number(minutes);
+    if (!Number.isFinite(num)) return "--";
+    return `${num.toFixed(2)} min`;
+  }
+
+  function formatElapsedMs(ms) {
+    if (!Number.isFinite(ms) || ms < 0) return "--";
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
+  }
+
+  function createSubTask(name, priority) {
+    return {
+      id: generateSubTaskId(),
+      name,
+      completed: false,
+      priority,
+      startTime: null,
+      completionTime: null,
+      durationMinutes: null
+    };
+  }
+
+  function normalizeSubTask(sub, basePriority) {
+    if (!sub) {
+      return createSubTask("Step", basePriority);
+    }
+    const normalized = {
+      id: sub.id || generateSubTaskId(),
+      name: sub.name || "Step",
+      completed: Boolean(sub.completed),
+      priority: toNumber(sub.priority, basePriority),
+      startTime: sub.startTime || null,
+      completionTime: sub.completionTime || null,
+      durationMinutes: sub.durationMinutes !== undefined && sub.durationMinutes !== null && Number.isFinite(Number(sub.durationMinutes))
+        ? Number(sub.durationMinutes)
+        : null
+    };
+    if (normalized.durationMinutes === null && normalized.startTime && normalized.completionTime) {
+      normalized.durationMinutes = calculateDurationMinutes(normalized.startTime, normalized.completionTime);
+    }
+    return normalized;
+  }
+
+  function computeTotalChartDuration(subTasks) {
+    if (!Array.isArray(subTasks) || subTasks.length === 0) return 0;
+    return Number(subTasks.reduce((sum, sub) => {
+      const value = Number(sub.durationMinutes);
+      return Number.isFinite(value) ? sum + value : sum;
+    }, 0).toFixed(2));
+  }
+
+  function updateChartDurationForTask(task) {
+    if (!isChartTask(task)) {
+      delete task.chartDurationMinutes;
+      return;
+    }
+    task.chartDurationMinutes = computeTotalChartDuration(task.subTasks);
+  }
+
+  function clearRunningTimers() {
+    runningTimers.forEach(intervalId => clearInterval(intervalId));
+    runningTimers.clear();
+  }
+
+  function stopTimerForSubTask(subId) {
+    const intervalId = runningTimers.get(subId);
+    if (intervalId) {
+      clearInterval(intervalId);
+      runningTimers.delete(subId);
+    }
+  }
+
+  function trackTimer(sub, timerEl) {
+    if (!timerEl) return;
+    stopTimerForSubTask(sub.id);
+    if (sub.completed) {
+      timerEl.textContent = `Completed – ${formatDuration(sub.durationMinutes)}`;
+      return;
+    }
+    if (!sub.startTime) {
+      timerEl.textContent = "Timer: --";
+      return;
+    }
+    const update = () => {
+      const startDate = new Date(sub.startTime);
+      if (Number.isNaN(startDate.getTime())) {
+        timerEl.textContent = "Timer: --";
+        return;
+      }
+      const now = new Date();
+      timerEl.textContent = `Timer: ${formatElapsedMs(now.getTime() - startDate.getTime())}`;
+    };
+    update();
+    const intervalId = setInterval(update, 1000);
+    runningTimers.set(sub.id, intervalId);
+  }
+
+  function ensureChartSubTasks(task) {
+    if (!isChartTask(task)) return false;
+    if (!Array.isArray(task.subTasks)) {
+      task.subTasks = [];
+    }
+    if (task.subTasks.length > 0) return false;
+    const basePriority = computePriority({ ...task, subTasks: [] });
+    const defaults = buildChartSteps(task.authorType);
+    task.subTasks = defaults.map(step => createSubTask(step, basePriority));
+    return true;
+  }
+
+  function resolveTaskAndSub(taskIndex, subIndex, options = {}) {
+    let resolvedIndex = taskIndex;
+    let task = tasks[resolvedIndex];
+    if ((!task || resolvedIndex === undefined || resolvedIndex === null || resolvedIndex < 0) && options.taskId) {
+      resolvedIndex = tasks.findIndex(t => t.id === options.taskId);
+      task = tasks[resolvedIndex];
+    }
+    if (!task) {
+      return { task: null, taskIndex: -1, sub: null, subIndex: -1 };
+    }
+    let resolvedSubIndex = subIndex;
+    let sub = Array.isArray(task.subTasks) ? task.subTasks[resolvedSubIndex] : undefined;
+    if ((!sub || resolvedSubIndex === undefined || resolvedSubIndex === null || resolvedSubIndex < 0) && options.subId && Array.isArray(task.subTasks)) {
+      resolvedSubIndex = task.subTasks.findIndex(s => s.id === options.subId);
+      sub = task.subTasks[resolvedSubIndex];
+    }
+    return { task, taskIndex: resolvedIndex, sub, subIndex: resolvedSubIndex };
+  }
+
+  function renderChartSummary(task) {
+    const container = document.createElement("div");
+    container.className = "chart-summary";
+    const heading = document.createElement("h4");
+    heading.textContent = "Chart Summary";
+    container.appendChild(heading);
+    const list = document.createElement("ul");
+    const durations = task.subTasks
+      .map(sub => Number(sub.durationMinutes))
+      .filter(value => Number.isFinite(value));
+    const longest = durations.length ? Math.max(...durations) : null;
+    task.subTasks.forEach(sub => {
+      const item = document.createElement("li");
+      item.textContent = `${sub.name}: ${formatDuration(sub.durationMinutes)}`;
+      if (longest !== null && Number(sub.durationMinutes) === longest) {
+        item.classList.add("longest-step");
+      }
+      list.appendChild(item);
+    });
+    container.appendChild(list);
+    const total = Number.isFinite(Number(task.chartDurationMinutes))
+      ? Number(task.chartDurationMinutes)
+      : computeTotalChartDuration(task.subTasks);
+    const totalLabel = document.createElement("div");
+    totalLabel.className = "chart-total";
+    totalLabel.textContent = `Total duration: ${formatDuration(total)}`;
+    container.appendChild(totalLabel);
+    return container;
+  }
+
+  function refreshAfterSubTaskChange(taskIndex, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    updateChartDurationForTask(task);
+    task.priority = computePriority(task);
+    persist();
+    const focusActive = !$("focus").classList.contains("hidden");
+    if (focusActive) {
+      const currentFocusTask = focusQueue[0];
+      if ((resolvedIndex !== -1 && currentFocusTaskIndex === resolvedIndex)
+        || (options.taskId && currentFocusTask && currentFocusTask.id === options.taskId)) {
+        renderFocusTask(task, resolvedIndex);
+      }
+    }
+    if (!focusActive && !options.focusOnly) {
+      updateUI();
+    }
+  }
+
+  function startSubTask(taskIndex, subIndex, options = {}) {
+    const { task, taskIndex: resolvedIndex, sub } = resolveTaskAndSub(taskIndex, subIndex, options);
+    if (!task || !sub) return;
+    sub.startTime = new Date().toISOString();
+    sub.completed = false;
+    sub.completionTime = null;
+    sub.durationMinutes = null;
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function toggleSubTaskCompletion(taskIndex, subIndex, isCompleted, options = {}) {
+    const { task, taskIndex: resolvedIndex, sub } = resolveTaskAndSub(taskIndex, subIndex, options);
+    if (!task || !sub) return;
+    if (isCompleted) {
+      if (!sub.startTime) {
+        sub.startTime = new Date().toISOString();
+      }
+      sub.completed = true;
+      sub.completionTime = new Date().toISOString();
+      sub.durationMinutes = calculateDurationMinutes(sub.startTime, sub.completionTime) ?? 0;
+      stopTimerForSubTask(sub.id);
+    } else {
+      sub.completed = false;
+      sub.completionTime = null;
+      sub.durationMinutes = null;
+    }
+    const nextOptions = { ...options, taskId: task.id, subId: sub.id };
+    refreshAfterSubTaskChange(resolvedIndex, nextOptions);
+  }
+
+  function editSubTaskName(taskIndex, subIndex, options = {}) {
+    const { task, taskIndex: resolvedIndex, sub } = resolveTaskAndSub(taskIndex, subIndex, options);
+    if (!task || !sub) return;
+    const newName = prompt("Rename step", sub.name);
+    if (!newName) return;
+    sub.name = newName.trim();
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id, subId: sub.id });
+  }
+
+  function removeSubTask(taskIndex, subIndex, options = {}) {
+    const { task, taskIndex: resolvedIndex, subIndex: resolvedSubIndex } = resolveTaskAndSub(taskIndex, subIndex, options);
+    if (!task || !Array.isArray(task.subTasks)) return;
+    if (!confirm("Remove this step?")) return;
+    const removed = task.subTasks.splice(resolvedSubIndex, 1);
+    if (removed.length) {
+      stopTimerForSubTask(removed[0].id);
+    }
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function addSubTaskToTask(taskIndex, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    const name = prompt("New step name");
+    if (!name) return;
+    const base = computePriority({ ...task, subTasks: [] });
+    if (!Array.isArray(task.subTasks)) {
+      task.subTasks = [];
+    }
+    task.subTasks.push(createSubTask(name.trim(), base));
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function renderChartTask(task, taskIndex) {
+    const container = document.createElement("div");
+    container.style.width = "100%";
+    if (!Array.isArray(task.subTasks) || task.subTasks.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "No steps configured.";
+      container.appendChild(empty);
+      return container;
+    }
+    task.subTasks.forEach((sub, subIndex) => {
+      const row = document.createElement("div");
+      row.className = "subtask-row";
+      if (sub.completed) row.classList.add("completed");
+
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.checked = sub.completed;
+      chk.onchange = event => toggleSubTaskCompletion(taskIndex, subIndex, event.target.checked, { focusOnly: true, taskId: task.id, subId: sub.id });
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "subtask-name";
+      nameSpan.textContent = sub.name;
+
+      const actions = document.createElement("div");
+      actions.className = "subtask-actions";
+
+      const startBtn = document.createElement("button");
+      startBtn.textContent = sub.startTime ? "Restart" : "Start";
+      startBtn.title = "Start or restart timer";
+      startBtn.onclick = () => startSubTask(taskIndex, subIndex, { taskId: task.id, subId: sub.id });
+      actions.appendChild(startBtn);
+
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "✏️";
+      editBtn.title = "Rename step";
+      editBtn.onclick = () => editSubTaskName(taskIndex, subIndex, { taskId: task.id, subId: sub.id });
+      actions.appendChild(editBtn);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.title = "Remove step";
+      deleteBtn.onclick = () => removeSubTask(taskIndex, subIndex, { taskId: task.id, subId: sub.id });
+      actions.appendChild(deleteBtn);
+
+      const timer = document.createElement("span");
+      timer.className = "timer-label";
+      trackTimer(sub, timer);
+
+      row.appendChild(chk);
+      row.appendChild(nameSpan);
+      row.appendChild(actions);
+      row.appendChild(timer);
+      container.appendChild(row);
+    });
+
+    const controls = document.createElement("div");
+    controls.className = "chart-step-controls";
+
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "➕ Add Step";
+    addBtn.onclick = () => addSubTaskToTask(taskIndex, { taskId: task.id });
+    controls.appendChild(addBtn);
+
+    const resetTimersBtn = document.createElement("button");
+    resetTimersBtn.textContent = "⏱️ Reset Timers";
+    resetTimersBtn.onclick = () => {
+      task.subTasks.forEach(sub => {
+        stopTimerForSubTask(sub.id);
+        sub.startTime = null;
+        sub.completionTime = null;
+        sub.durationMinutes = null;
+        sub.completed = false;
+      });
+      refreshAfterSubTaskChange(taskIndex, { focusOnly: true, taskId: task.id });
+    };
+    controls.appendChild(resetTimersBtn);
+
+    container.appendChild(controls);
+
+    if (task.subTasks.every(sub => sub.completed)) {
+      container.appendChild(renderChartSummary(task));
+    }
+
+    return container;
+  }
+
+  function renderSimpleSubTasks(task, taskIndex) {
+    const container = document.createElement("div");
+    if (!Array.isArray(task.subTasks) || task.subTasks.length === 0) {
+      container.textContent = "No sub-tasks for this task.";
+      return container;
+    }
+    task.subTasks.forEach((sub, subIndex) => {
+      const row = document.createElement("div");
+      row.className = "subtask-row";
+      if (sub.completed) row.classList.add("completed");
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.checked = sub.completed;
+      chk.onchange = event => toggleSubTaskCompletion(taskIndex, subIndex, event.target.checked, { taskId: task.id, subId: sub.id });
+      const label = document.createElement("span");
+      label.className = "subtask-name";
+      label.textContent = sub.name;
+      row.appendChild(chk);
+      row.appendChild(label);
+      container.appendChild(row);
+    });
+    return container;
+  }
+
+  function renderFocusTask(task, taskIndex) {
+    const subTaskView = $("subTaskView");
+    if (!subTaskView) return;
+    let resolvedIndex = taskIndex;
+    if ((resolvedIndex === undefined || resolvedIndex === null || resolvedIndex < 0) && task) {
+      resolvedIndex = tasks.findIndex(t => t.id === task.id);
+    }
+    const referenceTask = (resolvedIndex !== undefined && resolvedIndex !== null && resolvedIndex >= 0)
+      ? tasks[resolvedIndex]
+      : task;
+    currentFocusTaskIndex = resolvedIndex;
+    subTaskView.innerHTML = "";
+    clearRunningTimers();
+    let createdDefaults = false;
+    if (isChartTask(referenceTask)) {
+      createdDefaults = ensureChartSubTasks(referenceTask);
+    }
+    if (createdDefaults) {
+      updateChartDurationForTask(referenceTask);
+      referenceTask.priority = computePriority(referenceTask);
+      persist();
+    }
+    const content = isChartTask(referenceTask)
+      ? renderChartTask(referenceTask, resolvedIndex)
+      : renderSimpleSubTasks(referenceTask, resolvedIndex);
+    subTaskView.appendChild(content);
+  }
 
   const URGENCY_OPTIONS = [
     { value: 5, text: "5 – Critical Billing Window or Immediate Patient Need" },
@@ -486,38 +979,42 @@
 
   function recalcTaskPriority(task) {
     if (!task) return task;
-    const normalized = { ...task };
-    normalized.authorType = normalized.authorType || "attending";
-    normalized.patientType = normalizePatientType(normalized.patientType);
-    normalized.visitType = normalizeVisitType(normalized.visitType);
-    normalized.clinicSite = normalizeClinicSite(normalized.clinicSite);
-    normalized.dateOfService = normalized.dateOfService || null;
-    normalized.createdAt = normalized.createdAt || normalized.addedAt || new Date().toISOString();
-    if (normalized.category === "Charts") normalized.category = "Chart";
-    if (normalized.dateOfService) {
-      normalized.daysSinceVisit = calculateDaysSince(normalized.dateOfService);
+    task.authorType = task.authorType || "attending";
+    task.patientType = normalizePatientType(task.patientType);
+    task.visitType = normalizeVisitType(task.visitType);
+    task.clinicSite = normalizeClinicSite(task.clinicSite);
+    task.dateOfService = task.dateOfService || null;
+    task.createdAt = task.createdAt || task.addedAt || new Date().toISOString();
+    if (task.category === "Charts") task.category = "Chart";
+    if (task.dateOfService) {
+      task.daysSinceVisit = calculateDaysSince(task.dateOfService);
     } else {
-      const parsedDays = Number(normalized.daysSinceVisit);
-      normalized.daysSinceVisit = (normalized.daysSinceVisit === null || normalized.daysSinceVisit === undefined || normalized.daysSinceVisit === "" || !Number.isFinite(parsedDays))
+      const parsedDays = Number(task.daysSinceVisit);
+      task.daysSinceVisit = (task.daysSinceVisit === null || task.daysSinceVisit === undefined || task.daysSinceVisit === "" || !Number.isFinite(parsedDays))
         ? null
         : parsedDays;
     }
-    normalized.urgency = clampScale(normalized.urgency, 3);
-    normalized.importance = clampScale(normalized.importance, 1);
-    normalized.novelty = clampScale(normalized.novelty, 1);
-    normalized.interest = clampScale(normalized.interest, 1);
-    normalized.externalPressure = clampScale(normalized.externalPressure, 1);
-    normalized.timeToStart = clampScale(normalized.timeToStart, 1);
-    normalized.difficulty = clampScale(normalized.difficulty, 1);
-    if (Array.isArray(normalized.subTasks) && normalized.subTasks.length) {
-      const base = computePriority({ ...normalized, subTasks: [] });
-      normalized.subTasks = normalized.subTasks.map(sub => ({
-        ...sub,
-        priority: base
-      }));
+    task.urgency = clampScale(task.urgency, 3);
+    task.importance = clampScale(task.importance, 1);
+    task.novelty = clampScale(task.novelty, 1);
+    task.interest = clampScale(task.interest, 1);
+    task.externalPressure = clampScale(task.externalPressure, 1);
+    task.timeToStart = clampScale(task.timeToStart, 1);
+    task.difficulty = clampScale(task.difficulty, 1);
+    if (!Array.isArray(task.subTasks)) {
+      task.subTasks = [];
     }
-    normalized.priority = computePriority(normalized);
-    return normalized;
+    const base = computePriority({ ...task, subTasks: [] });
+    if (task.subTasks.length) {
+      task.subTasks = task.subTasks.map(sub => {
+        const normalizedSub = normalizeSubTask(sub, base);
+        normalizedSub.priority = base;
+        return normalizedSub;
+      });
+    }
+    updateChartDurationForTask(task);
+    task.priority = computePriority(task);
+    return task;
   }
 
   function persist() {
@@ -570,15 +1067,10 @@
     const subLines = $("initialSubTasks").value.split('\n')
       .map(l => l.trim())
       .filter(Boolean);
-    task.subTasks = subLines.map(line => ({
-      id: Date.now().toString() + Math.random().toString(36).slice(2,8),
-      name: line,
-      completed: false,
-      priority: basePriority
-    }));
-
+    task.subTasks = subLines.map(line => createSubTask(line, basePriority));
 
     task.priority = computePriority(task);
+    updateChartDurationForTask(task);
     tasks.push(task);
     persist();
 
@@ -672,21 +1164,17 @@
       const matchIndex = existingSubs.findIndex(sub => sub.name === line);
       if (matchIndex !== -1) {
         const existing = existingSubs.splice(matchIndex, 1)[0];
-        return { ...existing, name: line };
+        const normalizedExisting = normalizeSubTask(existing, basePriority);
+        normalizedExisting.name = line;
+        normalizedExisting.priority = basePriority;
+        return normalizedExisting;
       }
-      return {
-        id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
-        name: line,
-        completed: false,
-        priority: basePriority
-      };
+      return createSubTask(line, basePriority);
     });
 
     task.subTasks = newSubTasks;
-    task.subTasks.forEach(sub => {
-      sub.priority = basePriority;
-    });
     task.priority = computePriority(task);
+    updateChartDurationForTask(task);
     persist();
 
     toggleEditMode(false);
@@ -848,7 +1336,7 @@
           const chk = document.createElement("input");
           chk.type = "checkbox";
           chk.checked = sub.completed;
-          chk.onchange = () => completeSubTask(idx, subIndex);
+          chk.onchange = event => toggleSubTaskCompletion(idx, subIndex, event.target.checked, { taskId: t.id, subId: sub.id });
           const label = document.createElement("span");
           label.textContent = sub.name;
           label.style.marginLeft = "0.25rem";
@@ -856,6 +1344,13 @@
           subRow.appendChild(label);
           div.appendChild(subRow);
         });
+      }
+
+      if (isChartTask(t) && Number.isFinite(Number(t.chartDurationMinutes)) && Number(t.chartDurationMinutes) > 0) {
+        const totalRow = document.createElement("div");
+        totalRow.className = "score";
+        totalRow.textContent = `Chart time: ${formatDuration(Number(t.chartDurationMinutes))}`;
+        div.appendChild(totalRow);
       }
 
       taskList.appendChild(div);
@@ -890,7 +1385,7 @@
             const chk = document.createElement("input");
             chk.type = "checkbox";
             chk.checked = sub.completed;
-            chk.onchange = () => completeSubTask(idx, subIndex);
+            chk.onchange = event => toggleSubTaskCompletion(idx, subIndex, event.target.checked, { taskId: task.id, subId: sub.id });
             const label = document.createElement("span");
             label.textContent = sub.name;
             label.style.marginLeft = "0.25rem";
@@ -898,6 +1393,13 @@
             subRow.appendChild(label);
             wrap.appendChild(subRow);
           });
+        }
+
+        if (isChartTask(task) && Number.isFinite(Number(task.chartDurationMinutes)) && Number(task.chartDurationMinutes) > 0) {
+          const totalRow = document.createElement("div");
+          totalRow.className = "score";
+          totalRow.textContent = `Chart time: ${formatDuration(Number(task.chartDurationMinutes))}`;
+          wrap.appendChild(totalRow);
         }
 
         dueTodayList.appendChild(wrap);
@@ -917,39 +1419,21 @@
   function showNextTask() {
     const display = document.querySelector(".focus");
     const scoreView = $("scoreView");
-    const subTaskView = $("subTaskView");
     if (focusQueue.length === 0) {
       display.textContent = "✅ All tasks complete!";
       scoreView.textContent = "";
-      subTaskView.innerHTML = "";
+      const subTaskView = $("subTaskView");
+      if (subTaskView) subTaskView.innerHTML = "";
+      clearRunningTimers();
+      currentFocusTaskIndex = null;
       return;
     }
     const current = focusQueue[0];
     display.textContent = current.name;
-    scoreView.textContent = `Score: ${current.priority.toFixed(1)}`;
-
     const idx = tasks.findIndex(t => t.id === current.id);
-
-    subTaskView.innerHTML = "";
-    if (current.subTasks && current.subTasks.length) {
-      current.subTasks.forEach((sub, subIndex) => {
-        const row = document.createElement("div");
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        const chk = document.createElement("input");
-        chk.type = "checkbox";
-        chk.checked = sub.completed;
-        chk.onchange = () => completeSubTask(idx, subIndex);
-        const label = document.createElement("span");
-        label.textContent = sub.name;
-        label.style.marginLeft = "0.25rem";
-        row.appendChild(chk);
-        row.appendChild(label);
-        subTaskView.appendChild(row);
-      });
-    } else {
-      subTaskView.textContent = "No sub‑tasks for this task.";
-    }
+    const task = idx !== -1 ? tasks[idx] : current;
+    scoreView.textContent = `Score: ${task.priority.toFixed(1)}`;
+    renderFocusTask(task, idx);
   }
 
   function completeTask() {
@@ -962,6 +1446,8 @@
   }
 
   function backToCapture() {
+    clearRunningTimers();
+    currentFocusTaskIndex = null;
     $("focus").classList.add("hidden");
     $("capture").classList.remove("hidden");
     updateUI();
@@ -1066,17 +1552,6 @@
       wrapper.appendChild(deleteBtn);
       container.appendChild(wrapper);
     });
-  }
-
-  function completeSubTask(taskIndex, subIndex) {
-    const parent = tasks[taskIndex];
-    if (!parent || !parent.subTasks) return;
-    const sub = parent.subTasks[subIndex];
-    if (!sub) return;
-    sub.completed = true;
-    parent.priority = computePriority(parent);
-    persist();
-    updateUI();
   }
 
   function updateBillingReminder() {
