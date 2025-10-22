@@ -107,11 +107,12 @@
   <input type="date" id="dueDate" />
     </label>
     <div>
-      <button onclick="addTask()">Add Task</button>
+      <button onclick="addTask()" id="addTaskBtn">Add Task</button>
+      <button onclick="saveTaskUpdate()" id="saveUpdateBtn" class="hidden">Save Update</button>
       <button onclick="saveAsTemplate()">Add as Template</button>
       <button onclick="startFocus()" id="startBtn" disabled>Get started</button>
       <button onclick="reset()">Reset</button>
-      
+
     </div>
     <div id="templateSection" style="margin-top:1rem;">
   <h3>Templates</h3>
@@ -181,6 +182,7 @@ let supabase = null;
 let tasks = [];
 let templates = [];
 let focusQueue = [];
+let editingTaskId = null;
 
 function init() {
   if (MODE === "supabase" && SUPABASE_URL && SUPABASE_ANON_KEY) {
@@ -256,6 +258,7 @@ async function persist() {
 }
 
 function addTask() {
+  if (editingTaskId) return;
   const name = $("name").value.trim();
   if (!name) return;
   const task = {
@@ -281,6 +284,69 @@ function addTask() {
   updateUI();
 }
 
+function beginEditTask(taskId) {
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+  editingTaskId = taskId;
+  $("name").value = task.name || "";
+  $("importance").value = String(coerceNumber(task.importance, 3));
+  $("urgency").value = String(coerceNumber(task.urgency, 3));
+  $("novelty").value = String(coerceNumber(task.novelty, 3));
+  $("interest").value = String(coerceNumber(task.interest, 3));
+  $("externalPressure").value = String(coerceNumber(task.externalPressure, 0));
+  $("timeToStart").value = String(coerceNumber(task.timeToStart, 3));
+  $("difficulty").value = String(coerceNumber(task.difficulty, 3));
+  $("dueDate").value = task.dueDate || "";
+  setEditingState(true);
+  $("name").focus();
+}
+
+function setEditingState(isEditing) {
+  const saveBtn = $("saveUpdateBtn");
+  const addBtn = $("addTaskBtn");
+  if (!saveBtn || !addBtn) return;
+  if (isEditing) {
+    saveBtn.classList.remove("hidden");
+    addBtn.classList.add("hidden");
+  } else {
+    saveBtn.classList.add("hidden");
+    addBtn.classList.remove("hidden");
+  }
+}
+
+function saveTaskUpdate() {
+  if (!editingTaskId) return;
+  const name = $("name").value.trim();
+  if (!name) return;
+  const idx = tasks.findIndex(t => t.id === editingTaskId);
+  if (idx === -1) {
+    setEditingState(false);
+    editingTaskId = null;
+    return;
+  }
+  const existing = tasks[idx];
+  const updated = {
+    ...existing,
+    name,
+    importance: getScaleValue("importance"),
+    urgency: getScaleValue("urgency"),
+    novelty: getScaleValue("novelty"),
+    interest: getScaleValue("interest"),
+    externalPressure: getScaleValue("externalPressure", 0),
+    timeToStart: getScaleValue("timeToStart"),
+    difficulty: getScaleValue("difficulty"),
+    dueDate: $("dueDate").value || null,
+  };
+  updated.priority = computePriority(updated);
+  tasks[idx] = updated;
+  persist();
+  editingTaskId = null;
+  setEditingState(false);
+  $("name").value = "";
+  $("dueDate").value = "";
+  updateUI();
+}
+
 function updateUI() {
   const taskList = $("taskList");
   taskList.innerHTML = "";
@@ -296,16 +362,28 @@ function updateUI() {
     row.style.justifyContent = "space-between";
     const info = document.createElement("span");
     info.textContent = `${t.name} ${t.completed ? "(✓)" : ""} — ${t.priority.toFixed(1)}`;
+    const actions = document.createElement("span");
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️";
+    editBtn.onclick = () => beginEditTask(t.id);
     const delBtn = document.createElement("button");
     delBtn.textContent = "🗑️";
     delBtn.onclick = () => {
       if (!confirm("Delete this task?")) return;
-      tasks.splice(i, 1);
+      const [removed] = tasks.splice(i, 1);
+      if (removed && removed.id === editingTaskId) {
+        editingTaskId = null;
+        setEditingState(false);
+        $("name").value = "";
+        $("dueDate").value = "";
+      }
       persist();
       updateUI();
     };
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
     row.appendChild(info);
-    row.appendChild(delBtn);
+    row.appendChild(actions);
     div.appendChild(row);
 
     if (t.addedAt) {
@@ -346,13 +424,6 @@ function updateUI() {
         div.appendChild(subRow);
       });
     }
-    // add a button to create a new sub‑task for this task
-    const addSubBtn = document.createElement("button");
-    addSubBtn.textContent = "➕ Add sub-task";
-    addSubBtn.style.marginTop = "0.25rem";
-    addSubBtn.onclick = () => addSubTask(i);
-    div.appendChild(addSubBtn);
-
     taskList.appendChild(div);
   }
 
@@ -447,6 +518,8 @@ function backToCapture() {
 function reset() {
   if (!confirm("Clear all tasks?")) return;
   tasks = [];
+  editingTaskId = null;
+  setEditingState(false);
   localStorage.removeItem("tasks");
   if (supabase) supabase.from("tasks").delete().neq("id", "");
   updateUI();
