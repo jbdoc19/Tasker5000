@@ -43,6 +43,14 @@
       flex-wrap: wrap;
       margin-bottom: 0.75rem;
     }
+    .show-all-toggle {
+      background: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 0.35rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
     .task-view-label {
       color: #a0a0a0;
       font-size: 0.85rem;
@@ -122,6 +130,25 @@
       font-size: 0.82rem;
       color: #d0dcff;
       font-weight: 500;
+    }
+    .task-progress-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .task-progress-meter {
+      background: #111922;
+      border-radius: 999px;
+      overflow: hidden;
+      height: 6px;
+      width: 100%;
+    }
+    .task-progress-meter .fill {
+      display: block;
+      height: 100%;
+      background: #0a84ff;
+      width: 0%;
+      transition: width 150ms ease-out;
     }
     .task-meta {
       font-size: 0.75rem;
@@ -378,12 +405,13 @@
     <div id="categoryProgress" class="category-progress"></div>
     <details class="peek">
       <summary>🔍 Peek at tasks</summary>
-      <div class="task-list-header">
+      <div class="task-list-header" id="taskListHeader">
         <label class="task-view-label" for="taskViewMode">View</label>
         <select id="taskViewMode" class="task-view-select">
           <option value="active" selected>Active Tasks</option>
           <option value="completed">Completed Tasks</option>
         </select>
+        <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
       </div>
       <div id="taskList"></div>
     </details>
@@ -411,6 +439,7 @@
   let activeCategory = "All";
   const TASK_LIST_MODES = { ACTIVE: "active", COMPLETED: "completed" };
   let taskListMode = TASK_LIST_MODES.ACTIVE;
+  let showAllActiveTasks = false;
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
   const runningTimers = new Map();
@@ -671,6 +700,10 @@
     const basePriority = options.basePriority !== undefined
       ? options.basePriority
       : computePriority({ ...task, subTasks: [] });
+    if (task.useChartTemplate === false) {
+      task.subTasks = task.subTasks.map(sub => normalizeSubTask(sub, basePriority));
+      return false;
+    }
     const defaults = buildChartSteps(task.authorType);
     const lowerDefaults = defaults.map(step => step.toLowerCase());
     const requiredSet = new Set(lowerDefaults);
@@ -867,11 +900,10 @@
       container.appendChild(empty);
       return container;
     }
-    const completedCount = task.subTasks.filter(sub => sub.completed).length;
-    const progressSummary = document.createElement("div");
-    progressSummary.className = "task-progress";
-    progressSummary.textContent = `${completedCount}/${task.subTasks.length} steps done`;
-    container.appendChild(progressSummary);
+    const progressElement = createProgressElement(task);
+    if (progressElement) {
+      container.appendChild(progressElement);
+    }
     task.subTasks.forEach((sub, subIndex) => {
       const row = document.createElement("div");
       row.className = "subtask-row";
@@ -1085,6 +1117,25 @@
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }
 
+  function calculateDaysUntil(dateString) {
+    if (!dateString) return null;
+    const parsed = new Date(dateString + "T00:00:00");
+    if (Number.isNaN(parsed.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = parsed.getTime() - today.getTime();
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  }
+
+  function isDateInCurrentMonth(dateString) {
+    if (!dateString) return false;
+    const parsed = new Date(dateString + "T00:00:00");
+    if (Number.isNaN(parsed.getTime())) return false;
+    const today = new Date();
+    return parsed.getFullYear() === today.getFullYear()
+      && parsed.getMonth() === today.getMonth();
+  }
+
   function getUrgencyDescriptor(value) {
     const option = URGENCY_OPTIONS.find(opt => Number(opt.value) === Number(value));
     return option ? option.text : null;
@@ -1265,13 +1316,7 @@
     return isSameLocalDay(createdDate, now) ? 2 : 1;
   }
 
-  function computePriority(t) {
-    if (Array.isArray(t.subTasks) && t.subTasks.length) {
-      const remaining = t.subTasks.filter(s => !s.completed);
-      if (remaining.length === 0) return 0;
-      const total = remaining.reduce((sum,s) => sum + s.priority, 0);
-      return total / remaining.length;
-    }
+  function computeRawPriorityScore(t) {
     const importance = clampScale(t.importance, 1);
     const urgency = clampScale(t.urgency, 3);
     const novelty = clampScale(t.novelty, 1);
@@ -1290,6 +1335,60 @@
     const visitWeight = getVisitTypeWeight(t.visitType);
     const sameDayBonus = getSameDayBonus(t.clinicSite, t.createdAt);
     return baseScore * patientWeight * visitWeight * sameDayBonus;
+  }
+
+  function computeTimeWeight(task) {
+    if (!task) return 1;
+    const isChart = isChartTask(task);
+    const parsedDays = Number(task.daysSinceVisit);
+    const daysSince = Number.isFinite(parsedDays)
+      ? parsedDays
+      : (task.dateOfService ? calculateDaysSince(task.dateOfService) : null);
+    const daysUntilDue = task.dueDate ? calculateDaysUntil(task.dueDate) : null;
+    const currentMonth = isDateInCurrentMonth(task.dateOfService)
+      || isDateInCurrentMonth(task.dueDate);
+
+    if (!isChart) {
+      if (daysUntilDue !== null && Number.isFinite(daysUntilDue) && daysUntilDue <= 3 && daysUntilDue >= 0) {
+        return 1.2;
+      }
+      return 1.0;
+    }
+
+    if (daysSince !== null && Number.isFinite(daysSince)) {
+      if (daysSince > 95) return 0.5;
+      if (daysSince >= 90 && daysSince <= 95) return 2.0;
+      if (daysSince >= 0 && daysSince < 3) return 1.8;
+      if (daysSince >= 3 && currentMonth) return 1.3;
+    }
+
+    if (daysUntilDue !== null && Number.isFinite(daysUntilDue)) {
+      if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+        return 1.8;
+      }
+      if (daysUntilDue < 0 && daysSince === null) {
+        return currentMonth ? 1.3 : 1.0;
+      }
+      if (currentMonth) {
+        return 1.3;
+      }
+    }
+
+    return 1.0;
+  }
+
+  function computePriority(t) {
+    const weightedBase = computeRawPriorityScore(t) * computeTimeWeight(t);
+    if (Array.isArray(t.subTasks) && t.subTasks.length) {
+      const remaining = t.subTasks.filter(s => !s.completed);
+      if (remaining.length === 0) return 0;
+      const total = remaining.reduce((sum, s) => {
+        const value = Number(s.priority);
+        return Number.isFinite(value) ? sum + value : sum + weightedBase;
+      }, 0);
+      return total / remaining.length;
+    }
+    return weightedBase;
   }
 
   function recalcTaskPriority(task) {
@@ -1328,7 +1427,17 @@
     } else {
       task.completed = Boolean(task.completed);
     }
-    const base = computePriority({ ...task, subTasks: [] });
+    if (isChartTask(task) && task.useChartTemplate === undefined) {
+      const defaults = new Set(buildChartSteps(task.authorType).map(step => step.toLowerCase()));
+      const hasCustomSteps = Array.isArray(task.subTasks)
+        ? task.subTasks.some(sub => !defaults.has(String(sub?.name || "").toLowerCase()))
+        : false;
+      task.useChartTemplate = !hasCustomSteps;
+    }
+    const baseRaw = computeRawPriorityScore({ ...task, subTasks: [] });
+    const timeWeight = computeTimeWeight(task);
+    task.timeWeight = timeWeight;
+    const base = baseRaw * timeWeight;
     if (isChartTask(task)) {
       ensureChartSubTasks(task, { basePriority: base });
     }
@@ -1395,6 +1504,10 @@
     const subLines = $("initialSubTasks").value.split('\n')
       .map(l => l.trim())
       .filter(Boolean);
+    const hasCustomSubTasks = subLines.length > 0;
+    if (isChartTask(task)) {
+      task.useChartTemplate = !hasCustomSubTasks;
+    }
     task.subTasks = subLines.map(line => createSubTask(line, basePriority));
 
     if (isChartTask(task)) {
@@ -1494,6 +1607,13 @@
       .map(line => line.trim())
       .filter(Boolean);
 
+    const hasCustomSubTasks = subLines.length > 0;
+    if (isChartTask(task)) {
+      task.useChartTemplate = !hasCustomSubTasks;
+    } else if (task.useChartTemplate !== undefined) {
+      delete task.useChartTemplate;
+    }
+
     const basePriority = computePriority({ ...task, subTasks: [] });
     const existingSubs = Array.isArray(task.subTasks) ? task.subTasks.slice() : [];
     const newSubTasks = subLines.map(line => {
@@ -1581,13 +1701,38 @@
     return descriptors;
   }
 
-  function createProgressElement(task) {
+  function getSubTaskProgress(task) {
     if (!Array.isArray(task.subTasks) || task.subTasks.length === 0) return null;
+    const total = task.subTasks.length;
     const completed = task.subTasks.filter(sub => sub.completed).length;
-    const progress = document.createElement("div");
-    progress.className = "task-progress";
-    progress.textContent = `${completed}/${task.subTasks.length} steps done`;
-    return progress;
+    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+    const usesPatientList = isChartTask(task) && task.useChartTemplate === false;
+    const label = usesPatientList
+      ? `${completed} of ${total} patients done`
+      : `${completed}/${total} steps done`;
+    return { total, completed, percent, label };
+  }
+
+  function createProgressElement(task) {
+    const progressData = getSubTaskProgress(task);
+    if (!progressData) return null;
+    const container = document.createElement("div");
+    container.className = "task-progress-group";
+
+    const label = document.createElement("div");
+    label.className = "task-progress";
+    label.textContent = `${progressData.label} (${progressData.percent}%)`;
+    container.appendChild(label);
+
+    const meter = document.createElement("div");
+    meter.className = "task-progress-meter";
+    const fill = document.createElement("span");
+    fill.className = "fill";
+    fill.style.width = `${progressData.percent}%`;
+    meter.appendChild(fill);
+    container.appendChild(meter);
+
+    return container;
   }
 
   function createMetaItem(text) {
@@ -1645,6 +1790,12 @@
     actions.className = "task-card-actions";
 
     if (mode === TASK_LIST_MODES.ACTIVE) {
+      const completeBtn = document.createElement("button");
+      completeBtn.textContent = "Mark Done";
+      completeBtn.title = "Complete task";
+      completeBtn.onclick = () => markTaskDoneFromPeek(task.id);
+      actions.appendChild(completeBtn);
+
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️";
       editBtn.title = "Edit task";
@@ -1764,9 +1915,24 @@
       taskViewSelect.value = taskListMode;
     }
 
+    if (taskListMode !== TASK_LIST_MODES.ACTIVE) {
+      showAllActiveTasks = false;
+    }
+
     const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     $("startBtn").disabled = remaining.length === 0;
+
+    const toggleBtn = $("showAllToggle");
+    if (toggleBtn) {
+      if (taskListMode !== TASK_LIST_MODES.ACTIVE || remaining.length <= 3) {
+        toggleBtn.classList.add("hidden");
+        toggleBtn.textContent = "Show All";
+      } else {
+        toggleBtn.classList.remove("hidden");
+        toggleBtn.textContent = showAllActiveTasks ? "Show Top 3" : "Show All";
+      }
+    }
 
     let displayTasks = [];
     if (taskListMode === TASK_LIST_MODES.COMPLETED) {
@@ -1778,7 +1944,12 @@
           return bDate - aDate;
         });
     } else {
-      displayTasks = remaining.sort((a, b) => b.priority - a.priority);
+      const sortedRemaining = [...remaining].sort((a, b) => b.priority - a.priority);
+      if (remaining.length <= 3 || showAllActiveTasks) {
+        displayTasks = sortedRemaining;
+      } else {
+        displayTasks = sortedRemaining.slice(0, 3);
+      }
     }
 
     if (!displayTasks.length) {
@@ -1810,11 +1981,10 @@
         wrap.textContent = `${task.name} — due today`;
 
         if (task.subTasks && task.subTasks.length) {
-          const completedCount = task.subTasks.filter(s => s.completed).length;
-          const progress = document.createElement("div");
-          progress.className = "score";
-          progress.textContent = `${completedCount}/${task.subTasks.length} steps done`;
-          wrap.appendChild(progress);
+          const progressElement = createProgressElement(task);
+          if (progressElement) {
+            wrap.appendChild(progressElement);
+          }
 
           task.subTasks.forEach((sub, subIndex) => {
             const subRow = document.createElement("div");
@@ -1846,6 +2016,12 @@
     });
   }
 
+  function toggleShowAllActive() {
+    if (taskListMode !== TASK_LIST_MODES.ACTIVE) return;
+    showAllActiveTasks = !showAllActiveTasks;
+    updateUI();
+  }
+
   function startFocus() {
     if (editingTaskId) cancelEdit();
     $("capture").classList.add("hidden");
@@ -1875,24 +2051,47 @@
     renderFocusTask(task, idx);
   }
 
+  function completeTaskById(taskId, options = {}) {
+    const idx = tasks.findIndex(t => t.id === taskId);
+    if (idx === -1) return false;
+    const task = tasks[idx];
+    if (task.completed) return false;
+    const nowIso = new Date().toISOString();
+    task.completed = true;
+    task.completedAt = nowIso;
+    updateChartDurationForTask(task);
+    if (Array.isArray(task.subTasks)) {
+      task.subTasks.forEach(sub => stopTimerForSubTask(sub.id));
+    }
+    persist();
+    if (!options.skipUI) {
+      updateUI();
+    }
+    return true;
+  }
+
+  function markTaskDoneFromPeek(taskId) {
+    const completed = completeTaskById(taskId);
+    if (!completed) return;
+    const wasCurrentFocus = focusQueue.length && focusQueue[0].id === taskId;
+    focusQueue = focusQueue.filter(t => t.id !== taskId);
+    if (wasCurrentFocus) {
+      clearRunningTimers();
+    }
+    const focusSection = $("focus");
+    if (focusSection && !focusSection.classList.contains("hidden")) {
+      showNextTask();
+    }
+  }
+
   function completeTask() {
     if (!focusQueue.length) return;
-    const nowIso = new Date().toISOString();
     const current = focusQueue[0];
-    current.completed = true;
-    current.completedAt = nowIso;
-    const idx = tasks.findIndex(t => t.id === current.id);
-    if (idx !== -1) {
-      tasks[idx].completed = true;
-      tasks[idx].completedAt = nowIso;
-      updateChartDurationForTask(tasks[idx]);
-      if (Array.isArray(tasks[idx].subTasks)) {
-        tasks[idx].subTasks.forEach(sub => stopTimerForSubTask(sub.id));
-      }
-    }
+    const completed = completeTaskById(current.id, { skipUI: true });
     clearRunningTimers();
-    persist();
-    updateUI();
+    if (completed) {
+      updateUI();
+    }
     focusQueue.shift();
     showNextTask();
   }
@@ -2050,6 +2249,7 @@
     modeSelect.addEventListener("change", event => {
       const value = String(event.target.value || TASK_LIST_MODES.ACTIVE).toLowerCase();
       taskListMode = value === TASK_LIST_MODES.COMPLETED ? TASK_LIST_MODES.COMPLETED : TASK_LIST_MODES.ACTIVE;
+      showAllActiveTasks = false;
       updateUI();
     });
   }
