@@ -1706,10 +1706,7 @@
     const total = task.subTasks.length;
     const completed = task.subTasks.filter(sub => sub.completed).length;
     const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
-    const usesPatientList = isChartTask(task) && task.useChartTemplate === false;
-    const label = usesPatientList
-      ? `${completed} of ${total} patients done`
-      : `${completed}/${total} steps done`;
+    const label = `${completed} of ${total} steps done`;
     return { total, completed, percent, label };
   }
 
@@ -1721,7 +1718,7 @@
 
     const label = document.createElement("div");
     label.className = "task-progress";
-    label.textContent = `${progressData.label} (${progressData.percent}%)`;
+    label.textContent = `${progressData.label} (${progressData.percent} %)`;
     container.appendChild(label);
 
     const meter = document.createElement("div");
@@ -1973,10 +1970,22 @@
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     const today = now.toISOString().split("T")[0];
 
-    tasks.forEach((task, idx) => {
+    tasks.forEach(task => {
       if (isTaskCompleted(task)) return;
       if (activeCategory !== "All" && task.category !== activeCategory) return;
-      if (task.dueDate === today) {
+
+      const fallbackDueDate = (!task.dueDate && task.dateOfService)
+        ? (() => {
+            const dt = new Date(`${task.dateOfService}T00:00:00`);
+            if (!Number.isNaN(dt.getTime())) {
+              dt.setDate(dt.getDate() + 3);
+              return dt.toISOString().split("T")[0];
+            }
+            return null;
+          })()
+        : null;
+
+      if (task.dueDate === today || (fallbackDueDate && fallbackDueDate === today)) {
         const wrap = document.createElement("div");
         wrap.textContent = `${task.name} — due today`;
 
@@ -1985,23 +1994,6 @@
           if (progressElement) {
             wrap.appendChild(progressElement);
           }
-
-          task.subTasks.forEach((sub, subIndex) => {
-            const subRow = document.createElement("div");
-            subRow.style.display = "flex";
-            subRow.style.alignItems = "center";
-            subRow.style.marginLeft = "1rem";
-            const chk = document.createElement("input");
-            chk.type = "checkbox";
-            chk.checked = sub.completed;
-            chk.onchange = event => toggleSubTaskCompletion(idx, subIndex, event.target.checked, { taskId: task.id, subId: sub.id });
-            const label = document.createElement("span");
-            label.textContent = sub.name;
-            label.style.marginLeft = "0.25rem";
-            subRow.appendChild(chk);
-            subRow.appendChild(label);
-            wrap.appendChild(subRow);
-          });
         }
 
         if (isChartTask(task) && Number.isFinite(Number(task.chartDurationMinutes)) && Number(task.chartDurationMinutes) > 0) {
