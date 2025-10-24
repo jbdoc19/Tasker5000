@@ -600,6 +600,57 @@
         { value: 4, text: "4 – Small amount of synthesis or clean-up work." },
         { value: 5, text: "5 – Straightforward chart; minimal thought required." }
       ]
+    },
+    admin: {
+      importance: [
+        { value: 1, text: "1: Low-value clerical item — informational only, not linked to care or billing (e.g., generic record release)." },
+        { value: 2, text: "2: Routine paperwork (e.g., school letter, general clearance) with limited medical impact." },
+        { value: 3, text: "3: Moderately important — ensures continuity of services or avoids family confusion." },
+        { value: 4, text: "4: Affects patient function, equipment use, or continuity of home health/therapy services." },
+        { value: 5, text: "5: Legally, financially, or clinically critical (e.g., DME or home nursing orders, time-sensitive medical necessity forms)." }
+      ],
+      urgency: [
+        { value: 1, text: "1: No time constraint; backlog cleanup or batch task." },
+        { value: 2, text: "2: Preferred within a week to prevent workflow pileup." },
+        { value: 3, text: "3: Due soon — flagged or requested multiple times (within 72 hours)." },
+        { value: 4, text: "4: Time-sensitive — blocking care, equipment renewal, or external agency action." },
+        { value: 5, text: "5: Immediate deadline — service interruption or patient safety risk if not completed today." }
+      ],
+      novelty: [
+        { value: 1, text: "1: Routine, repetitive — identical to previous letters or forms." },
+        { value: 2, text: "2: Minor variation (same patient, slightly different form)." },
+        { value: 3, text: "3: Moderate variation — new formatting or service type but same structure." },
+        { value: 4, text: "4: Requires rethinking or rewriting — new medical justification or appeal." },
+        { value: 5, text: "5: Entirely new or unusual form requiring research, collaboration, or creative framing." }
+      ],
+      interest: [
+        { value: 1, text: "1: Utterly draining paperwork with no personal reward." },
+        { value: 2, text: "2: Mildly tolerable — repetitive but manageable." },
+        { value: 3, text: "3: Neutral task; emotionally flat but not difficult." },
+        { value: 4, text: "4: Slightly satisfying — clear, finite, ‘box checked’ gratification." },
+        { value: 5, text: "5: Emotionally rewarding — high-impact document that feels meaningful or helps a deserving family." }
+      ],
+      externalPressure: [
+        { value: 1, text: "1: No one waiting; background task only." },
+        { value: 2, text: "2: Requested once, no follow-up." },
+        { value: 3, text: "3: Family, therapist, or vendor has followed up once or twice." },
+        { value: 4, text: "4: Repeated requests or escalating frustration from external partner." },
+        { value: 5, text: "5: Time-sensitive escalation — multiple stakeholders involved, risk of complaint or service disruption." }
+      ],
+      timeToStart: [
+        { value: 1, text: "1: Fully prepped or pre-filled — literally one click to sign, fax, or send." },
+        { value: 2, text: "2: Nearly complete — requires signatures or minor edits." },
+        { value: 3, text: "3: Ready to draft — information accessible, no major digging needed." },
+        { value: 4, text: "4: Some setup required — gathering diagnostic codes, reviewing notes." },
+        { value: 5, text: "5: Requires locating old versions or supporting documents (e.g., past forms, letters)." }
+      ],
+      difficulty: [
+        { value: 1, text: "1: Straightforward — fill in basic info, minimal judgment." },
+        { value: 2, text: "2: Simple but tedious — multiple checkboxes or sign-offs." },
+        { value: 3, text: "3: Moderate — requires referencing recent visits or clinical notes." },
+        { value: 4, text: "4: High cognitive effort — must summarize complex clinical picture concisely." },
+        { value: 5, text: "5: Very complex — appeals, multidisciplinary coordination, or justification requiring clinical precision." }
+      ]
     }
   };
 
