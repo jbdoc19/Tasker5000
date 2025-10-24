@@ -445,6 +445,7 @@
   const runningTimers = new Map();
   const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
   let storedChartFieldValues = null;
+  let currentScaleDescriptorCategory = "general";
 
   function getChartFields() {
     return chartFieldIds
@@ -501,8 +502,9 @@
   }
 
   function handleCategoryChange(value) {
-    const categoryValue = (value ?? $("taskCategory")?.value ?? "").toString().toLowerCase();
-    if (categoryValue === "chart") {
+    const resolvedCategory = (value ?? $("taskCategory")?.value ?? "").toString();
+    populateScalesForCategory(resolvedCategory);
+    if (resolvedCategory.toLowerCase() === "chart") {
       showChartFields();
     } else {
       hideChartFields();
@@ -516,6 +518,137 @@
     container.classList.add("is-hidden");
     container.setAttribute("aria-hidden", "true");
     setChartFieldsDisabled(true);
+  }
+
+  const NUMERIC_SCALE_FIELDS = ["importance","novelty","interest","timeToStart","difficulty"];
+  const SCALE_FIELDS = [...NUMERIC_SCALE_FIELDS, "urgency", "externalPressure"];
+  const BASIC_NUMERIC_DESCRIPTORS = [1, 2, 3, 4, 5].map(value => ({
+    value,
+    text: String(value)
+  }));
+
+  const DEFAULT_DESCRIPTOR_SET = {
+    importance: BASIC_NUMERIC_DESCRIPTORS,
+    urgency: [
+      { value: 5, text: "5 – Critical Billing Window or Immediate Patient Need" },
+      { value: 4, text: "4 – High Priority – Near-Term Deadline" },
+      { value: 3, text: "3 – Moderate Priority – Monthly Closure" },
+      { value: 2, text: "2 – Low Billing Value – Already Overdue" },
+      { value: 1, text: "1 – Routine Follow-Up Work" }
+    ],
+    novelty: BASIC_NUMERIC_DESCRIPTORS,
+    interest: BASIC_NUMERIC_DESCRIPTORS,
+    externalPressure: [
+      { value: 1, text: "1 – Solo responsibility" },
+      { value: 2, text: "2 – Soft deadline / courtesy check" },
+      { value: 3, text: "3 – Peer or team waiting" },
+      { value: 4, text: "4 – Leadership expectation" },
+      { value: 5, text: "5 – Patient or compliance critical" }
+    ],
+    timeToStart: BASIC_NUMERIC_DESCRIPTORS,
+    difficulty: BASIC_NUMERIC_DESCRIPTORS
+  };
+
+  const CATEGORY_DESCRIPTOR_SETS = {
+    chart: {
+      importance: [
+        { value: 1, text: "1 – Chart adds minimal new information or duplicates an existing note." },
+        { value: 2, text: "2 – Routine follow-up with limited clinical or legal relevance." },
+        { value: 3, text: "3 – Contains moderate clinical content or affects internal workflow (e.g., continuity documentation)." },
+        { value: 4, text: "4 – Impacts care coordination, billing, or orders being released." },
+        { value: 5, text: "5 – Critical legal or clinical documentation—such as a new complex care note, DME letter, or therapy order summary." }
+      ],
+      urgency: [
+        { value: 1, text: "1 – No immediate consequence if delayed more than a week." },
+        { value: 2, text: "2 – Should be completed within five to seven days to keep the workflow moving." },
+        { value: 3, text: "3 – Approaching the expected three-day chart completion window." },
+        { value: 4, text: "4 – Actively holding up orders, referrals, or communication with other providers." },
+        { value: 5, text: "5 – Must be completed within 24 hours—blocking patient care, billing, or compliance." }
+      ],
+      novelty: [
+        { value: 1, text: "1 – Repetitive, nearly identical to prior encounters—mental autopilot work." },
+        { value: 2, text: "2 – Familiar patient with predictable updates." },
+        { value: 3, text: "3 – Some variation or new findings but overall routine." },
+        { value: 4, text: "4 – Clearly different or updated scenario (new comorbidity, new specialist input)." },
+        { value: 5, text: "5 – Entirely new case or patient; requires full synthesis and high cognitive effort." }
+      ],
+      interest: [
+        { value: 1, text: "1 – Emotionally draining, tedious, or disengaging." },
+        { value: 2, text: "2 – Slightly more tolerable but still repetitive." },
+        { value: 3, text: "3 – Neutral—acceptable task without resistance or enthusiasm." },
+        { value: 4, text: "4 – Personally engaging or meaningful (e.g., rewarding outcome, interesting complexity)." },
+        { value: 5, text: "5 – Highly interesting or affirming—feels worth your energy investment." }
+      ],
+      externalPressure: [
+        { value: 1, text: "1 – No one waiting on this; purely internal backlog." },
+        { value: 2, text: "2 – Minimal outside awareness—perhaps a resident awaiting co-signature." },
+        { value: 3, text: "3 – Family or administrative team may soon follow up." },
+        { value: 4, text: "4 – Directly affects nursing, therapy, or resident progress if left undone." },
+        { value: 5, text: "5 – Leadership, family, or compliance risk if not completed immediately." }
+      ],
+      timeToStart: [
+        { value: 1, text: "1 – Requires major prep—multiple subspecialty notes or context review needed." },
+        { value: 2, text: "2 – Some setup required; moderate amount of data gathering first." },
+        { value: 3, text: "3 – Ready to begin with basic template or SmartPhrase already open." },
+        { value: 4, text: "4 – Mostly drafted or pre-filled by a resident." },
+        { value: 5, text: "5 – One click from completion—review and sign only." }
+      ],
+      difficulty: [
+        { value: 1, text: "1 – Straightforward chart; minimal thought required." },
+        { value: 2, text: "2 – Small amount of synthesis or clean-up work." },
+        { value: 3, text: "3 – Moderate effort—some review of orders, results, or medication changes." },
+        { value: 4, text: "4 – High cognitive load—multiple notes or CareEverywhere data to merge." },
+        { value: 5, text: "5 – Very complex visit—multiple specialists, high-stakes content, or documentation risk." }
+      ]
+    }
+  };
+
+  function getCategoryDescriptorKey(category) {
+    const normalized = (category || "").toString().trim().toLowerCase();
+    return normalized || "general";
+  }
+
+  function getScaleOptions(fieldId, categoryKey) {
+    const key = categoryKey || "general";
+    const descriptorSet = CATEGORY_DESCRIPTOR_SETS[key];
+    if (descriptorSet && Array.isArray(descriptorSet[fieldId])) {
+      return descriptorSet[fieldId];
+    }
+    const defaults = DEFAULT_DESCRIPTOR_SET[fieldId];
+    if (defaults) {
+      return defaults;
+    }
+    return BASIC_NUMERIC_DESCRIPTORS;
+  }
+
+  function populateScaleSelect(fieldId, categoryKey) {
+    const select = $(fieldId);
+    if (!select) return;
+    const previousValue = select.value;
+    const options = getScaleOptions(fieldId, categoryKey);
+    select.innerHTML = "";
+    options.forEach(option => {
+      const opt = document.createElement("option");
+      opt.value = String(option.value);
+      opt.textContent = option.text || String(option.value);
+      select.appendChild(opt);
+    });
+    const previous = previousValue !== undefined && previousValue !== null
+      ? String(previousValue)
+      : "";
+    const hasPrevious = options.some(option => String(option.value) === previous);
+    if (hasPrevious) {
+      select.value = previous;
+    } else if (options.length > 0) {
+      select.value = String(options[0].value);
+    }
+  }
+
+  function populateScalesForCategory(category) {
+    const key = getCategoryDescriptorKey(category);
+    currentScaleDescriptorCategory = key;
+    SCALE_FIELDS.forEach(fieldId => populateScaleSelect(fieldId, key));
+    updateUrgencyHint(getSuggestedUrgency(derivedDaysSinceVisit));
   }
 
   const BASE_CHART_STEPS = [
@@ -1038,68 +1171,6 @@
     subTaskView.appendChild(content);
   }
 
-  const URGENCY_OPTIONS = [
-    { value: 5, text: "5 – Critical Billing Window or Immediate Patient Need" },
-    { value: 4, text: "4 – High Priority – Near-Term Deadline" },
-    { value: 3, text: "3 – Moderate Priority – Monthly Closure" },
-    { value: 2, text: "2 – Low Billing Value – Already Overdue" },
-    { value: 1, text: "1 – Routine Follow-Up Work" }
-  ];
-
-  const PRESSURE_OPTIONS = [
-    { value: 1, text: "1 – Solo responsibility" },
-    { value: 2, text: "2 – Soft deadline / courtesy check" },
-    { value: 3, text: "3 – Peer or team waiting" },
-    { value: 4, text: "4 – Leadership expectation" },
-    { value: 5, text: "5 – Patient or compliance critical" }
-  ];
-
-  const NUMERIC_SCALE_FIELDS = ["importance","novelty","interest","timeToStart","difficulty"];
-
-  function populateNumericSelect(id) {
-    const sel = $(id);
-    if (!sel) return;
-    sel.innerHTML = "";
-    for (let i = 1; i <= 5; i++) {
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = String(i);
-      sel.appendChild(opt);
-    }
-  }
-
-  function populateUrgencySelect() {
-    const sel = $("urgency");
-    if (!sel) return;
-    sel.innerHTML = "";
-    URGENCY_OPTIONS.forEach(option => {
-      const opt = document.createElement("option");
-      opt.value = String(option.value);
-      opt.textContent = option.text;
-      sel.appendChild(opt);
-    });
-  }
-
-  function populateExternalPressureSelect() {
-    const sel = $("externalPressure");
-    if (!sel) return;
-    sel.innerHTML = "";
-    PRESSURE_OPTIONS.forEach(option => {
-      const opt = document.createElement("option");
-      opt.value = String(option.value);
-      opt.textContent = option.text;
-      sel.appendChild(opt);
-    });
-  }
-
-  function populateScales() {
-    NUMERIC_SCALE_FIELDS.forEach(populateNumericSelect);
-    populateUrgencySelect();
-    populateExternalPressureSelect();
-  }
-
-  populateScales();
-
   function formatDateForInput(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -1137,7 +1208,8 @@
   }
 
   function getUrgencyDescriptor(value) {
-    const option = URGENCY_OPTIONS.find(opt => Number(opt.value) === Number(value));
+    const options = getScaleOptions("urgency", currentScaleDescriptorCategory);
+    const option = options.find(opt => Number(opt.value) === Number(value));
     return option ? option.text : null;
   }
 
