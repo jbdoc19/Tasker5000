@@ -509,6 +509,7 @@
     } else {
       hideChartFields();
     }
+    renderTemplates();
   }
 
   function initializeChartFields() {
@@ -1910,6 +1911,12 @@
     actions.className = "task-card-actions";
 
     if (mode === TASK_LIST_MODES.ACTIVE) {
+      const startNowBtn = document.createElement("button");
+      startNowBtn.textContent = "Start Now";
+      startNowBtn.title = "Focus on this task";
+      startNowBtn.onclick = () => startFocus(task.id);
+      actions.appendChild(startNowBtn);
+
       const completeBtn = document.createElement("button");
       completeBtn.textContent = "Mark Done";
       completeBtn.title = "Complete task";
@@ -2137,12 +2144,24 @@
     updateUI();
   }
 
-  function startFocus() {
+  function startFocus(initialTaskId = null) {
     if (editingTaskId) cancelEdit();
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
     focusQueue = tasks.filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
       .sort((a,b) => b.priority - a.priority);
+    if (initialTaskId) {
+      const targetIndex = focusQueue.findIndex(task => task.id === initialTaskId);
+      if (targetIndex > 0) {
+        const [selected] = focusQueue.splice(targetIndex, 1);
+        focusQueue.unshift(selected);
+      } else if (targetIndex === -1) {
+        const directTask = tasks.find(t => t.id === initialTaskId && !isTaskCompleted(t));
+        if (directTask) {
+          focusQueue.unshift(directTask);
+        }
+      }
+    }
     showNextTask();
   }
 
@@ -2261,7 +2280,20 @@
   function renderTemplates() {
     const container = $("templateButtons");
     container.innerHTML = "";
-    templates.forEach((t, i) => {
+    const selectedCategory = $("taskCategory")?.value || "General";
+    const matchingTemplates = templates
+      .map((template, index) => ({ template, index }))
+      .filter(({ template }) => (template.category || "General") === selectedCategory);
+
+    if (!matchingTemplates.length) {
+      const empty = document.createElement("p");
+      empty.className = "score";
+      empty.textContent = "No templates for this category yet.";
+      container.appendChild(empty);
+      return;
+    }
+
+    matchingTemplates.forEach(({ template: t, index: templateIndex }) => {
       const wrapper = document.createElement("div");
       const useBtn = document.createElement("button");
       useBtn.textContent = `📋 ${t.name}`;
@@ -2294,7 +2326,9 @@
         updateDerivedFields();
       };
       const editBtn = document.createElement("button");
-      editBtn.textContent = "✏️ Edit";
+      editBtn.textContent = "✏️";
+      editBtn.title = "Edit template";
+      editBtn.setAttribute("aria-label", "Edit template");
       editBtn.onclick = () => {
         const newName = prompt("Edit template name:", t.name);
         if (!newName) return;
@@ -2303,10 +2337,12 @@
         renderTemplates();
       };
       const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️ Delete";
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.title = "Delete template";
+      deleteBtn.setAttribute("aria-label", "Delete template");
       deleteBtn.onclick = () => {
         if (!confirm("Delete this template?")) return;
-        templates.splice(i, 1);
+        templates.splice(templateIndex, 1);
         localStorage.setItem("templates", JSON.stringify(templates));
         renderTemplates();
       };
