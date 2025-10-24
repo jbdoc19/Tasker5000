@@ -482,6 +482,334 @@
       color: #7bd88f;
       font-weight: 600;
     }
+    .module-card {
+      width: 100%;
+      max-width: 720px;
+      background: #181818;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+    }
+    .module-card h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.35rem;
+    }
+    .module-card p {
+      margin: 0.25rem 0 0.75rem;
+      color: #c9d1d9;
+      line-height: 1.45;
+    }
+    .module-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .module-toggle label {
+      margin: 0;
+      font-weight: 600;
+    }
+    .module-toggle input[type="checkbox"],
+    .module-toggle input[type="time"] {
+      accent-color: #0a84ff;
+      background: #111;
+      color: #fff;
+      border: 1px solid #333;
+      padding: 0.25rem 0.35rem;
+      border-radius: 6px;
+    }
+    .morning-blocks {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0.75rem 0;
+    }
+    .routine-block {
+      background: rgba(12, 12, 12, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 0.85rem;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .routine-block.completed {
+      border-color: rgba(123, 216, 143, 0.6);
+      background: rgba(18, 40, 20, 0.85);
+    }
+    .routine-block h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+    .routine-block small {
+      color: #a0aec0;
+      display: block;
+    }
+    .countdown-display {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #7bd88f;
+    }
+    .intention-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .intention-buttons button {
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(34, 34, 34, 0.85);
+    }
+    .progress-strip {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      position: relative;
+      margin: 0.5rem 0;
+    }
+    .progress-strip span {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, #0a84ff, #7bd88f);
+      transition: width 200ms ease-out;
+    }
+    .module-inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .history-list {
+      margin: 0.5rem 0 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+      color: #aab8c8;
+    }
+    .history-list li {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .history-list li:last-child {
+      border-bottom: none;
+    }
+    .toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      display: grid;
+      gap: 0.75rem;
+      z-index: 1500;
+    }
+    .toast {
+      background: rgba(30, 30, 30, 0.95);
+      border-left: 4px solid #0a84ff;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: #f5f5f5;
+      min-width: 220px;
+      box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+    }
+    .toast strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.95rem;
+    }
+    .wizard-overlay,
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 1400;
+    }
+    .wizard-content,
+    .modal-card {
+      background: #121212;
+      border-radius: 12px;
+      padding: 1.25rem;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      color: #f1f5f9;
+    }
+    .wizard-content h3,
+    .modal-card h3 {
+      margin: 0 0 0.75rem;
+    }
+    .wizard-steps {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .wizard-steps label {
+      font-size: 0.85rem;
+    }
+    .wizard-actions,
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .launch-pad-settings {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .launch-pad-settings select,
+    .launch-pad-settings input[type="text"] {
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+      padding: 0.45rem;
+      border-radius: 6px;
+    }
+    .launch-pad-list {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .launch-pad-item {
+      display: grid;
+      grid-template-columns: 1fr minmax(110px, 150px) auto;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(20, 20, 20, 0.85);
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .launch-pad-item small {
+      color: #9aa0a6;
+      font-size: 0.75rem;
+    }
+    .sleep-checklist {
+      display: grid;
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+    .sleep-checklist label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      background: rgba(15, 15, 15, 0.85);
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .sleep-checklist input[type="checkbox"] {
+      margin-top: 0.1rem;
+      accent-color: #7bd88f;
+    }
+    .sleep-tips {
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: #9aa0a6;
+    }
+    .sleep-summary {
+      font-size: 0.9rem;
+      background: rgba(18, 26, 36, 0.85);
+      border-radius: 8px;
+      padding: 0.6rem;
+      margin-top: 0.75rem;
+    }
+    .sunlight-alert {
+      margin-top: 0.75rem;
+      padding: 0.65rem;
+      border-radius: 8px;
+      background: rgba(40, 36, 16, 0.85);
+      color: #f8e3a1;
+      font-size: 0.85rem;
+    }
+    .energy-rating {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .energy-rating input[type="range"] {
+      flex: 1;
+    }
+    .celebration {
+      background: rgba(14, 48, 22, 0.85);
+      border-left: 3px solid #7bd88f;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #d2ffde;
+      margin-top: 0.5rem;
+    }
+    .launch-pad-summary {
+      background: rgba(22, 24, 30, 0.9);
+      border-radius: 10px;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .launch-pad-summary strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .routine-affirmation {
+      font-size: 0.85rem;
+      color: #f0ead6;
+      background: rgba(50, 42, 24, 0.6);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+    .morning-chart-wrapper {
+      margin-top: 0.75rem;
+      background: #191919;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 0.75rem;
+      border-radius: 10px;
+    }
+    .chart-canvas {
+      width: 100%;
+      max-width: 360px;
+      height: 160px;
+      display: block;
+      margin: 0 auto;
+    }
+    .chart-legend {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: 0.75rem;
+      color: #a5adba;
+      margin-top: 0.5rem;
+      justify-content: center;
+    }
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 0.35rem;
+    }
+    .legend-swatch.completion {
+      background: #0a84ff;
+    }
+    .legend-swatch.energy {
+      background: #f97316;
+    }
+    .module-note {
+      font-size: 0.78rem;
+      color: #9ba6b9;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -495,6 +823,8 @@
     aria-label="Activate Meltdown Shield"
     onclick="activateShield()"
   >🆘 I'm Overwhelmed</button>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
   <section
     id="meltdownShield"
@@ -514,6 +844,137 @@
 
   <!-- Task entry form -->
   <section id="capture">
+    <div id="morningLaunchModule" class="module-card">
+      <div class="module-toggle">
+        <label for="morningLaunchToggle">🌅 Morning Launch Sequence</label>
+        <input type="checkbox" id="morningLaunchToggle" />
+      </div>
+      <p>Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day.</p>
+      <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
+      <div id="morningLaunchContent" class="hidden" aria-hidden="true">
+        <div class="progress-strip" aria-hidden="true">
+          <span id="morningLaunchProgress"></span>
+        </div>
+        <div id="morningLaunchStatus" class="score"></div>
+        <div class="module-inline-actions">
+          <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
+          <button id="morningLaunchSkipBtn" type="button">Skip today</button>
+        </div>
+        <div class="morning-blocks">
+          <article class="routine-block" data-block="move">
+            <h3>MOVE — Light Aerobic + Sunlight</h3>
+            <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
+            <div class="countdown-display" id="moveCountdown">20:00</div>
+            <div class="module-inline-actions">
+              <button id="moveStartBtn" type="button">Start 20-min timer</button>
+              <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
+            </div>
+          </article>
+          <article class="routine-block" data-block="reflect">
+            <h3>REFLECT — Cold Splash + Intention</h3>
+            <small>Reset with a cold rinse, then name the tone for your day.</small>
+            <div class="intention-buttons">
+              <button type="button" data-intention="Calm & steady">Calm & steady</button>
+              <button type="button" data-intention="Playful & connected">Playful & connected</button>
+              <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
+            </div>
+            <label for="morningIntention" style="margin:0;">
+              <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
+            </label>
+            <div class="module-inline-actions">
+              <button id="reflectCompleteBtn" type="button">Save intention</button>
+            </div>
+          </article>
+          <article class="routine-block" data-block="plan">
+            <h3>PLAN — Process Anchors</h3>
+            <small>Lock in process-based actions and block time before the day takes over.</small>
+            <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
+            <div class="module-inline-actions">
+              <button id="planCompleteBtn" type="button">Plan locked in</button>
+            </div>
+          </article>
+        </div>
+        <div class="energy-rating">
+          <label for="morningEnergy" style="margin:0;">Energy check-in</label>
+          <input id="morningEnergy" type="range" min="1" max="5" step="1" />
+          <span id="morningEnergyLabel">--</span>
+          <button id="morningEnergySave" type="button">Log energy</button>
+        </div>
+        <div class="morning-chart-wrapper">
+          <canvas
+            id="morningLaunchChart"
+            class="chart-canvas"
+            width="360"
+            height="160"
+            role="img"
+            aria-label="Line chart of morning launch completion and energy trends"
+          ></canvas>
+          <div class="chart-legend" aria-hidden="true">
+            <span><span class="legend-swatch completion"></span>Completion %</span>
+            <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
+          </div>
+          <div id="morningLaunchChartSummary" class="module-note"></div>
+        </div>
+        <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
+      </div>
+    </div>
+
+    <div id="launchPadModule" class="module-card">
+      <div class="module-toggle">
+        <label for="launchPadReminderTime">🚀 Environmental Reminders & Launch Pads</label>
+        <input type="time" id="launchPadReminderTime" />
+      </div>
+      <p>Curate a nightly launch pad so tomorrow's clinic run starts calm, stocked, and on time.</p>
+      <div class="launch-pad-summary" id="launchPadSummary"></div>
+      <div class="module-inline-actions">
+        <button id="openLaunchPadModal" type="button">Evening checklist</button>
+        <button id="launchPadMorningReview" type="button">Morning review</button>
+      </div>
+      <div class="launch-pad-settings">
+        <label for="launchPadSiteSelect">Clinic / environment
+          <select id="launchPadSiteSelect"></select>
+        </label>
+        <div class="module-inline-actions">
+          <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
+          <button id="launchPadAddItem" type="button">Add Item</button>
+          <button id="launchPadLoadPreset" type="button">Reset to preset</button>
+        </div>
+        <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div id="sleepToolkitModule" class="module-card">
+      <div class="module-toggle">
+        <label for="sleepToolkitToggle">😴 Sleep & Circadian Rhythm Toolkit</label>
+        <input type="checkbox" id="sleepToolkitToggle" />
+      </div>
+      <p>Stabilize melatonin and cortisol rhythms with a nightly wind-down and morning light cues.</p>
+      <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
+        <div class="sleep-checklist" id="sleepChecklist"></div>
+        <div id="sleepCompletionSummary" class="sleep-summary"></div>
+        <div class="module-inline-actions">
+          <label for="melatoninReminderToggle" style="flex:1;">
+            <input type="checkbox" id="melatoninReminderToggle" /> Melatonin reminder
+          </label>
+          <label for="melatoninReminderTime" style="margin:0;">Time
+            <input type="time" id="melatoninReminderTime" />
+          </label>
+        </div>
+        <div class="module-inline-actions">
+          <label for="sunlightReminderToggle" style="flex:1;">
+            <input type="checkbox" id="sunlightReminderToggle" /> Morning sunlight alert
+          </label>
+          <label for="sunlightReminderTime" style="margin:0;">Time
+            <input type="time" id="sunlightReminderTime" />
+          </label>
+        </div>
+        <div id="sunlightAlert" class="sunlight-alert hidden" aria-live="polite"></div>
+        <div id="sleepMorningRating" class="energy-rating"></div>
+        <div id="sleepCorrelationSummary" class="sleep-summary"></div>
+        <div class="sleep-tips" id="sleepTips"></div>
+      </div>
+    </div>
+
     <label for="name">Task Name
       <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
     </label>
@@ -625,6 +1086,40 @@
     </div>
   </section>
 
+  <div id="firstThreeWizard" class="wizard-overlay hidden" aria-hidden="true">
+    <div class="wizard-content" role="dialog" aria-modal="true" aria-labelledby="firstThreeTitle">
+      <h3 id="firstThreeTitle">🪜 First-Three-Steps Wizard</h3>
+      <p>Break the project into tiny, guaranteed-win actions to get moving.</p>
+      <div class="wizard-steps">
+        <label>Step 1
+          <input type="text" id="firstThreeStep1" placeholder="Open patient chart" />
+        </label>
+        <label>Step 2
+          <input type="text" id="firstThreeStep2" placeholder="Skim last visit notes" />
+        </label>
+        <label>Step 3
+          <input type="text" id="firstThreeStep3" placeholder="Draft first paragraph" />
+        </label>
+      </div>
+      <div class="wizard-actions">
+        <button id="firstThreeSkip" type="button">Skip for this task</button>
+        <button id="firstThreeCancel" type="button">Cancel</button>
+        <button id="firstThreeSave" type="button">Save steps</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="launchPadModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="launchPadModalTitle">
+      <h3 id="launchPadModalTitle">🚀 Prep Tomorrow's Launch Pad</h3>
+      <p>Gather items tonight so future-you can walk out the door calm.</p>
+      <div id="launchPadModalList" class="sleep-checklist" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button id="launchPadModalClose" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Focus mode -->
   <section id="focus" class="hidden">
     <div id="focusTimer" aria-live="polite">🧭 Focus Time: 0:00</div>
@@ -654,6 +1149,110 @@
   const FOCUS_PING_INTERVAL_MS = 10 * 60 * 1000;
   const AUDIT_STORAGE_PREFIX = "audit_";
   const AUDIT_SHOWN_SUFFIX = "_shown";
+  const MORNING_LAUNCH_KEY = "morningLaunchState";
+  const LAUNCH_PAD_KEY = "launchPadState";
+  const SLEEP_TOOLKIT_KEY = "sleepToolkitState";
+  const FIRST_THREE_KEYWORDS = [
+    "report",
+    "project",
+    "backlog",
+    "chart",
+    "presentation",
+    "summary",
+    "documentation",
+    "analysis",
+    "panel",
+    "prep"
+  ];
+  const FIRST_THREE_WORD_THRESHOLD = 5;
+  const DEFAULT_MORNING_TIMER_MINUTES = 20;
+  const MORNING_BLOCKS = ["move", "reflect", "plan"];
+  const MORNING_CHART_LIMIT = 10;
+  const MORNING_CHART_COLORS = {
+    completion: "#0a84ff",
+    energy: "#f97316",
+    grid: "rgba(148, 163, 184, 0.25)",
+    axis: "rgba(148, 163, 184, 0.4)"
+  };
+  const DEFAULT_LAUNCH_PAD_REMINDER = "20:00";
+  const DEFAULT_MELATONIN_TIME = "21:30";
+  const DEFAULT_SUNLIGHT_TIME = "08:00";
+  const DEFAULT_LAUNCH_PAD_SITE = "General Clinic";
+  const ENERGY_LABELS = {
+    1: "Foggy",
+    2: "Sleepy",
+    3: "Steady",
+    4: "Energized",
+    5: "Lit up"
+  };
+  const SLEEP_RATING_LABELS = {
+    1: "Exhausted",
+    2: "Restless",
+    3: "Adequate",
+    4: "Rested",
+    5: "Recharged"
+  };
+  const LAUNCH_PAD_PRESETS = {
+    "General Clinic": [
+      "Stethoscope",
+      "Laptop + charger",
+      "Clinic badge",
+      "Progress note templates",
+      "Snacks / water"
+    ],
+    "St PJ’s Shelter": [
+      "ID badge",
+      "Warm layers",
+      "Resource handouts",
+      "Portable charger",
+      "Snacks"
+    ],
+    "Craniofacial Clinic": [
+      "Care plan binders",
+      "Growth charts",
+      "Camera / tablet",
+      "Consent forms",
+      "Comfort items"
+    ]
+  };
+  const SLEEP_CHECKLIST_ITEMS = [
+    {
+      id: "warmShower",
+      label: "Warm shower or bath 1–2 hours before bed",
+      tip: "Warm water triggers a cooling rebound that cues melatonin."
+    },
+    {
+      id: "blueLight",
+      label: "Blue-light blocker on screens",
+      tip: "Filtering blue light reduces melatonin suppression from devices."
+    },
+    {
+      id: "activity",
+      label: "Light physical activity earlier today",
+      tip: "Daytime movement builds sleep pressure for smoother nights."
+    },
+    {
+      id: "caffeine",
+      label: "Caffeine curfew observed (last sip by 2 PM)",
+      tip: "Caffeine has a ~6 hour half-life—curbing it prevents bedtime jitters."
+    },
+    {
+      id: "magnesium",
+      label: "Optional magnesium or electrolytes",
+      tip: "Magnesium calms the nervous system and supports muscle recovery."
+    }
+  ];
+  const WEEKDAY_OPTIONS = [
+    { label: "Any day", value: "any" },
+    { label: "Weekdays", value: "weekdays" },
+    { label: "Monday", value: "1" },
+    { label: "Tuesday", value: "2" },
+    { label: "Wednesday", value: "3" },
+    { label: "Thursday", value: "4" },
+    { label: "Friday", value: "5" },
+    { label: "Saturday", value: "6" },
+    { label: "Sunday", value: "0" }
+  ];
 
   function getChartFields() {
     return chartFieldIds
@@ -707,6 +1306,1415 @@
     container.classList.add("is-hidden");
     container.setAttribute("aria-hidden", "true");
     setChartFieldsDisabled(true);
+  }
+
+  function getToastContainer() {
+    return $("toastContainer");
+  }
+
+  function showToast(title, message, options = {}) {
+    const container = getToastContainer();
+    if (!container) return;
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.setAttribute("role", "status");
+    const heading = document.createElement("strong");
+    heading.textContent = title;
+    toast.appendChild(heading);
+    const body = document.createElement("div");
+    body.textContent = message;
+    toast.appendChild(body);
+    container.appendChild(toast);
+    const timeout = Number.isFinite(options.timeout) ? options.timeout : 6000;
+    setTimeout(() => {
+      toast.classList.add("hidden");
+      setTimeout(() => toast.remove(), 350);
+    }, timeout);
+  }
+
+  function getDateKey(date = new Date()) {
+    const dt = new Date(date);
+    dt.setHours(0, 0, 0, 0);
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, "0");
+    const day = String(dt.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function getTodayKey() {
+    return getDateKey(new Date());
+  }
+
+  function getTomorrowKey() {
+    const dt = new Date();
+    dt.setDate(dt.getDate() + 1);
+    return getDateKey(dt);
+  }
+
+  function getYesterdayKey() {
+    const dt = new Date();
+    dt.setDate(dt.getDate() - 1);
+    return getDateKey(dt);
+  }
+
+  function formatFriendlyDate(dateKey) {
+    if (!dateKey) return "";
+    const parts = dateKey.split("-");
+    if (parts.length !== 3) return dateKey;
+    const [year, month, day] = parts.map(part => Number(part));
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+      return dateKey;
+    }
+    const dt = new Date(year, month - 1, day);
+    if (Number.isNaN(dt.getTime())) return dateKey;
+    return dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  }
+
+  function formatShortDateLabel(dateKey) {
+    if (!dateKey) return "";
+    const parts = dateKey.split("-");
+    if (parts.length !== 3) return dateKey;
+    const [year, month, day] = parts.map(part => Number(part));
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+      return dateKey;
+    }
+    const dt = new Date(year, month - 1, day);
+    if (Number.isNaN(dt.getTime())) return dateKey;
+    return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function getDateKeyFromIso(isoString) {
+    if (!isoString) return null;
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return null;
+    return getDateKey(date);
+  }
+
+  function getDefaultMorningEntry() {
+    return {
+      completed: {
+        move: false,
+        reflect: false,
+        plan: false
+      },
+      intention: "",
+      planNotes: "",
+      energy: null,
+      skip: false,
+      countdownBlock: null,
+      countdownEnd: null,
+      celebrated: false,
+      lastUpdated: null
+    };
+  }
+
+  function getDefaultMorningState() {
+    return {
+      enabled: false,
+      entries: {}
+    };
+  }
+
+  function loadMorningLaunchState() {
+    if (morningLaunchState) return morningLaunchState;
+    try {
+      const raw = localStorage.getItem(MORNING_LAUNCH_KEY);
+      if (!raw) {
+        morningLaunchState = getDefaultMorningState();
+        return morningLaunchState;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        morningLaunchState = getDefaultMorningState();
+        return morningLaunchState;
+      }
+      const state = { ...getDefaultMorningState(), ...parsed };
+      if (!state.entries || typeof state.entries !== "object") {
+        state.entries = {};
+      }
+      Object.keys(state.entries).forEach(key => {
+        state.entries[key] = { ...getDefaultMorningEntry(), ...state.entries[key] };
+      });
+      morningLaunchState = state;
+    } catch (error) {
+      console.error("Unable to load morning launch state", error);
+      morningLaunchState = getDefaultMorningState();
+    }
+    return morningLaunchState;
+  }
+
+  function persistMorningLaunchState() {
+    if (!morningLaunchState) return;
+    try {
+      if (morningLaunchState.entries) {
+        const keys = Object.keys(morningLaunchState.entries).sort();
+        if (keys.length > 60) {
+          const toRemove = keys.slice(0, keys.length - 60);
+          toRemove.forEach(key => delete morningLaunchState.entries[key]);
+        }
+      }
+      const serialized = JSON.stringify(morningLaunchState);
+      localStorage.setItem(MORNING_LAUNCH_KEY, serialized);
+    } catch (error) {
+      console.error("Unable to persist morning launch state", error);
+    }
+  }
+
+  function getMorningEntry(dateKey = getTodayKey()) {
+    const state = loadMorningLaunchState();
+    if (!state.entries) state.entries = {};
+    if (!state.entries[dateKey]) {
+      state.entries[dateKey] = getDefaultMorningEntry();
+    }
+    return state.entries[dateKey];
+  }
+
+  function resetMorningEntry(dateKey = getTodayKey()) {
+    const state = loadMorningLaunchState();
+    state.entries[dateKey] = getDefaultMorningEntry();
+    persistMorningLaunchState();
+    updateMorningLaunchUI();
+  }
+
+  function setMorningSkip(dateKey = getTodayKey(), skip = true) {
+    const entry = getMorningEntry(dateKey);
+    entry.skip = skip;
+    if (skip) {
+      MORNING_BLOCKS.forEach(block => {
+        entry.completed[block] = false;
+      });
+      entry.celebrated = false;
+    }
+    clearMorningCountdown(entry);
+    entry.lastUpdated = new Date().toISOString();
+    persistMorningLaunchState();
+    updateMorningLaunchUI();
+  }
+
+  function clearMorningCountdown(entry) {
+    if (morningCountdown && morningCountdown.intervalId) {
+      clearInterval(morningCountdown.intervalId);
+    }
+    morningCountdown = null;
+    if (entry) {
+      entry.countdownBlock = null;
+      entry.countdownEnd = null;
+    }
+  }
+
+  function formatCountdown(msRemaining) {
+    if (!Number.isFinite(msRemaining) || msRemaining <= 0) {
+      return "00:00";
+    }
+    const totalSeconds = Math.ceil(msRemaining / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function updateMoveCountdownDisplay(remainingMs) {
+    const display = $("moveCountdown");
+    if (!display) return;
+    if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+      display.textContent = "20:00";
+      return;
+    }
+    display.textContent = formatCountdown(remainingMs);
+  }
+
+  function resumeMorningCountdown(entry) {
+    if (!entry || !entry.countdownBlock || !entry.countdownEnd) {
+      updateMoveCountdownDisplay(null);
+      return;
+    }
+    const remaining = entry.countdownEnd - Date.now();
+    if (remaining <= 0) {
+      clearMorningCountdown(entry);
+      updateMoveCountdownDisplay(null);
+      showToast("MOVE timer", "20 minutes are up. Celebrate the endorphins!");
+      return;
+    }
+    updateMoveCountdownDisplay(remaining);
+    if (morningCountdown && morningCountdown.intervalId) {
+      clearInterval(morningCountdown.intervalId);
+    }
+    morningCountdown = {
+      block: entry.countdownBlock,
+      intervalId: setInterval(() => {
+        const nowRemaining = entry.countdownEnd - Date.now();
+        if (nowRemaining <= 0) {
+          clearMorningCountdown(entry);
+          updateMoveCountdownDisplay(null);
+          showToast("MOVE timer", "20 minutes are up. Nice job getting sunlight and motion!");
+        } else {
+          updateMoveCountdownDisplay(nowRemaining);
+        }
+      }, 1000)
+    };
+  }
+
+  function startMorningCountdown(block = "move") {
+    const entry = getMorningEntry();
+    entry.skip = false;
+    entry.countdownBlock = block;
+    entry.countdownEnd = Date.now() + DEFAULT_MORNING_TIMER_MINUTES * 60 * 1000;
+    entry.lastUpdated = new Date().toISOString();
+    persistMorningLaunchState();
+    resumeMorningCountdown(entry);
+  }
+
+  function setMorningBlockCompleted(block, data = {}) {
+    const entry = getMorningEntry();
+    entry.skip = false;
+    if (!entry.completed) {
+      entry.completed = { move: false, reflect: false, plan: false };
+    }
+    entry.completed[block] = true;
+    if (block === "reflect" && data.intention !== undefined) {
+      entry.intention = data.intention;
+    }
+    if (block === "plan" && data.planNotes !== undefined) {
+      entry.planNotes = data.planNotes;
+    }
+    if (block === "move") {
+      clearMorningCountdown(entry);
+    }
+    entry.lastUpdated = new Date().toISOString();
+    persistMorningLaunchState();
+    updateMorningLaunchUI();
+    showToast("Morning Launch", `Nice momentum! ${block.toUpperCase()} locked in.`);
+  }
+
+  function logMorningEnergy(value) {
+    const entry = getMorningEntry();
+    entry.energy = Number(value);
+    entry.lastUpdated = new Date().toISOString();
+    persistMorningLaunchState();
+    updateMorningLaunchUI();
+    if (Number.isFinite(entry.energy)) {
+      const label = ENERGY_LABELS[entry.energy] || entry.energy;
+      showToast("Energy logged", `Morning energy set to ${label}.`);
+    }
+  }
+
+  function getMorningHistory(limit = 10) {
+    const state = loadMorningLaunchState();
+    const entries = Object.entries(state.entries || {});
+    return entries
+      .sort((a, b) => (a[0] > b[0] ? -1 : 1))
+      .slice(0, limit)
+      .map(([dateKey, entry]) => ({ dateKey, entry }));
+  }
+
+  function buildMorningStatus(entry) {
+    if (entry.skip) {
+      return "Launch skipped today. Reset whenever you’re ready.";
+    }
+    const completedBlocks = MORNING_BLOCKS.filter(block => entry.completed[block]);
+    if (!completedBlocks.length) {
+      return "Start with MOVE to flood dopamine and sunlight cues.";
+    }
+    if (completedBlocks.length === MORNING_BLOCKS.length) {
+      if (!entry.celebrated) {
+        entry.celebrated = true;
+        persistMorningLaunchState();
+        showToast("Morning Launch", "All three blocks complete. Notice your focus surge later today.");
+      }
+      return "🌟 All three blocks complete. Anchor this momentum into your next action.";
+    }
+    if (completedBlocks.length === 1) {
+      return `Great job completing ${completedBlocks[0].toUpperCase()}! Next up: ${completedBlocks[0] === "move" ? "REFLECT" : "PLAN"}.`;
+    }
+    return "Great job completing MOVE and REFLECT! Lock in a process-based PLAN next.";
+  }
+
+  function updateMorningHistoryList() {
+    const list = $("morningLaunchHistory");
+    if (!list) return;
+    const history = getMorningHistory(7);
+    list.innerHTML = "";
+    if (!history.length) {
+      const item = document.createElement("li");
+      item.textContent = "No mornings logged yet.";
+      list.appendChild(item);
+      return;
+    }
+    history.forEach(({ dateKey, entry }) => {
+      const item = document.createElement("li");
+      const completedCount = MORNING_BLOCKS.filter(block => entry.completed?.[block]).length;
+      const energyLabel = entry.energy ? ENERGY_LABELS[entry.energy] || entry.energy : "--";
+      item.textContent = `${formatFriendlyDate(dateKey)} — ${completedCount}/${MORNING_BLOCKS.length} blocks • Energy: ${energyLabel}`;
+      list.appendChild(item);
+    });
+  }
+
+  function calculateMorningCompletionPercent(entry) {
+    if (!entry || entry.skip) return 0;
+    const totalBlocks = MORNING_BLOCKS.length || 1;
+    const completedBlocks = MORNING_BLOCKS.filter(block => entry.completed?.[block]).length;
+    return Math.round((completedBlocks / totalBlocks) * 100);
+  }
+
+  function renderMorningLaunchChart(limit = MORNING_CHART_LIMIT) {
+    const canvas = $("morningLaunchChart");
+    const summaryEl = $("morningLaunchChartSummary");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const width = canvas.clientWidth || canvas.width || 360;
+    const height = canvas.clientHeight || canvas.height || 160;
+    canvas.width = width;
+    canvas.height = height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const history = getMorningHistory(limit);
+    if (!history.length) {
+      ctx.fillStyle = "#6b7280";
+      ctx.font = "12px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("Complete your morning launch to unlock insights.", canvas.width / 2, canvas.height / 2);
+      if (summaryEl) {
+        summaryEl.textContent = "Complete your morning launch to unlock momentum and energy trends.";
+      }
+      return;
+    }
+    const chronological = [...history].reverse();
+    const padding = 28;
+    const graphWidth = canvas.width - padding * 2;
+    const graphHeight = canvas.height - padding * 2;
+    const xStep = chronological.length > 1 ? graphWidth / (chronological.length - 1) : 0;
+    const completionPoints = [];
+    const energyPoints = [];
+    chronological.forEach((item, index) => {
+      const { entry, dateKey } = item;
+      completionPoints.push({
+        index,
+        value: calculateMorningCompletionPercent(entry),
+        dateKey
+      });
+      const energy = Number(entry.energy);
+      energyPoints.push({
+        index,
+        value: Number.isFinite(energy) ? Math.round(Math.max(0, Math.min(100, ((energy - 1) / 4) * 100))) : null,
+        energy: Number.isFinite(energy) ? energy : null,
+        dateKey
+      });
+    });
+    const project = value => {
+      const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
+      return canvas.height - padding - (safeValue / 100) * graphHeight;
+    };
+    ctx.strokeStyle = MORNING_CHART_COLORS.axis;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.stroke();
+    const gridValues = [25, 50, 75, 100];
+    ctx.setLineDash([4, 4]);
+    gridValues.forEach(value => {
+      const y = project(value);
+      ctx.strokeStyle = MORNING_CHART_COLORS.grid;
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(canvas.width - padding, y);
+      ctx.stroke();
+      ctx.fillStyle = "#7f8a9c";
+      ctx.font = "10px system-ui";
+      ctx.textAlign = "right";
+      ctx.fillText(`${value}%`, padding - 6, y + 3);
+    });
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#9aa6b8";
+    ctx.font = "10px system-ui";
+    ctx.textAlign = "center";
+    chronological.forEach((item, index) => {
+      const x = padding + xStep * index;
+      ctx.fillText(formatShortDateLabel(item.dateKey), x, canvas.height - padding + 14);
+    });
+    ctx.fillStyle = "#8893a5";
+    ctx.textAlign = "left";
+    ctx.fillText("Energy line scaled so top = level 5", padding, padding - 10);
+    const drawLine = (points, color, dashed = false) => {
+      const valid = points.filter(point => Number.isFinite(point.value));
+      if (!valid.length) return;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash(dashed ? [6, 4] : []);
+      ctx.beginPath();
+      valid.forEach((point, idx) => {
+        const x = padding + xStep * point.index;
+        const y = project(point.value);
+        if (idx === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+      valid.forEach(point => {
+        const x = padding + xStep * point.index;
+        const y = project(point.value);
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      });
+      ctx.restore();
+    };
+    drawLine(completionPoints, MORNING_CHART_COLORS.completion, false);
+    drawLine(energyPoints, MORNING_CHART_COLORS.energy, true);
+    if (summaryEl) {
+      const completionSum = completionPoints.reduce((sum, point) => sum + (Number.isFinite(point.value) ? point.value : 0), 0);
+      const completionAvg = completionPoints.length
+        ? Math.round(completionSum / completionPoints.length)
+        : 0;
+      const energyValid = energyPoints.filter(point => Number.isFinite(point.energy));
+      let summary = `Last ${chronological.length}-day average completion: ${completionAvg}%`;
+      if (energyValid.length) {
+        const avgEnergy = energyValid.reduce((sum, point) => sum + point.energy, 0) / energyValid.length;
+        const label = ENERGY_LABELS[Math.round(avgEnergy)] || "";
+        summary += ` • Energy ≈ ${avgEnergy.toFixed(1)}${label ? ` (${label})` : ""}`;
+      } else {
+        summary += " • Log energy to compare how rested mornings drive completion";
+      }
+      summaryEl.textContent = `${summary}.`;
+    }
+  }
+
+  function updateMorningLaunchUI() {
+    const state = loadMorningLaunchState();
+    const toggle = $("morningLaunchToggle");
+    const content = $("morningLaunchContent");
+    if (toggle) {
+      toggle.checked = Boolean(state.enabled);
+    }
+    if (!content) return;
+    if (!state.enabled) {
+      clearMorningCountdown(getMorningEntry());
+      content.classList.add("hidden");
+      content.setAttribute("aria-hidden", "true");
+      const summary = $("morningLaunchChartSummary");
+      if (summary) {
+        summary.textContent = "Enable Morning Launch to start tracking your morning momentum.";
+      }
+      const chart = $("morningLaunchChart");
+      if (chart) {
+        const ctx = chart.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, chart.width, chart.height);
+        }
+      }
+      return;
+    }
+    content.classList.remove("hidden");
+    content.setAttribute("aria-hidden", "false");
+    const entry = getMorningEntry();
+    const intentionField = $("morningIntention");
+    const planField = $("morningPlanNotes");
+    if (intentionField) {
+      intentionField.value = entry.intention || "";
+    }
+    if (planField) {
+      planField.value = entry.planNotes || "";
+    }
+    const completedCount = MORNING_BLOCKS.filter(block => entry.completed?.[block]).length;
+    const progress = $("morningLaunchProgress");
+    if (progress) {
+      const width = Math.round((completedCount / MORNING_BLOCKS.length) * 100);
+      progress.style.width = `${width}%`;
+    }
+    const status = $("morningLaunchStatus");
+    if (status) {
+      status.textContent = buildMorningStatus(entry);
+    }
+    MORNING_BLOCKS.forEach(block => {
+      const blockEl = document.querySelector(`.routine-block[data-block="${block}"]`);
+      if (blockEl) {
+        blockEl.classList.toggle("completed", Boolean(entry.completed?.[block]));
+      }
+    });
+    const energySlider = $("morningEnergy");
+    const energyLabel = $("morningEnergyLabel");
+    if (energySlider) {
+      const value = Number.isFinite(entry.energy) ? entry.energy : 3;
+      energySlider.value = String(value);
+      if (energyLabel) {
+        const label = ENERGY_LABELS[value] || value;
+        energyLabel.textContent = `${label}`;
+      }
+    }
+    resumeMorningCountdown(entry);
+    updateMorningHistoryList();
+    renderMorningLaunchChart();
+  }
+
+  function initializeMorningLaunchModule() {
+    loadMorningLaunchState();
+    const toggle = $("morningLaunchToggle");
+    if (toggle) {
+      toggle.addEventListener("change", event => {
+        const state = loadMorningLaunchState();
+        state.enabled = event.target.checked;
+        persistMorningLaunchState();
+        updateMorningLaunchUI();
+      });
+    }
+    const resetBtn = $("morningLaunchResetBtn");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        if (confirm("Reset today's launch blocks?")) {
+          resetMorningEntry();
+        }
+      });
+    }
+    const skipBtn = $("morningLaunchSkipBtn");
+    if (skipBtn) {
+      skipBtn.addEventListener("click", () => setMorningSkip(getTodayKey(), true));
+    }
+    const moveStart = $("moveStartBtn");
+    if (moveStart) {
+      moveStart.addEventListener("click", () => startMorningCountdown("move"));
+    }
+    const moveComplete = $("moveCompleteBtn");
+    if (moveComplete) {
+      moveComplete.addEventListener("click", () => setMorningBlockCompleted("move"));
+    }
+    const reflectSave = $("reflectCompleteBtn");
+    if (reflectSave) {
+      reflectSave.addEventListener("click", () => {
+        const intention = $("morningIntention")?.value.trim() || "";
+        setMorningBlockCompleted("reflect", { intention });
+      });
+    }
+    const planSave = $("planCompleteBtn");
+    if (planSave) {
+      planSave.addEventListener("click", () => {
+        const planNotes = $("morningPlanNotes")?.value.trim() || "";
+        setMorningBlockCompleted("plan", { planNotes });
+      });
+    }
+    const energySlider = $("morningEnergy");
+    const energyLabel = $("morningEnergyLabel");
+    if (energySlider) {
+      energySlider.addEventListener("input", event => {
+        const value = Number(event.target.value || 3);
+        if (energyLabel) {
+          const label = ENERGY_LABELS[value] || value;
+          energyLabel.textContent = label;
+        }
+      });
+    }
+    const energySave = $("morningEnergySave");
+    if (energySave) {
+      energySave.addEventListener("click", () => {
+        const value = Number($("morningEnergy")?.value || 3);
+        logMorningEnergy(value);
+      });
+    }
+    const intentionButtons = document.querySelectorAll(".intention-buttons button[data-intention]");
+    if (intentionButtons.length) {
+      intentionButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const intention = btn.getAttribute("data-intention") || "";
+          const field = $("morningIntention");
+          if (field) {
+            field.value = intention;
+            field.focus();
+          }
+        });
+      });
+    }
+    updateMorningLaunchUI();
+  }
+
+  function generateLaunchPadItemId() {
+    return `lp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  }
+
+  function getDefaultLaunchPadState() {
+    return {
+      reminderTime: DEFAULT_LAUNCH_PAD_REMINDER,
+      activeSite: DEFAULT_LAUNCH_PAD_SITE,
+      items: {},
+      status: {},
+      lastReminderDate: null,
+      lastMorningNudge: null
+    };
+  }
+
+  function normalizeLaunchPadState(state) {
+    const base = { ...getDefaultLaunchPadState(), ...state };
+    if (!base.items || typeof base.items !== "object") {
+      base.items = {};
+    }
+    if (!base.status || typeof base.status !== "object") {
+      base.status = {};
+    }
+    Object.keys(LAUNCH_PAD_PRESETS).forEach(site => {
+      if (!Array.isArray(base.items[site]) || !base.items[site].length) {
+        base.items[site] = LAUNCH_PAD_PRESETS[site].map(name => ({
+          id: generateLaunchPadItemId(),
+          name,
+          dayRule: "any",
+          isCustom: false
+        }));
+      } else {
+        base.items[site] = base.items[site].map(item => ({
+          id: item.id || generateLaunchPadItemId(),
+          name: item.name || "Item",
+          dayRule: item.dayRule || "any",
+          isCustom: Boolean(item.isCustom)
+        }));
+      }
+    });
+    if (!base.items[base.activeSite]) {
+      base.activeSite = DEFAULT_LAUNCH_PAD_SITE;
+    }
+    return base;
+  }
+
+  function loadLaunchPadState() {
+    if (launchPadState) return launchPadState;
+    try {
+      const raw = localStorage.getItem(LAUNCH_PAD_KEY);
+      if (!raw) {
+        launchPadState = normalizeLaunchPadState(getDefaultLaunchPadState());
+        return launchPadState;
+      }
+      const parsed = JSON.parse(raw);
+      launchPadState = normalizeLaunchPadState(parsed || {});
+    } catch (error) {
+      console.error("Unable to load launch pad state", error);
+      launchPadState = normalizeLaunchPadState(getDefaultLaunchPadState());
+    }
+    return launchPadState;
+  }
+
+  function persistLaunchPadState() {
+    if (!launchPadState) return;
+    try {
+      if (launchPadState.status) {
+        const keys = Object.keys(launchPadState.status).sort();
+        if (keys.length > 90) {
+          const toRemove = keys.slice(0, keys.length - 90);
+          toRemove.forEach(key => delete launchPadState.status[key]);
+        }
+      }
+      localStorage.setItem(LAUNCH_PAD_KEY, JSON.stringify(launchPadState));
+    } catch (error) {
+      console.error("Unable to persist launch pad state", error);
+    }
+    updateLaunchPadSummary();
+  }
+
+  function ensureLaunchPadSite(site) {
+    const state = loadLaunchPadState();
+    if (!state.items[site]) {
+      const preset = LAUNCH_PAD_PRESETS[site] || [];
+      state.items[site] = preset.map(name => ({
+        id: generateLaunchPadItemId(),
+        name,
+        dayRule: "any",
+        isCustom: false
+      }));
+    }
+    return state.items[site];
+  }
+
+  function setLaunchPadActiveSite(site) {
+    const state = loadLaunchPadState();
+    state.activeSite = site;
+    ensureLaunchPadSite(site);
+    persistLaunchPadState();
+    renderLaunchPadSettings();
+  }
+
+  function loadPresetForActiveSite() {
+    const state = loadLaunchPadState();
+    const site = state.activeSite || DEFAULT_LAUNCH_PAD_SITE;
+    const preset = LAUNCH_PAD_PRESETS[site] || [];
+    state.items[site] = preset.map(name => ({
+      id: generateLaunchPadItemId(),
+      name,
+      dayRule: "any",
+      isCustom: false
+    }));
+    persistLaunchPadState();
+    renderLaunchPadSettings();
+    showToast("Launch pad reset", `${site} preset restored.`);
+  }
+
+  function addLaunchPadItem(name) {
+    const trimmed = (name || "").trim();
+    if (!trimmed) return;
+    const state = loadLaunchPadState();
+    const site = state.activeSite || DEFAULT_LAUNCH_PAD_SITE;
+    ensureLaunchPadSite(site);
+    state.items[site].push({
+      id: generateLaunchPadItemId(),
+      name: trimmed,
+      dayRule: "any",
+      isCustom: true
+    });
+    persistLaunchPadState();
+    renderLaunchPadSettings();
+  }
+
+  function removeLaunchPadItem(itemId) {
+    const state = loadLaunchPadState();
+    const site = state.activeSite || DEFAULT_LAUNCH_PAD_SITE;
+    const list = ensureLaunchPadSite(site);
+    const next = list.filter(item => item.id !== itemId);
+    state.items[site] = next;
+    persistLaunchPadState();
+    renderLaunchPadSettings();
+  }
+
+  function updateLaunchPadDayRule(itemId, dayRule) {
+    const state = loadLaunchPadState();
+    const site = state.activeSite || DEFAULT_LAUNCH_PAD_SITE;
+    const list = ensureLaunchPadSite(site);
+    const item = list.find(entry => entry.id === itemId);
+    if (item) {
+      item.dayRule = dayRule;
+      persistLaunchPadState();
+    }
+  }
+
+  function shouldIncludeLaunchPadItemOnDate(item, dateKey) {
+    if (!item || !dateKey) return false;
+    if (!item.dayRule || item.dayRule === "any") return true;
+    const dt = new Date(`${dateKey}T00:00:00`);
+    if (Number.isNaN(dt.getTime())) return true;
+    const weekday = dt.getDay();
+    if (item.dayRule === "weekdays") {
+      return weekday >= 1 && weekday <= 5;
+    }
+    return String(weekday) === String(item.dayRule);
+  }
+
+  function getLaunchPadStatus(dateKey) {
+    const state = loadLaunchPadState();
+    if (!state.status[dateKey]) {
+      state.status[dateKey] = {};
+    }
+    return state.status[dateKey];
+  }
+
+  function setLaunchPadItemReady(dateKey, itemId, ready) {
+    const status = getLaunchPadStatus(dateKey);
+    status[itemId] = Boolean(ready);
+    persistLaunchPadState();
+    updateLaunchPadSummary();
+  }
+
+  function computeLaunchPadReadiness(dateKey) {
+    const state = loadLaunchPadState();
+    const site = state.activeSite || DEFAULT_LAUNCH_PAD_SITE;
+    const list = ensureLaunchPadSite(site);
+    const relevant = list.filter(item => shouldIncludeLaunchPadItemOnDate(item, dateKey));
+    const status = getLaunchPadStatus(dateKey);
+    const readyCount = relevant.filter(item => status[item.id]).length;
+    return {
+      total: relevant.length,
+      ready: readyCount,
+      items: relevant,
+      status
+    };
+  }
+
+  function updateLaunchPadSummary() {
+    const summary = $("launchPadSummary");
+    if (!summary) return;
+    const todayKey = getTodayKey();
+    const readiness = computeLaunchPadReadiness(todayKey);
+    if (readiness.total === 0) {
+      summary.textContent = "No launch pad items scheduled for today.";
+      return;
+    }
+    summary.innerHTML = "";
+    const header = document.createElement("strong");
+    header.textContent = `Launch Pad: ${readiness.ready}/${readiness.total} items ready`;
+    summary.appendChild(header);
+    const hint = document.createElement("div");
+    if (readiness.ready === readiness.total) {
+      hint.textContent = "Everything is staged — future you says thanks!";
+    } else {
+      const remaining = readiness.total - readiness.ready;
+      hint.textContent = `${remaining} item(s) still need attention before heading out.`;
+    }
+    summary.appendChild(hint);
+  }
+
+  function renderLaunchPadSettings() {
+    const state = loadLaunchPadState();
+    const siteSelect = $("launchPadSiteSelect");
+    if (siteSelect) {
+      siteSelect.innerHTML = "";
+      Object.keys(LAUNCH_PAD_PRESETS).forEach(site => {
+        const option = document.createElement("option");
+        option.value = site;
+        option.textContent = site;
+        if (site === state.activeSite) {
+          option.selected = true;
+        }
+        siteSelect.appendChild(option);
+      });
+      siteSelect.onchange = event => {
+        setLaunchPadActiveSite(event.target.value);
+      };
+    }
+    const timeInput = $("launchPadReminderTime");
+    if (timeInput) {
+      timeInput.value = state.reminderTime || DEFAULT_LAUNCH_PAD_REMINDER;
+      timeInput.onchange = event => {
+        state.reminderTime = event.target.value || DEFAULT_LAUNCH_PAD_REMINDER;
+        persistLaunchPadState();
+      };
+    }
+    const listContainer = $("launchPadItemList");
+    if (listContainer) {
+      listContainer.innerHTML = "";
+      const items = ensureLaunchPadSite(state.activeSite || DEFAULT_LAUNCH_PAD_SITE);
+      if (!items.length) {
+        const empty = document.createElement("p");
+        empty.className = "score";
+        empty.textContent = "No launch pad items yet.";
+        listContainer.appendChild(empty);
+      } else {
+        items.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "launch-pad-item";
+          const name = document.createElement("div");
+          name.textContent = item.name;
+          if (item.isCustom) {
+            const custom = document.createElement("small");
+            custom.textContent = "custom";
+            name.appendChild(document.createElement("br"));
+            name.appendChild(custom);
+          }
+          const select = document.createElement("select");
+          WEEKDAY_OPTIONS.forEach(option => {
+            const opt = document.createElement("option");
+            opt.value = option.value;
+            opt.textContent = option.label;
+            if (option.value === item.dayRule) {
+              opt.selected = true;
+            }
+            select.appendChild(opt);
+          });
+          select.addEventListener("change", event => {
+            updateLaunchPadDayRule(item.id, event.target.value);
+          });
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "🗑";
+          removeBtn.title = "Remove item";
+          removeBtn.addEventListener("click", () => {
+            if (confirm(`Remove ${item.name}?`)) {
+              removeLaunchPadItem(item.id);
+            }
+          });
+          row.appendChild(name);
+          row.appendChild(select);
+          row.appendChild(removeBtn);
+          listContainer.appendChild(row);
+        });
+      }
+    }
+    updateLaunchPadSummary();
+  }
+
+  function renderLaunchPadModalList(targetDateKey) {
+    const container = $("launchPadModalList");
+    if (!container) return;
+    container.innerHTML = "";
+    const readiness = computeLaunchPadReadiness(targetDateKey);
+    if (!readiness.total) {
+      const empty = document.createElement("p");
+      empty.className = "score";
+      empty.textContent = "No items needed for that day.";
+      container.appendChild(empty);
+      return;
+    }
+    readiness.items.forEach(item => {
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = Boolean(readiness.status[item.id]);
+      checkbox.addEventListener("change", event => {
+        setLaunchPadItemReady(targetDateKey, item.id, event.target.checked);
+      });
+      const span = document.createElement("span");
+      span.textContent = item.name;
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      container.appendChild(label);
+    });
+  }
+
+  function setModalVisibility(modalId, isVisible) {
+    const overlay = $(modalId);
+    if (!overlay) return;
+    if (isVisible) {
+      overlay.classList.remove("hidden");
+      overlay.setAttribute("aria-hidden", "false");
+    } else {
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function openLaunchPadModal(options = {}) {
+    const { targetDateKey = getTomorrowKey() } = options;
+    renderLaunchPadModalList(targetDateKey);
+    const overlay = $("launchPadModal");
+    if (!overlay) return;
+    overlay.dataset.targetDate = targetDateKey;
+    setModalVisibility("launchPadModal", true);
+  }
+
+  function closeLaunchPadModal() {
+    setModalVisibility("launchPadModal", false);
+  }
+
+  function initializeLaunchPadModule() {
+    loadLaunchPadState();
+    renderLaunchPadSettings();
+    const addBtn = $("launchPadAddItem");
+    if (addBtn) {
+      addBtn.addEventListener("click", () => {
+        const field = $("launchPadNewItem");
+        addLaunchPadItem(field?.value || "");
+        if (field) field.value = "";
+      });
+    }
+    const presetBtn = $("launchPadLoadPreset");
+    if (presetBtn) {
+      presetBtn.addEventListener("click", () => {
+        if (confirm("Reset this site's launch pad to the curated preset?")) {
+          loadPresetForActiveSite();
+        }
+      });
+    }
+    const openEvening = $("openLaunchPadModal");
+    if (openEvening) {
+      openEvening.addEventListener("click", () => openLaunchPadModal({ targetDateKey: getTomorrowKey() }));
+    }
+    const morningReview = $("launchPadMorningReview");
+    if (morningReview) {
+      morningReview.addEventListener("click", () => openLaunchPadModal({ targetDateKey: getTodayKey() }));
+    }
+    const modalClose = $("launchPadModalClose");
+    if (modalClose) {
+      modalClose.addEventListener("click", () => {
+        closeLaunchPadModal();
+      });
+    }
+    const overlay = $("launchPadModal");
+    if (overlay) {
+      overlay.addEventListener("click", event => {
+        if (event.target === overlay) {
+          closeLaunchPadModal();
+        }
+      });
+    }
+    updateLaunchPadSummary();
+  }
+
+  function getDefaultSleepState() {
+    return {
+      enabled: false,
+      checklist: {},
+      melatonin: {
+        enabled: false,
+        time: DEFAULT_MELATONIN_TIME,
+        lastPrompt: null
+      },
+      sunlight: {
+        enabled: false,
+        time: DEFAULT_SUNLIGHT_TIME,
+        lastPrompt: null
+      },
+      restRatings: {}
+    };
+  }
+
+  function loadSleepToolkitState() {
+    if (sleepToolkitState) return sleepToolkitState;
+    try {
+      const raw = localStorage.getItem(SLEEP_TOOLKIT_KEY);
+      if (!raw) {
+        sleepToolkitState = getDefaultSleepState();
+        return sleepToolkitState;
+      }
+      const parsed = JSON.parse(raw);
+      sleepToolkitState = { ...getDefaultSleepState(), ...parsed };
+      if (!sleepToolkitState.checklist || typeof sleepToolkitState.checklist !== "object") {
+        sleepToolkitState.checklist = {};
+      }
+      if (!sleepToolkitState.restRatings || typeof sleepToolkitState.restRatings !== "object") {
+        sleepToolkitState.restRatings = {};
+      }
+    } catch (error) {
+      console.error("Unable to load sleep toolkit state", error);
+      sleepToolkitState = getDefaultSleepState();
+    }
+    return sleepToolkitState;
+  }
+
+  function persistSleepToolkitState() {
+    if (!sleepToolkitState) return;
+    try {
+      if (sleepToolkitState.checklist) {
+        const keys = Object.keys(sleepToolkitState.checklist).sort();
+        if (keys.length > 120) {
+          const toRemove = keys.slice(0, keys.length - 120);
+          toRemove.forEach(key => delete sleepToolkitState.checklist[key]);
+        }
+      }
+      if (sleepToolkitState.restRatings) {
+        const ratingKeys = Object.keys(sleepToolkitState.restRatings).sort();
+        if (ratingKeys.length > 180) {
+          const prune = ratingKeys.slice(0, ratingKeys.length - 180);
+          prune.forEach(key => delete sleepToolkitState.restRatings[key]);
+        }
+      }
+      localStorage.setItem(SLEEP_TOOLKIT_KEY, JSON.stringify(sleepToolkitState));
+    } catch (error) {
+      console.error("Unable to persist sleep toolkit state", error);
+    }
+  }
+
+  function getSleepChecklistEntry(dateKey = getTodayKey()) {
+    const state = loadSleepToolkitState();
+    if (!state.checklist[dateKey]) {
+      const entry = {};
+      SLEEP_CHECKLIST_ITEMS.forEach(item => {
+        entry[item.id] = false;
+      });
+      state.checklist[dateKey] = entry;
+    }
+    return state.checklist[dateKey];
+  }
+
+  function toggleSleepChecklistItem(itemId, value, dateKey = getTodayKey()) {
+    const checklist = getSleepChecklistEntry(dateKey);
+    if (!Object.prototype.hasOwnProperty.call(checklist, itemId)) return;
+    checklist[itemId] = Boolean(value);
+    persistSleepToolkitState();
+    updateSleepToolkitUI();
+  }
+
+  function computeSleepCompletion(dateKey = getTodayKey()) {
+    const checklist = getSleepChecklistEntry(dateKey);
+    const total = SLEEP_CHECKLIST_ITEMS.length;
+    const completed = SLEEP_CHECKLIST_ITEMS.filter(item => checklist[item.id]).length;
+    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+    return { total, completed, percent };
+  }
+
+  function renderSleepChecklist(dateKey = getTodayKey()) {
+    const container = $("sleepChecklist");
+    if (!container) return;
+    const checklist = getSleepChecklistEntry(dateKey);
+    container.innerHTML = "";
+    SLEEP_CHECKLIST_ITEMS.forEach(item => {
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = Boolean(checklist[item.id]);
+      checkbox.addEventListener("change", event => {
+        toggleSleepChecklistItem(item.id, event.target.checked, dateKey);
+      });
+      const span = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = item.label;
+      const tip = document.createElement("div");
+      tip.textContent = item.tip;
+      tip.style.fontSize = "0.78rem";
+      tip.style.color = "#9aa0a6";
+      span.appendChild(title);
+      span.appendChild(tip);
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      container.appendChild(label);
+    });
+  }
+
+  function updateSleepCompletionSummary(dateKey = getTodayKey()) {
+    const summary = $("sleepCompletionSummary");
+    if (!summary) return;
+    const { total, completed, percent } = computeSleepCompletion(dateKey);
+    summary.textContent = `You hit ${completed}/${total} sleep steps – ${percent}% consistency.`;
+  }
+
+  function renderSleepTips() {
+    const container = $("sleepTips");
+    if (!container) return;
+    container.innerHTML = "";
+    SLEEP_CHECKLIST_ITEMS.forEach(item => {
+      const tip = document.createElement("div");
+      tip.textContent = `• ${item.tip}`;
+      container.appendChild(tip);
+    });
+  }
+
+  function recordSleepRating(dateKey, rating) {
+    const state = loadSleepToolkitState();
+    state.restRatings[dateKey] = Number(rating);
+    persistSleepToolkitState();
+    updateSleepToolkitUI();
+    const label = SLEEP_RATING_LABELS[rating] || rating;
+    showToast("Sleep logged", `Restfulness marked as ${label}.`);
+  }
+
+  function countChartTasksCompletedOn(dateKey) {
+    if (!dateKey) return 0;
+    return tasks.filter(task => {
+      if (!isChartTask(task)) return false;
+      const completionKey = getDateKeyFromIso(task.completedAt);
+      return completionKey === dateKey;
+    }).length;
+  }
+
+  function updateSleepCorrelationSummary() {
+    const summary = $("sleepCorrelationSummary");
+    if (!summary) return;
+    const state = loadSleepToolkitState();
+    const entries = Object.entries(state.restRatings || {});
+    if (!entries.length) {
+      summary.textContent = "Log rest ratings to see how sleep fuels charting momentum.";
+      return;
+    }
+    let highCount = 0;
+    let highCharts = 0;
+    let lowCount = 0;
+    let lowCharts = 0;
+    entries.forEach(([dateKey, rating]) => {
+      const charts = countChartTasksCompletedOn(dateKey);
+      if (Number(rating) >= 4) {
+        highCount += 1;
+        highCharts += charts;
+      } else {
+        lowCount += 1;
+        lowCharts += charts;
+      }
+    });
+    const avgHigh = highCount ? (highCharts / highCount).toFixed(1) : "0.0";
+    const avgLow = lowCount ? (lowCharts / lowCount).toFixed(1) : "0.0";
+    summary.innerHTML = `Rested (≥4): ${avgHigh} chart(s) completed next day.<br/>Draggy (≤3): ${avgLow} chart(s).`;
+  }
+
+  function renderSleepMorningRating() {
+    const container = $("sleepMorningRating");
+    if (!container) return;
+    container.innerHTML = "";
+    const state = loadSleepToolkitState();
+    const targetKey = getYesterdayKey();
+    if (!targetKey) return;
+    const existing = state.restRatings[targetKey];
+    const label = document.createElement("label");
+    label.style.margin = "0";
+    label.textContent = `How rested do you feel this morning (${formatFriendlyDate(targetKey)})?`;
+    container.appendChild(label);
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "1";
+    slider.max = "5";
+    slider.step = "1";
+    slider.value = String(existing || 3);
+    slider.style.flex = "1";
+    const valueLabel = document.createElement("span");
+    valueLabel.textContent = SLEEP_RATING_LABELS[slider.value] || slider.value;
+    slider.addEventListener("input", event => {
+      const val = Number(event.target.value);
+      valueLabel.textContent = SLEEP_RATING_LABELS[val] || val;
+    });
+    const save = document.createElement("button");
+    save.textContent = existing ? "Update rating" : "Log rating";
+    save.addEventListener("click", () => {
+      recordSleepRating(targetKey, Number(slider.value));
+    });
+    container.appendChild(slider);
+    container.appendChild(valueLabel);
+    container.appendChild(save);
+  }
+
+  function updateSleepToolkitUI() {
+    const state = loadSleepToolkitState();
+    const toggle = $("sleepToolkitToggle");
+    const content = $("sleepToolkitContent");
+    if (toggle) {
+      toggle.checked = Boolean(state.enabled);
+    }
+    if (!content) return;
+    if (!state.enabled) {
+      content.classList.add("hidden");
+      content.setAttribute("aria-hidden", "true");
+      const alert = $("sunlightAlert");
+      if (alert) {
+        alert.classList.add("hidden");
+        alert.setAttribute("aria-hidden", "true");
+      }
+      if (sunlightAlertTimeoutId) {
+        clearTimeout(sunlightAlertTimeoutId);
+        sunlightAlertTimeoutId = null;
+      }
+      return;
+    }
+    content.classList.remove("hidden");
+    content.setAttribute("aria-hidden", "false");
+    renderSleepChecklist();
+    updateSleepCompletionSummary();
+    renderSleepTips();
+    const melatoninToggle = $("melatoninReminderToggle");
+    if (melatoninToggle) {
+      melatoninToggle.checked = Boolean(state.melatonin?.enabled);
+    }
+    const melatoninTime = $("melatoninReminderTime");
+    if (melatoninTime) {
+      melatoninTime.value = state.melatonin?.time || DEFAULT_MELATONIN_TIME;
+    }
+    const sunlightToggle = $("sunlightReminderToggle");
+    if (sunlightToggle) {
+      sunlightToggle.checked = Boolean(state.sunlight?.enabled);
+    }
+    const sunlightTime = $("sunlightReminderTime");
+    if (sunlightTime) {
+      sunlightTime.value = state.sunlight?.time || DEFAULT_SUNLIGHT_TIME;
+    }
+    renderSleepMorningRating();
+    updateSleepCorrelationSummary();
+  }
+
+  function initializeSleepToolkitModule() {
+    loadSleepToolkitState();
+    const toggle = $("sleepToolkitToggle");
+    if (toggle) {
+      toggle.addEventListener("change", event => {
+        const state = loadSleepToolkitState();
+        state.enabled = event.target.checked;
+        persistSleepToolkitState();
+        updateSleepToolkitUI();
+      });
+    }
+    const melatoninToggle = $("melatoninReminderToggle");
+    if (melatoninToggle) {
+      melatoninToggle.addEventListener("change", event => {
+        const state = loadSleepToolkitState();
+        state.melatonin.enabled = event.target.checked;
+        persistSleepToolkitState();
+      });
+    }
+    const melatoninTime = $("melatoninReminderTime");
+    if (melatoninTime) {
+      melatoninTime.addEventListener("change", event => {
+        const state = loadSleepToolkitState();
+        state.melatonin.time = event.target.value || DEFAULT_MELATONIN_TIME;
+        persistSleepToolkitState();
+      });
+    }
+    const sunlightToggle = $("sunlightReminderToggle");
+    if (sunlightToggle) {
+      sunlightToggle.addEventListener("change", event => {
+        const state = loadSleepToolkitState();
+        state.sunlight.enabled = event.target.checked;
+        persistSleepToolkitState();
+      });
+    }
+    const sunlightTime = $("sunlightReminderTime");
+    if (sunlightTime) {
+      sunlightTime.addEventListener("change", event => {
+        const state = loadSleepToolkitState();
+        state.sunlight.time = event.target.value || DEFAULT_SUNLIGHT_TIME;
+        persistSleepToolkitState();
+      });
+    }
+    updateSleepToolkitUI();
+  }
+
+  function getMinutesFromTimeString(timeString) {
+    if (!timeString || typeof timeString !== "string") return null;
+    const [hours, minutes] = timeString.split(":").map(part => Number(part));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+    return hours * 60 + minutes;
+  }
+
+  function showSunlightBanner(message) {
+    const alert = $("sunlightAlert");
+    if (!alert) return;
+    alert.textContent = message;
+    alert.classList.remove("hidden");
+    alert.setAttribute("aria-hidden", "false");
+    if (sunlightAlertTimeoutId) {
+      clearTimeout(sunlightAlertTimeoutId);
+    }
+    sunlightAlertTimeoutId = setTimeout(() => {
+      alert.classList.add("hidden");
+      alert.setAttribute("aria-hidden", "true");
+    }, 5 * 60 * 1000);
+  }
+
+  function checkLaunchPadReminder() {
+    const state = loadLaunchPadState();
+    const timeMinutes = getMinutesFromTimeString(state.reminderTime || DEFAULT_LAUNCH_PAD_REMINDER);
+    if (timeMinutes === null) return;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const todayKey = getTodayKey();
+    if (currentMinutes >= timeMinutes && state.lastReminderDate !== todayKey) {
+      state.lastReminderDate = todayKey;
+      persistLaunchPadState();
+      showToast("Launch pad", "Prepare tomorrow's kit? Check your evening checklist.");
+    }
+  }
+
+  function checkMelatoninReminder() {
+    const state = loadSleepToolkitState();
+    if (!state.enabled || !state.melatonin?.enabled) return;
+    const timeMinutes = getMinutesFromTimeString(state.melatonin.time || DEFAULT_MELATONIN_TIME);
+    if (timeMinutes === null) return;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const todayKey = getTodayKey();
+    if (currentMinutes >= timeMinutes && state.melatonin.lastPrompt !== todayKey) {
+      state.melatonin.lastPrompt = todayKey;
+      persistSleepToolkitState();
+      showToast("Melatonin reminder", "Dim the lights and consider your melatonin routine.");
+    }
+  }
+
+  function checkSunlightReminder() {
+    const state = loadSleepToolkitState();
+    if (!state.enabled || !state.sunlight?.enabled) return;
+    const timeMinutes = getMinutesFromTimeString(state.sunlight.time || DEFAULT_SUNLIGHT_TIME);
+    if (timeMinutes === null) return;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const todayKey = getTodayKey();
+    if (currentMinutes >= timeMinutes && state.sunlight.lastPrompt !== todayKey) {
+      state.sunlight.lastPrompt = todayKey;
+      persistSleepToolkitState();
+      showSunlightBanner("Sunlight exposure due — step outside for 10 minutes to halt melatonin.");
+      showToast("Sunlight cue", "Morning light = cortisol boost + melatonin shutoff.");
+    }
+  }
+
+  function checkAllReminders() {
+    checkLaunchPadReminder();
+    checkMelatoninReminder();
+    checkSunlightReminder();
+  }
+
+  function startReminderLoop() {
+    if (reminderIntervalId) {
+      clearInterval(reminderIntervalId);
+    }
+    checkAllReminders();
+    reminderIntervalId = setInterval(checkAllReminders, 60 * 1000);
   }
 
   function handleCategoryChange(value) {
@@ -1045,7 +3053,7 @@
     return fallback * remainingCount;
   }
 
-  function createSubTask(name, priority) {
+  function createSubTask(name, priority, options = {}) {
     return {
       id: generateSubTaskId(),
       name,
@@ -1053,7 +3061,9 @@
       priority,
       startTime: null,
       completionTime: null,
-      durationMinutes: null
+      durationMinutes: null,
+      isFirstThree: Boolean(options.isFirstThree),
+      deferredUntilUnlock: Boolean(options.deferredUntilUnlock)
     };
   }
 
@@ -1070,12 +3080,74 @@
       completionTime: sub.completionTime || null,
       durationMinutes: sub.durationMinutes !== undefined && sub.durationMinutes !== null && Number.isFinite(Number(sub.durationMinutes))
         ? Number(sub.durationMinutes)
-        : null
+        : null,
+      isFirstThree: Boolean(sub.isFirstThree),
+      deferredUntilUnlock: Boolean(sub.deferredUntilUnlock)
     };
     if (normalized.durationMinutes === null && normalized.startTime && normalized.completionTime) {
       normalized.durationMinutes = calculateDurationMinutes(normalized.startTime, normalized.completionTime);
     }
     return normalized;
+  }
+
+  function shouldTriggerFirstThreeWizard(taskName, subLines, category) {
+    const normalizedName = (taskName || "").toLowerCase();
+    const wordCount = normalizedName.split(/\s+/).filter(Boolean).length;
+    const hasKeyword = FIRST_THREE_KEYWORDS.some(keyword => normalizedName.includes(keyword));
+    const isChart = (category || "").toLowerCase() === "chart";
+    if (Array.isArray(subLines) && subLines.length > 0) {
+      return false;
+    }
+    return wordCount >= FIRST_THREE_WORD_THRESHOLD || hasKeyword || isChart;
+  }
+
+  function applyFirstThreeSteps(task, steps, basePriority) {
+    if (!task) return;
+    const trimmed = Array.isArray(steps)
+      ? steps.map(step => step.trim()).filter(Boolean)
+      : [];
+    while (trimmed.length < 3) {
+      const defaults = ["Open workspace", "Outline first move", "Start five-minute draft"];
+      trimmed.push(defaults[trimmed.length] || `Micro step ${trimmed.length + 1}`);
+    }
+    task.firstThreeMode = true;
+    task.firstThreeUnlocked = Boolean(task.firstThreeUnlocked);
+    task.firstThreeSteps = trimmed.slice(0, 3);
+    const firstThreeSubs = trimmed.slice(0, 3).map(step => createSubTask(step, basePriority, { isFirstThree: true }));
+    const existingSubs = Array.isArray(task.subTasks) ? task.subTasks : [];
+    const deferred = !task.firstThreeUnlocked;
+    const remainder = existingSubs.map(sub => ({
+      ...sub,
+      deferredUntilUnlock: deferred && !sub.isFirstThree
+    }));
+    task.subTasks = [...firstThreeSubs, ...remainder];
+  }
+
+  function getVisibleSubTasks(task) {
+    if (!task || !Array.isArray(task.subTasks)) return [];
+    if (!task.firstThreeMode || task.firstThreeUnlocked) {
+      return task.subTasks;
+    }
+    return task.subTasks.filter(sub => sub.isFirstThree || !sub.deferredUntilUnlock);
+  }
+
+  function maybeUnlockFirstThree(task, { silent = false } = {}) {
+    if (!task || !task.firstThreeMode) return;
+    const subs = Array.isArray(task.subTasks) ? task.subTasks : [];
+    const firstThreeSubs = subs.filter(sub => sub.isFirstThree);
+    if (firstThreeSubs.length === 0) {
+      task.firstThreeUnlocked = true;
+      task.subTasks = subs.map(sub => ({ ...sub, deferredUntilUnlock: false }));
+      return;
+    }
+    const allComplete = firstThreeSubs.every(sub => sub.completed);
+    if (allComplete && !task.firstThreeUnlocked) {
+      task.firstThreeUnlocked = true;
+      task.subTasks = subs.map(sub => ({ ...sub, deferredUntilUnlock: false }));
+      if (!silent) {
+        showToast("Momentum!", "Nice momentum! Here's what's next.");
+      }
+    }
   }
 
   function computeTotalChartDuration(subTasks) {
@@ -1467,7 +3539,9 @@
         return existing.sub;
       }
       changed = true;
-      return createSubTask(step, basePriority);
+      return createSubTask(step, basePriority, {
+        deferredUntilUnlock: task.firstThreeMode && !task.firstThreeUnlocked
+      });
     });
 
     const extras = task.subTasks.filter(sub => {
@@ -1487,6 +3561,11 @@
       if (sub.priority !== basePriority) {
         sub.priority = basePriority;
         changed = true;
+      }
+      if (task.firstThreeMode) {
+        sub.deferredUntilUnlock = !task.firstThreeUnlocked && !sub.isFirstThree;
+      } else if (sub.deferredUntilUnlock) {
+        sub.deferredUntilUnlock = false;
       }
     });
 
@@ -1582,10 +3661,21 @@
       sub.completionTime = new Date().toISOString();
       sub.durationMinutes = calculateDurationMinutes(sub.startTime, sub.completionTime) ?? 0;
       stopTimerForSubTask(sub.id);
+      if (task.firstThreeMode) {
+        maybeUnlockFirstThree(task);
+      }
     } else {
       sub.completed = false;
       sub.completionTime = null;
       sub.durationMinutes = null;
+      if (task.firstThreeMode && sub.isFirstThree) {
+        task.firstThreeUnlocked = false;
+        task.subTasks.forEach(step => {
+          if (!step.isFirstThree) {
+            step.deferredUntilUnlock = true;
+          }
+        });
+      }
     }
     const nextOptions = { ...options, taskId: task.id, subId: sub.id };
     refreshAfterSubTaskChange(resolvedIndex, nextOptions);
@@ -1620,7 +3710,9 @@
     if (!Array.isArray(task.subTasks)) {
       task.subTasks = [];
     }
-    task.subTasks.push(createSubTask(name.trim(), base));
+    task.subTasks.push(createSubTask(name.trim(), base, {
+      deferredUntilUnlock: task.firstThreeMode && !task.firstThreeUnlocked
+    }));
     refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
   }
 
@@ -1637,7 +3729,12 @@
     if (progressElement) {
       container.appendChild(progressElement);
     }
-    task.subTasks.forEach((sub, subIndex) => {
+    const visibleSubs = getVisibleSubTasks(task);
+    const hiddenCount = task.firstThreeMode && !task.firstThreeUnlocked
+      ? task.subTasks.length - visibleSubs.length
+      : 0;
+    visibleSubs.forEach(sub => {
+      const subIndex = task.subTasks.findIndex(entry => entry.id === sub.id);
       const row = document.createElement("div");
       row.className = "subtask-row";
       if (sub.completed) row.classList.add("completed");
@@ -1683,6 +3780,13 @@
       container.appendChild(row);
     });
 
+    if (hiddenCount > 0) {
+      const gate = document.createElement("div");
+      gate.className = "celebration";
+      gate.textContent = "Complete the first three micro-steps to reveal the rest of the chart flow.";
+      container.appendChild(gate);
+    }
+
     const controls = document.createElement("div");
     controls.className = "chart-step-controls";
 
@@ -1725,7 +3829,9 @@
     progressSummary.className = "task-progress";
     progressSummary.textContent = `${completedCount}/${task.subTasks.length} steps done`;
     container.appendChild(progressSummary);
-    task.subTasks.forEach((sub, subIndex) => {
+    const visibleSubs = getVisibleSubTasks(task);
+    visibleSubs.forEach(sub => {
+      const subIndex = task.subTasks.findIndex(entry => entry.id === sub.id);
       const row = document.createElement("div");
       row.className = "subtask-row";
       if (sub.completed) row.classList.add("completed");
@@ -1740,6 +3846,12 @@
       row.appendChild(label);
       container.appendChild(row);
     });
+    if (task.firstThreeMode && !task.firstThreeUnlocked) {
+      const hint = document.createElement("div");
+      hint.className = "celebration";
+      hint.textContent = "Unlock the remaining steps by completing your first three micro-actions.";
+      container.appendChild(hint);
+    }
     return container;
   }
 
@@ -1915,6 +4027,13 @@
   let focusTimerLastPing = null;
   let focusSoundEnabled = true;
   let focusAudioContext = null;
+  let morningLaunchState = null;
+  let launchPadState = null;
+  let sleepToolkitState = null;
+  let morningCountdown = null;
+  let reminderIntervalId = null;
+  let pendingTaskDraft = null;
+  let sunlightAlertTimeoutId = null;
 
   const meltdownShieldState = {
     stepIndex: 0
@@ -2257,6 +4376,16 @@
     task.dateOfService = task.dateOfService || null;
     task.createdAt = task.createdAt || task.addedAt || new Date().toISOString();
     if (task.category === "Charts") task.category = "Chart";
+    task.firstThreeMode = Boolean(task.firstThreeMode);
+    if (!Array.isArray(task.firstThreeSteps)) {
+      task.firstThreeSteps = [];
+    }
+    if (!task.firstThreeMode) {
+      task.firstThreeUnlocked = true;
+      task.firstThreeSteps = [];
+    } else if (task.firstThreeUnlocked === undefined) {
+      task.firstThreeUnlocked = false;
+    }
     if (task.dateOfService) {
       task.daysSinceVisit = calculateDaysSince(task.dateOfService);
     } else {
@@ -2304,6 +4433,24 @@
         normalizedSub.priority = base;
         return normalizedSub;
       });
+      if (task.firstThreeMode) {
+        if (!task.firstThreeSteps.length) {
+          task.firstThreeSteps = task.subTasks.slice(0, 3).map(sub => sub.name);
+        } else {
+          task.firstThreeSteps = task.firstThreeSteps.slice(0, 3);
+        }
+        task.subTasks.forEach((sub, index) => {
+          const isFirst = index < 3;
+          sub.isFirstThree = isFirst;
+          sub.deferredUntilUnlock = !task.firstThreeUnlocked && !isFirst;
+        });
+        maybeUnlockFirstThree(task, { silent: true });
+      } else {
+        task.subTasks.forEach(sub => {
+          sub.isFirstThree = false;
+          sub.deferredUntilUnlock = false;
+        });
+      }
     }
     updateChartDurationForTask(task);
     task.priority = computePriority(task);
@@ -2314,10 +4461,12 @@
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
-  // create a new task with optional sub‑tasks from textarea
-  function addTask() {
-    const name = $("name").value.trim();
-    if (!name) return;
+  function buildTaskDraftFromForm() {
+    const nameField = $("name");
+    if (!nameField) return null;
+    const name = nameField.value.trim();
+    if (!name) return null;
+    const category = $("taskCategory").value || "General";
     const authorField = $("authorType");
     const authorType = authorField ? (authorField.value || "attending") : "attending";
     const patientField = $("patientType");
@@ -2332,7 +4481,7 @@
     const task = {
       id: Date.now().toString(),
       name,
-      category: $("taskCategory").value || "General",
+      category,
       authorType,
       patientType,
       visitType,
@@ -2351,38 +4500,167 @@
       completedAt: null,
       createdAt: new Date().toISOString(),
       addedAt: new Date().toISOString(),
-      subTasks: []
+      subTasks: [],
+      firstThreeMode: false,
+      firstThreeUnlocked: true,
+      firstThreeSteps: []
     };
-
-    // base priority for sub‑tasks
     const basePriority = computePriority({ ...task, subTasks: [] });
-
-    // parse sub‑tasks from textarea (one per line)
     const subLines = $("initialSubTasks").value.split('\n')
-      .map(l => l.trim())
+      .map(line => line.trim())
       .filter(Boolean);
     const hasCustomSubTasks = subLines.length > 0;
     if (isChartTask(task)) {
       task.useChartTemplate = !hasCustomSubTasks;
     }
-    task.subTasks = subLines.map(line => createSubTask(line, basePriority));
+    return { task, basePriority, subLines };
+  }
 
+  function finalizeNewTask(draft, options = {}) {
+    if (!draft) return;
+    const { task, basePriority, subLines } = draft;
+    const firstThreeSteps = Array.isArray(options.firstThreeSteps) ? options.firstThreeSteps : null;
+    const deferred = task.firstThreeMode && !task.firstThreeUnlocked;
+    task.subTasks = Array.isArray(subLines)
+      ? subLines.map(line => createSubTask(line, basePriority, {
+          deferredUntilUnlock: deferred
+        }))
+      : [];
+    if (firstThreeSteps && firstThreeSteps.length) {
+      task.firstThreeMode = true;
+      task.firstThreeUnlocked = false;
+      applyFirstThreeSteps(task, firstThreeSteps, basePriority);
+    } else {
+      if (!task.firstThreeMode) {
+        task.firstThreeUnlocked = true;
+        task.firstThreeSteps = [];
+      }
+    }
     if (isChartTask(task)) {
       const defaultsAdded = ensureChartSubTasks(task, { basePriority });
       if (defaultsAdded) {
         task.subTasks = task.subTasks.map(sub => normalizeSubTask(sub, basePriority));
       }
     }
-
+    maybeUnlockFirstThree(task, { silent: true });
     task.priority = computePriority(task);
     updateChartDurationForTask(task);
     tasks.push(task);
     persist();
-
     clearFormFields();
     toggleEditMode(false);
     editingTaskId = null;
     updateUI();
+  }
+
+  // create a new task with optional sub‑tasks from textarea
+  function addTask() {
+    const draft = buildTaskDraftFromForm();
+    if (!draft) return;
+    const triggerWizard = shouldTriggerFirstThreeWizard(
+      draft.task.name,
+      draft.subLines,
+      draft.task.category
+    );
+    if (triggerWizard) {
+      pendingTaskDraft = draft;
+      openFirstThreeWizard();
+      return;
+    }
+    finalizeNewTask(draft);
+  }
+
+  function generateFirstThreeSuggestions(taskName) {
+    const anchor = (taskName || "").split(/[–—:-]/)[0].trim() || "this work";
+    return [
+      `Open materials for ${anchor}`,
+      "List three micro-actions in your notebook",
+      "Start a 5-minute draft or outline"
+    ];
+  }
+
+  function setFirstThreeInputs(values) {
+    const ids = ["firstThreeStep1", "firstThreeStep2", "firstThreeStep3"];
+    ids.forEach((id, index) => {
+      const field = $(id);
+      if (field) {
+        field.value = values[index] || "";
+      }
+    });
+  }
+
+  function openFirstThreeWizard() {
+    const overlay = $("firstThreeWizard");
+    if (!overlay) return;
+    const suggestions = generateFirstThreeSuggestions(pendingTaskDraft?.task?.name);
+    setFirstThreeInputs(suggestions);
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    const firstInput = $("firstThreeStep1");
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.select();
+    }
+  }
+
+  function closeFirstThreeWizard() {
+    const overlay = $("firstThreeWizard");
+    if (!overlay) return;
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  function submitFirstThreeWizard() {
+    if (!pendingTaskDraft) {
+      closeFirstThreeWizard();
+      return;
+    }
+    const steps = ["firstThreeStep1", "firstThreeStep2", "firstThreeStep3"]
+      .map(id => $(id)?.value || "")
+      .map(value => value.trim())
+      .filter(Boolean);
+    finalizeNewTask(pendingTaskDraft, { firstThreeSteps: steps });
+    pendingTaskDraft = null;
+    closeFirstThreeWizard();
+  }
+
+  function skipFirstThreeWizard() {
+    if (pendingTaskDraft) {
+      pendingTaskDraft.task.firstThreeMode = false;
+      pendingTaskDraft.task.firstThreeUnlocked = true;
+      pendingTaskDraft.task.firstThreeSteps = [];
+      finalizeNewTask(pendingTaskDraft);
+      pendingTaskDraft = null;
+    }
+    closeFirstThreeWizard();
+  }
+
+  function cancelFirstThreeWizard() {
+    pendingTaskDraft = null;
+    closeFirstThreeWizard();
+  }
+
+  function initializeFirstThreeWizard() {
+    const saveBtn = $("firstThreeSave");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", submitFirstThreeWizard);
+    }
+    const skipBtn = $("firstThreeSkip");
+    if (skipBtn) {
+      skipBtn.addEventListener("click", skipFirstThreeWizard);
+    }
+    const cancelBtn = $("firstThreeCancel");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", cancelFirstThreeWizard);
+    }
+    const overlay = $("firstThreeWizard");
+    if (overlay) {
+      overlay.addEventListener("click", event => {
+        if (event.target === overlay) {
+          cancelFirstThreeWizard();
+        }
+      });
+    }
   }
 
   function startEditTask(taskId) {
@@ -2482,15 +4760,42 @@
         normalizedExisting.priority = basePriority;
         return normalizedExisting;
       }
-      return createSubTask(line, basePriority);
+      return createSubTask(line, basePriority, {
+        deferredUntilUnlock: task.firstThreeMode && !task.firstThreeUnlocked
+      });
     });
 
     task.subTasks = newSubTasks;
+    if (task.firstThreeMode) {
+      const firstThreeSubset = task.subTasks.slice(0, 3);
+      if (firstThreeSubset.length < 3) {
+        task.firstThreeMode = false;
+        task.firstThreeUnlocked = true;
+        task.firstThreeSteps = [];
+        task.subTasks = task.subTasks.map(sub => ({ ...sub, isFirstThree: false, deferredUntilUnlock: false }));
+      } else {
+        task.firstThreeSteps = firstThreeSubset.map(sub => sub.name);
+        task.subTasks = task.subTasks.map((sub, index) => {
+          const isFirst = index < 3;
+          return {
+            ...sub,
+            isFirstThree: isFirst,
+            deferredUntilUnlock: !task.firstThreeUnlocked && !isFirst
+          };
+        });
+        maybeUnlockFirstThree(task, { silent: true });
+      }
+    } else {
+      task.subTasks = task.subTasks.map(sub => ({ ...sub, isFirstThree: false, deferredUntilUnlock: false }));
+    }
     if (isChartTask(task)) {
       const defaultsChanged = ensureChartSubTasks(task, { basePriority });
       if (defaultsChanged) {
         task.subTasks = task.subTasks.map(sub => normalizeSubTask(sub, basePriority));
       }
+    }
+    if (task.firstThreeMode) {
+      maybeUnlockFirstThree(task, { silent: true });
     }
     task.priority = computePriority(task);
     updateChartDurationForTask(task);
@@ -2695,6 +5000,13 @@
       card.appendChild(descriptorContainer);
     }
 
+    if (task.firstThreeMode && !task.firstThreeUnlocked && mode === TASK_LIST_MODES.ACTIVE) {
+      const nudge = document.createElement("div");
+      nudge.className = "score";
+      nudge.textContent = "Start with the first three micro-steps to unlock the rest.";
+      card.appendChild(nudge);
+    }
+
     const progress = createProgressElement(task);
     if (progress) {
       card.appendChild(progress);
@@ -2883,6 +5195,7 @@
         dueTodayList.appendChild(wrap);
       }
     });
+    updateSleepToolkitUI();
   }
 
   function toggleShowAllActive() {
@@ -3179,6 +5492,10 @@
     setDefaultFieldValues();
     updateBillingReminder();
     initializeSoundPreference();
+    initializeFirstThreeWizard();
+    initializeMorningLaunchModule();
+    initializeLaunchPadModule();
+    initializeSleepToolkitModule();
     const saved = localStorage.getItem("tasks");
     if (saved) {
       tasks = JSON.parse(saved).map(task => {
@@ -3207,8 +5524,10 @@
         clinicSite: normalizeClinicSite(template.clinicSite)
       }));
     }
+    startReminderLoop();
     renderTemplates();
     updateUI();
+    updateSleepToolkitUI();
     updateDerivedFields();
   });
   </script>
