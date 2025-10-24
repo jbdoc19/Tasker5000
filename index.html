@@ -43,6 +43,20 @@
       flex-wrap: wrap;
       margin-bottom: 0.75rem;
     }
+    .time-budget-control {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: #a0a0a0;
+    }
+    .time-budget-control select {
+      background: #1a1a1a;
+      color: #eee;
+      border: 1px solid #444;
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+    }
     .show-all-toggle {
       background: #2a2a2a;
       color: #fff;
@@ -315,6 +329,87 @@
     .chart-step-controls button {
       font-size: 0.85rem;
     }
+    #focusTimer {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #d0dcff;
+    }
+    #focusTimer.pulse {
+      animation: focus-pulse 1s ease-out;
+    }
+    @keyframes focus-pulse {
+      0% { color: #d0dcff; }
+      50% { color: #0a84ff; }
+      100% { color: #d0dcff; }
+    }
+    .sound-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .sound-toggle input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      accent-color: #0a84ff;
+    }
+    .audit-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 999;
+    }
+    .audit-modal {
+      background: #151515;
+      border-radius: 10px;
+      max-width: 520px;
+      width: 100%;
+      padding: 1.25rem;
+      color: #f5f5f5;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+    .audit-modal h3 {
+      margin: 0 0 0.75rem;
+    }
+    .audit-summary {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: #d0dcff;
+    }
+    .audit-task-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+    .audit-task-list li {
+      background: #1f1f1f;
+      border-radius: 6px;
+      padding: 0.6rem;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+    .audit-task-list li strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .audit-task-subtasks {
+      margin: 0.35rem 0 0;
+      padding-left: 1rem;
+      color: #b0b0b0;
+    }
+    .audit-modal button {
+      margin-top: 1rem;
+    }
     [aria-live] { outline: none; }
   </style>
 </head>
@@ -399,6 +494,10 @@
       <h3>Templates</h3>
       <div id="templateButtons"></div>
     </div>
+    <label class="sound-toggle" for="focusSoundToggle">
+      <input type="checkbox" id="focusSoundToggle" checked />
+      Enable focus mode ping
+    </label>
     <!-- Category filter bar -->
     <div id="categoryFilter" class="category-filter"></div>
     <!-- Progress per category -->
@@ -411,6 +510,16 @@
           <option value="active" selected>Active Tasks</option>
           <option value="completed">Completed Tasks</option>
         </select>
+        <label class="time-budget-control" for="timeBudget">
+          I have
+          <select id="timeBudget">
+            <option value="">--</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="60">60</option>
+          </select>
+          minutes
+        </label>
         <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
       </div>
       <div id="taskList"></div>
@@ -423,6 +532,7 @@
 
   <!-- Focus mode -->
   <section id="focus" class="hidden">
+    <div id="focusTimer" aria-live="polite">🧭 Focus Time: 0:00</div>
     <div class="focus" tabindex="0" aria-live="polite"></div>
     <div class="score" id="scoreView"></div>
     <div id="subTaskView"></div>
@@ -446,6 +556,9 @@
   const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
   let storedChartFieldValues = null;
   let currentScaleDescriptorCategory = "general";
+  const FOCUS_PING_INTERVAL_MS = 10 * 60 * 1000;
+  const AUDIT_STORAGE_PREFIX = "audit_";
+  const AUDIT_SHOWN_SUFFIX = "_shown";
 
   function getChartFields() {
     return chartFieldIds
@@ -812,6 +925,31 @@
     return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
   }
 
+  function getSelectedTimeBudget() {
+    const rawValue = $("timeBudget")?.value;
+    if (rawValue === undefined || rawValue === null || rawValue === "") return null;
+    const parsed = Number(rawValue);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  function estimateTaskMinutes(task) {
+    if (!task) return 0;
+    const subTasks = Array.isArray(task.subTasks) ? task.subTasks : [];
+    const remaining = subTasks.filter(sub => !sub.completed);
+    const remainingCount = remaining.length > 0 ? remaining.length : 1;
+    const recordedDurations = subTasks
+      .map(sub => Number(sub.durationMinutes))
+      .filter(value => Number.isFinite(value) && value > 0);
+    if (recordedDurations.length) {
+      const avg = recordedDurations.reduce((sum, value) => sum + value, 0) / recordedDurations.length;
+      return Math.max(1, Math.ceil(avg * remainingCount));
+    }
+    const difficultyMap = { 1: 60, 2: 45, 3: 30, 4: 15, 5: 5 };
+    const difficulty = clampScale(task.difficulty, 3);
+    const fallback = difficultyMap[difficulty] || 30;
+    return fallback * remainingCount;
+  }
+
   function createSubTask(name, priority) {
     return {
       id: generateSubTaskId(),
@@ -912,6 +1050,284 @@
     update();
     const intervalId = setInterval(update, 1000);
     runningTimers.set(sub.id, intervalId);
+  }
+
+  function stopFocusTimer(resetDisplay = true) {
+    if (focusTimerId) {
+      clearInterval(focusTimerId);
+      focusTimerId = null;
+    }
+    focusTimerStart = null;
+    focusTimerLastPing = null;
+    const timerEl = $("focusTimer");
+    if (!timerEl) return;
+    timerEl.classList.remove("pulse");
+    if (resetDisplay) {
+      timerEl.textContent = "🧭 Focus Time: 0:00";
+    }
+  }
+
+  function updateFocusTimerDisplay(elapsedMs) {
+    const timerEl = $("focusTimer");
+    if (!timerEl) return;
+    const minutes = Math.floor(elapsedMs / 60000);
+    const seconds = Math.floor((elapsedMs % 60000) / 1000);
+    timerEl.textContent = `🧭 Focus Time: ${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function playFocusPing() {
+    if (!focusSoundEnabled) return;
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+    if (!focusAudioContext) {
+      try {
+        focusAudioContext = new AudioContextCtor();
+      } catch (error) {
+        focusAudioContext = null;
+        return;
+      }
+    }
+    if (focusAudioContext.state === "suspended") {
+      focusAudioContext.resume().catch(() => {});
+    }
+    const duration = 0.4;
+    const oscillator = focusAudioContext.createOscillator();
+    const gain = focusAudioContext.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, focusAudioContext.currentTime);
+    gain.gain.setValueAtTime(0.0001, focusAudioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.05, focusAudioContext.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, focusAudioContext.currentTime + duration);
+    oscillator.connect(gain);
+    gain.connect(focusAudioContext.destination);
+    oscillator.start();
+    oscillator.stop(focusAudioContext.currentTime + duration);
+  }
+
+  function triggerFocusPing() {
+    const timerEl = $("focusTimer");
+    if (timerEl) {
+      timerEl.classList.add("pulse");
+      setTimeout(() => timerEl.classList.remove("pulse"), 1000);
+    }
+    playFocusPing();
+  }
+
+  function startFocusTimer() {
+    const timerEl = $("focusTimer");
+    if (!timerEl) return;
+    stopFocusTimer(false);
+    focusTimerStart = Date.now();
+    focusTimerLastPing = focusTimerStart;
+    updateFocusTimerDisplay(0);
+    focusTimerId = setInterval(() => {
+      if (focusTimerStart === null) return;
+      const now = Date.now();
+      const elapsed = now - focusTimerStart;
+      updateFocusTimerDisplay(elapsed);
+      if (!focusTimerLastPing || now - focusTimerLastPing >= FOCUS_PING_INTERVAL_MS) {
+        triggerFocusPing();
+        focusTimerLastPing = now;
+      }
+    }, 1000);
+  }
+
+  function setFocusSoundPreference(enabled) {
+    focusSoundEnabled = Boolean(enabled);
+    localStorage.setItem("focusSoundEnabled", focusSoundEnabled ? "true" : "false");
+  }
+
+  function getAuditStorageKey(date = new Date()) {
+    return `${AUDIT_STORAGE_PREFIX}${date.toISOString().split("T")[0]}`;
+  }
+
+  function getAuditShownKey(storageKey) {
+    return `${storageKey}${AUDIT_SHOWN_SUFFIX}`;
+  }
+
+  function loadAuditEntries(storageKey) {
+    if (!storageKey) return [];
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function recordTaskCompletion(task) {
+    if (!task) return;
+    const storageKey = getAuditStorageKey();
+    const entries = loadAuditEntries(storageKey);
+    const subDetails = Array.isArray(task.subTasks)
+      ? task.subTasks.map(sub => {
+          const rawDuration = Number(sub?.durationMinutes);
+          const normalizedDuration = Number.isFinite(rawDuration) && rawDuration > 0
+            ? Number(rawDuration.toFixed(2))
+            : null;
+          return {
+            name: sub?.name || "Step",
+            duration: normalizedDuration
+          };
+        })
+      : [];
+    let totalDuration = getTaskTotalDuration(task);
+    if (Number.isFinite(totalDuration) && totalDuration > 0) {
+      totalDuration = Number(totalDuration.toFixed(2));
+    } else {
+      const fallbackTotal = subDetails.reduce((sum, sub) => {
+        return Number.isFinite(sub.duration) ? sum + sub.duration : sum;
+      }, 0);
+      totalDuration = fallbackTotal > 0 ? Number(fallbackTotal.toFixed(2)) : null;
+    }
+    entries.push({
+      name: task.name || "Task",
+      subDetails,
+      totalDuration,
+      completedAt: getCompletionTimestamp(task) || new Date().toISOString()
+    });
+    localStorage.setItem(storageKey, JSON.stringify(entries));
+  }
+
+  function showEndOfDayAudit(entries = null, shownKeyOverride = null) {
+    const storageKey = getAuditStorageKey();
+    const auditEntries = entries || loadAuditEntries(storageKey);
+    if (!auditEntries.length) return;
+    const shownKey = shownKeyOverride || getAuditShownKey(storageKey);
+
+    const overlay = document.createElement("div");
+    overlay.className = "audit-backdrop";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "auditModalTitle");
+
+    const modal = document.createElement("div");
+    modal.className = "audit-modal";
+
+    const title = document.createElement("h3");
+    title.id = "auditModalTitle";
+    title.textContent = "End of Day Audit";
+    modal.appendChild(title);
+
+    const totalMinutes = auditEntries.reduce((sum, entry) => {
+      const value = Number(entry?.totalDuration);
+      return Number.isFinite(value) ? sum + value : sum;
+    }, 0);
+
+    let longestSubtask = null;
+    auditEntries.forEach(entry => {
+      const details = Array.isArray(entry?.subDetails) ? entry.subDetails : [];
+      details.forEach(sub => {
+        const duration = Number(sub?.duration);
+        if (!Number.isFinite(duration)) return;
+        if (!longestSubtask || duration > longestSubtask.duration) {
+          longestSubtask = {
+            taskName: entry?.name || "Task",
+            name: sub?.name || "Step",
+            duration
+          };
+        }
+      });
+    });
+
+    const summary = document.createElement("div");
+    summary.className = "audit-summary";
+    const summaryLines = [
+      `Tasks completed: ${auditEntries.length}`,
+      `Productive minutes: ${formatDuration(totalMinutes)}`,
+      longestSubtask
+        ? `Longest subtask: ${longestSubtask.name} (${formatDuration(longestSubtask.duration)}) — ${longestSubtask.taskName}`
+        : "Longest subtask: --"
+    ];
+    summaryLines.forEach(text => {
+      const line = document.createElement("div");
+      line.textContent = text;
+      summary.appendChild(line);
+    });
+    modal.appendChild(summary);
+
+    const list = document.createElement("ul");
+    list.className = "audit-task-list";
+    auditEntries.forEach(entry => {
+      const item = document.createElement("li");
+      const header = document.createElement("strong");
+      header.textContent = `${entry?.name || "Task"} — ${formatDuration(entry?.totalDuration)}`;
+      item.appendChild(header);
+      const details = Array.isArray(entry?.subDetails) ? entry.subDetails : [];
+      if (details.length) {
+        const subList = document.createElement("ul");
+        subList.className = "audit-task-subtasks";
+        details.forEach(sub => {
+          const subItem = document.createElement("li");
+          subItem.textContent = `${sub?.name || "Step"}: ${formatDuration(sub?.duration)}`;
+          subList.appendChild(subItem);
+        });
+        item.appendChild(subList);
+      }
+      list.appendChild(item);
+    });
+    modal.appendChild(list);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.textContent = "Close";
+
+    const closeModal = () => {
+      overlay.remove();
+      document.removeEventListener("keydown", onKeyDown);
+    };
+
+    const onKeyDown = event => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeModal();
+      }
+    };
+
+    closeBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        closeModal();
+      }
+    });
+    document.addEventListener("keydown", onKeyDown);
+
+    modal.appendChild(closeBtn);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => closeBtn.focus());
+    if (shownKey) {
+      localStorage.setItem(shownKey, "true");
+    }
+  }
+
+  function maybeShowEndOfDayAudit() {
+    const remainingActive = tasks.filter(task => !isTaskCompleted(task)).length;
+    if (remainingActive > 0) return;
+    const storageKey = getAuditStorageKey();
+    const shownKey = getAuditShownKey(storageKey);
+    if (localStorage.getItem(shownKey) === "true") return;
+    const entries = loadAuditEntries(storageKey);
+    if (!entries.length) return;
+    showEndOfDayAudit(entries, shownKey);
+  }
+
+  function initializeSoundPreference() {
+    const saved = localStorage.getItem("focusSoundEnabled");
+    if (saved !== null) {
+      focusSoundEnabled = saved === "true";
+    }
+    const toggle = $("focusSoundToggle");
+    if (!toggle) return;
+    toggle.checked = focusSoundEnabled;
+    toggle.addEventListener("change", event => {
+      setFocusSoundPreference(event.target.checked);
+      if (focusSoundEnabled && focusAudioContext && focusAudioContext.state === "suspended") {
+        focusAudioContext.resume().catch(() => {});
+      }
+    });
   }
 
   function ensureChartSubTasks(task, options = {}) {
@@ -1399,6 +1815,11 @@
   let templates = [];
   let focusQueue = [];
   let editingTaskId = null;
+  let focusTimerId = null;
+  let focusTimerStart = null;
+  let focusTimerLastPing = null;
+  let focusSoundEnabled = true;
+  let focusAudioContext = null;
 
   function clearFormFields() {
     setDefaultFieldValues();
@@ -1917,7 +2338,7 @@
     return details;
   }
 
-  function renderTaskListCard(task, mode) {
+  function renderTaskListCard(task, mode, timeBudgetMinutes = null) {
     const card = document.createElement("article");
     card.className = "task-card";
     if (mode === TASK_LIST_MODES.COMPLETED) {
@@ -2010,6 +2431,10 @@
 
     if (mode === TASK_LIST_MODES.ACTIVE) {
       metaItems.push(`Score ${task.priority.toFixed(1)}`);
+      if (Number.isFinite(timeBudgetMinutes) && timeBudgetMinutes > 0) {
+        const estimatedMinutes = estimateTaskMinutes(task);
+        metaItems.push(`Est ${estimatedMinutes} min`);
+      }
       if (task.dueDate) metaItems.push(`Due ${task.dueDate}`);
       if (task.addedAt) {
         const formatted = formatDateTime(task.addedAt);
@@ -2086,10 +2511,16 @@
     const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     $("startBtn").disabled = remaining.length === 0;
+    const timeBudget = getSelectedTimeBudget();
+    const hasTimeBudget = Number.isFinite(timeBudget);
+    const sortedRemaining = [...remaining].sort((a, b) => b.priority - a.priority);
+    const budgetFilteredRemaining = hasTimeBudget
+      ? sortedRemaining.filter(task => estimateTaskMinutes(task) <= timeBudget)
+      : sortedRemaining;
 
     const toggleBtn = $("showAllToggle");
     if (toggleBtn) {
-      if (taskListMode !== TASK_LIST_MODES.ACTIVE || remaining.length <= 3) {
+      if (taskListMode !== TASK_LIST_MODES.ACTIVE || budgetFilteredRemaining.length <= 3) {
         toggleBtn.classList.add("hidden");
         toggleBtn.textContent = "Show All";
       } else {
@@ -2108,24 +2539,28 @@
           return bDate - aDate;
         });
     } else {
-      const sortedRemaining = [...remaining].sort((a, b) => b.priority - a.priority);
-      if (remaining.length <= 3 || showAllActiveTasks) {
-        displayTasks = sortedRemaining;
+      const pool = budgetFilteredRemaining;
+      if (pool.length <= 3 || showAllActiveTasks) {
+        displayTasks = pool;
       } else {
-        displayTasks = sortedRemaining.slice(0, 3);
+        displayTasks = pool.slice(0, 3);
       }
     }
 
     if (!displayTasks.length) {
       const empty = document.createElement("p");
       empty.className = "score";
-      empty.textContent = taskListMode === TASK_LIST_MODES.COMPLETED
-        ? "No completed tasks yet."
-        : "No active tasks to show.";
+      if (taskListMode === TASK_LIST_MODES.ACTIVE && hasTimeBudget && remaining.length > 0 && budgetFilteredRemaining.length === 0) {
+        empty.textContent = "No tasks fit the selected time budget.";
+      } else {
+        empty.textContent = taskListMode === TASK_LIST_MODES.COMPLETED
+          ? "No completed tasks yet."
+          : "No active tasks to show.";
+      }
       taskList.appendChild(empty);
     } else {
       displayTasks.forEach(task => {
-        const card = renderTaskListCard(task, taskListMode);
+        const card = renderTaskListCard(task, taskListMode, hasTimeBudget ? timeBudget : null);
         taskList.appendChild(card);
       });
     }
@@ -2183,6 +2618,7 @@
 
   function startFocus(initialTaskId = null) {
     if (editingTaskId) cancelEdit();
+    stopFocusTimer();
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
     focusQueue = tasks.filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
@@ -2211,11 +2647,13 @@
       const subTaskView = $("subTaskView");
       if (subTaskView) subTaskView.innerHTML = "";
       clearRunningTimers();
+      stopFocusTimer();
       currentFocusTaskIndex = null;
       return;
     }
     const current = focusQueue[0];
     display.textContent = current.name;
+    startFocusTimer();
     const idx = tasks.findIndex(t => t.id === current.id);
     const task = idx !== -1 ? tasks[idx] : current;
     scoreView.textContent = `Score: ${task.priority.toFixed(1)}`;
@@ -2235,6 +2673,8 @@
       task.subTasks.forEach(sub => stopTimerForSubTask(sub.id));
     }
     persist();
+    recordTaskCompletion(task);
+    maybeShowEndOfDayAudit();
     if (!options.skipUI) {
       updateUI();
     }
@@ -2248,6 +2688,7 @@
     focusQueue = focusQueue.filter(t => t.id !== taskId);
     if (wasCurrentFocus) {
       clearRunningTimers();
+      stopFocusTimer();
     }
     const focusSection = $("focus");
     if (focusSection && !focusSection.classList.contains("hidden")) {
@@ -2269,6 +2710,7 @@
 
   function backToCapture() {
     clearRunningTimers();
+    stopFocusTimer();
     currentFocusTaskIndex = null;
     $("focus").classList.add("hidden");
     $("capture").classList.remove("hidden");
@@ -2442,12 +2884,22 @@
     });
   }
 
+  function registerTimeBudgetControl() {
+    const budgetSelect = $("timeBudget");
+    if (!budgetSelect) return;
+    budgetSelect.addEventListener("change", () => {
+      updateUI();
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     initializeChartFields();
     registerFieldListeners();
     registerTaskListModeControl();
+    registerTimeBudgetControl();
     setDefaultFieldValues();
     updateBillingReminder();
+    initializeSoundPreference();
     const saved = localStorage.getItem("tasks");
     if (saved) {
       tasks = JSON.parse(saved).map(task => {
