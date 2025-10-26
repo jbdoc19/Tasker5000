@@ -928,21 +928,21 @@
     }
 
     .page-header {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
+      text-align: center;
+      margin: 8px 0 12px;
     }
 
-    .page-title {
-      font-size: clamp(20px, 3vw, 22px);
+    .page-header .title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-weight: 600;
-      margin: 0;
     }
 
-    .billing-reminder {
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      margin: 0;
+    .page-header .subtitle {
+      margin-top: 6px;
+      opacity: 0.8;
+      font-size: 0.9rem;
     }
 
     .action-bar {
@@ -1029,15 +1029,101 @@
     }
 
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-4);
+      background: rgba(18, 22, 28, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
       box-shadow: var(--shadow-soft);
       display: flex;
       flex-direction: column;
       gap: var(--space-3);
     }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .card-head h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .card-body {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .card--collapsed .card-body {
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1400;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal__content {
+      width: min(560px, 92vw);
+      max-height: 80vh;
+      overflow: auto;
+      background: #0f141a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px;
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .modal__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-1);
+    }
+
+    .modal__close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    .template-card {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      background: rgba(16, 20, 28, 0.9);
+      display: grid;
+      gap: 6px;
+    }
+
+    .template-card strong {
+      font-size: 0.95rem;
+    }
+
+    .template-card button {
+      justify-self: flex-start;
+    }
+
 
     .section-heading {
       display: flex;
@@ -1207,6 +1293,15 @@
       gap: var(--space-3);
     }
 
+    .task-form-actions--inline {
+      align-items: center;
+    }
+
+    .task-form-actions--inline .btn {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
     .task-form-minimal {
       display: grid;
       gap: var(--space-2);
@@ -1366,10 +1461,10 @@
 
   <section id="capture">
     <div class="app-shell">
-      <header class="page-header">
-        <h1 class="page-title">🎯 Task Focus</h1>
-        <p id="billingReminder" class="billing-reminder"></p>
-      </header>
+      <div class="page-header">
+        <div class="title">🎯 Task Focus</div>
+        <div class="subtitle" id="billingReminder"></div>
+      </div>
 
       <div class="action-bar">
         <div class="action-bar-primary">
@@ -1384,39 +1479,31 @@
       </div>
 
       <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
-        <div class="section-heading">
-          <h2>Next focus move</h2>
-          <span id="nextTaskScore" class="chip"></span>
+        <div class="card-head">
+          <h2>Next focus</h2>
+          <span id="nextTaskScore" class="chip hidden"></span>
         </div>
         <p id="nextTaskName" class="next-task-name"></p>
         <p id="nextTaskSubstep" class="next-task-meta"></p>
         <div id="nextTaskChips" class="next-task-meta"></div>
         <div class="next-task-actions">
-          <button id="nextTaskStartFull" class="btn btn-primary" type="button">Start full focus</button>
+          <button id="nextTaskStartFull" class="btn btn-primary" type="button">Start full</button>
           <button id="nextTaskStartSprint" class="btn btn-secondary" type="button">Start 5-min</button>
         </div>
         <p id="nextTaskEmpty" class="next-task-empty hidden">You're clear for now. Add what matters next.</p>
+      </section>
 
-        <div class="task-form-minimal">
-          <div class="task-form-header">
-            <label for="name">Task Name
-              <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
-            </label>
-          </div>
-          <div class="task-form-actions">
-            <button type="button" class="btn btn-ghost" id="useTemplateButton">Use template</button>
-            <button
-              type="button"
-              class="btn btn-ghost"
-              id="expandTaskDetailsButton"
-              aria-controls="taskDetails"
-            >
-              Expand details
-            </button>
-          </div>
+      <section id="addTaskCard" class="card card--collapsed" aria-live="polite" data-collapsed="true">
+        <div class="card-head">
+          <h2>Add task</h2>
+          <button id="toggleAddTaskCard" class="link-button" type="button" aria-expanded="false" aria-controls="addTaskCardBody">
+            Expand
+          </button>
         </div>
-
-        <div id="taskDetails" class="task-details-panel" data-collapsed="true">
+        <div class="card-body" id="addTaskCardBody" aria-hidden="true">
+          <label for="name">Task name
+            <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
+          </label>
           <label for="taskCategory">Category
             <select id="taskCategory">
               <option value="General" selected>General</option>
@@ -1428,57 +1515,99 @@
               <option value="Personal">Personal</option>
             </select>
           </label>
-          <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
-            <label for="authorType">Chart Author
-              <select id="authorType">
-                <option value="attending" selected>Attending</option>
-                <option value="resident">Resident</option>
-              </select>
-            </label>
-            <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
-              <select id="patientType">
-                <option value="Non-Complex" selected>Non-Complex</option>
-                <option value="Complex">Complex</option>
-              </select>
-            </label>
-            <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
-              <select id="visitType">
-                <option value="Follow-Up" selected>Follow-Up</option>
-                <option value="Establish Care">Establish Care</option>
-                <option value="Well Child Visit">Well Child Visit</option>
-                <option value="Acute Visit">Acute Visit</option>
-              </select>
-            </label>
-            <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
-              <select id="clinicSite">
-                <option value="General Clinic" selected>General Clinic</option>
-                <option value="St PJ’s Shelter">St PJ’s Shelter</option>
-                <option value="Craniofacial Clinic">Craniofacial Clinic</option>
-              </select>
-            </label>
-            <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
-              <input type="date" id="dateOfService" />
-            </label>
-            <small id="chartAgeDisplay" class="chart-age"></small>
+          <div class="task-form-actions task-form-actions--inline">
+            <button type="button" class="btn btn-ghost" id="btn-use-template">Use template</button>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              id="expandTaskDetailsButton"
+              aria-controls="taskDetails"
+              aria-expanded="false"
+            >
+              Show details
+            </button>
           </div>
-          <label for="importance">Importance (1–5) <select id="importance"></select></label>
-          <label for="urgency">Urgency (1–5)
-            <select id="urgency"></select>
-          </label>
-          <small id="urgencyHint" class="urgency-hint"></small>
-          <label for="novelty">Novelty (1–5) <select id="novelty"></select></label>
-          <label for="interest">Interest (1–5) <select id="interest"></select></label>
-          <label for="externalPressure">External Pressure (1–5)
-            <select id="externalPressure"></select>
-          </label>
-          <label for="timeToStart">Time to Start (1–5) <select id="timeToStart"></select></label>
-          <label for="difficulty">Difficulty (1–5) <select id="difficulty"></select></label>
-          <label for="dueDate" title="Optional specific target date; used for personal scheduling.">Due Date (Optional)
-            <input type="date" id="dueDate" />
-          </label>
-          <label for="initialSubTasks">Subtasks
-            <textarea id="initialSubTasks" rows="3" placeholder="One subtask per line."></textarea>
-          </label>
+          <div id="taskDetails" class="task-details-panel" data-collapsed="true">
+            <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
+              <label for="authorType">Chart Author
+                <select id="authorType">
+                  <option value="attending" selected>Attending</option>
+                  <option value="resident">Resident</option>
+                </select>
+              </label>
+              <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
+                <select id="patientType">
+                  <option value="Non-Complex" selected>Non-Complex</option>
+                  <option value="Complex">Complex</option>
+                </select>
+              </label>
+              <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
+                <select id="visitType">
+                  <option value="Follow-Up" selected>Follow-Up</option>
+                  <option value="Establish Care">Establish Care</option>
+                  <option value="Well Child Visit">Well Child Visit</option>
+                  <option value="Acute Visit">Acute Visit</option>
+                </select>
+              </label>
+              <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
+                <select id="clinicSite">
+                  <option value="General Clinic" selected>General Clinic</option>
+                  <option value="St PJ’s Shelter">St PJ’s Shelter</option>
+                  <option value="Craniofacial Clinic">Craniofacial Clinic</option>
+                </select>
+              </label>
+              <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
+                <input type="date" id="dateOfService" />
+              </label>
+              <small id="chartAgeDisplay" class="chart-age"></small>
+            </div>
+            <label for="importance">Importance (1–5) <select id="importance"></select></label>
+            <label for="urgency">Urgency (1–5)
+              <select id="urgency"></select>
+            </label>
+            <small id="urgencyHint" class="urgency-hint"></small>
+            <label for="novelty">Novelty (1–5) <select id="novelty"></select></label>
+            <label for="interest">Interest (1–5) <select id="interest"></select></label>
+            <label for="externalPressure">External Pressure (1–5)
+              <select id="externalPressure"></select>
+            </label>
+            <label for="timeToStart">Time to Start (1–5) <select id="timeToStart"></select></label>
+            <label for="difficulty">Difficulty (1–5) <select id="difficulty"></select></label>
+            <label for="dueDate" title="Optional specific target date; used for personal scheduling.">Due Date (Optional)
+              <input type="date" id="dueDate" />
+            </label>
+            <label for="initialSubTasks">Subtasks
+              <textarea id="initialSubTasks" rows="3" placeholder="One subtask per line."></textarea>
+            </label>
+            <label class="sound-toggle" for="focusSoundToggle">
+              <input type="checkbox" id="focusSoundToggle" checked />
+              Enable focus mode ping
+            </label>
+            <div id="categoryFilter" class="category-filter"></div>
+            <div id="categoryProgress" class="category-progress"></div>
+            <details class="peek">
+              <summary>🔍 Peek at tasks</summary>
+              <div class="task-list-header" id="taskListHeader">
+                <label class="task-view-label" for="taskViewMode">View</label>
+                <select id="taskViewMode" class="task-view-select">
+                  <option value="active" selected>Active Tasks</option>
+                  <option value="completed">Completed Tasks</option>
+                </select>
+                <label class="time-budget-control" for="timeBudget">
+                  I have
+                  <select id="timeBudget" data-field="time-budget">
+                    <option value="">--</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="60">60</option>
+                  </select>
+                  minutes
+                </label>
+                <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
+              </div>
+              <div id="taskList"></div>
+            </details>
+          </div>
           <div class="task-form-actions">
             <button id="addTaskBtn" type="button" onclick="addTask()">Add Task</button>
             <button id="saveUpdateBtn" class="hidden" type="button" onclick="saveTaskUpdate()">Save Update</button>
@@ -1487,34 +1616,6 @@
             <button type="button" onclick="startFocus()" id="startBtn" disabled>Get started</button>
             <button type="button" onclick="reset()">Reset</button>
           </div>
-          <label class="sound-toggle" for="focusSoundToggle">
-            <input type="checkbox" id="focusSoundToggle" checked />
-            Enable focus mode ping
-          </label>
-          <div id="categoryFilter" class="category-filter"></div>
-          <div id="categoryProgress" class="category-progress"></div>
-          <details class="peek">
-            <summary>🔍 Peek at tasks</summary>
-            <div class="task-list-header" id="taskListHeader">
-              <label class="task-view-label" for="taskViewMode">View</label>
-              <select id="taskViewMode" class="task-view-select">
-                <option value="active" selected>Active Tasks</option>
-                <option value="completed">Completed Tasks</option>
-              </select>
-              <label class="time-budget-control" for="timeBudget">
-                I have
-                <select id="timeBudget">
-                  <option value="">--</option>
-                  <option value="15">15</option>
-                  <option value="30">30</option>
-                  <option value="60">60</option>
-                </select>
-                minutes
-              </label>
-              <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
-            </div>
-            <div id="taskList"></div>
-          </details>
         </div>
       </section>
 
@@ -1587,7 +1688,7 @@
               </div>
               <div class="energy-rating">
                 <label for="morningEnergy" style="margin:0;">Energy check-in</label>
-                <input id="morningEnergy" type="range" min="1" max="5" step="1" />
+                <input id="morningEnergy" data-field="energy-level" type="range" min="1" max="5" step="1" value="3" />
                 <span id="morningEnergyLabel">--</span>
                 <button id="morningEnergySave" type="button">Log energy</button>
               </div>
@@ -1699,6 +1800,13 @@
     </div>
   </section>
 
+  <div id="template-modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="templateModalTitle">
+    <div class="modal__content">
+      <div class="modal__head"><strong id="templateModalTitle">Choose a template</strong><button class="modal__close" type="button">✕</button></div>
+      <div class="template-grid" id="template-grid"></div>
+    </div>
+  </div>
+
   <div id="firstThreeWizard" class="wizard-overlay hidden" aria-hidden="true">
     <div class="wizard-content" role="dialog" aria-modal="true" aria-labelledby="firstThreeTitle">
       <h3 id="firstThreeTitle">🪜 First-Three-Steps Wizard</h3>
@@ -1761,7 +1869,9 @@
   let sprintEndTime = null;
   let nextTaskId = null;
   let showAllDueToday = false;
+  let lastFocusedBeforeTemplateModal = null;
   const MODULE_STATE_PREFIX = "moduleState_";
+  const ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
   const COLLAPSIBLE_MODULE_IDS = [
     "morningLaunchModule",
     "launchPadModule",
@@ -3655,13 +3765,6 @@
     return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
   }
 
-  function getSelectedTimeBudget() {
-    const rawValue = $("timeBudget")?.value;
-    if (rawValue === undefined || rawValue === null || rawValue === "") return null;
-    const parsed = Number(rawValue);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-  }
-
   function estimateTaskMinutes(task) {
     if (!task) return 0;
     const subTasks = Array.isArray(task.subTasks) ? task.subTasks : [];
@@ -3674,11 +3777,50 @@
       const avg = recordedDurations.reduce((sum, value) => sum + value, 0) / recordedDurations.length;
       return Math.max(1, Math.ceil(avg * remainingCount));
     }
-    const difficultyMap = { 1: 60, 2: 45, 3: 30, 4: 15, 5: 5 };
-    const difficulty = clampScale(task.difficulty, 3);
-    const fallback = difficultyMap[difficulty] || 30;
-    return fallback * remainingCount;
+    const n = subTasks.length;
+    const difficulty = Number(task.difficulty || 3);
+    const startFriction = Number(task.timeToStart || 3);
+    const estimate = Math.round((10 + 2 * n) * (0.7 + 0.15 * difficulty) + (startFriction - 3) * 2);
+    return Math.max(5, estimate);
   }
+
+  function getEnergyLevel() {
+    const el = document.querySelector('[data-field="energy-level"]');
+    if (el) {
+      const value = Number(el.value || el.getAttribute('data-value'));
+      if (Number.isFinite(value)) return value;
+    }
+    return 3;
+  }
+
+  function getTimeBudgetMinutes() {
+    const el = document.querySelector('[data-field="time-budget"]');
+    if (!el) return Infinity;
+    const value = Number(el.value);
+    return Number.isFinite(value) && value > 0 ? value : Infinity;
+  }
+
+  function energyFit(task, energyLevel) {
+    if (!Number.isFinite(energyLevel)) return 1;
+    const est = estimateTaskMinutes(task);
+    const difficulty = Number(task?.difficulty || 3);
+    const lowEnergyWeight = energyLevel <= 2 ? (est > 20 ? 0.85 : 1) * (difficulty >= 4 ? 0.85 : 1) : 1;
+    const highEnergyWeight = energyLevel >= 4 ? 1.05 : 1;
+    return lowEnergyWeight * highEnergyWeight;
+  }
+
+  function timeFit(task, budgetMinutes) {
+    if (!Number.isFinite(budgetMinutes)) return 1;
+    const est = estimateTaskMinutes(task);
+    if (!Number.isFinite(est) || est <= 0) return 1;
+    if (est <= budgetMinutes) {
+      const ratio = est / (budgetMinutes * 0.85);
+      return Math.max(0.85, Math.min(1.05, 1.05 - Math.abs(1 - ratio) * 0.3));
+    }
+    const overRatio = est / budgetMinutes;
+    return Math.max(0.55, 1 - (overRatio - 1) * 0.6);
+  }
+
 
   function getEffectiveEnergyLevel() {
     let level = null;
@@ -3708,32 +3850,11 @@
   }
 
   function computeEnergyFit(task, energyLevel) {
-    if (!Number.isFinite(energyLevel)) return 1;
-    const estimatedMinutes = estimateTaskMinutes(task) || 0;
-    const difficulty = clampScale(task?.difficulty, 3);
-    let weight = 1;
-    if (energyLevel <= 2) {
-      if (estimatedMinutes > 25) weight *= 0.75;
-      if (difficulty >= 4) weight *= 0.8;
-    } else if (energyLevel >= 4) {
-      if (estimatedMinutes >= 20) weight *= 1.05;
-      if (difficulty >= 4) weight *= 1.05;
-    }
-    return weight;
+    return energyFit(task, energyLevel);
   }
 
   function computeTimeFit(task, budgetMinutes) {
-    if (!Number.isFinite(budgetMinutes)) return 1;
-    const estimatedMinutes = estimateTaskMinutes(task) || 0;
-    if (!estimatedMinutes) return 1;
-    if (estimatedMinutes <= budgetMinutes) {
-      const ratio = estimatedMinutes / budgetMinutes;
-      const boost = Math.max(0, (1 - ratio) * 0.2);
-      return Math.min(1.15, 1 + boost);
-    }
-    const overRatio = estimatedMinutes / budgetMinutes;
-    if (overRatio >= 1.8) return 0.6;
-    return Math.max(0.7, 1 - (overRatio - 1) * 0.5);
+    return timeFit(task, budgetMinutes);
   }
 
   function createSubTask(name, priority, options = {}) {
@@ -5800,15 +5921,19 @@
       insights.push(`Est. ${Math.max(1, Math.round(estimated))} min`);
     }
     if (Number.isFinite(timeBudget)) {
+      const timeScore = timeFit(task, timeBudget);
       if (!Number.isFinite(estimated) || estimated <= 0) {
         insights.push(`${timeBudget}-min window`);
-      } else if (estimated <= timeBudget) {
-        insights.push(`Fits ${timeBudget} min block`);
-      } else {
-        insights.push(`Stretch beyond ${timeBudget} min`);
+      } else if (timeScore > 1) {
+        insights.push(`Fits ${timeBudget}-min`);
+      } else if (estimated > timeBudget) {
+        insights.push(`Stretch past ${timeBudget} min`);
       }
     }
-    if (Number.isFinite(energyLevel) && ENERGY_LABELS && ENERGY_LABELS[energyLevel]) {
+    const energyScore = energyFit(task, energyLevel);
+    if (energyScore < 1) {
+      insights.push('Easy win');
+    } else if (Number.isFinite(energyLevel) && ENERGY_LABELS && ENERGY_LABELS[energyLevel]) {
       insights.push(`Energy: ${ENERGY_LABELS[energyLevel]}`);
     }
     if (isChartTask(task) && Number.isFinite(Number(task.daysSinceVisit)) && Number(task.daysSinceVisit) > 0) {
@@ -5831,8 +5956,8 @@
     const startFullBtn = $("nextTaskStartFull");
     const startSprintBtn = $("nextTaskStartSprint");
 
-    const energyLevel = getEffectiveEnergyLevel();
-    const timeBudget = getSelectedTimeBudget();
+    const energyLevel = clampScale(getEnergyLevel(), 3);
+    const timeBudget = getTimeBudgetMinutes();
 
     const candidates = tasks
       .filter(task => !isTaskCompleted(task) && (activeCategory === "All" || task.category === activeCategory))
@@ -5955,11 +6080,168 @@
 
     if (total > 3) {
       toggleBtn.classList.remove("hidden");
-      toggleBtn.textContent = showAllDueToday ? "Show less" : `Show all (${total})`;
+      toggleBtn.textContent = showAllDueToday ? "Show top 3" : `Show all (${total})`;
     } else {
       toggleBtn.classList.add("hidden");
       toggleBtn.textContent = "";
     }
+  }
+
+  function setAddTaskCardCollapsed(collapsed, options = {}) {
+    const card = $("addTaskCard");
+    const toggle = $("toggleAddTaskCard");
+    if (!card || !toggle) return;
+    const { skipFocus = false, skipPersist = false } = options;
+    card.classList.toggle("card--collapsed", collapsed);
+    card.dataset.collapsed = collapsed ? "true" : "false";
+    const body = card.querySelector(".card-body");
+    if (body) {
+      body.setAttribute("aria-hidden", collapsed ? "true" : "false");
+    }
+    toggle.textContent = collapsed ? "Expand" : "Collapse";
+    toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    if (!skipPersist) {
+      localStorage.setItem(ADD_TASK_CARD_STATE_KEY, collapsed ? "collapsed" : "expanded");
+    }
+    if (!collapsed && !skipFocus) {
+      focusFirstEditableField();
+    }
+  }
+
+  function toggleAddTaskCard() {
+    const card = $("addTaskCard");
+    if (!card) return;
+    const collapsed = card.dataset.collapsed !== "false";
+    setAddTaskCardCollapsed(!collapsed);
+  }
+
+  function initializeAddTaskCardState() {
+    const card = $("addTaskCard");
+    if (!card) return;
+    const stored = localStorage.getItem(ADD_TASK_CARD_STATE_KEY);
+    const collapsed = stored ? stored !== "expanded" : true;
+    setAddTaskCardCollapsed(collapsed, { skipFocus: true, skipPersist: true });
+  }
+
+  function focusFirstEditableField() {
+    const nameField = $("name");
+    if (nameField) {
+      nameField.focus();
+      nameField.select();
+    }
+  }
+
+  function handleTemplateModalKeydown(event) {
+    if (event.key === "Escape") {
+      closeTemplateModal();
+    }
+  }
+
+  function closeTemplateModal() {
+    const modal = $("template-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+    document.removeEventListener("keydown", handleTemplateModalKeydown);
+    if (lastFocusedBeforeTemplateModal && typeof lastFocusedBeforeTemplateModal.focus === "function") {
+      lastFocusedBeforeTemplateModal.focus();
+    }
+    lastFocusedBeforeTemplateModal = null;
+  }
+
+  function renderTemplateCards(list) {
+    const grid = $("template-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    if (!list || !list.length) {
+      const empty = document.createElement("p");
+      empty.className = "score";
+      empty.textContent = "No templates for this category yet.";
+      grid.appendChild(empty);
+      return;
+    }
+    list.forEach(template => {
+      const card = document.createElement("div");
+      card.className = "template-card";
+      const title = document.createElement("strong");
+      title.textContent = template.name;
+      card.appendChild(title);
+      const meta = document.createElement("p");
+      meta.className = "score";
+      const categoryLabel = template.category || "General";
+      meta.textContent = `Category: ${categoryLabel}`;
+      card.appendChild(meta);
+      const stats = document.createElement("p");
+      stats.className = "score";
+      stats.textContent = `Imp ${template.importance || 1} • Urg ${template.urgency || 3} • Diff ${template.difficulty || 3}`;
+      card.appendChild(stats);
+      const applyBtn = document.createElement("button");
+      applyBtn.type = "button";
+      applyBtn.className = "btn btn-primary";
+      applyBtn.textContent = "Apply";
+      applyBtn.addEventListener("click", () => applyTemplate(template));
+      card.appendChild(applyBtn);
+      grid.appendChild(card);
+    });
+  }
+
+  function openTemplateModal() {
+    const modal = $("template-modal");
+    if (!modal) return;
+    lastFocusedBeforeTemplateModal = document.activeElement;
+    const category = $("taskCategory")?.value || "General";
+    const filtered = templates.filter(t => (t.category || "General") === category);
+    renderTemplateCards(filtered);
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    document.addEventListener("keydown", handleTemplateModalKeydown);
+    const firstButton = modal.querySelector(".template-card button") || modal.querySelector(".modal__close");
+    if (firstButton) {
+      firstButton.focus();
+    }
+  }
+
+  function fillTaskFormFromTemplate(template) {
+    if (!template) return;
+    $("name").value = template.name || "";
+    const category = template.category || "General";
+    $("taskCategory").value = category;
+    handleCategoryChange(category);
+    $("importance").value = String(template.importance || 1);
+    $("novelty").value = String(template.novelty || 1);
+    $("interest").value = String(template.interest || 1);
+    const authorField = $("authorType");
+    if (authorField) authorField.value = template.authorType || "attending";
+    const patientField = $("patientType");
+    if (patientField) patientField.value = normalizePatientType(template.patientType);
+    const visitField = $("visitType");
+    if (visitField) visitField.value = normalizeVisitType(template.visitType);
+    const clinicField = $("clinicSite");
+    if (clinicField) clinicField.value = normalizeClinicSite(template.clinicSite);
+    const urgencyField = $("urgency");
+    if (urgencyField) urgencyField.value = String(template.urgency || 3);
+    const pressureField = $("externalPressure");
+    if (pressureField) pressureField.value = String(template.externalPressure || 1);
+    $("timeToStart").value = String(template.timeToStart || 1);
+    $("difficulty").value = String(template.difficulty || 1);
+    const dateField = $("dateOfService");
+    if (dateField) dateField.value = formatDateForInput(new Date());
+    urgencyAuto = false;
+    updateDerivedFields();
+  }
+
+  function applyTemplate(template) {
+    fillTaskFormFromTemplate(template);
+    setAddTaskCardCollapsed(false, { skipFocus: true });
+    closeTemplateModal();
+    focusFirstEditableField();
+  }
+
+  function updateTemplateModalForCategory(category) {
+    const modal = $("template-modal");
+    if (!modal || modal.classList.contains("hidden")) return;
+    const filtered = templates.filter(t => (t.category || "General") === category);
+    renderTemplateCards(filtered);
   }
 
   function setTaskDetailsCollapsed(collapsed) {
@@ -5967,7 +6249,7 @@
     const button = $("expandTaskDetailsButton");
     if (!panel || !button) return;
     panel.dataset.collapsed = collapsed ? "true" : "false";
-    button.textContent = collapsed ? "Expand details" : "Hide details";
+    button.textContent = collapsed ? "Show details" : "Hide details";
     button.setAttribute("aria-expanded", collapsed ? "false" : "true");
     panel.setAttribute("aria-hidden", collapsed ? "true" : "false");
   }
@@ -6132,15 +6414,28 @@
     if (expandBtn) {
       expandBtn.addEventListener("click", toggleTaskDetails);
     }
-    const templateBtn = $("useTemplateButton");
+    const templateBtn = $("btn-use-template");
     if (templateBtn) {
       templateBtn.addEventListener("click", () => {
-        openModuleById("templateModule");
-        const firstTemplate = document.querySelector("#templateButtons button");
-        if (firstTemplate) {
-          firstTemplate.focus();
+        setAddTaskCardCollapsed(false, { skipFocus: true });
+        openTemplateModal();
+      });
+    }
+    const toggleCardBtn = $("toggleAddTaskCard");
+    if (toggleCardBtn) {
+      toggleCardBtn.addEventListener("click", toggleAddTaskCard);
+    }
+    const modal = $("template-modal");
+    if (modal) {
+      modal.addEventListener("click", event => {
+        if (event.target === modal) {
+          closeTemplateModal();
         }
       });
+      const closeBtn = modal.querySelector(".modal__close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", closeTemplateModal);
+      }
     }
   }
 
@@ -6166,8 +6461,8 @@
     const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     $("startBtn").disabled = remaining.length === 0;
-    const timeBudget = getSelectedTimeBudget();
-    const energyLevel = getEffectiveEnergyLevel();
+    const timeBudget = getTimeBudgetMinutes();
+    const energyLevel = clampScale(getEnergyLevel(), 3);
     const hasTimeBudget = Number.isFinite(timeBudget);
     const sortedRemaining = [...remaining].sort((a, b) => b.priority - a.priority);
     const budgetFilteredRemaining = hasTimeBudget
@@ -6278,13 +6573,14 @@
     stopFocusTimer();
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
-    const energyLevel = getEffectiveEnergyLevel();
-    const timeBudget = getSelectedTimeBudget();
+    const energyLevel = clampScale(getEnergyLevel(), 3);
+    const timeBudget = getTimeBudgetMinutes();
     lastFocusEnergyLevel = energyLevel;
     lastFocusTimeBudget = timeBudget;
+    const score = task => Number(task?.priority || 0) * energyFit(task, energyLevel) * timeFit(task, timeBudget);
     focusQueue = tasks
       .filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
-      .sort((a, b) => computeFocusScore(b, energyLevel, timeBudget) - computeFocusScore(a, energyLevel, timeBudget));
+      .sort((a, b) => score(b) - score(a));
     if (initialTaskId) {
       const targetIndex = focusQueue.findIndex(task => task.id === initialTaskId);
       if (targetIndex > 0) {
@@ -6464,11 +6760,24 @@
 
   function renderTemplates() {
     const container = $("templateButtons");
-    container.innerHTML = "";
     const selectedCategory = $("taskCategory")?.value || "General";
     const matchingTemplates = templates
       .map((template, index) => ({ template, index }))
       .filter(({ template }) => (template.category || "General") === selectedCategory);
+
+    const useTemplateBtn = $("btn-use-template");
+    if (useTemplateBtn) {
+      const hasTemplates = matchingTemplates.length > 0;
+      useTemplateBtn.disabled = !hasTemplates;
+      useTemplateBtn.setAttribute("aria-disabled", hasTemplates ? "false" : "true");
+      useTemplateBtn.title = hasTemplates ? "" : "No templates for this category yet";
+    }
+
+    updateTemplateModalForCategory(selectedCategory);
+
+    if (!container) return;
+
+    container.innerHTML = "";
 
     if (!matchingTemplates.length) {
       const empty = document.createElement("p");
@@ -6483,32 +6792,9 @@
       const useBtn = document.createElement("button");
       useBtn.textContent = `📋 ${t.name}`;
       useBtn.onclick = () => {
-        $("name").value = t.name;
-        $("taskCategory").value = t.category || "General";
-        handleCategoryChange(t.category || "General");
-        $("importance").value = String(t.importance || 1);
-        $("novelty").value = String(t.novelty || 1);
-        $("interest").value = String(t.interest || 1);
-        const authorField = $("authorType");
-        if (authorField) authorField.value = t.authorType || "attending";
-        const patientField = $("patientType");
-        if (patientField) patientField.value = normalizePatientType(t.patientType);
-        const visitField = $("visitType");
-        if (visitField) visitField.value = normalizeVisitType(t.visitType);
-        const clinicField = $("clinicSite");
-        if (clinicField) clinicField.value = normalizeClinicSite(t.clinicSite);
-        const urgencyField = $("urgency");
-        if (urgencyField) urgencyField.value = String(t.urgency || 3);
-        const pressureField = $("externalPressure");
-        if (pressureField) {
-          pressureField.value = String(t.externalPressure || 1);
-        }
-        $("timeToStart").value = String(t.timeToStart || 1);
-        $("difficulty").value = String(t.difficulty || 1);
-        const dateField = $("dateOfService");
-        if (dateField) dateField.value = formatDateForInput(new Date());
-        urgencyAuto = false;
-        updateDerivedFields();
+        fillTaskFormFromTemplate(t);
+        setAddTaskCardCollapsed(false, { skipFocus: true });
+        focusFirstEditableField();
       };
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️";
@@ -6554,7 +6840,7 @@
       month: "short",
       day: "numeric"
     });
-    reminder.textContent = `Make sure that "all charts from ${formatted} must be completed today to be eligible for billing".`;
+    reminder.innerHTML = `Make sure that all charts from <strong>${formatted}</strong> must be completed today to be eligible for billing.`;
   }
 
   function registerFieldListeners() {
@@ -6612,6 +6898,7 @@
     initializeSoundPreference();
     initializeFirstThreeWizard();
     initializeTaskForm();
+    initializeAddTaskCardState();
     initializeActionBar();
     initializeCollapsibleModules();
     initializeMorningLaunchModule();
