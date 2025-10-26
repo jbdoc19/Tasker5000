@@ -817,20 +817,477 @@
       margin-top: 0.5rem;
       text-align: center;
     }
+
+    :root {
+      --accent: #2dd4bf;
+      --background: #05090f;
+      --surface: rgba(18, 22, 28, 0.9);
+      --surface-muted: rgba(24, 28, 36, 0.9);
+      --border: rgba(255, 255, 255, 0.06);
+      --text-primary: #f4f7fb;
+      --text-secondary: #aeb8c9;
+      --text-muted: #6b7280;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-soft: 0 18px 36px rgba(0, 0, 0, 0.35);
+      --space-1: 8px;
+      --space-2: 12px;
+      --space-3: 16px;
+      --space-4: 24px;
+      --space-5: 32px;
+      --transition: 160ms ease;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text-primary);
+      font-family: "Inter", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: var(--space-5) var(--space-2) 120px;
+      line-height: 1.6;
+    }
+
+    .app-shell {
+      width: min(100%, 1100px);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 1024px) {
+      .app-shell {
+        width: min(100%, 960px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-shell {
+        width: min(100%, 720px);
+      }
+    }
+
+    .page-header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .page-title {
+      font-size: clamp(20px, 3vw, 22px);
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .billing-reminder {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .action-bar-primary {
+      display: flex;
+      gap: var(--space-2);
+      flex: 1 1 auto;
+    }
+
+    .action-bar-secondary {
+      display: flex;
+      gap: var(--space-1);
+      margin-left: auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: none;
+      border-radius: 999px;
+      padding: 0.55rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
+    }
+
+    .btn:focus-visible,
+    .icon-button:focus-visible,
+    .link-button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #041013;
+      font-weight: 600;
+    }
+
+    .btn-secondary {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(45, 212, 191, 0.25);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .icon-button {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform var(--transition), background var(--transition);
+    }
+
+    .icon-button:hover,
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .section-heading h2,
+    .next-task-card h2 {
+      font-size: clamp(16px, 2.3vw, 18px);
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .link-button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .next-task-card {
+      gap: var(--space-2);
+    }
+
+    .next-task-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .next-task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .next-task-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .due-today-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .due-today-item {
+      display: grid;
+      gap: var(--space-1);
+      background: var(--surface-muted);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
+    }
+
+    .due-today-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .due-today-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+    }
+
+    .due-today-pills {
+      display: inline-flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.65rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .pill-primary {
+      background: rgba(45, 212, 191, 0.18);
+      color: var(--accent);
+      border-color: rgba(45, 212, 191, 0.35);
+    }
+
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .module-header {
+      width: 100%;
+      background: transparent;
+      color: var(--text-primary);
+      border: none;
+      padding: var(--space-3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .module-heading {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .module-caret {
+      display: inline-block;
+      transition: transform var(--transition);
+      color: var(--text-secondary);
+    }
+
+    .module-card.is-open .module-caret {
+      transform: rotate(90deg);
+    }
+
+    .module-body {
+      padding: 0 var(--space-4) var(--space-4);
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .module-body[hidden] {
+      display: none;
+    }
+
+    .module-footnote {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .task-form-card {
+      gap: var(--space-3);
+    }
+
+    .task-form-minimal {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .task-form-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .task-form-actions {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .task-details-panel {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .task-details-panel[data-collapsed="true"] {
+      display: none;
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    input[type="text"],
+    select,
+    input[type="date"],
+    textarea {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.95rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 96px;
+    }
+
+    .category-filter,
+    .category-progress,
+    .peek {
+      margin-top: var(--space-3);
+    }
+
+    .peek {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-md);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: var(--space-4);
+      right: var(--space-4);
+      z-index: 1500;
+    }
+
+    .meltdown-sos-button {
+      display: none;
+    }
+
+    .module-stack {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .due-today-empty {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .next-task-empty {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .quick-pill {
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .quick-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .info-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+    }
+
+    .info-dot[title] {
+      cursor: help;
+    }
+
+    button:not(.btn):not(.icon-button):not(.pill):not(.link-button):not(.module-header) {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border-radius: 999px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
-  <h1>🎯 Task Focus</h1>
-  <p id="billingReminder" class="billing-reminder"></p>
-
-  <button
-    id="meltdownSosButton"
-    class="meltdown-sos-button"
-    type="button"
-    aria-label="Activate Meltdown Shield"
-    onclick="activateShield()"
-  >🆘 I'm Overwhelmed</button>
-
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
   <section
@@ -849,247 +1306,338 @@
     </div>
   </section>
 
-  <!-- Task entry form -->
   <section id="capture">
-    <div id="morningLaunchModule" class="module-card">
-      <div class="module-toggle">
-        <label for="morningLaunchToggle">🌅 Morning Launch Sequence</label>
-        <input type="checkbox" id="morningLaunchToggle" />
+    <div class="app-shell">
+      <header class="page-header">
+        <h1 class="page-title">🎯 Task Focus</h1>
+        <p id="billingReminder" class="billing-reminder"></p>
+      </header>
+
+      <div class="action-bar">
+        <div class="action-bar-primary">
+          <button id="startNextAction" class="btn btn-primary" type="button">Start next task</button>
+          <button id="startSprintAction" class="btn btn-secondary" type="button">Start 5-min</button>
+        </div>
+        <div class="action-bar-secondary">
+          <button id="quickAddAction" class="icon-button" type="button" aria-label="Quick add task">＋</button>
+          <button id="dueTodayAction" class="icon-button" type="button" aria-label="Open due-today list">📋</button>
+          <button id="shieldAction" class="icon-button" type="button" aria-label="Overwhelmed shield">🛡️</button>
+        </div>
       </div>
-      <p>Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day.</p>
-      <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
-      <div id="morningLaunchContent" class="hidden" aria-hidden="true">
-        <div class="progress-strip" aria-hidden="true">
-          <span id="morningLaunchProgress"></span>
+
+      <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
+        <div class="section-heading">
+          <h2>Next focus move</h2>
+          <span id="nextTaskScore" class="chip"></span>
         </div>
-        <div id="morningLaunchStatus" class="score"></div>
-        <div class="module-inline-actions">
-          <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
-          <button id="morningLaunchSkipBtn" type="button">Skip today</button>
+        <p id="nextTaskName" class="next-task-name"></p>
+        <p id="nextTaskSubstep" class="next-task-meta"></p>
+        <div id="nextTaskChips" class="next-task-meta"></div>
+        <div class="next-task-actions">
+          <button id="nextTaskStartFull" class="btn btn-primary" type="button">Start full focus</button>
+          <button id="nextTaskStartSprint" class="btn btn-secondary" type="button">Start 5-min</button>
         </div>
-        <div class="morning-blocks">
-          <article class="routine-block" data-block="move">
-            <h3>MOVE — Light Aerobic + Sunlight</h3>
-            <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
-            <div class="countdown-display" id="moveCountdown">20:00</div>
-            <div class="module-inline-actions">
-              <button id="moveStartBtn" type="button">Start 20-min timer</button>
-              <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
-            </div>
-          </article>
-          <article class="routine-block" data-block="reflect">
-            <h3>REFLECT — Cold Splash + Intention</h3>
-            <small>Reset with a cold rinse, then name the tone for your day.</small>
-            <div class="intention-buttons">
-              <button type="button" data-intention="Calm & steady">Calm & steady</button>
-              <button type="button" data-intention="Playful & connected">Playful & connected</button>
-              <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
-            </div>
-            <label for="morningIntention" style="margin:0;">
-              <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
+        <p id="nextTaskEmpty" class="next-task-empty hidden">You're clear for now. Add what matters next.</p>
+
+        <div class="task-form-minimal">
+          <div class="task-form-header">
+            <label for="name">Task Name
+              <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
             </label>
-            <div class="module-inline-actions">
-              <button id="reflectCompleteBtn" type="button">Save intention</button>
-            </div>
-          </article>
-          <article class="routine-block" data-block="plan">
-            <h3>PLAN — Process Anchors</h3>
-            <small>Lock in process-based actions and block time before the day takes over.</small>
-            <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
-            <div class="module-inline-actions">
-              <button id="planCompleteBtn" type="button">Plan locked in</button>
-            </div>
-          </article>
-        </div>
-        <div class="energy-rating">
-          <label for="morningEnergy" style="margin:0;">Energy check-in</label>
-          <input id="morningEnergy" type="range" min="1" max="5" step="1" />
-          <span id="morningEnergyLabel">--</span>
-          <button id="morningEnergySave" type="button">Log energy</button>
-        </div>
-        <div class="morning-chart-wrapper">
-          <canvas
-            id="morningLaunchChart"
-            class="chart-canvas"
-            width="360"
-            height="160"
-            role="img"
-            aria-label="Line chart of morning launch completion and energy trends"
-          ></canvas>
-          <div class="chart-legend" aria-hidden="true">
-            <span><span class="legend-swatch completion"></span>Completion %</span>
-            <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
           </div>
-          <div id="morningLaunchChartSummary" class="module-note"></div>
+          <div class="task-form-actions">
+            <button type="button" class="btn btn-ghost" id="useTemplateButton">Use template</button>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              id="expandTaskDetailsButton"
+              aria-controls="taskDetails"
+            >
+              Expand details
+            </button>
+          </div>
         </div>
-        <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
-      </div>
-    </div>
 
-    <div id="launchPadModule" class="module-card">
-      <div class="module-toggle">
-        <label for="launchPadReminderTime">🚀 Environmental Reminders & Launch Pads</label>
-        <input type="time" id="launchPadReminderTime" />
-      </div>
-      <p>Curate a nightly launch pad so tomorrow's clinic run starts calm, stocked, and on time.</p>
-      <div class="launch-pad-summary" id="launchPadSummary"></div>
-      <div class="module-inline-actions">
-        <button id="openLaunchPadModal" type="button">Evening checklist</button>
-        <button id="launchPadMorningReview" type="button">Morning review</button>
-      </div>
-      <div class="launch-pad-settings">
-        <label for="launchPadSiteSelect">Clinic / environment
-          <select id="launchPadSiteSelect"></select>
-        </label>
-        <div class="module-inline-actions">
-          <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
-          <button id="launchPadAddItem" type="button">Add Item</button>
-          <button id="launchPadLoadPreset" type="button">Reset to preset</button>
+        <div id="taskDetails" class="task-details-panel" data-collapsed="true">
+          <label for="taskCategory">Category
+            <select id="taskCategory">
+              <option value="General" selected>General</option>
+              <option value="Admin">Admin</option>
+              <option value="Chart">Chart</option>
+              <option value="Inbox">Inbox</option>
+              <option value="Calls">Calls</option>
+              <option value="Teaching">Teaching</option>
+              <option value="Personal">Personal</option>
+            </select>
+          </label>
+          <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
+            <label for="authorType">Chart Author
+              <select id="authorType">
+                <option value="attending" selected>Attending</option>
+                <option value="resident">Resident</option>
+              </select>
+            </label>
+            <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
+              <select id="patientType">
+                <option value="Non-Complex" selected>Non-Complex</option>
+                <option value="Complex">Complex</option>
+              </select>
+            </label>
+            <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
+              <select id="visitType">
+                <option value="Follow-Up" selected>Follow-Up</option>
+                <option value="Establish Care">Establish Care</option>
+                <option value="Well Child Visit">Well Child Visit</option>
+                <option value="Acute Visit">Acute Visit</option>
+              </select>
+            </label>
+            <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
+              <select id="clinicSite">
+                <option value="General Clinic" selected>General Clinic</option>
+                <option value="St PJ’s Shelter">St PJ’s Shelter</option>
+                <option value="Craniofacial Clinic">Craniofacial Clinic</option>
+              </select>
+            </label>
+            <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
+              <input type="date" id="dateOfService" />
+            </label>
+            <small id="chartAgeDisplay" class="chart-age"></small>
+          </div>
+          <label for="importance">Importance (1–5) <select id="importance"></select></label>
+          <label for="urgency">Urgency (1–5)
+            <select id="urgency"></select>
+          </label>
+          <small id="urgencyHint" class="urgency-hint"></small>
+          <label for="novelty">Novelty (1–5) <select id="novelty"></select></label>
+          <label for="interest">Interest (1–5) <select id="interest"></select></label>
+          <label for="externalPressure">External Pressure (1–5)
+            <select id="externalPressure"></select>
+          </label>
+          <label for="timeToStart">Time to Start (1–5) <select id="timeToStart"></select></label>
+          <label for="difficulty">Difficulty (1–5) <select id="difficulty"></select></label>
+          <label for="dueDate" title="Optional specific target date; used for personal scheduling.">Due Date (Optional)
+            <input type="date" id="dueDate" />
+          </label>
+          <label for="initialSubTasks">Subtasks
+            <textarea id="initialSubTasks" rows="3" placeholder="One subtask per line."></textarea>
+          </label>
+          <div class="task-form-actions">
+            <button id="addTaskBtn" type="button" onclick="addTask()">Add Task</button>
+            <button id="saveUpdateBtn" class="hidden" type="button" onclick="saveTaskUpdate()">Save Update</button>
+            <button id="cancelEditBtn" class="hidden" type="button" onclick="cancelEdit()">Cancel</button>
+            <button type="button" onclick="saveAsTemplate()">Add as Template</button>
+            <button type="button" onclick="startFocus()" id="startBtn" disabled>Get started</button>
+            <button type="button" onclick="reset()">Reset</button>
+          </div>
+          <label class="sound-toggle" for="focusSoundToggle">
+            <input type="checkbox" id="focusSoundToggle" checked />
+            Enable focus mode ping
+          </label>
+          <div id="categoryFilter" class="category-filter"></div>
+          <div id="categoryProgress" class="category-progress"></div>
+          <details class="peek">
+            <summary>🔍 Peek at tasks</summary>
+            <div class="task-list-header" id="taskListHeader">
+              <label class="task-view-label" for="taskViewMode">View</label>
+              <select id="taskViewMode" class="task-view-select">
+                <option value="active" selected>Active Tasks</option>
+                <option value="completed">Completed Tasks</option>
+              </select>
+              <label class="time-budget-control" for="timeBudget">
+                I have
+                <select id="timeBudget">
+                  <option value="">--</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="60">60</option>
+                </select>
+                minutes
+              </label>
+              <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
+            </div>
+            <div id="taskList"></div>
+          </details>
         </div>
-        <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
-      </div>
-    </div>
+      </section>
 
-    <div id="sleepToolkitModule" class="module-card">
-      <div class="module-toggle">
-        <label for="sleepToolkitToggle">😴 Sleep & Circadian Rhythm Toolkit</label>
-        <input type="checkbox" id="sleepToolkitToggle" />
-      </div>
-      <p>Stabilize melatonin and cortisol rhythms with a nightly wind-down and morning light cues.</p>
-      <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
-        <div class="sleep-checklist" id="sleepChecklist"></div>
-        <div id="sleepCompletionSummary" class="sleep-summary"></div>
-        <div class="module-inline-actions">
-          <label for="melatoninReminderToggle" style="flex:1;">
-            <input type="checkbox" id="melatoninReminderToggle" /> Melatonin reminder
-          </label>
-          <label for="melatoninReminderTime" style="margin:0;">Time
-            <input type="time" id="melatoninReminderTime" />
-          </label>
+      <section id="dueTodaySection" class="card due-today-card hidden" aria-live="polite">
+        <div class="section-heading">
+          <h2>Due today</h2>
+          <button id="toggleDueToday" class="link-button hidden" type="button"></button>
         </div>
-        <div class="module-inline-actions">
-          <label for="sunlightReminderToggle" style="flex:1;">
-            <input type="checkbox" id="sunlightReminderToggle" /> Morning sunlight alert
-          </label>
-          <label for="sunlightReminderTime" style="margin:0;">Time
-            <input type="time" id="sunlightReminderTime" />
-          </label>
-        </div>
-        <div id="sunlightAlert" class="sunlight-alert hidden" aria-live="polite"></div>
-        <div id="sleepMorningRating" class="energy-rating"></div>
-        <div id="sleepCorrelationSummary" class="sleep-summary"></div>
-        <div class="sleep-tips" id="sleepTips"></div>
-      </div>
-    </div>
+        <div id="dueTodayList" class="due-today-list"></div>
+        <p id="dueTodayEmpty" class="due-today-empty hidden">Nothing due today. You're caught up.</p>
+      </section>
 
-    <label for="name">Task Name
-      <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
-    </label>
-    <label for="taskCategory">Category
-      <select id="taskCategory">
-        <option value="General" selected>General</option>
-        <option value="Admin">Admin</option>
-        <option value="Chart">Chart</option>
-        <option value="Inbox">Inbox</option>
-        <option value="Calls">Calls</option>
-        <option value="Teaching">Teaching</option>
-        <option value="Personal">Personal</option>
-      </select>
-    </label>
-    <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
-      <label for="authorType">Chart Author
-        <select id="authorType">
-          <option value="attending" selected>Attending</option>
-          <option value="resident">Resident</option>
-        </select>
-      </label>
-      <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
-        <select id="patientType">
-          <option value="Non-Complex" selected>Non-Complex</option>
-          <option value="Complex">Complex</option>
-        </select>
-      </label>
-      <label for="visitType" title="Determines estimated chart complexity and time to complete.">Visit Type
-        <select id="visitType">
-          <option value="Follow-Up" selected>Follow-Up</option>
-          <option value="Establish Care">Establish Care</option>
-          <option value="Well Child Visit">Well Child Visit</option>
-          <option value="Acute Visit">Acute Visit</option>
-        </select>
-      </label>
-      <label for="clinicSite" title="Same-day notes from St PJ’s or Craniofacial automatically rise to the top.">Clinic Site
-        <select id="clinicSite">
-          <option value="General Clinic" selected>General Clinic</option>
-          <option value="St PJ’s Shelter">St PJ’s Shelter</option>
-          <option value="Craniofacial Clinic">Craniofacial Clinic</option>
-        </select>
-      </label>
-      <label for="dateOfService" title="Select the date of the encounter; defaults to today.">Date of Service
-        <input type="date" id="dateOfService" />
-      </label>
-      <small id="chartAgeDisplay" class="chart-age"></small>
-    </div>
-    <label for="importance">Importance (1–5) <select id="importance"></select></label>
-    <label for="urgency">Urgency (1–5)
-      <select id="urgency"></select>
-    </label>
-    <small id="urgencyHint" class="urgency-hint"></small>
-    <label for="novelty">Novelty (1–5) <select id="novelty"></select></label>
-    <label for="interest">Interest (1–5) <select id="interest"></select></label>
-    <label for="externalPressure">External Pressure (1–5)
-      <select id="externalPressure"></select>
-    </label>
-    <label for="timeToStart">Time to Start (1–5) <select id="timeToStart"></select></label>
-    <label for="difficulty">Difficulty (1–5) <select id="difficulty"></select></label>
-    <label for="dueDate" title="Optional specific target date; used for personal scheduling.">Due Date (Optional) <input type="date" id="dueDate" /></label>
-    <label for="initialSubTasks">Subtasks
-      <textarea id="initialSubTasks" rows="3" placeholder="One subtask per line."></textarea>
-    </label>
-    <div>
-      <button id="addTaskBtn" onclick="addTask()">Add Task</button>
-      <button id="saveUpdateBtn" class="hidden" onclick="saveTaskUpdate()">Save Update</button>
-      <button id="cancelEditBtn" class="hidden" onclick="cancelEdit()">Cancel</button>
-      <button onclick="saveAsTemplate()">Add as Template</button>
-      <button onclick="startFocus()" id="startBtn" disabled>Get started</button>
-      <button onclick="reset()">Reset</button>
-    </div>
-    <div id="templateSection" style="margin-top:1rem;">
-      <h3>Templates</h3>
-      <div id="templateButtons"></div>
-    </div>
-    <label class="sound-toggle" for="focusSoundToggle">
-      <input type="checkbox" id="focusSoundToggle" checked />
-      Enable focus mode ping
-    </label>
-    <!-- Category filter bar -->
-    <div id="categoryFilter" class="category-filter"></div>
-    <!-- Progress per category -->
-    <div id="categoryProgress" class="category-progress"></div>
-    <details class="peek">
-      <summary>🔍 Peek at tasks</summary>
-      <div class="task-list-header" id="taskListHeader">
-        <label class="task-view-label" for="taskViewMode">View</label>
-        <select id="taskViewMode" class="task-view-select">
-          <option value="active" selected>Active Tasks</option>
-          <option value="completed">Completed Tasks</option>
-        </select>
-        <label class="time-budget-control" for="timeBudget">
-          I have
-          <select id="timeBudget">
-            <option value="">--</option>
-            <option value="15">15</option>
-            <option value="30">30</option>
-            <option value="60">60</option>
-          </select>
-          minutes
-        </label>
-        <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
+      <div class="module-stack">
+        <div id="morningLaunchModule" class="module-card" data-module-id="morningLaunchModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>🌅 Morning Launch Sequence</span>
+            </div>
+            <span class="info-dot" title="Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div class="module-toggle">
+              <label for="morningLaunchToggle">Enable Morning Launch</label>
+              <input type="checkbox" id="morningLaunchToggle" />
+            </div>
+            <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
+            <div id="morningLaunchContent" class="hidden" aria-hidden="true">
+              <div class="progress-strip" aria-hidden="true">
+                <span id="morningLaunchProgress"></span>
+              </div>
+              <div id="morningLaunchStatus" class="score"></div>
+              <div class="module-inline-actions">
+                <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
+                <button id="morningLaunchSkipBtn" type="button">Skip today</button>
+              </div>
+              <div class="morning-blocks">
+                <article class="routine-block" data-block="move">
+                  <h3>MOVE — Light Aerobic + Sunlight</h3>
+                  <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
+                  <div class="countdown-display" id="moveCountdown">20:00</div>
+                  <div class="module-inline-actions">
+                    <button id="moveStartBtn" type="button">Start 20-min timer</button>
+                    <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
+                  </div>
+                </article>
+                <article class="routine-block" data-block="reflect">
+                  <h3>REFLECT — Cold Splash + Intention</h3>
+                  <small>Reset with a cold rinse, then name the tone for your day.</small>
+                  <div class="intention-buttons">
+                    <button type="button" data-intention="Calm & steady">Calm & steady</button>
+                    <button type="button" data-intention="Playful & connected">Playful & connected</button>
+                    <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
+                  </div>
+                  <label for="morningIntention" style="margin:0;">
+                    <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
+                  </label>
+                  <div class="module-inline-actions">
+                    <button id="reflectCompleteBtn" type="button">Save intention</button>
+                  </div>
+                </article>
+                <article class="routine-block" data-block="plan">
+                  <h3>PLAN — Process Anchors</h3>
+                  <small>Lock in process-based actions and block time before the day takes over.</small>
+                  <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
+                  <div class="module-inline-actions">
+                    <button id="planCompleteBtn" type="button">Plan locked in</button>
+                  </div>
+                </article>
+              </div>
+              <div class="energy-rating">
+                <label for="morningEnergy" style="margin:0;">Energy check-in</label>
+                <input id="morningEnergy" type="range" min="1" max="5" step="1" />
+                <span id="morningEnergyLabel">--</span>
+                <button id="morningEnergySave" type="button">Log energy</button>
+              </div>
+              <div class="morning-chart-wrapper">
+                <canvas
+                  id="morningLaunchChart"
+                  class="chart-canvas"
+                  width="360"
+                  height="160"
+                  role="img"
+                  aria-label="Line chart of morning launch completion and energy trends"
+                ></canvas>
+                <div class="chart-legend" aria-hidden="true">
+                  <span><span class="legend-swatch completion"></span>Completion %</span>
+                  <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
+                </div>
+                <div id="morningLaunchChartSummary" class="module-note"></div>
+              </div>
+              <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="launchPadModule" class="module-card" data-module-id="launchPadModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>🚀 Environmental Reminders & Launch Pads</span>
+            </div>
+            <span class="info-dot" title="Curate a nightly launch pad so tomorrow starts calm, stocked, and on time.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div class="module-toggle">
+              <label for="launchPadReminderTime">Reminder time</label>
+              <input type="time" id="launchPadReminderTime" />
+            </div>
+            <div class="launch-pad-summary" id="launchPadSummary"></div>
+            <div class="module-inline-actions">
+              <button id="openLaunchPadModal" type="button">Evening checklist</button>
+              <button id="launchPadMorningReview" type="button">Morning review</button>
+            </div>
+            <div class="launch-pad-settings">
+              <label for="launchPadSiteSelect">Clinic / environment
+                <select id="launchPadSiteSelect"></select>
+              </label>
+              <div class="module-inline-actions">
+                <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
+                <button id="launchPadAddItem" type="button">Add Item</button>
+                <button id="launchPadLoadPreset" type="button">Reset to preset</button>
+              </div>
+              <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="sleepToolkitModule" class="module-card" data-module-id="sleepToolkitModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>😴 Sleep & Circadian Rhythm Toolkit</span>
+            </div>
+            <span class="info-dot" title="Stabilize melatonin and cortisol rhythms with gentle wind-down and light cues.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div class="module-toggle">
+              <label for="sleepToolkitToggle">Enable toolkit</label>
+              <input type="checkbox" id="sleepToolkitToggle" />
+            </div>
+            <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
+              <div class="sleep-checklist" id="sleepChecklist"></div>
+              <div id="sleepCompletionSummary" class="sleep-summary"></div>
+              <div class="module-inline-actions">
+                <label for="melatoninReminderToggle" style="flex:1;">
+                  <input type="checkbox" id="melatoninReminderToggle" /> Melatonin reminder
+                </label>
+                <label for="melatoninReminderTime" style="margin:0;">Time
+                  <input type="time" id="melatoninReminderTime" />
+                </label>
+              </div>
+              <div class="module-inline-actions">
+                <label for="sunlightReminderToggle" style="flex:1;">
+                  <input type="checkbox" id="sunlightReminderToggle" /> Morning sunlight alert
+                </label>
+                <label for="sunlightReminderTime" style="margin:0;">Time
+                  <input type="time" id="sunlightReminderTime" />
+                </label>
+              </div>
+              <div id="sunlightAlert" class="sunlight-alert hidden" aria-live="polite"></div>
+              <div id="sleepMorningRating" class="energy-rating"></div>
+              <div id="sleepCorrelationSummary" class="sleep-summary"></div>
+              <div class="sleep-tips" id="sleepTips"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="templateModule" class="module-card" data-module-id="templateModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>🧩 Templates</span>
+            </div>
+            <span class="info-dot" title="Pull in proven task blueprints without rewriting every field.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div id="templateButtons"></div>
+          </div>
+        </div>
       </div>
-      <div id="taskList"></div>
-    </details>
-    <div id="dueTodaySection" style="margin-top:1rem;">
-      <h3>🗂️ Charts Due Today</h3>
-      <div id="dueTodayList"></div>
     </div>
   </section>
 
@@ -1151,6 +1699,17 @@
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
   const runningTimers = new Map();
+  let sprintDurationMinutes = null;
+  let sprintEndTime = null;
+  let nextTaskId = null;
+  let showAllDueToday = false;
+  const MODULE_STATE_PREFIX = "moduleState_";
+  const COLLAPSIBLE_MODULE_IDS = [
+    "morningLaunchModule",
+    "launchPadModule",
+    "sleepToolkitModule",
+    "templateModule"
+  ];
   const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
   let storedChartFieldValues = null;
   let currentScaleDescriptorCategory = "general";
@@ -3292,6 +3851,10 @@
     }
     focusTimerStart = null;
     focusTimerLastPing = null;
+    sprintEndTime = null;
+    if (resetDisplay) {
+      sprintDurationMinutes = null;
+    }
     const timerEl = $("focusTimer");
     if (!timerEl) return;
     timerEl.classList.remove("pulse");
@@ -3303,6 +3866,20 @@
   function updateFocusTimerDisplay(elapsedMs) {
     const timerEl = $("focusTimer");
     if (!timerEl) return;
+    if (Number.isFinite(sprintDurationMinutes) && sprintDurationMinutes > 0 && sprintEndTime) {
+      const remaining = Math.max(0, sprintEndTime - Date.now());
+      if (remaining > 0) {
+        const minutesLeft = Math.floor(remaining / 60000);
+        const secondsLeft = Math.floor((remaining % 60000) / 1000);
+        timerEl.textContent = `⏱️ Sprint: ${minutesLeft}:${String(secondsLeft).padStart(2, "0")}`;
+        return;
+      }
+      sprintDurationMinutes = null;
+      sprintEndTime = null;
+      timerEl.textContent = "✅ Sprint complete";
+      triggerFocusPing();
+      return;
+    }
     const minutes = Math.floor(elapsedMs / 60000);
     const seconds = Math.floor((elapsedMs % 60000) / 1000);
     timerEl.textContent = `🧭 Focus Time: ${minutes}:${String(seconds).padStart(2, "0")}`;
@@ -3352,6 +3929,11 @@
     stopFocusTimer(false);
     focusTimerStart = Date.now();
     focusTimerLastPing = focusTimerStart;
+    if (Number.isFinite(sprintDurationMinutes) && sprintDurationMinutes > 0) {
+      sprintEndTime = focusTimerStart + sprintDurationMinutes * 60000;
+    } else {
+      sprintEndTime = null;
+    }
     updateFocusTimerDisplay(0);
     focusTimerId = setInterval(() => {
       if (focusTimerStart === null) return;
@@ -5142,6 +5724,368 @@
     return card;
   }
 
+  function computeFocusScore(task, energyLevel, timeBudget) {
+    if (!task) return 0;
+    const base = Number(task?.priority || 0);
+    if (!Number.isFinite(base) || base <= 0) {
+      return base || 0;
+    }
+    const energyWeight = computeEnergyFit(task, energyLevel);
+    const timeWeight = computeTimeFit(task, timeBudget);
+    return base * energyWeight * timeWeight;
+  }
+
+  function buildNextTaskInsights(task, energyLevel, timeBudget) {
+    const insights = [];
+    const estimated = estimateTaskMinutes(task);
+    if (Number.isFinite(estimated) && estimated > 0) {
+      insights.push(`Est. ${Math.max(1, Math.round(estimated))} min`);
+    }
+    if (Number.isFinite(timeBudget)) {
+      if (!Number.isFinite(estimated) || estimated <= 0) {
+        insights.push(`${timeBudget}-min window`);
+      } else if (estimated <= timeBudget) {
+        insights.push(`Fits ${timeBudget} min block`);
+      } else {
+        insights.push(`Stretch beyond ${timeBudget} min`);
+      }
+    }
+    if (Number.isFinite(energyLevel) && ENERGY_LABELS && ENERGY_LABELS[energyLevel]) {
+      insights.push(`Energy: ${ENERGY_LABELS[energyLevel]}`);
+    }
+    if (isChartTask(task) && Number.isFinite(Number(task.daysSinceVisit)) && Number(task.daysSinceVisit) > 0) {
+      insights.push(`${task.daysSinceVisit}d since visit`);
+    }
+    if (task.category) {
+      insights.push(task.category);
+    }
+    return insights.filter(Boolean).slice(0, 3);
+  }
+
+  function updateNextTaskCard() {
+    const card = $("nextTaskCard");
+    if (!card) return;
+    const nameEl = $("nextTaskName");
+    const substepEl = $("nextTaskSubstep");
+    const chipsEl = $("nextTaskChips");
+    const scoreEl = $("nextTaskScore");
+    const emptyEl = $("nextTaskEmpty");
+    const startFullBtn = $("nextTaskStartFull");
+    const startSprintBtn = $("nextTaskStartSprint");
+
+    const energyLevel = getEffectiveEnergyLevel();
+    const timeBudget = getSelectedTimeBudget();
+
+    const candidates = tasks
+      .filter(task => !isTaskCompleted(task) && (activeCategory === "All" || task.category === activeCategory))
+      .sort((a, b) => computeFocusScore(b, energyLevel, timeBudget) - computeFocusScore(a, energyLevel, timeBudget));
+
+    const topTask = candidates[0] || null;
+    nextTaskId = topTask ? topTask.id : null;
+
+    card.classList.remove("hidden");
+    if (!topTask) {
+      if (nameEl) nameEl.textContent = "";
+      if (substepEl) substepEl.textContent = "";
+      if (chipsEl) chipsEl.innerHTML = "";
+      if (scoreEl) {
+        scoreEl.textContent = "";
+        scoreEl.classList.add("hidden");
+      }
+      if (emptyEl) emptyEl.classList.remove("hidden");
+      if (startFullBtn) startFullBtn.disabled = true;
+      if (startSprintBtn) startSprintBtn.disabled = true;
+      return;
+    }
+
+    if (emptyEl) emptyEl.classList.add("hidden");
+    if (nameEl) nameEl.textContent = topTask.name;
+    const firstSub = Array.isArray(topTask.subTasks)
+      ? topTask.subTasks.find(sub => !sub.completed)
+      : null;
+    if (substepEl) {
+      substepEl.textContent = firstSub
+        ? `Next substep: ${firstSub.name}`
+        : "Set your first micro-step.";
+    }
+    if (chipsEl) {
+      chipsEl.innerHTML = "";
+      buildNextTaskInsights(topTask, energyLevel, timeBudget).forEach(text => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = text;
+        chipsEl.appendChild(chip);
+      });
+    }
+    if (scoreEl) {
+      scoreEl.textContent = `Score ${topTask.priority.toFixed(1)}`;
+      scoreEl.classList.remove("hidden");
+    }
+    if (startFullBtn) startFullBtn.disabled = false;
+    if (startSprintBtn) startSprintBtn.disabled = false;
+  }
+
+  function renderDueTodayList(entries) {
+    const section = $("dueTodaySection");
+    const listEl = $("dueTodayList");
+    const toggleBtn = $("toggleDueToday");
+    const emptyEl = $("dueTodayEmpty");
+    if (!section || !listEl || !toggleBtn || !emptyEl) return;
+
+    listEl.innerHTML = "";
+
+    if (!entries.length) {
+      section.classList.add("hidden");
+      emptyEl.classList.remove("hidden");
+      toggleBtn.classList.add("hidden");
+      toggleBtn.textContent = "";
+      return;
+    }
+
+    section.classList.remove("hidden");
+    emptyEl.classList.add("hidden");
+
+    const total = entries.length;
+    const visibleCount = showAllDueToday ? total : Math.min(3, total);
+    entries.slice(0, visibleCount).forEach(entry => {
+      const item = document.createElement("div");
+      item.className = "due-today-item";
+
+      const title = document.createElement("p");
+      title.className = "due-today-title";
+      title.textContent = entry.task.name;
+      item.appendChild(title);
+
+      const meta = document.createElement("div");
+      meta.className = "due-today-meta";
+      const metaBits = ["Due today"];
+      if (entry.fallback && entry.task.dateOfService) {
+        metaBits.push(`Visit ${entry.task.dateOfService}`);
+      }
+      if (isChartTask(entry.task) && Number.isFinite(Number(entry.task.chartDurationMinutes)) && Number(entry.task.chartDurationMinutes) > 0) {
+        metaBits.push(`Chart ${formatDuration(Number(entry.task.chartDurationMinutes))}`);
+      }
+      meta.textContent = metaBits.join(" • ");
+      item.appendChild(meta);
+
+      if (entry.task.subTasks && entry.task.subTasks.length) {
+        const progressElement = createProgressElement(entry.task);
+        if (progressElement) {
+          item.appendChild(progressElement);
+        }
+      }
+
+      const pillRow = document.createElement("div");
+      pillRow.className = "due-today-pills";
+      const sprintBtn = document.createElement("button");
+      sprintBtn.className = "pill pill-primary";
+      sprintBtn.type = "button";
+      sprintBtn.textContent = "Start 5m";
+      sprintBtn.addEventListener("click", () => startFiveMinuteSprint(entry.task.id));
+      pillRow.appendChild(sprintBtn);
+
+      const fullBtn = document.createElement("button");
+      fullBtn.className = "pill";
+      fullBtn.type = "button";
+      fullBtn.textContent = "Start full";
+      fullBtn.addEventListener("click", () => startFocus(entry.task.id));
+      pillRow.appendChild(fullBtn);
+
+      item.appendChild(pillRow);
+      listEl.appendChild(item);
+    });
+
+    if (total > 3) {
+      toggleBtn.classList.remove("hidden");
+      toggleBtn.textContent = showAllDueToday ? "Show less" : `Show all (${total})`;
+    } else {
+      toggleBtn.classList.add("hidden");
+      toggleBtn.textContent = "";
+    }
+  }
+
+  function setTaskDetailsCollapsed(collapsed) {
+    const panel = $("taskDetails");
+    const button = $("expandTaskDetailsButton");
+    if (!panel || !button) return;
+    panel.dataset.collapsed = collapsed ? "true" : "false";
+    button.textContent = collapsed ? "Expand details" : "Hide details";
+    button.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    panel.setAttribute("aria-hidden", collapsed ? "true" : "false");
+  }
+
+  function toggleTaskDetails() {
+    const panel = $("taskDetails");
+    if (!panel) return;
+    const collapsed = panel.dataset.collapsed !== "false";
+    setTaskDetailsCollapsed(!collapsed);
+  }
+
+  function setModuleOpenState(module, body, open, header = null) {
+    if (!module || !body) return;
+    module.classList.toggle("is-open", open);
+    body.hidden = !open;
+    if (header) {
+      header.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    body.setAttribute("aria-hidden", open ? "false" : "true");
+  }
+
+  function openModuleById(id) {
+    const module = $(id);
+    if (!module) return;
+    const body = module.querySelector(".module-body");
+    const header = module.querySelector(".module-header");
+    if (!body) return;
+    setModuleOpenState(module, body, true, header);
+    localStorage.setItem(`${MODULE_STATE_PREFIX}${id}`, "open");
+  }
+
+  function initializeCollapsibleModules() {
+    COLLAPSIBLE_MODULE_IDS.forEach(id => {
+      const module = $(id);
+      if (!module) return;
+      const header = module.querySelector(".module-header");
+      const body = module.querySelector(".module-body");
+      if (!header || !body) return;
+      const stored = localStorage.getItem(`${MODULE_STATE_PREFIX}${id}`);
+      const isOpen = stored === "open";
+      setModuleOpenState(module, body, isOpen, header);
+      header.addEventListener("click", () => {
+        const nextState = !module.classList.contains("is-open");
+        setModuleOpenState(module, body, nextState, header);
+        localStorage.setItem(`${MODULE_STATE_PREFIX}${id}`, nextState ? "open" : "closed");
+      });
+    });
+  }
+
+  function startFiveMinuteSprint(taskId = null) {
+    setTaskDetailsCollapsed(false);
+    const targetId = taskId || nextTaskId || null;
+    startFocus(targetId, { sprintMinutes: 5 });
+  }
+
+  function quickAddTask() {
+    const input = prompt("Quick add task");
+    if (!input) return;
+    const name = input.trim();
+    if (!name) return;
+    const nowIso = new Date().toISOString();
+    const task = {
+      id: Date.now().toString(),
+      name,
+      category: "General",
+      authorType: "attending",
+      patientType: "Non-Complex",
+      visitType: "Follow-Up",
+      clinicSite: "General Clinic",
+      dateOfService: null,
+      daysSinceVisit: null,
+      importance: 3,
+      urgency: 3,
+      novelty: 3,
+      interest: 3,
+      externalPressure: 2,
+      timeToStart: 3,
+      difficulty: 3,
+      dueDate: null,
+      completed: false,
+      completedAt: null,
+      createdAt: nowIso,
+      addedAt: nowIso,
+      subTasks: [],
+      firstThreeMode: false,
+      firstThreeUnlocked: true,
+      firstThreeSteps: [],
+      useChartTemplate: false
+    };
+    task.priority = computePriority(task);
+    updateChartDurationForTask(task);
+    tasks.push(task);
+    persist();
+    setTaskDetailsCollapsed(true);
+    updateUI();
+  }
+
+  function initializeActionBar() {
+    const startNext = $("startNextAction");
+    if (startNext) {
+      startNext.addEventListener("click", () => {
+        if (nextTaskId) {
+          startFocus(nextTaskId);
+        } else {
+          startFocus();
+        }
+      });
+    }
+    const sprintAction = $("startSprintAction");
+    if (sprintAction) {
+      sprintAction.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
+    }
+    const quickAddBtn = $("quickAddAction");
+    if (quickAddBtn) {
+      quickAddBtn.addEventListener("click", quickAddTask);
+    }
+    const dueTodayBtn = $("dueTodayAction");
+    if (dueTodayBtn) {
+      dueTodayBtn.addEventListener("click", () => {
+        showAllDueToday = true;
+        updateUI();
+        const section = $("dueTodaySection");
+        if (section && !section.classList.contains("hidden")) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+    const shieldBtn = $("shieldAction");
+    if (shieldBtn) {
+      shieldBtn.addEventListener("click", activateShield);
+    }
+    const startFull = $("nextTaskStartFull");
+    if (startFull) {
+      startFull.addEventListener("click", () => {
+        if (nextTaskId) {
+          startFocus(nextTaskId);
+        } else {
+          startFocus();
+        }
+      });
+    }
+    const startSprint = $("nextTaskStartSprint");
+    if (startSprint) {
+      startSprint.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
+    }
+    const toggleDue = $("toggleDueToday");
+    if (toggleDue) {
+      toggleDue.addEventListener("click", () => {
+        showAllDueToday = !showAllDueToday;
+        updateUI();
+        const section = $("dueTodaySection");
+        if (section && !section.classList.contains("hidden")) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+  }
+
+  function initializeTaskForm() {
+    setTaskDetailsCollapsed(true);
+    const expandBtn = $("expandTaskDetailsButton");
+    if (expandBtn) {
+      expandBtn.addEventListener("click", toggleTaskDetails);
+    }
+    const templateBtn = $("useTemplateButton");
+    if (templateBtn) {
+      templateBtn.addEventListener("click", () => {
+        openModuleById("templateModule");
+        const firstTemplate = document.querySelector("#templateButtons button");
+        if (firstTemplate) {
+          firstTemplate.focus();
+        }
+      });
+    }
+  }
+
   // main UI update
   function updateUI() {
     tasks = tasks.map(recalcTaskPriority);
@@ -5165,6 +6109,7 @@
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     $("startBtn").disabled = remaining.length === 0;
     const timeBudget = getSelectedTimeBudget();
+    const energyLevel = getEffectiveEnergyLevel();
     const hasTimeBudget = Number.isFinite(timeBudget);
     const sortedRemaining = [...remaining].sort((a, b) => b.priority - a.priority);
     const budgetFilteredRemaining = hasTimeBudget
@@ -5218,12 +6163,10 @@
       });
     }
 
-    // tasks due today
-    const dueTodayList = $("dueTodayList");
-    dueTodayList.innerHTML = "";
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     const today = now.toISOString().split("T")[0];
+    const dueTodayEntries = [];
 
     tasks.forEach(task => {
       if (isTaskCompleted(task)) return;
@@ -5241,26 +6184,19 @@
         : null;
 
       if (task.dueDate === today || (fallbackDueDate && fallbackDueDate === today)) {
-        const wrap = document.createElement("div");
-        wrap.textContent = `${task.name} — due today`;
-
-        if (task.subTasks && task.subTasks.length) {
-          const progressElement = createProgressElement(task);
-          if (progressElement) {
-            wrap.appendChild(progressElement);
-          }
-        }
-
-        if (isChartTask(task) && Number.isFinite(Number(task.chartDurationMinutes)) && Number(task.chartDurationMinutes) > 0) {
-          const totalRow = document.createElement("div");
-          totalRow.className = "score";
-          totalRow.textContent = `Chart time: ${formatDuration(Number(task.chartDurationMinutes))}`;
-          wrap.appendChild(totalRow);
-        }
-
-        dueTodayList.appendChild(wrap);
+        dueTodayEntries.push({
+          task,
+          fallback: Boolean(fallbackDueDate && !task.dueDate)
+        });
       }
     });
+
+    dueTodayEntries.sort((a, b) => computeFocusScore(b.task, energyLevel, timeBudget) - computeFocusScore(a.task, energyLevel, timeBudget));
+    if (!dueTodayEntries.length) {
+      showAllDueToday = false;
+    }
+    renderDueTodayList(dueTodayEntries);
+    updateNextTaskCard();
     updateSleepToolkitUI();
   }
 
@@ -5270,8 +6206,17 @@
     updateUI();
   }
 
-  function startFocus(initialTaskId = null) {
+  function startFocus(initialTaskId = null, options = {}) {
     if (editingTaskId) cancelEdit();
+    if (options && options.expandDetails) {
+      setTaskDetailsCollapsed(false);
+    }
+    const sprintMinutes = Number(options?.sprintMinutes);
+    if (Number.isFinite(sprintMinutes) && sprintMinutes > 0) {
+      sprintDurationMinutes = sprintMinutes;
+    } else {
+      sprintDurationMinutes = null;
+    }
     stopFocusTimer();
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
@@ -5279,16 +6224,9 @@
     const timeBudget = getSelectedTimeBudget();
     lastFocusEnergyLevel = energyLevel;
     lastFocusTimeBudget = timeBudget;
-    const focusScore = task => {
-      const base = Number(task?.priority || 0);
-      if (!Number.isFinite(base) || base <= 0) return base || 0;
-      const energyWeight = computeEnergyFit(task, energyLevel);
-      const timeWeight = computeTimeFit(task, timeBudget);
-      return base * energyWeight * timeWeight;
-    };
     focusQueue = tasks
       .filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
-      .sort((a, b) => focusScore(b) - focusScore(a));
+      .sort((a, b) => computeFocusScore(b, energyLevel, timeBudget) - computeFocusScore(a, energyLevel, timeBudget));
     if (initialTaskId) {
       const targetIndex = focusQueue.findIndex(task => task.id === initialTaskId);
       if (targetIndex > 0) {
@@ -5615,6 +6553,9 @@
     updateBillingReminder();
     initializeSoundPreference();
     initializeFirstThreeWizard();
+    initializeTaskForm();
+    initializeActionBar();
+    initializeCollapsibleModules();
     initializeMorningLaunchModule();
     initializeLaunchPadModule();
     initializeSleepToolkitModule();
