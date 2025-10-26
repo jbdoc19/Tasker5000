@@ -199,6 +199,13 @@
       margin: 0.25rem 0;
     }
     .score { font-size: 0.8rem; color: #ccc; }
+    #focusFitHint {
+      color: #8f9aa8;
+      font-size: 0.85rem;
+      margin-top: 0.35rem;
+      max-width: 600px;
+      text-align: center;
+    }
     .chart-age, .urgency-hint {
       display: block;
       margin-top: 0.25rem;
@@ -1125,6 +1132,7 @@
     <div id="focusTimer" aria-live="polite">🧭 Focus Time: 0:00</div>
     <div class="focus" tabindex="0" aria-live="polite"></div>
     <div class="score" id="scoreView"></div>
+    <div id="focusFitHint" aria-live="polite"></div>
     <div id="subTaskView"></div>
     <div>
       <button onclick="completeTask()">Task complete</button>
@@ -1152,6 +1160,8 @@
   const MORNING_LAUNCH_KEY = "morningLaunchState";
   const LAUNCH_PAD_KEY = "launchPadState";
   const SLEEP_TOOLKIT_KEY = "sleepToolkitState";
+  let lastFocusEnergyLevel = null;
+  let lastFocusTimeBudget = null;
   const FIRST_THREE_KEYWORDS = [
     "report",
     "project",
@@ -3051,6 +3061,62 @@
     const difficulty = clampScale(task.difficulty, 3);
     const fallback = difficultyMap[difficulty] || 30;
     return fallback * remainingCount;
+  }
+
+  function getEffectiveEnergyLevel() {
+    let level = null;
+    try {
+      if (typeof getMorningEntry === "function") {
+        const entry = getMorningEntry();
+        if (entry && Number.isFinite(Number(entry.energy))) {
+          level = clampScale(entry.energy, 3);
+        }
+      }
+    } catch (error) {
+      console.warn("Unable to read morning energy entry", error);
+    }
+    if (!Number.isFinite(level)) {
+      const slider = $("morningEnergy");
+      if (slider) {
+        const sliderValue = Number(slider.value);
+        if (Number.isFinite(sliderValue)) {
+          level = clampScale(sliderValue, 3);
+        }
+      }
+    }
+    if (!Number.isFinite(level)) {
+      level = 3;
+    }
+    return level;
+  }
+
+  function computeEnergyFit(task, energyLevel) {
+    if (!Number.isFinite(energyLevel)) return 1;
+    const estimatedMinutes = estimateTaskMinutes(task) || 0;
+    const difficulty = clampScale(task?.difficulty, 3);
+    let weight = 1;
+    if (energyLevel <= 2) {
+      if (estimatedMinutes > 25) weight *= 0.75;
+      if (difficulty >= 4) weight *= 0.8;
+    } else if (energyLevel >= 4) {
+      if (estimatedMinutes >= 20) weight *= 1.05;
+      if (difficulty >= 4) weight *= 1.05;
+    }
+    return weight;
+  }
+
+  function computeTimeFit(task, budgetMinutes) {
+    if (!Number.isFinite(budgetMinutes)) return 1;
+    const estimatedMinutes = estimateTaskMinutes(task) || 0;
+    if (!estimatedMinutes) return 1;
+    if (estimatedMinutes <= budgetMinutes) {
+      const ratio = estimatedMinutes / budgetMinutes;
+      const boost = Math.max(0, (1 - ratio) * 0.2);
+      return Math.min(1.15, 1 + boost);
+    }
+    const overRatio = estimatedMinutes / budgetMinutes;
+    if (overRatio >= 1.8) return 0.6;
+    return Math.max(0.7, 1 - (overRatio - 1) * 0.5);
   }
 
   function createSubTask(name, priority, options = {}) {
@@ -5209,8 +5275,20 @@
     stopFocusTimer();
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
-    focusQueue = tasks.filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
-      .sort((a,b) => b.priority - a.priority);
+    const energyLevel = getEffectiveEnergyLevel();
+    const timeBudget = getSelectedTimeBudget();
+    lastFocusEnergyLevel = energyLevel;
+    lastFocusTimeBudget = timeBudget;
+    const focusScore = task => {
+      const base = Number(task?.priority || 0);
+      if (!Number.isFinite(base) || base <= 0) return base || 0;
+      const energyWeight = computeEnergyFit(task, energyLevel);
+      const timeWeight = computeTimeFit(task, timeBudget);
+      return base * energyWeight * timeWeight;
+    };
+    focusQueue = tasks
+      .filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
+      .sort((a, b) => focusScore(b) - focusScore(a));
     if (initialTaskId) {
       const targetIndex = focusQueue.findIndex(task => task.id === initialTaskId);
       if (targetIndex > 0) {
@@ -5232,6 +5310,7 @@
     if (focusQueue.length === 0) {
       display.textContent = "✅ All tasks complete!";
       scoreView.textContent = "";
+      updateFocusFitHint(null, lastFocusEnergyLevel, lastFocusTimeBudget);
       const subTaskView = $("subTaskView");
       if (subTaskView) subTaskView.innerHTML = "";
       clearRunningTimers();
@@ -5245,7 +5324,50 @@
     const idx = tasks.findIndex(t => t.id === current.id);
     const task = idx !== -1 ? tasks[idx] : current;
     scoreView.textContent = `Score: ${task.priority.toFixed(1)}`;
+    updateFocusFitHint(task, lastFocusEnergyLevel, lastFocusTimeBudget);
     renderFocusTask(task, idx);
+  }
+
+  function updateFocusFitHint(task, energyLevel, timeBudget) {
+    const hintEl = $("focusFitHint");
+    if (!hintEl) return;
+    if (!task) {
+      hintEl.textContent = "";
+      return;
+    }
+    const pieces = [];
+    const estimated = estimateTaskMinutes(task);
+    if (Number.isFinite(timeBudget)) {
+      if (Number.isFinite(estimated) && estimated > 0) {
+        const rounded = Math.max(1, Math.round(estimated));
+        if (rounded <= timeBudget) {
+          pieces.push(`Fits your ${timeBudget}-minute block (est. ${rounded} min)`);
+        } else {
+          pieces.push(`Stretch past ${timeBudget}-minute block (est. ${rounded} min)`);
+        }
+      } else {
+        pieces.push(`Focus window: ${timeBudget} min`);
+      }
+    }
+    if (Number.isFinite(energyLevel)) {
+      const difficulty = clampScale(task?.difficulty, 3);
+      if (energyLevel <= 2) {
+        if (estimated <= 20) {
+          pieces.push("Easiest win for low energy");
+        } else {
+          pieces.push("Try a 5-min pass—energy is low");
+        }
+      } else if (energyLevel >= 4) {
+        if (difficulty >= 4) {
+          pieces.push("Perfect for your high energy window");
+        } else {
+          pieces.push("Use the high energy to bank progress");
+        }
+      } else if (ENERGY_LABELS && ENERGY_LABELS[energyLevel]) {
+        pieces.push(`Energy check: ${ENERGY_LABELS[energyLevel]}`);
+      }
+    }
+    hintEl.textContent = pieces.length ? pieces.join(" • ") : "Working the highest-impact task next.";
   }
 
   function completeTaskById(taskId, options = {}) {
