@@ -921,6 +921,21 @@
         gap: var(--space-2);
       }
 
+      .card-sticky-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .card-sticky-actions__primary,
+      .card-sticky-actions__secondary {
+        justify-content: stretch;
+      }
+
+      .card-sticky-actions__primary > *,
+      .card-sticky-actions__secondary > * {
+        width: 100%;
+      }
+
       .toast-container {
         left: var(--space-2);
         right: var(--space-2);
@@ -1059,6 +1074,51 @@
 
     .card--collapsed .card-body {
       display: none;
+    }
+
+    .card--collapsed .card-sticky-actions {
+      display: none;
+    }
+
+    .status-card {
+      background: rgba(18, 22, 28, 0.85);
+    }
+
+    .status-card .category-progress {
+      margin-top: 0;
+    }
+
+    .task-form-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .card-sticky-actions {
+      position: sticky;
+      bottom: -12px;
+      margin: 0 -12px -12px;
+      padding: var(--space-3);
+      background: linear-gradient(180deg, rgba(18, 22, 28, 0) 0%, rgba(18, 22, 28, 0.92) 45%, rgba(18, 22, 28, 0.98) 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+    }
+
+    .card-sticky-actions__primary,
+    .card-sticky-actions__secondary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      align-items: center;
     }
 
     .modal {
@@ -1466,6 +1526,24 @@
         <div class="subtitle" id="billingReminder"></div>
       </div>
 
+      <section id="statusCard" class="card card--collapsed status-card" data-collapsed="true" aria-live="polite">
+        <div class="card-head">
+          <h2>Status</h2>
+          <button
+            id="toggleStatusCard"
+            class="link-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="statusCardBody"
+          >
+            Expand
+          </button>
+        </div>
+        <div class="card-body" id="statusCardBody" aria-hidden="true">
+          <div id="categoryProgress" class="category-progress"></div>
+        </div>
+      </section>
+
       <div class="action-bar">
         <div class="action-bar-primary">
           <button id="startNextAction" class="btn btn-primary" type="button">Start next task</button>
@@ -1493,6 +1571,15 @@
         <p id="nextTaskEmpty" class="next-task-empty hidden">You're clear for now. Add what matters next.</p>
       </section>
 
+      <section id="dueTodaySection" class="card due-today-card hidden" aria-live="polite">
+        <div class="section-heading">
+          <h2>Due today</h2>
+          <button id="toggleDueToday" class="link-button hidden" type="button"></button>
+        </div>
+        <div id="dueTodayList" class="due-today-list"></div>
+        <p id="dueTodayEmpty" class="due-today-empty hidden">Nothing due today. You're caught up.</p>
+      </section>
+
       <section id="addTaskCard" class="card card--collapsed" aria-live="polite" data-collapsed="true">
         <div class="card-head">
           <h2>Add task</h2>
@@ -1515,8 +1602,9 @@
               <option value="Personal">Personal</option>
             </select>
           </label>
-          <div class="task-form-actions task-form-actions--inline">
+          <div class="task-form-toolbar">
             <button type="button" class="btn btn-ghost" id="btn-use-template">Use template</button>
+            <button type="button" class="btn btn-ghost" onclick="saveAsTemplate()">Add as Template</button>
             <button
               type="button"
               class="btn btn-ghost"
@@ -1583,49 +1671,57 @@
               <input type="checkbox" id="focusSoundToggle" checked />
               Enable focus mode ping
             </label>
-            <div id="categoryFilter" class="category-filter"></div>
-            <div id="categoryProgress" class="category-progress"></div>
-            <details class="peek">
-              <summary>🔍 Peek at tasks</summary>
-              <div class="task-list-header" id="taskListHeader">
-                <label class="task-view-label" for="taskViewMode">View</label>
-                <select id="taskViewMode" class="task-view-select">
-                  <option value="active" selected>Active Tasks</option>
-                  <option value="completed">Completed Tasks</option>
-                </select>
-                <label class="time-budget-control" for="timeBudget">
-                  I have
-                  <select id="timeBudget" data-field="time-budget">
-                    <option value="">--</option>
-                    <option value="15">15</option>
-                    <option value="30">30</option>
-                    <option value="60">60</option>
-                  </select>
-                  minutes
-                </label>
-                <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
-              </div>
-              <div id="taskList"></div>
-            </details>
           </div>
-          <div class="task-form-actions">
-            <button id="addTaskBtn" type="button" onclick="addTask()">Add Task</button>
-            <button id="saveUpdateBtn" class="hidden" type="button" onclick="saveTaskUpdate()">Save Update</button>
-            <button id="cancelEditBtn" class="hidden" type="button" onclick="cancelEdit()">Cancel</button>
-            <button type="button" onclick="saveAsTemplate()">Add as Template</button>
-            <button type="button" onclick="startFocus()" id="startBtn" disabled>Get started</button>
-            <button type="button" onclick="reset()">Reset</button>
+        </div>
+        <div class="card-sticky-actions" aria-hidden="true">
+          <div class="card-sticky-actions__primary">
+            <button id="addTaskBtn" class="btn btn-primary" type="button" onclick="addTask()">Add Task</button>
+            <button id="saveUpdateBtn" class="btn btn-primary hidden" type="button" onclick="saveTaskUpdate()">Save Update</button>
+            <button id="cancelEditBtn" class="btn btn-ghost hidden" type="button" onclick="cancelEdit()">Cancel</button>
+          </div>
+          <div class="card-sticky-actions__secondary">
+            <button type="button" class="btn btn-secondary" onclick="startFiveMinuteSprint()" id="startBtn" disabled>Start 5-min</button>
+            <button type="button" class="btn btn-ghost" onclick="reset()">Reset</button>
           </div>
         </div>
       </section>
 
-      <section id="dueTodaySection" class="card due-today-card hidden" aria-live="polite">
-        <div class="section-heading">
-          <h2>Due today</h2>
-          <button id="toggleDueToday" class="link-button hidden" type="button"></button>
+      <section id="allTasksCard" class="card card--collapsed" data-collapsed="true" aria-live="polite">
+        <div class="card-head">
+          <h2 id="allTasksTitle">All Tasks</h2>
+          <button
+            id="toggleAllTasksCard"
+            class="link-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="allTasksCardBody"
+          >
+            Expand
+          </button>
         </div>
-        <div id="dueTodayList" class="due-today-list"></div>
-        <p id="dueTodayEmpty" class="due-today-empty hidden">Nothing due today. You're caught up.</p>
+        <div class="card-body" id="allTasksCardBody" aria-hidden="true">
+          <div class="task-list-header" id="taskListHeader">
+            <label class="task-view-label" for="taskViewMode">View</label>
+            <select id="taskViewMode" class="task-view-select">
+              <option value="active" selected>Active Tasks</option>
+              <option value="completed">Completed Tasks</option>
+            </select>
+            <label class="task-view-label" for="taskCategoryFilter">Category</label>
+            <select id="taskCategoryFilter" class="task-view-select"></select>
+            <label class="time-budget-control" for="timeBudget">
+              I have
+              <select id="timeBudget" data-field="time-budget">
+                <option value="">--</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+              </select>
+              minutes
+            </label>
+            <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
+          </div>
+          <div id="taskList"></div>
+        </div>
       </section>
 
       <div class="module-stack">
@@ -1871,7 +1967,10 @@
   let showAllDueToday = false;
   let lastFocusedBeforeTemplateModal = null;
   const MODULE_STATE_PREFIX = "moduleState_";
-  const ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
+  const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
+  const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
+  const STATUS_CARD_STATE_KEY = "ui.status.collapsed";
+  const ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.collapsed";
   const COLLAPSIBLE_MODULE_IDS = [
     "morningLaunchModule",
     "launchPadModule",
@@ -5642,15 +5741,25 @@
 
   // render filter bar
   function renderCategoryFilter() {
-    const bar = $("categoryFilter");
-    bar.innerHTML = "";
-    ["All", ...categories].forEach(cat => {
-      const btn = document.createElement("button");
-      btn.textContent = cat;
-      btn.className = (cat === activeCategory) ? "active" : "";
-      btn.onclick = () => { activeCategory = cat; updateUI(); };
-      bar.appendChild(btn);
+    const select = $("taskCategoryFilter");
+    if (!select) return;
+    const options = ["All", ...categories];
+    if (!options.includes(activeCategory)) {
+      activeCategory = "All";
+    }
+    const previous = select.value;
+    select.innerHTML = "";
+    options.forEach(cat => {
+      const option = document.createElement("option");
+      option.value = cat;
+      option.textContent = cat;
+      select.appendChild(option);
     });
+    const targetValue = options.includes(activeCategory) ? activeCategory : "All";
+    select.value = options.includes(previous) ? previous : targetValue;
+    if (select.value !== targetValue) {
+      select.value = targetValue;
+    }
   }
 
   // render progress per category
@@ -6091,21 +6200,50 @@
     const card = $("addTaskCard");
     const toggle = $("toggleAddTaskCard");
     if (!card || !toggle) return;
-    const { skipFocus = false, skipPersist = false } = options;
+    const {
+      skipFocus = false,
+      skipPersist = false,
+      scroll = true,
+      focusTarget = null
+    } = options;
+    const wasCollapsed = card.dataset.collapsed !== "false";
     card.classList.toggle("card--collapsed", collapsed);
     card.dataset.collapsed = collapsed ? "true" : "false";
     const body = card.querySelector(".card-body");
     if (body) {
       body.setAttribute("aria-hidden", collapsed ? "true" : "false");
     }
+    const sticky = card.querySelector(".card-sticky-actions");
+    if (sticky) {
+      sticky.setAttribute("aria-hidden", collapsed ? "true" : "false");
+    }
     toggle.textContent = collapsed ? "Expand" : "Collapse";
     toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
     if (!skipPersist) {
       localStorage.setItem(ADD_TASK_CARD_STATE_KEY, collapsed ? "collapsed" : "expanded");
     }
-    if (!collapsed && !skipFocus) {
-      focusFirstEditableField();
+    const expandedNow = !collapsed && wasCollapsed;
+    const handleDueDate = focusTarget === "dueDate";
+    const shouldScroll = !collapsed && scroll && (expandedNow || handleDueDate);
+    const shouldFocus = !collapsed && (!skipFocus || handleDueDate) && (expandedNow || handleDueDate);
+
+    if (shouldScroll) {
+      scrollCardHeaderIntoView(card);
     }
+
+    if (!shouldFocus) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      if (handleDueDate) {
+        if (!focusDueDateField()) {
+          focusFirstEditableField();
+        }
+        return;
+      }
+      focusFirstEditableField();
+    }, 120);
   }
 
   function toggleAddTaskCard() {
@@ -6118,17 +6256,81 @@
   function initializeAddTaskCardState() {
     const card = $("addTaskCard");
     if (!card) return;
-    const stored = localStorage.getItem(ADD_TASK_CARD_STATE_KEY);
+    let stored = localStorage.getItem(ADD_TASK_CARD_STATE_KEY);
+    if (!stored) {
+      const legacy = localStorage.getItem(LEGACY_ADD_TASK_CARD_STATE_KEY);
+      if (legacy) {
+        stored = legacy;
+        localStorage.setItem(ADD_TASK_CARD_STATE_KEY, legacy);
+        localStorage.removeItem(LEGACY_ADD_TASK_CARD_STATE_KEY);
+      }
+    }
     const collapsed = stored ? stored !== "expanded" : true;
-    setAddTaskCardCollapsed(collapsed, { skipFocus: true, skipPersist: true });
+    setAddTaskCardCollapsed(collapsed, { skipFocus: true, skipPersist: true, scroll: false });
+  }
+
+  function initializeStatusCardState() {
+    const toggle = $("toggleStatusCard");
+    if (toggle) {
+      toggle.addEventListener("click", () => {
+        const card = $("statusCard");
+        const collapsed = card?.dataset.collapsed !== "false";
+        setStatusCardCollapsed(!collapsed);
+      });
+    }
+    const stored = localStorage.getItem(STATUS_CARD_STATE_KEY);
+    const collapsed = stored ? stored !== "expanded" : true;
+    setStatusCardCollapsed(collapsed, { skipPersist: true });
+  }
+
+  function initializeAllTasksCardState() {
+    const toggle = $("toggleAllTasksCard");
+    if (toggle) {
+      toggle.addEventListener("click", () => {
+        const card = $("allTasksCard");
+        const collapsed = card?.dataset.collapsed !== "false";
+        setAllTasksCardCollapsed(!collapsed);
+      });
+    }
+    const stored = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
+    const collapsed = stored ? stored !== "expanded" : true;
+    setAllTasksCardCollapsed(collapsed, { skipPersist: true });
   }
 
   function focusFirstEditableField() {
     const nameField = $("name");
     if (nameField) {
-      nameField.focus();
-      nameField.select();
+      window.requestAnimationFrame(() => {
+        nameField.focus();
+        if (typeof nameField.select === "function") {
+          nameField.select();
+        }
+      });
     }
+  }
+
+  function focusDueDateField() {
+    const dueField = $("dueDate");
+    if (dueField) {
+      window.requestAnimationFrame(() => dueField.focus());
+      return true;
+    }
+    const serviceField = $("dateOfService");
+    if (serviceField) {
+      window.requestAnimationFrame(() => serviceField.focus());
+      return true;
+    }
+    return false;
+  }
+
+  function scrollCardHeaderIntoView(card) {
+    if (!card) return;
+    const target = card.querySelector(".card-head") || card;
+    window.requestAnimationFrame(() => {
+      const rect = target.getBoundingClientRect();
+      const offset = Math.max(0, window.scrollY + rect.top - 24);
+      window.scrollTo({ top: offset, behavior: "smooth" });
+    });
   }
 
   function handleTemplateModalKeydown(event) {
@@ -6201,11 +6403,16 @@
     }
   }
 
-  function fillTaskFormFromTemplate(template) {
+  function fillTaskFormFromTemplate(template, options = {}) {
     if (!template) return;
     $("name").value = template.name || "";
-    const category = template.category || "General";
-    $("taskCategory").value = category;
+    const keepCurrent = Boolean(options.keepCurrentCategory);
+    const categoryField = $("taskCategory");
+    const currentCategory = categoryField ? (categoryField.value || "General") : "General";
+    const category = keepCurrent ? currentCategory : (template.category || currentCategory);
+    if (categoryField) {
+      categoryField.value = category;
+    }
     handleCategoryChange(category);
     $("importance").value = String(template.importance || 1);
     $("novelty").value = String(template.novelty || 1);
@@ -6231,10 +6438,10 @@
   }
 
   function applyTemplate(template) {
-    fillTaskFormFromTemplate(template);
-    setAddTaskCardCollapsed(false, { skipFocus: true });
+    fillTaskFormFromTemplate(template, { keepCurrentCategory: true });
+    setTaskDetailsCollapsed(false);
+    setAddTaskCardCollapsed(false, { focusTarget: "dueDate" });
     closeTemplateModal();
-    focusFirstEditableField();
   }
 
   function updateTemplateModalForCategory(category) {
@@ -6259,6 +6466,38 @@
     if (!panel) return;
     const collapsed = panel.dataset.collapsed !== "false";
     setTaskDetailsCollapsed(!collapsed);
+  }
+
+  function setStatusCardCollapsed(collapsed, options = {}) {
+    const card = $("statusCard");
+    const toggle = $("toggleStatusCard");
+    const body = $("statusCardBody");
+    if (!card || !toggle || !body) return;
+    const { skipPersist = false } = options;
+    card.classList.toggle("card--collapsed", collapsed);
+    card.dataset.collapsed = collapsed ? "true" : "false";
+    body.setAttribute("aria-hidden", collapsed ? "true" : "false");
+    toggle.textContent = collapsed ? "Expand" : "Collapse";
+    toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    if (!skipPersist) {
+      localStorage.setItem(STATUS_CARD_STATE_KEY, collapsed ? "collapsed" : "expanded");
+    }
+  }
+
+  function setAllTasksCardCollapsed(collapsed, options = {}) {
+    const card = $("allTasksCard");
+    const toggle = $("toggleAllTasksCard");
+    const body = $("allTasksCardBody");
+    if (!card || !toggle || !body) return;
+    const { skipPersist = false } = options;
+    card.classList.toggle("card--collapsed", collapsed);
+    card.dataset.collapsed = collapsed ? "true" : "false";
+    body.setAttribute("aria-hidden", collapsed ? "true" : "false");
+    toggle.textContent = collapsed ? "Expand" : "Collapse";
+    toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    if (!skipPersist) {
+      localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, collapsed ? "collapsed" : "expanded");
+    }
   }
 
   function setModuleOpenState(module, body, open, header = null) {
@@ -6445,6 +6684,12 @@
     persist();
     renderCategoryFilter();
     renderCategoryProgress();
+
+    const allTasksTitle = $("allTasksTitle");
+    if (allTasksTitle) {
+      const total = tasks.length;
+      allTasksTitle.textContent = `All Tasks (${total})`;
+    }
 
     const taskList = $("taskList");
     taskList.innerHTML = "";
@@ -6792,9 +7037,7 @@
       const useBtn = document.createElement("button");
       useBtn.textContent = `📋 ${t.name}`;
       useBtn.onclick = () => {
-        fillTaskFormFromTemplate(t);
-        setAddTaskCardCollapsed(false, { skipFocus: true });
-        focusFirstEditableField();
+        applyTemplate(t);
       };
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️";
@@ -6884,6 +7127,16 @@
     });
   }
 
+  function registerCategoryFilterControl() {
+    const categorySelect = $("taskCategoryFilter");
+    if (!categorySelect) return;
+    categorySelect.addEventListener("change", event => {
+      const value = (event.target.value || "All").toString();
+      activeCategory = categories.includes(value) || value === "All" ? value : "All";
+      updateUI();
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
@@ -6899,6 +7152,8 @@
     initializeFirstThreeWizard();
     initializeTaskForm();
     initializeAddTaskCardState();
+    initializeStatusCardState();
+    initializeAllTasksCardState();
     initializeActionBar();
     initializeCollapsibleModules();
     initializeMorningLaunchModule();
@@ -6932,6 +7187,7 @@
         clinicSite: normalizeClinicSite(template.clinicSite)
       }));
     }
+    registerCategoryFilterControl();
     startReminderLoop();
     renderTemplates();
     updateUI();
