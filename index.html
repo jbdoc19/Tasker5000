@@ -998,6 +998,10 @@
       transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
     }
 
+    a.btn {
+      text-decoration: none;
+    }
+
     .btn:focus-visible,
     .icon-button:focus-visible,
     .link-button:focus-visible {
@@ -1041,6 +1045,83 @@
     .icon-button:hover,
     .btn:hover {
       transform: translateY(-1px);
+    }
+
+    .resource-card .card-body {
+      gap: var(--space-2);
+    }
+
+    .resource-intro {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .resource-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-2);
+    }
+
+    .resource-button {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: var(--space-2);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-decoration: none;
+      color: var(--text-primary);
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.16), rgba(45, 212, 191, 0));
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .resource-button:hover,
+    .resource-button:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(45, 212, 191, 0.35);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .resource-button strong {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .resource-button span {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .resource-button--deep {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0));
+      border-color: rgba(59, 130, 246, 0.18);
+    }
+
+    .resource-button--sunrise {
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(250, 204, 21, 0));
+      border-color: rgba(250, 204, 21, 0.18);
+    }
+
+    .resource-button--orchid {
+      background: linear-gradient(135deg, rgba(192, 132, 252, 0.18), rgba(192, 132, 252, 0));
+      border-color: rgba(192, 132, 252, 0.18);
+    }
+
+    .resource-button--emerald {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0));
+      border-color: rgba(16, 185, 129, 0.22);
+    }
+
+    .resource-button small {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .card {
@@ -1525,6 +1606,69 @@
         <div class="title">🎯 Task Focus</div>
         <div class="subtitle" id="billingReminder"></div>
       </div>
+
+      <section id="supportLinks" class="card resource-card" aria-labelledby="supportLinksTitle">
+        <div class="card-head">
+          <h2 id="supportLinksTitle">Quick access partners</h2>
+        </div>
+        <div class="card-body">
+          <p class="resource-intro">
+            Launch the assistants and knowledge bases you rely on for planning, EPIC efficiency, and assessment templates.
+          </p>
+          <div class="resource-links">
+            <a
+              class="resource-button"
+              href="https://chatgpt.com/g/g-p-68feee841e7081919a28fe9b3083e9f0-karl/project"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <small>Planning ally</small>
+              <strong>Chat with Karl</strong>
+              <span>ADHD-tailored task partner ready to map out your day.</span>
+            </a>
+            <a
+              class="resource-button resource-button--deep"
+              href="https://chatgpt.com/g/g-p-6836a5682d0481918484506cbc1f3082-epic-companion/project"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <small>EPIC strategies</small>
+              <strong>EPIC Companion</strong>
+              <span>Brainstorm workflows to move faster inside the EHR.</span>
+            </a>
+            <a
+              class="resource-button resource-button--sunrise"
+              href="https://notebooklm.google.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <small>Article digest</small>
+              <strong>NotebookLM</strong>
+              <span>Summarize research and notes in a focused workspace.</span>
+            </a>
+            <a
+              class="resource-button resource-button--orchid"
+              href="https://www.notion.so/Assessments-and-Plans-28131b26f81f803088bad074ee0e00fb?source=copy_link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <small>Reference vault</small>
+              <strong>Assessments &amp; Plans</strong>
+              <span>Review ready-made assessment and plan examples.</span>
+            </a>
+            <a
+              class="resource-button resource-button--emerald"
+              href="https://chatgpt.com/g/g-p-68feff1f73ac819189dcf556e573c912-assessments-plans/project"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <small>Document builder</small>
+              <strong>Create Assessments &amp; Plans</strong>
+              <span>Draft new assessments from your history and physical notes.</span>
+            </a>
+          </div>
+        </div>
+      </section>
 
       <section id="statusCard" class="card card--collapsed status-card" data-collapsed="true" aria-live="polite">
         <div class="card-head">
