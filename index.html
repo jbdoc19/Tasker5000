@@ -1525,6 +1525,256 @@
       gap: var(--space-3);
     }
 
+    .next-best-card .card-body {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .next-best-controls {
+      display: grid;
+      gap: var(--space-2);
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      align-items: flex-start;
+    }
+
+    .next-best-energy {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .nbt-frictions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .nbt-frictions label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .nbt-frictions input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .next-best-results {
+      display: grid;
+      gap: var(--space-2);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .next-best-option {
+      display: grid;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
+      position: relative;
+    }
+
+    .next-best-option h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .next-best-option .impact {
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .next-best-option .chunk-meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .next-best-empty {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .conflict-grid {
+      display: grid;
+      gap: var(--space-2);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .conflict-column {
+      display: grid;
+      gap: var(--space-2);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
+    }
+
+    .conflict-column h3 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .conflict-list {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .conflict-item {
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.15);
+      cursor: grab;
+    }
+
+    .conflict-item:active {
+      cursor: grabbing;
+    }
+
+    .conflict-item strong {
+      font-size: 0.9rem;
+    }
+
+    .conflict-item span {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .conflict-arena {
+      border: 2px dashed rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      min-height: 140px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: var(--space-3);
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .conflict-arena.is-ready {
+      border-color: var(--accent);
+      background: rgba(45, 212, 191, 0.12);
+    }
+
+    .conflict-arena .arena-slot {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .conflict-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .defuse-grid {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .defuse-steps {
+      display: grid;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .defuse-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .defuse-progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0a84ff, #7bd88f);
+      transition: width 180ms ease-out;
+    }
+
+    .defuse-locks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .defuse-locks label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.15);
+      font-size: 0.8rem;
+    }
+
+    .dopamine-playlist {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .dopamine-intervals {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .dopamine-interval {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.85rem;
+    }
+
+    .dopamine-progress {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .dopamine-progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f97316, #7c3aed);
+      transition: width 180ms ease-out;
+    }
+
+    .confetti-burst {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: grid;
+      place-items: center;
+      animation: confetti-pop 900ms ease-out forwards;
+      font-size: 2.5rem;
+      z-index: 2000;
+    }
+
+    @keyframes confetti-pop {
+      0% { opacity: 0; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0; transform: scale(1.2); }
+    }
+
     .due-today-empty {
       color: var(--text-secondary);
       font-size: 0.9rem;
@@ -1699,6 +1949,75 @@
           <button id="shieldAction" class="icon-button" type="button" aria-label="Overwhelmed shield">🛡️</button>
         </div>
       </div>
+
+      <section id="nextBestEngineCard" class="card next-best-card" aria-live="polite">
+        <div class="card-head">
+          <h2>⚡ Next Best Thing Engine</h2>
+          <button id="nextBestRefresh" class="link-button" type="button">Refresh</button>
+        </div>
+        <div class="card-body">
+          <div class="next-best-controls">
+            <label for="nextBestTime">
+              Time available
+              <select id="nextBestTime">
+                <option value="10">10 minutes</option>
+                <option value="15" selected>15 minutes</option>
+                <option value="20">20 minutes</option>
+                <option value="30">30 minutes</option>
+              </select>
+            </label>
+            <div class="next-best-energy">
+              <label for="nextBestEnergy">Energy right now</label>
+              <input
+                id="nextBestEnergy"
+                data-field="energy-level"
+                type="range"
+                min="1"
+                max="5"
+                step="1"
+                value="3"
+              />
+              <span id="nextBestEnergyLabel" class="score">Steady</span>
+            </div>
+            <label for="nextBestDeadline">
+              Deadline pressure (1–5)
+              <select id="nextBestDeadline"></select>
+            </label>
+            <label for="nextBestSize">
+              Task size preference
+              <select id="nextBestSize">
+                <option value="any" selected>Any</option>
+                <option value="small">Small bites</option>
+                <option value="medium">Medium chunks</option>
+                <option value="large">Big swing</option>
+              </select>
+            </label>
+            <div>
+              <span class="score">Friction tags</span>
+              <div class="nbt-frictions" role="group" aria-label="Friction tags">
+                <label>
+                  <input type="checkbox" name="nextBestFriction" value="start" />
+                  Start anxiety
+                </label>
+                <label>
+                  <input type="checkbox" name="nextBestFriction" value="perfection" />
+                  Perfection spiral
+                </label>
+                <label>
+                  <input type="checkbox" name="nextBestFriction" value="social" />
+                  Social energy dip
+                </label>
+                <label>
+                  <input type="checkbox" name="nextBestFriction" value="focus" />
+                  Focus fragmentation
+                </label>
+              </div>
+            </div>
+          </div>
+          <div id="nextBestResults" class="next-best-results"></div>
+          <p id="nextBestEmpty" class="next-best-empty hidden">Add a task to see your next best options.</p>
+        </div>
+      </section>
 
       <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
         <div class="card-head">
@@ -2036,6 +2355,124 @@
             <div id="templateButtons"></div>
           </div>
         </div>
+
+        <div id="conflictResolverModule" class="module-card" data-module-id="conflictResolverModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>🥊 3-v-3 Conflict Resolver</span>
+            </div>
+            <span class="info-dot" title="Drag one should-do and one want-to into the arena to settle the debate.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div class="conflict-grid">
+              <div class="conflict-column">
+                <h3>Top 3 should-do</h3>
+                <div id="conflictShouldList" class="conflict-list" aria-live="polite"></div>
+              </div>
+              <div class="conflict-column">
+                <h3>Top 3 want-to</h3>
+                <div id="conflictWantList" class="conflict-list" aria-live="polite"></div>
+              </div>
+            </div>
+            <div
+              id="conflictArena"
+              class="conflict-arena"
+              role="application"
+              aria-live="polite"
+              aria-label="Drag contenders here"
+            >
+              <div id="conflictArenaPrompt">Drag a contender from each side into the arena.</div>
+            </div>
+            <div class="conflict-actions">
+              <button id="conflictReset" type="button" class="btn btn-ghost">Reset arena</button>
+            </div>
+            <div id="conflictResult" class="score" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div id="defuseModule" class="module-card" data-module-id="defuseModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>🧘 DEFUSE Mode</span>
+            </div>
+            <span class="info-dot" title="90-second preflight that separates feelings from actions and locks distractions.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div class="defuse-grid">
+              <div class="defuse-steps">
+                <strong>Preflight (90s)</strong>
+                <div id="defusePrompt">Feeling ≠ instruction. You can feel tired and still send the email.</div>
+                <div class="defuse-progress" aria-hidden="true">
+                  <span id="defuseProgressFill"></span>
+                </div>
+                <div class="score">Countdown: <span id="defuseCountdown">90s</span></div>
+              </div>
+              <div>
+                <strong>Fake it action</strong>
+                <div class="intention-buttons">
+                  <button type="button" data-defuse-action="Open the doc & type the title">Open doc + type title</button>
+                  <button type="button" data-defuse-action="Write one bullet in the note">Draft one bullet</button>
+                  <button type="button" data-defuse-action="Send the 2-sentence update">Send the 2-sentence update</button>
+                </div>
+                <p id="defuseActionPreview" class="score">Action picked: Open the doc & type the title</p>
+              </div>
+              <div>
+                <strong>Zone locks</strong>
+                <div id="defuseLocks" class="defuse-locks">
+                  <label><input type="checkbox" value="Messages" /> Messages</label>
+                  <label><input type="checkbox" value="Email" /> Email</label>
+                  <label><input type="checkbox" value="Instagram" /> Instagram</label>
+                  <label><input type="checkbox" value="YouTube" /> YouTube</label>
+                </div>
+              </div>
+              <div>
+                <strong>Uptime sprint</strong>
+                <p id="defuseUptime" class="score">Next sprint: 10 minutes</p>
+                <div class="defuse-progress" aria-hidden="true">
+                  <span id="defuseUptimeFill"></span>
+                </div>
+              </div>
+              <div class="conflict-actions">
+                <button id="defuseStart" type="button" class="btn btn-primary">Start DEFUSE</button>
+                <button id="defuseCancel" type="button" class="btn btn-ghost" disabled>Cancel</button>
+              </div>
+              <div id="defuseStatus" class="score" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dopamineModule" class="module-card" data-module-id="dopamineModule">
+          <button class="module-header" type="button" aria-expanded="false">
+            <div class="module-heading">
+              <span class="module-caret" aria-hidden="true">▸</span>
+              <span>🎵 Dopamine Retrainer</span>
+            </div>
+            <span class="info-dot" title="Stretch reward intervals with a playlist of micro-celebrations.">i</span>
+          </button>
+          <div class="module-body" hidden>
+            <div class="dopamine-playlist">
+              <label for="dopamineReward">Reward style
+                <select id="dopamineReward">
+                  <option value="music">Music stinger</option>
+                  <option value="confetti">GIF confetti</option>
+                  <option value="coin">Coin sound</option>
+                  <option value="stretch">Stretch cue</option>
+                </select>
+              </label>
+              <div class="dopamine-intervals" id="dopamineIntervals" aria-live="polite"></div>
+              <div class="dopamine-progress" aria-hidden="true">
+                <span id="dopamineProgressFill"></span>
+              </div>
+              <div class="conflict-actions">
+                <button id="dopamineStart" type="button" class="btn btn-primary">Start playlist</button>
+                <button id="dopamineStop" type="button" class="btn btn-ghost" disabled>Stop</button>
+              </div>
+              <div id="dopamineStatus" class="score" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -2119,7 +2556,10 @@
     "morningLaunchModule",
     "launchPadModule",
     "sleepToolkitModule",
-    "templateModule"
+    "templateModule",
+    "conflictResolverModule",
+    "defuseModule",
+    "dopamineModule"
   ];
   const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
   let storedChartFieldValues = null;
@@ -2132,6 +2572,18 @@
   const SLEEP_TOOLKIT_KEY = "sleepToolkitState";
   let lastFocusEnergyLevel = null;
   let lastFocusTimeBudget = null;
+  let syncingEnergySliders = false;
+  let conflictArenaSelection = { should: null, want: null };
+  const DEFAULT_DEFUSE_ACTION = "Open the doc & type the title";
+  let defuseState = {
+    active: false,
+    countdown: 90,
+    intervalId: null,
+    uptime: DEFUSE_MINUTES_MIN,
+    uptimeIntervalId: null,
+    selectedAction: DEFAULT_DEFUSE_ACTION
+  };
+  let dopamineState = null;
   const FIRST_THREE_KEYWORDS = [
     "report",
     "project",
@@ -2158,6 +2610,14 @@
   const DEFAULT_MELATONIN_TIME = "21:30";
   const DEFAULT_SUNLIGHT_TIME = "08:00";
   const DEFAULT_LAUNCH_PAD_SITE = "General Clinic";
+  const NEXT_BEST_STORAGE_KEY = "nextBest.inputs";
+  const DEFUSE_BASE_MINUTES_KEY = "defuse.baseMinutes";
+  const DEFUSE_ACTION_KEY = "defuse.action";
+  const DEFUSE_LOCKS_KEY = "defuse.locks";
+  const DEFUSE_MINUTES_MIN = 10;
+  const DEFUSE_MINUTES_MAX = 30;
+  const DOPAMINE_REWARD_KEY = "dopamine.reward";
+  const DOPAMINE_INTERVALS = [2, 6, 12];
   const ENERGY_LABELS = {
     1: "Foggy",
     2: "Sleepy",
@@ -2172,6 +2632,23 @@
     4: "Rested",
     5: "Recharged"
   };
+  const NEXT_BEST_FRICTION_RULES = {
+    start: task => (Number(task.timeToStart) || 3) <= 3,
+    perfection: task => estimateTaskMinutes(task) <= 25,
+    social: task => !["Calls", "Inbox"].includes(task.category || ""),
+    focus: task => {
+      const remaining = Array.isArray(task.subTasks) ? task.subTasks.filter(sub => !sub.completed).length : 0;
+      return remaining <= 4;
+    }
+  };
+  const DEFUSE_PROMPTS = [
+    { threshold: 60, message: "Feeling ≠ instruction. You can feel tired and still send the email." },
+    { threshold: 30, message: "Fake it: open the doc, type the title, breathe." },
+    { threshold: 0, message: "Zone check: distractions locked. You're cleared for takeoff." }
+  ];
+  const MMP_MIN_MINUTES = 10;
+  const MMP_MAX_MINUTES = 20;
+  const CONFLICT_DEFAULT_SPRINT = 12;
   const LAUNCH_PAD_PRESETS = {
     "General Clinic": [
       "Stethoscope",
@@ -2840,6 +3317,7 @@
         const label = ENERGY_LABELS[value] || value;
         energyLabel.textContent = `${label}`;
       }
+      alignEnergySliders(value, "morning");
     }
     resumeMorningCountdown(entry);
     updateMorningHistoryList();
@@ -2900,6 +3378,7 @@
           const label = ENERGY_LABELS[value] || value;
           energyLabel.textContent = label;
         }
+        alignEnergySliders(value, "morning");
       });
     }
     const energySave = $("morningEnergySave");
@@ -4134,6 +4613,39 @@
     if (!el) return Infinity;
     const value = Number(el.value);
     return Number.isFinite(value) && value > 0 ? value : Infinity;
+  }
+
+  function alignEnergySliders(value, source = "next") {
+    const resolved = clampScale(value, 3);
+    if (syncingEnergySliders) {
+      return resolved;
+    }
+    syncingEnergySliders = true;
+    const nextSlider = $("nextBestEnergy");
+    if (nextSlider && source !== "next" ) {
+      nextSlider.value = String(resolved);
+      nextSlider.setAttribute("data-value", String(resolved));
+    }
+    const nextLabel = $("nextBestEnergyLabel");
+    if (nextLabel) {
+      const label = ENERGY_LABELS[resolved] || resolved;
+      nextLabel.textContent = label;
+    }
+    const morningSlider = $("morningEnergy");
+    if (morningSlider && source !== "morning") {
+      morningSlider.value = String(resolved);
+      const morningLabel = $("morningEnergyLabel");
+      if (morningLabel) {
+        const label = ENERGY_LABELS[resolved] || resolved;
+        morningLabel.textContent = label;
+      }
+    }
+    const nextField = document.querySelector('#nextBestEnergy');
+    if (nextField) {
+      nextField.setAttribute('data-value', String(resolved));
+    }
+    syncingEnergySliders = false;
+    return resolved;
   }
 
   function energyFit(task, energyLevel) {
@@ -6354,6 +6866,379 @@
     if (startSprintBtn) startSprintBtn.disabled = false;
   }
 
+  const DEFAULT_NEXT_BEST_INPUTS = {
+    time: 15,
+    energy: 3,
+    deadline: 3,
+    size: "any",
+    frictions: []
+  };
+
+  function clampMmpMinutes(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric) || numeric <= 0) return MMP_MIN_MINUTES;
+    return Math.max(MMP_MIN_MINUTES, Math.min(MMP_MAX_MINUTES, Math.round(numeric)));
+  }
+
+  function loadNextBestInputs() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(NEXT_BEST_STORAGE_KEY) || "null");
+      if (stored && typeof stored === "object") {
+        const frictions = Array.isArray(stored.frictions)
+          ? Array.from(new Set(stored.frictions.map(String)))
+          : [];
+        return {
+          ...DEFAULT_NEXT_BEST_INPUTS,
+          ...stored,
+          time: Number(stored.time) || DEFAULT_NEXT_BEST_INPUTS.time,
+          energy: clampScale(stored.energy, DEFAULT_NEXT_BEST_INPUTS.energy),
+          deadline: clampScale(stored.deadline, DEFAULT_NEXT_BEST_INPUTS.deadline),
+          size: stored.size || DEFAULT_NEXT_BEST_INPUTS.size,
+          frictions
+        };
+      }
+    } catch (error) {
+      console.warn("Unable to load Next Best inputs", error);
+    }
+    return { ...DEFAULT_NEXT_BEST_INPUTS };
+  }
+
+  function saveNextBestInputs(inputs) {
+    try {
+      localStorage.setItem(NEXT_BEST_STORAGE_KEY, JSON.stringify(inputs));
+    } catch (error) {
+      console.warn("Unable to save Next Best inputs", error);
+    }
+  }
+
+  function applyNextBestInputs(inputs) {
+    const timeSelect = $("nextBestTime");
+    if (timeSelect) {
+      timeSelect.value = String(inputs.time);
+    }
+    const energySlider = $("nextBestEnergy");
+    if (energySlider) {
+      energySlider.value = String(inputs.energy);
+      energySlider.setAttribute("data-value", String(inputs.energy));
+    }
+    const deadlineSelect = $("nextBestDeadline");
+    if (deadlineSelect) {
+      deadlineSelect.value = String(inputs.deadline);
+    }
+    const sizeSelect = $("nextBestSize");
+    if (sizeSelect) {
+      sizeSelect.value = inputs.size || "any";
+    }
+    const checkboxes = document.querySelectorAll('input[name="nextBestFriction"]');
+    checkboxes.forEach(box => {
+      box.checked = inputs.frictions.includes(box.value);
+    });
+    alignEnergySliders(inputs.energy, "next");
+  }
+
+  function getSelectedFrictionTags() {
+    return Array.from(document.querySelectorAll('input[name="nextBestFriction"]:checked'))
+      .map(input => input.value)
+      .filter(Boolean);
+  }
+
+  function getNextBestInputs() {
+    const defaults = loadNextBestInputs();
+    const timeSelect = $("nextBestTime");
+    const energySlider = $("nextBestEnergy");
+    const deadlineSelect = $("nextBestDeadline");
+    const sizeSelect = $("nextBestSize");
+    const timeValue = Number(timeSelect?.value || defaults.time);
+    const energyValue = Number(energySlider?.value || defaults.energy);
+    const deadlineValue = Number(deadlineSelect?.value || defaults.deadline);
+    const frictions = getSelectedFrictionTags();
+    const resolvedEnergy = alignEnergySliders(energyValue, "next");
+    return {
+      time: Number.isFinite(timeValue) && timeValue > 0 ? timeValue : defaults.time,
+      energy: resolvedEnergy,
+      deadline: clampScale(deadlineValue, defaults.deadline),
+      size: sizeSelect?.value || defaults.size,
+      frictions
+    };
+  }
+
+  function estimateSubTaskMinutes(task, sub) {
+    if (!sub) return null;
+    const recorded = Number(sub.durationMinutes);
+    if (Number.isFinite(recorded) && recorded > 0) {
+      return clampMmpMinutes(recorded);
+    }
+    const total = estimateTaskMinutes(task);
+    const remainingCount = Array.isArray(task.subTasks) && task.subTasks.length
+      ? task.subTasks.filter(step => !step.completed).length || 1
+      : 1;
+    const approx = Number.isFinite(total)
+      ? Math.max(6, total / Math.max(1, remainingCount))
+      : 15;
+    return clampMmpMinutes(approx);
+  }
+
+  function deriveMmpChunk(task) {
+    if (!task) return null;
+    const remainingSubs = Array.isArray(task.subTasks)
+      ? task.subTasks.filter(sub => !sub.completed)
+      : [];
+    if (remainingSubs.length) {
+      const prioritized = remainingSubs.map(sub => ({ sub, minutes: estimateSubTaskMinutes(task, sub) }));
+      const candidate = prioritized.find(entry => entry.minutes <= MMP_MAX_MINUTES) || prioritized[0];
+      if (candidate) {
+        return {
+          label: candidate.sub.name,
+          minutes: clampMmpMinutes(candidate.minutes),
+          subId: candidate.sub.id || null
+        };
+      }
+    }
+    const fallback = estimateTaskMinutes(task);
+    const sprint = Number.isFinite(fallback) ? Math.max(fallback * 0.5, MMP_MIN_MINUTES) : MMP_MIN_MINUTES;
+    const minutes = clampMmpMinutes(sprint);
+    return {
+      label: `First ${minutes} minutes on ${task.name}`,
+      minutes,
+      subId: null
+    };
+  }
+
+  function isEasyNextBest(evaluation) {
+    if (!evaluation) return false;
+    const difficulty = Number(evaluation.task?.difficulty || 3);
+    return difficulty <= 3 && evaluation.chunk.minutes <= 15;
+  }
+
+  function isBuddyNextBest(evaluation) {
+    if (!evaluation) return false;
+    const difficulty = Number(evaluation.task?.difficulty || 3);
+    const category = evaluation.task?.category || "";
+    return difficulty >= 4 || evaluation.chunk.minutes >= 18 || ["Calls", "Teaching"].includes(category);
+  }
+
+  function evaluateTaskForNextBest(task, inputs) {
+    if (!task || isTaskCompleted(task)) return null;
+    const chunk = deriveMmpChunk(task);
+    if (!chunk) return null;
+    const timeBudget = Number.isFinite(inputs.time) ? inputs.time : Infinity;
+    const energyLevel = clampScale(inputs.energy, 3);
+    let score = computeFocusScore(task, energyLevel, timeBudget);
+    if (!Number.isFinite(score)) score = 0;
+    (inputs.frictions || []).forEach(tag => {
+      const rule = NEXT_BEST_FRICTION_RULES[tag];
+      if (typeof rule === "function") {
+        score *= rule(task) ? 1.08 : 0.78;
+      }
+    });
+    const deadlineLevel = clampScale(inputs.deadline, 3);
+    if (deadlineLevel !== 3) {
+      const daysUntil = task.dueDate ? calculateDaysUntil(task.dueDate) : null;
+      const overdue = Number.isFinite(daysUntil) && daysUntil < 0;
+      const dueSoon = Number.isFinite(daysUntil) && daysUntil >= 0 && daysUntil <= 2;
+      const daysSince = Number(task.daysSinceVisit);
+      if (deadlineLevel > 3) {
+        const boost = 1 + (deadlineLevel - 3) * 0.12;
+        if (overdue || dueSoon || (Number.isFinite(daysSince) && daysSince >= 5)) {
+          score *= boost;
+        } else {
+          score *= 1 + (deadlineLevel - 3) * 0.05;
+        }
+      } else {
+        score *= Math.max(0.6, 1 - (3 - deadlineLevel) * 0.06);
+      }
+    }
+    const estimate = estimateTaskMinutes(task);
+    const effectiveEstimate = Number.isFinite(estimate) && estimate > 0 ? estimate : chunk.minutes;
+    if (inputs.size === "small") {
+      score *= effectiveEstimate <= 20 ? 1.1 : 0.82;
+    } else if (inputs.size === "medium") {
+      score *= effectiveEstimate >= 15 && effectiveEstimate <= 40 ? 1.08 : 0.88;
+    } else if (inputs.size === "large") {
+      score *= effectiveEstimate >= 30 ? 1.12 : 0.85;
+    }
+    const impact = Number(task.priority || 0);
+    const impactPerMinute = chunk.minutes > 0 ? impact / chunk.minutes : impact;
+    const insights = buildNextTaskInsights(task, energyLevel, timeBudget);
+    return {
+      task,
+      score,
+      chunk,
+      impactPerMinute,
+      estimate: effectiveEstimate,
+      insights
+    };
+  }
+
+  function launchNextBestOption(label, evaluation) {
+    if (!evaluation || !evaluation.task) return;
+    const minutes = Number.isFinite(evaluation.chunk?.minutes)
+      ? evaluation.chunk.minutes
+      : MMP_MIN_MINUTES;
+    showToast("Next Best Thing", `${label}: ${evaluation.chunk?.label || evaluation.task.name}`);
+    startFocus(evaluation.task.id, { sprintMinutes: minutes });
+  }
+
+  function createNextBestCard(config) {
+    const { key, title, subtitle, cta, evaluation } = config;
+    if (!evaluation) return null;
+    const card = document.createElement("article");
+    card.className = "next-best-option";
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    card.appendChild(heading);
+
+    if (subtitle) {
+      const hint = document.createElement("p");
+      hint.className = "score";
+      hint.textContent = subtitle;
+      card.appendChild(hint);
+    }
+
+    const name = document.createElement("strong");
+    name.textContent = evaluation.task.name;
+    card.appendChild(name);
+
+    const chunkMeta = document.createElement("div");
+    chunkMeta.className = "chunk-meta";
+    chunkMeta.textContent = `${evaluation.chunk.label} • ${evaluation.chunk.minutes} min`;
+    card.appendChild(chunkMeta);
+
+    const impact = document.createElement("div");
+    impact.className = "impact";
+    impact.textContent = `Impact/min: ${evaluation.impactPerMinute.toFixed(2)}`;
+    card.appendChild(impact);
+
+    if (Array.isArray(evaluation.insights) && evaluation.insights.length) {
+      const insights = document.createElement("div");
+      insights.className = "chunk-meta";
+      insights.textContent = evaluation.insights.join(" • ");
+      card.appendChild(insights);
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = key === "buddy" ? "btn btn-secondary" : "btn btn-primary";
+    button.textContent = cta || "Start";
+    button.addEventListener("click", () => launchNextBestOption(title, evaluation));
+    card.appendChild(button);
+    return card;
+  }
+
+  function updateNextBestOptions() {
+    const results = $("nextBestResults");
+    const empty = $("nextBestEmpty");
+    if (!results || !empty) return;
+
+    const inputs = getNextBestInputs();
+    saveNextBestInputs(inputs);
+
+    results.innerHTML = "";
+    empty.classList.add("hidden");
+
+    const candidates = tasks.filter(task => !isTaskCompleted(task));
+    if (!candidates.length) {
+      empty.textContent = "Add a task to see your next best options.";
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    const evaluations = candidates
+      .map(task => evaluateTaskForNextBest(task, inputs))
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+
+    if (!evaluations.length) {
+      empty.textContent = "No tasks match this window. Adjust your filters.";
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    const used = new Set();
+    const picks = {};
+    const assignCandidate = (key, predicate = null) => {
+      const match = evaluations.find(entry => !used.has(entry.task.id) && (!predicate || predicate(entry)));
+      if (match) {
+        used.add(match.task.id);
+        picks[key] = match;
+      }
+    };
+
+    assignCandidate("now");
+    assignCandidate("easy", isEasyNextBest);
+    assignCandidate("buddy", isBuddyNextBest);
+
+    ["easy", "buddy"].forEach(key => {
+      if (!picks[key]) {
+        const fallback = evaluations.find(entry => !used.has(entry.task.id));
+        if (fallback) {
+          used.add(fallback.task.id);
+          picks[key] = fallback;
+        }
+      }
+    });
+
+    const configs = [
+      { key: "now", title: "Do now", subtitle: "Highest ROI for this energy + time", cta: "Start" },
+      { key: "easy", title: "Do if easy", subtitle: "Low friction win to keep momentum", cta: "Start easy" },
+      { key: "buddy", title: "Do with buddy", subtitle: "Heavier lift – pull in accountability", cta: "Start with buddy" }
+    ];
+
+    configs.forEach(config => {
+      const evaluation = picks[config.key];
+      if (evaluation) {
+        const card = createNextBestCard({ ...config, evaluation });
+        if (card) results.appendChild(card);
+      }
+    });
+  }
+
+  function initializeNextBestEngine() {
+    const controlsExist = $("nextBestEngineCard");
+    if (!controlsExist) return;
+    const deadlineSelect = $("nextBestDeadline");
+    if (deadlineSelect && deadlineSelect.options.length === 0) {
+      for (let i = 1; i <= 5; i += 1) {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = String(i);
+        deadlineSelect.appendChild(option);
+      }
+    }
+    const stored = loadNextBestInputs();
+    applyNextBestInputs(stored);
+
+    const timeSelect = $("nextBestTime");
+    if (timeSelect) {
+      timeSelect.addEventListener("change", updateNextBestOptions);
+    }
+    const energySlider = $("nextBestEnergy");
+    if (energySlider) {
+      energySlider.addEventListener("input", event => {
+        const value = Number(event.target.value || stored.energy);
+        alignEnergySliders(value, "next");
+        updateNextBestOptions();
+      });
+    }
+    if (deadlineSelect) {
+      deadlineSelect.addEventListener("change", updateNextBestOptions);
+    }
+    const sizeSelect = $("nextBestSize");
+    if (sizeSelect) {
+      sizeSelect.addEventListener("change", updateNextBestOptions);
+    }
+    const frictionBoxes = document.querySelectorAll('input[name="nextBestFriction"]');
+    frictionBoxes.forEach(box => {
+      box.addEventListener("change", updateNextBestOptions);
+    });
+    const refreshBtn = $("nextBestRefresh");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", updateNextBestOptions);
+    }
+    updateNextBestOptions();
+  }
+
   function renderDueTodayList(entries) {
     const section = $("dueTodaySection");
     const listEl = $("dueTodayList");
@@ -6431,6 +7316,652 @@
       toggleBtn.classList.add("hidden");
       toggleBtn.textContent = "";
     }
+  }
+
+  function computeWantScore(task) {
+    const interest = Number(task?.interest || 3);
+    const novelty = Number(task?.novelty || 3);
+    const difficulty = Number(task?.difficulty || 3);
+    const est = estimateTaskMinutes(task);
+    const ease = Number.isFinite(est) && est <= 20 ? 1.15 : 0.95;
+    return (interest + novelty) * ease - difficulty * 0.2;
+  }
+
+  function renderConflictList(candidates, container, type) {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!candidates.length) {
+      const empty = document.createElement("p");
+      empty.className = "score";
+      empty.textContent = "No tasks available.";
+      container.appendChild(empty);
+      return;
+    }
+    candidates.slice(0, 3).forEach(({ task, descriptor }) => {
+      const item = document.createElement("div");
+      item.className = "conflict-item";
+      item.setAttribute("draggable", "true");
+      item.setAttribute("role", "button");
+      item.setAttribute("tabindex", "0");
+      item.dataset.type = type;
+      item.dataset.taskId = task.id;
+      const title = document.createElement("strong");
+      title.textContent = task.name;
+      const meta = document.createElement("span");
+      meta.textContent = descriptor;
+      item.appendChild(title);
+      item.appendChild(meta);
+      item.addEventListener("dragstart", event => {
+        if (!event.dataTransfer) return;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", JSON.stringify({ type, taskId: task.id }));
+      });
+      item.addEventListener("click", () => setConflictSelection(type, task.id));
+      item.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setConflictSelection(type, task.id);
+        }
+      });
+      container.appendChild(item);
+    });
+  }
+
+  function getActiveTaskById(taskId) {
+    return tasks.find(task => task.id === taskId && !isTaskCompleted(task));
+  }
+
+  function renderConflictArena() {
+    const arena = $("conflictArena");
+    if (!arena) return;
+    arena.innerHTML = "";
+    const selections = [];
+    if (conflictArenaSelection.should) {
+      selections.push({ label: "Should-do", task: conflictArenaSelection.should });
+    }
+    if (conflictArenaSelection.want) {
+      selections.push({ label: "Want-to", task: conflictArenaSelection.want });
+    }
+    if (!selections.length) {
+      const prompt = document.createElement("div");
+      prompt.id = "conflictArenaPrompt";
+      prompt.textContent = "Drag a contender from each side into the arena.";
+      arena.appendChild(prompt);
+      arena.classList.remove("is-ready");
+      return;
+    }
+    selections.forEach(selection => {
+      const slot = document.createElement("div");
+      slot.className = "arena-slot";
+      slot.textContent = `${selection.label}: ${selection.task.name}`;
+      arena.appendChild(slot);
+    });
+    if (conflictArenaSelection.should && conflictArenaSelection.want) {
+      arena.classList.add("is-ready");
+    } else {
+      arena.classList.remove("is-ready");
+    }
+  }
+
+  function setConflictSelection(type, taskId) {
+    const task = getActiveTaskById(taskId);
+    if (!task) return;
+    conflictArenaSelection = {
+      ...conflictArenaSelection,
+      [type]: task
+    };
+    const result = $("conflictResult");
+    if (result) result.textContent = "";
+    renderConflictArena();
+    if (conflictArenaSelection.should && conflictArenaSelection.want) {
+      evaluateConflictArena();
+    }
+  }
+
+  function resetConflictArena() {
+    conflictArenaSelection = { should: null, want: null };
+    const result = $("conflictResult");
+    if (result) result.textContent = "";
+    renderConflictArena();
+  }
+
+  function handleConflictDrop(event) {
+    event.preventDefault();
+    if (!event.dataTransfer) return;
+    try {
+      const payload = JSON.parse(event.dataTransfer.getData("text/plain"));
+      if (payload?.type && payload?.taskId) {
+        setConflictSelection(payload.type, payload.taskId);
+      }
+    } catch (error) {
+      console.warn("Unable to parse dropped conflict item", error);
+    }
+  }
+
+  function evaluateConflictArena() {
+    const shouldTask = conflictArenaSelection.should;
+    const wantTask = conflictArenaSelection.want;
+    if (!shouldTask || !wantTask) return;
+    const energy = clampScale(getEnergyLevel(), 3);
+    const timeBudget = getTimeBudgetMinutes();
+    const shouldChunk = deriveMmpChunk(shouldTask);
+    const wantChunk = deriveMmpChunk(wantTask);
+    const shouldScore = computeFocusScore(shouldTask, energy, timeBudget) * 0.6
+      + (Number(shouldTask.importance) || 1) * 2
+      + (shouldChunk.minutes <= 15 ? 1.1 : 1);
+    const wantScore = computeFocusScore(wantTask, energy, timeBudget) * 0.45
+      + (Number(wantTask.interest) || 3) + (Number(wantTask.novelty) || 3)
+      + (wantChunk.minutes <= 15 ? 1.05 : 0.9);
+    const recommended = shouldScore >= wantScore
+      ? { task: shouldTask, chunk: shouldChunk, label: "Should-do" }
+      : { task: wantTask, chunk: wantChunk, label: "Want-to" };
+    const sprintMinutes = Number.isFinite(recommended.chunk?.minutes)
+      ? recommended.chunk.minutes
+      : CONFLICT_DEFAULT_SPRINT;
+    showToast("Conflict resolved", `${recommended.label} wins: ${recommended.task.name}`);
+    const result = $("conflictResult");
+    if (result) {
+      result.textContent = `${recommended.label} wins – ${sprintMinutes} minute sprint queued.`;
+    }
+    startFocus(recommended.task.id, { sprintMinutes });
+    resetConflictArena();
+    updateConflictResolver();
+  }
+
+  function updateConflictResolver() {
+    const shouldList = $("conflictShouldList");
+    const wantList = $("conflictWantList");
+    if (!shouldList || !wantList) return;
+    const activeTasks = tasks.filter(task => !isTaskCompleted(task));
+    conflictArenaSelection.should = conflictArenaSelection.should
+      ? getActiveTaskById(conflictArenaSelection.should.id)
+      : null;
+    conflictArenaSelection.want = conflictArenaSelection.want
+      ? getActiveTaskById(conflictArenaSelection.want.id)
+      : null;
+    const energy = clampScale(getEnergyLevel(), 3);
+    const timeBudget = getTimeBudgetMinutes();
+    const shouldCandidates = activeTasks
+      .map(task => ({
+        task,
+        descriptor: `Focus score ${computeFocusScore(task, energy, timeBudget).toFixed(1)}`
+      }))
+      .sort((a, b) => computeFocusScore(b.task, energy, timeBudget) - computeFocusScore(a.task, energy, timeBudget));
+    const wantCandidates = activeTasks
+      .map(task => ({
+        task,
+        descriptor: `Spark score ${computeWantScore(task).toFixed(1)}`
+      }))
+      .sort((a, b) => computeWantScore(b.task) - computeWantScore(a.task));
+    renderConflictList(shouldCandidates, shouldList, "should");
+    renderConflictList(wantCandidates, wantList, "want");
+    renderConflictArena();
+  }
+
+  function initializeConflictResolverModule() {
+    const module = $("conflictResolverModule");
+    if (!module) return;
+    const arena = $("conflictArena");
+    if (arena) {
+      arena.addEventListener("dragover", event => {
+        event.preventDefault();
+        arena.classList.add("is-ready");
+      });
+      arena.addEventListener("dragleave", () => {
+        if (!conflictArenaSelection.should || !conflictArenaSelection.want) {
+          arena.classList.remove("is-ready");
+        }
+      });
+      arena.addEventListener("drop", handleConflictDrop);
+    }
+    const resetBtn = $("conflictReset");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", resetConflictArena);
+    }
+    updateConflictResolver();
+  }
+
+  function getDefuseBaseMinutes() {
+    const stored = Number(localStorage.getItem(DEFUSE_BASE_MINUTES_KEY));
+    if (Number.isFinite(stored) && stored >= DEFUSE_MINUTES_MIN) {
+      return Math.min(DEFUSE_MINUTES_MAX, Math.max(DEFUSE_MINUTES_MIN, Math.round(stored)));
+    }
+    return DEFUSE_MINUTES_MIN;
+  }
+
+  function setDefuseBaseMinutes(value) {
+    const clamped = Math.max(DEFUSE_MINUTES_MIN, Math.min(DEFUSE_MINUTES_MAX, Math.round(value)));
+    try {
+      localStorage.setItem(DEFUSE_BASE_MINUTES_KEY, String(clamped));
+    } catch (error) {
+      console.warn("Unable to store DEFUSE base minutes", error);
+    }
+    defuseState.uptime = clamped;
+    updateDefuseUptimeUI();
+  }
+
+  function getDefuseLocks() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(DEFUSE_LOCKS_KEY) || "[]");
+      return Array.isArray(raw) ? raw.map(String) : [];
+    } catch (error) {
+      console.warn("Unable to parse DEFUSE locks", error);
+      return [];
+    }
+  }
+
+  function saveDefuseLocks(values) {
+    try {
+      localStorage.setItem(DEFUSE_LOCKS_KEY, JSON.stringify(values));
+    } catch (error) {
+      console.warn("Unable to save DEFUSE locks", error);
+    }
+  }
+
+  function loadDefuseAction() {
+    try {
+      const stored = localStorage.getItem(DEFUSE_ACTION_KEY);
+      return stored || DEFAULT_DEFUSE_ACTION;
+    } catch (error) {
+      console.warn("Unable to load DEFUSE action", error);
+      return DEFAULT_DEFUSE_ACTION;
+    }
+  }
+
+  function saveDefuseAction(action) {
+    try {
+      if (!action) {
+        localStorage.removeItem(DEFUSE_ACTION_KEY);
+      } else {
+        localStorage.setItem(DEFUSE_ACTION_KEY, action);
+      }
+    } catch (error) {
+      console.warn("Unable to store DEFUSE action", error);
+    }
+  }
+
+  function getSelectedDefuseLocks() {
+    return Array.from(document.querySelectorAll('#defuseLocks input[type="checkbox"]:checked'))
+      .map(box => box.value)
+      .filter(Boolean);
+  }
+
+  function updateDefuseLocksUI() {
+    const stored = getDefuseLocks();
+    const boxes = document.querySelectorAll('#defuseLocks input[type="checkbox"]');
+    boxes.forEach(box => {
+      box.checked = stored.includes(box.value);
+    });
+  }
+
+  function updateDefuseUptimeUI() {
+    const base = defuseState.uptime || getDefuseBaseMinutes();
+    const uptime = $("defuseUptime");
+    if (uptime) {
+      uptime.textContent = `Next sprint: ${base} minutes`;
+    }
+    const fill = $("defuseUptimeFill");
+    if (fill) {
+      const ratio = (base - DEFUSE_MINUTES_MIN) / (DEFUSE_MINUTES_MAX - DEFUSE_MINUTES_MIN);
+      fill.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+    }
+  }
+
+  function updateDefuseCountdownUI() {
+    const countdownEl = $("defuseCountdown");
+    if (countdownEl) {
+      countdownEl.textContent = `${Math.max(0, defuseState.countdown)}s`;
+    }
+    const progress = $("defuseProgressFill");
+    if (progress) {
+      const ratio = defuseState.active ? (1 - defuseState.countdown / 90) : 0;
+      progress.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+    }
+    if (defuseState.active) {
+      const prompt = DEFUSE_PROMPTS.find(entry => defuseState.countdown <= entry.threshold);
+      const promptEl = $("defusePrompt");
+      if (prompt && promptEl) {
+        promptEl.textContent = prompt.message;
+      }
+    } else {
+      const promptEl = $("defusePrompt");
+      if (promptEl) {
+        promptEl.textContent = DEFUSE_PROMPTS[0].message;
+      }
+    }
+  }
+
+  function setDefuseStatus(message) {
+    const status = $("defuseStatus");
+    if (status) {
+      status.textContent = message || "";
+    }
+  }
+
+  function selectDefuseAction(action) {
+    defuseState.selectedAction = action || DEFAULT_DEFUSE_ACTION;
+    saveDefuseAction(defuseState.selectedAction);
+    const preview = $("defuseActionPreview");
+    if (preview) {
+      preview.textContent = `Action picked: ${defuseState.selectedAction}`;
+    }
+  }
+
+  function autoLockDefuseApps() {
+    const boxes = document.querySelectorAll('#defuseLocks input[type="checkbox"]');
+    const values = [];
+    boxes.forEach(box => {
+      box.checked = true;
+      values.push(box.value);
+    });
+    saveDefuseLocks(values);
+  }
+
+  function startDefusePreflight() {
+    if (defuseState.active) return;
+    defuseState.active = true;
+    defuseState.countdown = 90;
+    defuseState.selectedAction = defuseState.selectedAction || DEFAULT_DEFUSE_ACTION;
+    autoLockDefuseApps();
+    updateDefuseCountdownUI();
+    setDefuseStatus("Preflight running… stay with the prompt.");
+    const startBtn = $("defuseStart");
+    const cancelBtn = $("defuseCancel");
+    if (startBtn) startBtn.disabled = true;
+    if (cancelBtn) cancelBtn.disabled = false;
+    defuseState.intervalId = setInterval(() => {
+      defuseState.countdown -= 1;
+      if (defuseState.countdown <= 0) {
+        completeDefusePreflight();
+      } else {
+        updateDefuseCountdownUI();
+      }
+    }, 1000);
+    updateDefuseModeUI();
+  }
+
+  function cancelDefusePreflight() {
+    if (!defuseState.active) return;
+    if (defuseState.intervalId) {
+      clearInterval(defuseState.intervalId);
+      defuseState.intervalId = null;
+    }
+    defuseState.active = false;
+    defuseState.countdown = 90;
+    updateDefuseCountdownUI();
+    const startBtn = $("defuseStart");
+    const cancelBtn = $("defuseCancel");
+    if (startBtn) startBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = true;
+    setDefuseStatus("Preflight cancelled.");
+    updateDefuseModeUI();
+  }
+
+  function completeDefusePreflight() {
+    if (defuseState.intervalId) {
+      clearInterval(defuseState.intervalId);
+      defuseState.intervalId = null;
+    }
+    defuseState.active = false;
+    const sprintMinutes = getDefuseBaseMinutes();
+    setDefuseStatus(`Launching ${sprintMinutes}-minute DEFUSE sprint.`);
+    showToast("DEFUSE Mode", `${defuseState.selectedAction}. Sprinting for ${sprintMinutes} minutes.`);
+    const nextBase = Math.min(DEFUSE_MINUTES_MAX, sprintMinutes + 2);
+    setDefuseBaseMinutes(nextBase);
+    startFocus(null, { sprintMinutes });
+    defuseState.countdown = 90;
+    updateDefuseCountdownUI();
+    const startBtn = $("defuseStart");
+    const cancelBtn = $("defuseCancel");
+    if (startBtn) startBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = true;
+    updateDefuseModeUI();
+  }
+
+  function updateDefuseModeUI() {
+    updateDefuseLocksUI();
+    updateDefuseUptimeUI();
+    updateDefuseCountdownUI();
+    selectDefuseAction(defuseState.selectedAction || DEFAULT_DEFUSE_ACTION);
+    const startBtn = $("defuseStart");
+    const cancelBtn = $("defuseCancel");
+    if (startBtn) startBtn.disabled = defuseState.active;
+    if (cancelBtn) cancelBtn.disabled = !defuseState.active;
+  }
+
+  function initializeDefuseMode() {
+    const module = $("defuseModule");
+    if (!module) return;
+    defuseState.selectedAction = loadDefuseAction();
+    defuseState.uptime = getDefuseBaseMinutes();
+    updateDefuseModeUI();
+    const actionButtons = document.querySelectorAll('[data-defuse-action]');
+    actionButtons.forEach(button => {
+      button.addEventListener("click", () => selectDefuseAction(button.getAttribute("data-defuse-action")));
+    });
+    const lockBoxes = document.querySelectorAll('#defuseLocks input[type="checkbox"]');
+    lockBoxes.forEach(box => {
+      box.addEventListener("change", () => saveDefuseLocks(getSelectedDefuseLocks()));
+    });
+    const startBtn = $("defuseStart");
+    if (startBtn) {
+      startBtn.addEventListener("click", startDefusePreflight);
+    }
+    const cancelBtn = $("defuseCancel");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", cancelDefusePreflight);
+    }
+  }
+
+  function loadDopamineReward() {
+    const stored = localStorage.getItem(DOPAMINE_REWARD_KEY);
+    return stored || "music";
+  }
+
+  function saveDopamineReward(value) {
+    try {
+      localStorage.setItem(DOPAMINE_REWARD_KEY, value);
+    } catch (error) {
+      console.warn("Unable to save dopamine reward preference", error);
+    }
+  }
+
+  function updateDopamineStatus(message) {
+    const status = $("dopamineStatus");
+    if (status) {
+      status.textContent = message || "";
+    }
+  }
+
+  function renderDopamineIntervals() {
+    const container = $("dopamineIntervals");
+    if (!container) return;
+    container.innerHTML = "";
+    DOPAMINE_INTERVALS.forEach((minutes, index) => {
+      const row = document.createElement("div");
+      row.className = "dopamine-interval";
+      const label = document.createElement("span");
+      label.textContent = `${minutes} min`;
+      const status = document.createElement("span");
+      if (dopamineState?.currentIntervalIndex > index) {
+        status.textContent = "✅ complete";
+      } else if (dopamineState?.active && dopamineState.currentIntervalIndex === index) {
+        status.textContent = "▶️ now";
+      } else {
+        status.textContent = "… pending";
+      }
+      row.appendChild(label);
+      row.appendChild(status);
+      container.appendChild(row);
+    });
+  }
+
+  function updateDopamineProgress() {
+    const progress = $("dopamineProgressFill");
+    if (!progress) return;
+    if (!dopamineState || !dopamineState.active) {
+      const completed = dopamineState?.currentIntervalIndex >= DOPAMINE_INTERVALS.length;
+      progress.style.width = completed ? "100%" : "0%";
+      return;
+    }
+    const totalMinutes = DOPAMINE_INTERVALS[DOPAMINE_INTERVALS.length - 1];
+    const totalMs = Math.max(1, totalMinutes * 60 * 1000);
+    const elapsed = Date.now() - dopamineState.startTime;
+    const ratio = Math.max(0, Math.min(1, elapsed / totalMs));
+    progress.style.width = `${Math.round(ratio * 100)}%`;
+  }
+
+  function spawnConfetti() {
+    const burst = document.createElement("div");
+    burst.className = "confetti-burst";
+    const icons = ["🎉", "✨", "🪄", "🎊", "💫"];
+    burst.textContent = icons[Math.floor(Math.random() * icons.length)];
+    document.body.appendChild(burst);
+    setTimeout(() => {
+      if (burst.parentNode) {
+        burst.parentNode.removeChild(burst);
+      }
+    }, 900);
+  }
+
+  function playTone(frequency, durationMs = 320) {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const context = new AudioContextClass();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.2, context.currentTime);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + durationMs / 1000);
+      oscillator.stop(context.currentTime + durationMs / 1000);
+      setTimeout(() => context.close(), durationMs + 120);
+    } catch (error) {
+      console.warn("Tone playback unavailable", error);
+    }
+  }
+
+  function triggerDopamineReward(index) {
+    if (!dopamineState) return;
+    dopamineState.currentIntervalIndex = Math.max(dopamineState.currentIntervalIndex, index + 1);
+    renderDopamineIntervals();
+    updateDopamineProgress();
+    const minutes = DOPAMINE_INTERVALS[index];
+    if (dopamineState.rewardType === "music") {
+      playTone(440, 320);
+      setTimeout(() => playTone(660, 200), 180);
+    } else if (dopamineState.rewardType === "coin") {
+      playTone(880, 200);
+      setTimeout(() => playTone(660, 180), 180);
+    } else if (dopamineState.rewardType === "confetti") {
+      spawnConfetti();
+    } else {
+      showToast("Stretch cue", "Stand, reach tall, breathe for 10 seconds.");
+    }
+    if (index >= DOPAMINE_INTERVALS.length - 1) {
+      updateDopamineStatus("Intervals complete. Ride the momentum!");
+      stopDopaminePlaylist({ completed: true });
+    } else {
+      const next = DOPAMINE_INTERVALS[index + 1] - minutes;
+      updateDopamineStatus(`Nice! Next reward in ${next} min.`);
+    }
+  }
+
+  function stopDopaminePlaylist(options = {}) {
+    if (!dopamineState) return;
+    (dopamineState.timers || []).forEach(timerId => clearTimeout(timerId));
+    if (dopamineState.tickIntervalId) {
+      clearInterval(dopamineState.tickIntervalId);
+    }
+    const completed = Boolean(options.completed);
+    const rewardType = dopamineState.rewardType || loadDopamineReward();
+    const currentIndex = completed ? DOPAMINE_INTERVALS.length : (dopamineState.currentIntervalIndex || 0);
+    dopamineState = {
+      active: false,
+      rewardType,
+      currentIntervalIndex: currentIndex,
+      timers: [],
+      tickIntervalId: null,
+      startTime: null
+    };
+    renderDopamineIntervals();
+    updateDopamineProgress();
+    if (!completed) {
+      updateDopamineStatus("Playlist stopped.");
+    }
+    const startBtn = $("dopamineStart");
+    const stopBtn = $("dopamineStop");
+    if (startBtn) startBtn.disabled = false;
+    if (stopBtn) stopBtn.disabled = true;
+  }
+
+  function startDopaminePlaylist() {
+    if (dopamineState?.active) return;
+    const select = $("dopamineReward");
+    const rewardType = select?.value || loadDopamineReward();
+    saveDopamineReward(rewardType);
+    const startBtn = $("dopamineStart");
+    const stopBtn = $("dopamineStop");
+    if (startBtn) startBtn.disabled = true;
+    if (stopBtn) stopBtn.disabled = false;
+    const timers = DOPAMINE_INTERVALS.map((minutes, index) =>
+      setTimeout(() => triggerDopamineReward(index), minutes * 60 * 1000)
+    );
+    if (dopamineState?.tickIntervalId) {
+      clearInterval(dopamineState.tickIntervalId);
+    }
+    dopamineState = {
+      active: true,
+      rewardType,
+      timers,
+      startTime: Date.now(),
+      tickIntervalId: setInterval(updateDopamineProgress, 1000),
+      currentIntervalIndex: 0
+    };
+    renderDopamineIntervals();
+    updateDopamineProgress();
+    updateDopamineStatus("Playlist started – settle in.");
+  }
+
+  function initializeDopamineModule() {
+    const module = $("dopamineModule");
+    if (!module) return;
+    const stored = loadDopamineReward();
+    dopamineState = {
+      active: false,
+      rewardType: stored,
+      currentIntervalIndex: 0,
+      timers: [],
+      tickIntervalId: null,
+      startTime: null
+    };
+    const select = $("dopamineReward");
+    if (select) {
+      select.value = stored;
+      select.addEventListener("change", event => {
+        const value = event.target.value || "music";
+        saveDopamineReward(value);
+        if (dopamineState) {
+          dopamineState.rewardType = value;
+        }
+      });
+    }
+    const startBtn = $("dopamineStart");
+    if (startBtn) {
+      startBtn.addEventListener("click", startDopaminePlaylist);
+    }
+    const stopBtn = $("dopamineStop");
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => stopDopaminePlaylist({ completed: false }));
+      stopBtn.disabled = true;
+    }
+    renderDopamineIntervals();
+    updateDopamineProgress();
+    updateDopamineStatus("Stretch rewards from 2 → 6 → 12 minutes.");
   }
 
   function setAddTaskCardCollapsed(collapsed, options = {}) {
@@ -7032,6 +8563,8 @@
     }
     renderDueTodayList(dueTodayEntries);
     updateNextTaskCard();
+    updateNextBestOptions();
+    updateConflictResolver();
     updateSleepToolkitUI();
   }
 
@@ -7396,6 +8929,10 @@
     initializeMorningLaunchModule();
     initializeLaunchPadModule();
     initializeSleepToolkitModule();
+    initializeNextBestEngine();
+    initializeConflictResolverModule();
+    initializeDefuseMode();
+    initializeDopamineModule();
     const saved = localStorage.getItem("tasks");
     if (saved) {
       tasks = JSON.parse(saved).map(task => {
