@@ -215,6 +215,562 @@
       max-width: 600px;
     }
     .focus { font-size: 1.5rem; margin: 1rem 0; }
+    .distraction-tools {
+      margin-top: 1rem;
+      background: rgba(18, 18, 18, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 0.85rem;
+      width: min(100%, 560px);
+      display: grid;
+      gap: 0.55rem;
+    }
+    .distraction-tools__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .distraction-tools__header strong {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9aa0a6;
+    }
+    .distraction-prompt {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #cdd5e0;
+    }
+    .distraction-prompt span {
+      opacity: 0.8;
+    }
+    .distraction-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .distraction-options button {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.65rem;
+    }
+    .distraction-log {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      color: #bfc7d3;
+    }
+    .distraction-log li {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(12, 18, 24, 0.85);
+      border-radius: 8px;
+      padding: 0.4rem 0.55rem;
+    }
+    .distraction-log__time {
+      font-weight: 600;
+      color: #8ab4ff;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .distraction-log__label {
+      flex: 1;
+      color: #e4e9f2;
+    }
+    .distraction-log li.distraction-empty {
+      justify-content: center;
+      background: rgba(32, 34, 36, 0.65);
+      color: #7d8796;
+      font-weight: 500;
+    }
+    .doorway-reset {
+      background: rgba(26, 28, 38, 0.85);
+      border-radius: 10px;
+      border: 1px solid rgba(123, 216, 143, 0.25);
+      padding: 0.6rem 0.75rem;
+      display: grid;
+      gap: 0.4rem;
+    }
+    .doorway-reset-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+    }
+    .doorway-countdown {
+      font-size: 0.85rem;
+      color: #7bd88f;
+      font-weight: 600;
+    }
+    .gantt-card {
+      background: rgba(15, 18, 26, 0.98);
+      border-radius: 14px;
+      padding: 1.1rem;
+      width: min(92vw, 640px);
+      box-shadow: 0 26px 48px rgba(0, 0, 0, 0.45);
+      display: grid;
+      gap: 0.75rem;
+      color: #f5f7fb;
+    }
+    .gantt-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .gantt-intro {
+      font-size: 0.85rem;
+      color: #9aa0a6;
+      margin: 0;
+    }
+    .gantt-blocks-wrapper {
+      position: relative;
+      background: rgba(11, 16, 24, 0.9);
+      border-radius: 12px;
+      padding: 0.85rem;
+      overflow: hidden;
+    }
+    .gantt-blocks {
+      display: flex;
+      gap: 0.55rem;
+      width: 100%;
+      min-height: 110px;
+      position: relative;
+      z-index: 1;
+    }
+    .gantt-block {
+      flex: 1;
+      min-width: 100px;
+      border-radius: 10px;
+      background: linear-gradient(140deg, rgba(10, 132, 255, 0.65), rgba(123, 216, 143, 0.65));
+      padding: 0.65rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+    .gantt-block strong {
+      font-size: 0.95rem;
+    }
+    .gantt-block small {
+      color: rgba(245, 247, 251, 0.8);
+      font-size: 0.75rem;
+    }
+    .gantt-progress {
+      position: absolute;
+      inset: 0;
+      width: 0;
+      background: rgba(123, 216, 143, 0.28);
+      transition: width 320ms ease;
+      z-index: 0;
+    }
+    .gantt-progress.is-paused {
+      background: repeating-linear-gradient(135deg, rgba(123, 216, 143, 0.1), rgba(123, 216, 143, 0.1) 12px, rgba(10, 132, 255, 0.12) 12px, rgba(10, 132, 255, 0.12) 24px);
+    }
+    .gantt-status {
+      font-size: 0.85rem;
+      color: #a6b3c5;
+      min-height: 1.2em;
+    }
+    .worst-day-banner {
+      background: linear-gradient(120deg, rgba(44, 44, 52, 0.85), rgba(26, 28, 38, 0.85));
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 1rem;
+      display: grid;
+      gap: 0.55rem;
+      justify-items: center;
+    }
+    .worst-day-banner h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+      color: #f8f9fb;
+    }
+    .worst-day-button {
+      width: 100%;
+      max-width: 520px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 0.85rem 1.1rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 102, 126, 0.95), rgba(255, 159, 108, 0.9));
+      color: #121212;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 18px 32px rgba(255, 102, 126, 0.25);
+    }
+    .worst-day-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .worst-day-hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #c4c9d4;
+      text-align: center;
+    }
+    .worst-day-card {
+      background: rgba(18, 20, 28, 0.97);
+      border-radius: 16px;
+      padding: 1.25rem;
+      width: min(92vw, 520px);
+      box-shadow: 0 24px 46px rgba(0, 0, 0, 0.45);
+      display: grid;
+      gap: 0.75rem;
+      color: #f8f9fb;
+      position: relative;
+    }
+    .worst-day-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .worst-day-subheading {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #aeb7c8;
+    }
+    .worst-day-focus-line {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .worst-day-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8fa5ff;
+    }
+    .worst-day-timer {
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-align: center;
+      color: #7bd88f;
+    }
+    .worst-day-prompt {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #c4cad8;
+      text-align: center;
+    }
+    .worst-day-actions {
+      display: grid;
+      gap: 0.65rem;
+      text-align: center;
+    }
+    .worst-day-celebrations {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      justify-content: center;
+    }
+    .worst-day-celebrations button {
+      font-size: 0.9rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+    }
+    .worst-day-celebration {
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      color: #f4d47c;
+    }
+    @media (max-width: 600px) {
+      .distraction-tools {
+        padding: 0.75rem;
+      }
+      .gantt-block {
+        min-width: 80px;
+      }
+      .worst-day-button {
+        font-size: 1rem;
+      }
+    }
+    .distraction-tools {
+      margin-top: 1rem;
+      background: rgba(18, 18, 18, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 0.85rem;
+      width: min(100%, 560px);
+      display: grid;
+      gap: 0.55rem;
+    }
+    .distraction-tools__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .distraction-tools__header strong {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9aa0a6;
+    }
+    .distraction-prompt {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #cdd5e0;
+    }
+    .distraction-prompt span {
+      opacity: 0.8;
+    }
+    .distraction-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .distraction-options button {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.65rem;
+    }
+    .distraction-log {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      color: #bfc7d3;
+    }
+    .distraction-log li {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(12, 18, 24, 0.85);
+      border-radius: 8px;
+      padding: 0.4rem 0.55rem;
+    }
+    .distraction-log__time {
+      font-weight: 600;
+      color: #8ab4ff;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .distraction-log li.distraction-empty {
+      justify-content: center;
+      background: rgba(32, 34, 36, 0.65);
+      color: #7d8796;
+      font-weight: 500;
+    }
+    .doorway-reset {
+      background: rgba(26, 28, 38, 0.85);
+      border-radius: 10px;
+      border: 1px solid rgba(123, 216, 143, 0.25);
+      padding: 0.6rem 0.75rem;
+      display: grid;
+      gap: 0.4rem;
+    }
+    .doorway-reset-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+    }
+    .doorway-countdown {
+      font-size: 0.85rem;
+      color: #7bd88f;
+      font-weight: 600;
+    }
+    .gantt-card {
+      background: rgba(15, 18, 26, 0.98);
+      border-radius: 14px;
+      padding: 1.1rem;
+      width: min(92vw, 640px);
+      box-shadow: 0 26px 48px rgba(0, 0, 0, 0.45);
+      display: grid;
+      gap: 0.75rem;
+      color: #f5f7fb;
+    }
+    .gantt-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .gantt-intro {
+      font-size: 0.85rem;
+      color: #9aa0a6;
+      margin: 0;
+    }
+    .gantt-blocks-wrapper {
+      position: relative;
+      background: rgba(11, 16, 24, 0.9);
+      border-radius: 12px;
+      padding: 0.85rem;
+      overflow: hidden;
+    }
+    .gantt-blocks {
+      display: flex;
+      gap: 0.55rem;
+      width: 100%;
+      min-height: 110px;
+      position: relative;
+      z-index: 1;
+    }
+    .gantt-block {
+      flex: 1;
+      min-width: 100px;
+      border-radius: 10px;
+      background: linear-gradient(140deg, rgba(10, 132, 255, 0.65), rgba(123, 216, 143, 0.65));
+      padding: 0.65rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+    .gantt-block strong {
+      font-size: 0.95rem;
+    }
+    .gantt-block small {
+      color: rgba(245, 247, 251, 0.8);
+      font-size: 0.75rem;
+    }
+    .gantt-progress {
+      position: absolute;
+      inset: 0;
+      width: 0;
+      background: rgba(123, 216, 143, 0.28);
+      transition: width 320ms ease;
+      z-index: 0;
+    }
+    .gantt-progress.is-paused {
+      background: repeating-linear-gradient(135deg, rgba(123, 216, 143, 0.1), rgba(123, 216, 143, 0.1) 12px, rgba(10, 132, 255, 0.12) 12px, rgba(10, 132, 255, 0.12) 24px);
+    }
+    .gantt-status {
+      font-size: 0.85rem;
+      color: #a6b3c5;
+      min-height: 1.2em;
+    }
+    .worst-day-banner {
+      background: linear-gradient(120deg, rgba(44, 44, 52, 0.85), rgba(26, 28, 38, 0.85));
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 1rem;
+      display: grid;
+      gap: 0.55rem;
+      justify-items: center;
+    }
+    .worst-day-banner h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+      color: #f8f9fb;
+    }
+    .worst-day-button {
+      width: 100%;
+      max-width: 520px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 0.85rem 1.1rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 102, 126, 0.95), rgba(255, 159, 108, 0.9));
+      color: #121212;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 18px 32px rgba(255, 102, 126, 0.25);
+    }
+    .worst-day-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .worst-day-hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #c4c9d4;
+      text-align: center;
+    }
+    .worst-day-card {
+      background: rgba(18, 20, 28, 0.97);
+      border-radius: 16px;
+      padding: 1.25rem;
+      width: min(92vw, 520px);
+      box-shadow: 0 24px 46px rgba(0, 0, 0, 0.45);
+      display: grid;
+      gap: 0.75rem;
+      color: #f8f9fb;
+      position: relative;
+    }
+    .worst-day-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .worst-day-subheading {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #aeb7c8;
+    }
+    .worst-day-focus-line {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .worst-day-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8fa5ff;
+    }
+    .worst-day-timer {
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-align: center;
+      color: #7bd88f;
+    }
+    .worst-day-prompt {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #c4cad8;
+      text-align: center;
+    }
+    .worst-day-actions {
+      display: grid;
+      gap: 0.65rem;
+      text-align: center;
+    }
+    .worst-day-celebrations {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      justify-content: center;
+    }
+    .worst-day-celebrations button {
+      font-size: 0.9rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+    }
+    .worst-day-celebration {
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      color: #f4d47c;
+    }
+    @media (max-width: 600px) {
+      .distraction-tools {
+        padding: 0.75rem;
+      }
+      .gantt-block {
+        min-width: 80px;
+      }
+      .worst-day-button {
+        font-size: 1rem;
+      }
+    }
     .category-filter {
       display: flex;
       flex-wrap: wrap;
@@ -1938,6 +2494,12 @@
         </div>
       </section>
 
+      <div class="worst-day-banner" role="region" aria-labelledby="worstDayBannerTitle">
+        <h2 id="worstDayBannerTitle">😵‍💫 Worst-Day Mode</h2>
+        <button id="worstDayButton" class="worst-day-button" type="button">Start 5 minutes</button>
+        <p id="worstDayHint" class="worst-day-hint"></p>
+      </div>
+
       <div class="action-bar">
         <div class="action-bar-primary">
           <button id="startNextAction" class="btn btn-primary" type="button">Start next task</button>
@@ -1945,6 +2507,7 @@
         </div>
         <div class="action-bar-secondary">
           <button id="quickAddAction" class="icon-button" type="button" aria-label="Quick add task">＋</button>
+          <button id="ganttSnapshotAction" class="icon-button" type="button" aria-label="Adaptive Gantt snapshot">⏳</button>
           <button id="dueTodayAction" class="icon-button" type="button" aria-label="Open due-today list">📋</button>
           <button id="shieldAction" class="icon-button" type="button" aria-label="Overwhelmed shield">🛡️</button>
         </div>
@@ -2519,11 +3082,73 @@
   </div>
 
   <!-- Focus mode -->
+  <div id="ganttSnapshotOverlay" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="ganttSnapshotTitle">
+    <div class="gantt-card">
+      <div class="gantt-card__header">
+        <h3 id="ganttSnapshotTitle">⏳ Next 3-hour snapshot</h3>
+        <button id="ganttCloseButton" class="modal__close" type="button" aria-label="Close snapshot">✕</button>
+      </div>
+      <p class="gantt-intro">Blocks sized by estimated minutes so you can see what will actually fit.</p>
+      <div class="gantt-blocks-wrapper">
+        <div id="ganttProgressBar" class="gantt-progress"></div>
+        <div id="ganttBlocks" class="gantt-blocks" role="list"></div>
+      </div>
+      <div id="ganttStatus" class="gantt-status"></div>
+    </div>
+  </div>
+
+  <div id="worstDayOverlay" class="modal-overlay hidden worst-day-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="worstDayHeading">
+    <div class="worst-day-card">
+      <button id="worstDayClose" class="modal__close" type="button" aria-label="Close Worst-Day mode">✕</button>
+      <h3 id="worstDayHeading">😵‍💫 Worst-Day Mode</h3>
+      <p class="worst-day-subheading">One soft five-minute pass on your most meaningful project.</p>
+      <div class="worst-day-focus-line">
+        <span class="worst-day-label">Focus</span>
+        <strong id="worstDayFocus"></strong>
+      </div>
+      <div id="worstDayTimer" class="worst-day-timer">05:00</div>
+      <p id="worstDayPrompt" class="worst-day-prompt">Move gently. Drift happens — we'll reset together.</p>
+      <div id="worstDayActions" class="worst-day-actions hidden">
+        <p class="worst-day-complete">Sprint complete! Pick your next micro-reward.</p>
+        <div class="worst-day-celebrations" role="group" aria-label="Worst-Day celebration choices">
+          <button type="button" data-worst-day-choice="laugh">😂 Laugh</button>
+          <button type="button" data-worst-day-choice="stretch">🙆 Stretch</button>
+          <button type="button" data-worst-day-choice="stop">🛑 Stop proudly</button>
+        </div>
+        <div id="worstDayCelebration" class="worst-day-celebration" aria-live="polite"></div>
+      </div>
+      <button id="worstDayExit" class="link-button" type="button">Leave Worst-Day Mode</button>
+    </div>
+  </div>
+
   <section id="focus" class="hidden">
     <div id="focusTimer" aria-live="polite">🧭 Focus Time: 0:00</div>
     <div class="focus" tabindex="0" aria-live="polite"></div>
     <div class="score" id="scoreView"></div>
     <div id="focusFitHint" aria-live="polite"></div>
+    <div id="distractionTools" class="distraction-tools">
+      <div class="distraction-tools__header">
+        <strong>Distraction cheat sheet</strong>
+        <button id="caughtMeButton" type="button" disabled aria-disabled="true">“Caught me”</button>
+      </div>
+      <div id="distractionPrompt" class="distraction-prompt hidden">
+        <span>What pulled you off course?</span>
+        <div class="distraction-options" role="group" aria-label="Distraction triggers">
+          <button type="button" data-distraction-trigger="tab">Tab hop</button>
+          <button type="button" data-distraction-trigger="ping">Notification ping</button>
+          <button type="button" data-distraction-trigger="thought">Thought spiral</button>
+        </div>
+      </div>
+      <ul id="distractionLog" class="distraction-log" aria-live="polite" aria-label="Logged distractions"></ul>
+      <div id="doorwayReset" class="doorway-reset hidden" aria-live="polite">
+        <p id="doorwayResetMessage"></p>
+        <div class="doorway-reset-actions">
+          <button id="doorwayStartButton" type="button">Start 60-second reset</button>
+          <button id="doorwaySkipButton" type="button" class="link-button">Not now</button>
+        </div>
+        <div id="doorwayCountdown" class="doorway-countdown hidden"></div>
+      </div>
+    </div>
     <div id="subTaskView"></div>
     <div>
       <button onclick="completeTask()">Task complete</button>
@@ -2565,6 +3190,25 @@
   let storedChartFieldValues = null;
   let currentScaleDescriptorCategory = "general";
   const FOCUS_PING_INTERVAL_MS = 10 * 60 * 1000;
+  const DISTRACTION_TRIGGER_OPTIONS = [
+    { value: "tab", label: "Tab hop" },
+    { value: "ping", label: "Notification ping" },
+    { value: "thought", label: "Thought spiral" }
+  ];
+  const DOORWAY_RESET_THRESHOLD = 2;
+  const DOORWAY_RESET_DURATION_MS = 60 * 1000;
+  const GANTT_WINDOW_MINUTES = 180;
+  const WORST_DAY_DURATION_MS = 5 * 60 * 1000;
+  const WORST_DAY_LAUGHS = [
+    "You just taught your nervous system a new party trick.",
+    "That five-minute win still counts on your CV.",
+    "Future-you is slow clapping right now."
+  ];
+  const WORST_DAY_STRETCHES = [
+    "Shake out wrists, roll shoulders, slow neck circles.",
+    "Stand tall, inhale for four, exhale for six.",
+    "Touch the door frame, feel the reset, come back in."
+  ];
   const AUDIT_STORAGE_PREFIX = "audit_";
   const AUDIT_SHOWN_SUFFIX = "_shown";
   const MORNING_LAUNCH_KEY = "morningLaunchState";
@@ -4881,7 +5525,9 @@
     sprintEndTime = null;
     if (resetDisplay) {
       sprintDurationMinutes = null;
+      resetDistractionTracking();
     }
+    setCaughtMeEnabled(false);
     const timerEl = $("focusTimer");
     if (!timerEl) return;
     timerEl.classList.remove("pulse");
@@ -4972,6 +5618,251 @@
         focusTimerLastPing = now;
       }
     }, 1000);
+    setCaughtMeEnabled(true);
+  }
+
+  function setCaughtMeEnabled(enabled) {
+    const button = $("caughtMeButton");
+    if (!button) return;
+    button.disabled = !enabled;
+    button.setAttribute("aria-disabled", enabled ? "false" : "true");
+    if (!enabled) {
+      hideDistractionPrompt();
+    }
+  }
+
+  function hideDistractionPrompt() {
+    const prompt = $("distractionPrompt");
+    if (prompt) {
+      prompt.classList.add("hidden");
+    }
+  }
+
+  function toggleDistractionPrompt() {
+    if (!focusTimerStart) return;
+    const prompt = $("distractionPrompt");
+    if (!prompt) return;
+    prompt.classList.toggle("hidden");
+  }
+
+  function resetDistractionTracking() {
+    focusDistractionLog = [];
+    distractionTriggersSinceReset = 0;
+    updateDistractionLogUI();
+    hideDistractionPrompt();
+    clearDoorwayResetState({ hidePrompt: true });
+  }
+
+  function updateDistractionLogUI() {
+    const list = $("distractionLog");
+    if (!list) return;
+    list.innerHTML = "";
+    if (!focusDistractionLog.length) {
+      const empty = document.createElement("li");
+      empty.className = "distraction-empty";
+      empty.textContent = "Clear runway. Keep cruising.";
+      list.appendChild(empty);
+      return;
+    }
+    const entries = focusDistractionLog.slice().reverse();
+    entries.forEach(entry => {
+      const item = document.createElement("li");
+      const time = document.createElement("span");
+      time.className = "distraction-log__time";
+      if (Number.isFinite(entry.offset)) {
+        time.textContent = formatElapsedMs(entry.offset);
+      } else {
+        time.textContent = new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+      const label = document.createElement("div");
+      label.className = "distraction-log__label";
+      label.textContent = entry.label;
+      item.appendChild(time);
+      item.appendChild(label);
+      list.appendChild(item);
+    });
+  }
+
+  function logDistractionTrigger(triggerValue) {
+    if (!focusTimerStart) return;
+    const option = DISTRACTION_TRIGGER_OPTIONS.find(entry => entry.value === triggerValue);
+    const label = option ? option.label : String(triggerValue || "Trigger");
+    const timestamp = Date.now();
+    const offset = focusTimerStart ? Math.max(0, timestamp - focusTimerStart) : null;
+    focusDistractionLog.push({ label, timestamp, offset });
+    if (focusDistractionLog.length > 8) {
+      focusDistractionLog = focusDistractionLog.slice(focusDistractionLog.length - 8);
+    }
+    distractionTriggersSinceReset += 1;
+    updateDistractionLogUI();
+    hideDistractionPrompt();
+    maybePromptDoorwayReset();
+  }
+
+  function maybePromptDoorwayReset() {
+    if (doorwayResetState.active || doorwayResetState.pending) return;
+    if (distractionTriggersSinceReset < DOORWAY_RESET_THRESHOLD) return;
+    showDoorwayResetPrompt();
+  }
+
+  function showDoorwayResetPrompt() {
+    const container = $("doorwayReset");
+    const message = $("doorwayResetMessage");
+    if (!container || !message) return;
+    container.classList.remove("hidden");
+    message.textContent = "Two distractions logged. Take a 60-second doorway reset?";
+    const countdown = $("doorwayCountdown");
+    if (countdown) {
+      countdown.textContent = "";
+      countdown.classList.add("hidden");
+    }
+    const startBtn = $("doorwayStartButton");
+    if (startBtn) {
+      startBtn.textContent = "Start 60-second reset";
+      startBtn.disabled = false;
+    }
+    const skipBtn = $("doorwaySkipButton");
+    if (skipBtn) {
+      skipBtn.textContent = "Not now";
+    }
+    if (doorwayResetState.countdownId) {
+      clearInterval(doorwayResetState.countdownId);
+    }
+    doorwayResetState = { active: false, pending: true, endTime: null, countdownId: null };
+    showToast("Doorway reset", "Stand, walk to the doorway, clear the mental cache, then glide back.");
+  }
+
+  function startDoorwayResetCountdown() {
+    const container = $("doorwayReset");
+    if (!container) return;
+    const message = $("doorwayResetMessage");
+    if (message) {
+      message.textContent = "Stand, walk to the doorway, and let the reset happen.";
+    }
+    if (doorwayResetState.countdownId) {
+      clearInterval(doorwayResetState.countdownId);
+    }
+    doorwayResetState = { active: true, pending: false, endTime: Date.now() + DOORWAY_RESET_DURATION_MS, countdownId: null };
+    const startBtn = $("doorwayStartButton");
+    if (startBtn) {
+      startBtn.textContent = "Reset running…";
+      startBtn.disabled = true;
+    }
+    const skipBtn = $("doorwaySkipButton");
+    if (skipBtn) {
+      skipBtn.textContent = "Skip reset";
+    }
+    const countdown = $("doorwayCountdown");
+    if (countdown) {
+      countdown.classList.remove("hidden");
+    }
+    updateDoorwayCountdownUI();
+    doorwayResetState.countdownId = setInterval(updateDoorwayCountdownUI, 250);
+  }
+
+  function updateDoorwayCountdownUI() {
+    if (!doorwayResetState.active) return;
+    const countdown = $("doorwayCountdown");
+    if (!countdown) return;
+    const remaining = Math.max(0, doorwayResetState.endTime - Date.now());
+    const seconds = Math.ceil(remaining / 1000);
+    countdown.textContent = `⏳ ${seconds}s remaining`;
+    if (remaining <= 0) {
+      completeDoorwayReset();
+    }
+  }
+
+  function completeDoorwayReset() {
+    if (doorwayResetState.countdownId) {
+      clearInterval(doorwayResetState.countdownId);
+    }
+    doorwayResetState = { active: false, pending: false, endTime: null, countdownId: null };
+    distractionTriggersSinceReset = 0;
+    const message = $("doorwayResetMessage");
+    if (message) {
+      message.textContent = "Doorway reset complete. Notice what feels lighter.";
+    }
+    const countdown = $("doorwayCountdown");
+    if (countdown) {
+      countdown.textContent = "✅ Reset done";
+      countdown.classList.remove("hidden");
+    }
+    const startBtn = $("doorwayStartButton");
+    if (startBtn) {
+      startBtn.textContent = "Do it again";
+      startBtn.disabled = false;
+    }
+    const skipBtn = $("doorwaySkipButton");
+    if (skipBtn) {
+      skipBtn.textContent = "Close";
+    }
+    setTimeout(() => clearDoorwayResetState({ hidePrompt: true }), 6000);
+  }
+
+  function clearDoorwayResetState({ hidePrompt = false } = {}) {
+    if (doorwayResetState.countdownId) {
+      clearInterval(doorwayResetState.countdownId);
+    }
+    doorwayResetState = { active: false, pending: false, endTime: null, countdownId: null };
+    const container = $("doorwayReset");
+    if (!container) return;
+    if (hidePrompt) {
+      container.classList.add("hidden");
+    }
+    const message = $("doorwayResetMessage");
+    if (message && hidePrompt) {
+      message.textContent = "";
+    }
+    const countdown = $("doorwayCountdown");
+    if (countdown) {
+      countdown.textContent = "";
+      countdown.classList.add("hidden");
+    }
+    const startBtn = $("doorwayStartButton");
+    if (startBtn) {
+      startBtn.textContent = "Start 60-second reset";
+      startBtn.disabled = false;
+    }
+    const skipBtn = $("doorwaySkipButton");
+    if (skipBtn) {
+      skipBtn.textContent = "Not now";
+    }
+  }
+
+  function skipDoorwayResetPrompt() {
+    clearDoorwayResetState({ hidePrompt: true });
+    distractionTriggersSinceReset = 0;
+  }
+
+  function initializeDistractionTools() {
+    const button = $("caughtMeButton");
+    if (button) {
+      button.addEventListener("click", () => {
+        if (button.disabled) return;
+        toggleDistractionPrompt();
+      });
+    }
+    const prompt = $("distractionPrompt");
+    if (prompt) {
+      prompt.addEventListener("click", event => {
+        const target = event.target.closest('[data-distraction-trigger]');
+        if (!target) return;
+        const value = target.getAttribute('data-distraction-trigger');
+        if (value) {
+          logDistractionTrigger(value);
+        }
+      });
+    }
+    const startBtn = $("doorwayStartButton");
+    if (startBtn) {
+      startBtn.addEventListener("click", startDoorwayResetCountdown);
+    }
+    const skipBtn = $("doorwaySkipButton");
+    if (skipBtn) {
+      skipBtn.addEventListener("click", skipDoorwayResetPrompt);
+    }
+    updateDistractionLogUI();
+    setCaughtMeEnabled(false);
   }
 
   function setFocusSoundPreference(enabled) {
@@ -5700,6 +6591,13 @@
   let focusTimerId = null;
   let focusTimerStart = null;
   let focusTimerLastPing = null;
+  let focusDistractionLog = [];
+  let distractionTriggersSinceReset = 0;
+  let doorwayResetState = { active: false, pending: false, countdownId: null, endTime: null };
+  let ganttPlanState = { entries: [], totalMinutes: 0 };
+  let ganttOverlayStartTime = null;
+  let ganttProgressIntervalId = null;
+  let worstDayState = { active: false, countdownId: null, endTime: null, task: null, chunk: null };
   let focusSoundEnabled = true;
   let focusAudioContext = null;
   let morningLaunchState = null;
@@ -7802,6 +8700,7 @@
     if (!dopamineState || !dopamineState.active) {
       const completed = dopamineState?.currentIntervalIndex >= DOPAMINE_INTERVALS.length;
       progress.style.width = completed ? "100%" : "0%";
+      updateGanttOverlayProgress();
       return;
     }
     const totalMinutes = DOPAMINE_INTERVALS[DOPAMINE_INTERVALS.length - 1];
@@ -7809,6 +8708,7 @@
     const elapsed = Date.now() - dopamineState.startTime;
     const ratio = Math.max(0, Math.min(1, elapsed / totalMs));
     progress.style.width = `${Math.round(ratio * 100)}%`;
+    updateGanttOverlayProgress();
   }
 
   function spawnConfetti() {
@@ -7890,6 +8790,7 @@
     };
     renderDopamineIntervals();
     updateDopamineProgress();
+    updateGanttOverlayProgress();
     if (!completed) {
       updateDopamineStatus("Playlist stopped.");
     }
@@ -7924,6 +8825,7 @@
     };
     renderDopamineIntervals();
     updateDopamineProgress();
+    updateGanttOverlayProgress();
     updateDopamineStatus("Playlist started – settle in.");
   }
 
@@ -7964,7 +8866,158 @@
     updateDopamineStatus("Stretch rewards from 2 → 6 → 12 minutes.");
   }
 
-  function setAddTaskCardCollapsed(collapsed, options = {}) {
+  function buildAdaptiveGanttPlan(windowMinutes = GANTT_WINDOW_MINUTES) {
+    const energyLevel = clampScale(getEnergyLevel(), 3);
+    const timeBudget = getTimeBudgetMinutes();
+    const available = tasks
+      .filter(task => !isTaskCompleted(task))
+      .map(task => ({
+        task,
+        score: computeFocusScore(task, energyLevel, timeBudget),
+        minutes: Math.max(5, Math.round(estimateTaskMinutes(task) || 15))
+      }))
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+    const entries = [];
+    let remaining = Number.isFinite(windowMinutes) && windowMinutes > 0 ? windowMinutes : GANTT_WINDOW_MINUTES;
+    available.forEach(entry => {
+      if (remaining <= 0) return;
+      const blockMinutes = Math.min(entry.minutes, remaining);
+      entries.push({
+        task: entry.task,
+        minutes: blockMinutes,
+        fullMinutes: entry.minutes
+      });
+      remaining -= blockMinutes;
+    });
+    const totalMinutes = entries.reduce((sum, entry) => sum + entry.minutes, 0);
+    return { entries, totalMinutes };
+  }
+
+  function renderGanttSnapshot(plan) {
+    ganttPlanState = plan;
+    const container = $(\"ganttBlocks\");
+    const status = $(\"ganttStatus\");
+    if (container) {
+      container.innerHTML = \"\";
+      if (!plan.entries.length) {
+        const empty = document.createElement(\"div\");
+        empty.className = "score";
+        empty.textContent = "Add a task to see your next blocks.";
+        container.appendChild(empty);
+      } else {
+        plan.entries.forEach((entry, index) => {
+          const block = document.createElement(\"div\");
+          block.className = "gantt-block";
+          block.style.flex = String(Math.max(1, entry.minutes));
+          const title = document.createElement(\"strong\");
+          title.textContent = entry.task.name || "Task";
+          const detail = document.createElement(\"small\");
+          const startOffset = plan.entries.slice(0, index).reduce((sum, current) => sum + current.minutes, 0);
+          const start = new Date(Date.now() + startOffset * 60000);
+          detail.textContent = `${entry.minutes} min • starts ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+          block.appendChild(title);
+          block.appendChild(detail);
+          container.appendChild(block);
+        });
+      }
+    }
+    if (status) {
+      status.textContent = plan.entries.length
+        ? `Covers ${plan.totalMinutes} min. Playlist progress will sweep across.`
+        : "";
+    }
+  }
+
+    function updateGanttOverlayProgress() {
+    const bar = $(\"ganttProgressBar\");
+    const status = $(\"ganttStatus\");
+    if (!bar || !ganttPlanState) return;
+    const total = ganttPlanState.totalMinutes || 0;
+    if (!ganttOverlayStartTime || total <= 0) {
+      bar.style.width = "0%";
+      bar.classList.add("is-paused");
+      if (status && status.textContent === "") {
+        status.textContent = "Hit play on the playlist to animate your time.";
+      }
+      return;
+    }
+    if (!dopamineState || !dopamineState.active) {
+      bar.classList.add("is-paused");
+      if (status) {
+        status.textContent = "Playlist paused — progress holds until you press play.";
+      }
+      return;
+    }
+    bar.classList.remove("is-paused");
+    const elapsed = Math.max(0, Date.now() - ganttOverlayStartTime);
+    const ratio = Math.min(1, elapsed / (total * 60000));
+    bar.style.width = `${Math.round(ratio * 100)}%`;
+    if (status) {
+      status.textContent = `Playlist pacing ${Math.round(ratio * 100)}% of this snapshot.`;
+    }
+  }
+
+    function openGanttSnapshot() {
+    const overlay = $(\"ganttSnapshotOverlay\");
+    if (!overlay) return;
+    const plan = buildAdaptiveGanttPlan();
+    renderGanttSnapshot(plan);
+    ganttOverlayStartTime = Date.now();
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    updateGanttOverlayProgress();
+    if (ganttProgressIntervalId) {
+      clearInterval(ganttProgressIntervalId);
+    }
+    ganttProgressIntervalId = setInterval(updateGanttOverlayProgress, 1000);
+  }
+
+    function closeGanttSnapshot() {
+    const overlay = $(\"ganttSnapshotOverlay\");
+    if (!overlay) return;
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    if (ganttProgressIntervalId) {
+      clearInterval(ganttProgressIntervalId);
+      ganttProgressIntervalId = null;
+    }
+    ganttOverlayStartTime = null;
+  }
+
+    function refreshGanttSnapshotIfOpen() {
+    const overlay = $(\"ganttSnapshotOverlay\");
+    if (!overlay || overlay.classList.contains(\"hidden\")) return;
+    const plan = buildAdaptiveGanttPlan();
+    renderGanttSnapshot(plan);
+    ganttOverlayStartTime = Date.now();
+    updateGanttOverlayProgress();
+  }
+
+    function initializeGanttSnapshot() {
+    const trigger = $(\"ganttSnapshotAction\");
+    if (trigger) {
+      trigger.addEventListener(\"click\", openGanttSnapshot);
+    }
+    const closeBtn = $(\"ganttCloseButton\");
+    if (closeBtn) {
+      closeBtn.addEventListener(\"click\", closeGanttSnapshot);
+    }
+    const overlay = $(\"ganttSnapshotOverlay\");
+    if (overlay) {
+      overlay.addEventListener(\"click\", event => {
+        if (event.target === overlay) {
+          closeGanttSnapshot();
+        }
+      });
+    }
+    document.addEventListener(\"keydown\", event => {
+      if (event.key === \"Escape\") {
+        closeGanttSnapshot();
+      }
+    });
+  }
+
+    function setAddTaskCardCollapsed(collapsed, options = {}) {
     const card = $("addTaskCard");
     const toggle = $("toggleAddTaskCard");
     if (!card || !toggle) return;
@@ -8306,7 +9359,171 @@
     });
   }
 
-  function startFiveMinuteSprint(taskId = null) {
+  function getMostMeaningfulTask() {
+    const energyLevel = clampScale(getEnergyLevel(), 3);
+    const timeBudget = getTimeBudgetMinutes();
+    const scored = tasks
+      .filter(task => !isTaskCompleted(task))
+      .map(task => ({ task, score: computeFocusScore(task, energyLevel, timeBudget) }))
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+    return scored.length ? scored[0].task : null;
+  }
+
+  function updateWorstDayBanner() {
+    const button = $(\"worstDayButton\");
+    const hint = $(\"worstDayHint\");
+    const focusTask = getMostMeaningfulTask();
+    const hasTask = Boolean(focusTask);
+    if (button) {
+      button.disabled = !hasTask;
+      button.setAttribute("aria-disabled", hasTask ? "false" : "true");
+    }
+    if (hint) {
+      hint.textContent = hasTask ? `Most meaningful project: ${focusTask.name}` : "Add a task to unlock Worst-Day Mode.";
+    }
+  }
+
+    function startWorstDayMode() {
+    if (worstDayState.active) return;
+    const overlay = $(\"worstDayOverlay\");
+    const focusLine = $(\"worstDayFocus\");
+    const prompt = $(\"worstDayPrompt\");
+    const timerEl = $(\"worstDayTimer\");
+    const actions = $(\"worstDayActions\");
+    const celebration = $(\"worstDayCelebration\");
+    const focusTask = getMostMeaningfulTask();
+    if (!overlay || !focusTask) {
+      showToast(\"Worst-Day Mode\", \"Add a task to give yourself something kind to focus on.\");
+      return;
+    }
+    const chunk = deriveMmpChunk(focusTask) || { label: focusTask.name, minutes: 5, subId: null };
+    worstDayState = {
+      active: true,
+      countdownId: null,
+      endTime: Date.now() + WORST_DAY_DURATION_MS,
+      task: focusTask,
+      chunk
+    };
+    if (focusLine) {
+      focusLine.textContent = chunk.label || focusTask.name;
+    }
+    if (prompt) {
+      prompt.textContent = "Move gently. Drift happens — we'll reset together.";
+    }
+    if (timerEl) {
+      timerEl.textContent = "05:00";
+    }
+    if (actions) {
+      actions.classList.add("hidden");
+    }
+    if (celebration) {
+      celebration.textContent = "";
+    }
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    if (worstDayState.countdownId) {
+      clearInterval(worstDayState.countdownId);
+    }
+    worstDayState.countdownId = setInterval(updateWorstDayTimer, 250);
+    updateWorstDayTimer();
+  }
+
+    function updateWorstDayTimer() {
+    if (!worstDayState.active) return;
+    const timerEl = $(\"worstDayTimer\");
+    const prompt = $(\"worstDayPrompt\");
+    if (!timerEl) return;
+    const remaining = Math.max(0, worstDayState.endTime - Date.now());
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    if (remaining <= 0) {
+      completeWorstDaySprint();
+      if (prompt) {
+        prompt.textContent = "You stayed. Pick a gentle reward.";
+      }
+    }
+  }
+
+    function completeWorstDaySprint() {
+    if (worstDayState.countdownId) {
+      clearInterval(worstDayState.countdownId);
+    }
+    worstDayState.countdownId = null;
+    worstDayState.active = false;
+    worstDayState.endTime = null;
+    const actions = $(\"worstDayActions\");
+    if (actions) {
+      actions.classList.remove("hidden");
+    }
+    const celebration = $(\"worstDayCelebration\");
+    if (celebration) {
+      celebration.textContent = "";
+    }
+  }
+
+    function handleWorstDayChoice(choice) {
+    const celebration = $(\"worstDayCelebration\");
+    if (choice === "laugh") {
+      const line = WORST_DAY_LAUGHS[Math.floor(Math.random() * WORST_DAY_LAUGHS.length)] || "You showed up.";
+      if (celebration) celebration.textContent = line;
+    } else if (choice === "stretch") {
+      const line = WORST_DAY_STRETCHES[Math.floor(Math.random() * WORST_DAY_STRETCHES.length)] || "Shoulder rolls, deep breath.";
+      if (celebration) celebration.textContent = line;
+    } else if (choice === "stop") {
+      stopWorstDayMode({ celebrate: true });
+    }
+  }
+
+    function stopWorstDayMode(options = {}) {
+    const overlay = $(\"worstDayOverlay\");
+    if (worstDayState.countdownId) {
+      clearInterval(worstDayState.countdownId);
+    }
+    worstDayState = { active: false, countdownId: null, endTime: null, task: null, chunk: null };
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+    if (options.celebrate) {
+      showToast(\"Worst-Day Mode\", "Five minutes banked. That counts.");
+    }
+    updateWorstDayBanner();
+  }
+
+    function initializeWorstDayMode() {
+    const button = $(\"worstDayButton\");
+    if (button) {
+      button.addEventListener(\"click\", startWorstDayMode);
+    }
+    const overlay = $(\"worstDayOverlay\");
+    if (overlay) {
+      overlay.addEventListener(\"click\", event => {
+        if (event.target === overlay) {
+          stopWorstDayMode();
+        }
+      });
+    }
+    const closeBtn = $(\"worstDayClose\");
+    if (closeBtn) {
+      closeBtn.addEventListener(\"click\", () => stopWorstDayMode());
+    }
+    const exitBtn = $(\"worstDayExit\");
+    if (exitBtn) {
+      exitBtn.addEventListener(\"click\", () => stopWorstDayMode());
+    }
+    const actions = $(\"worstDayActions\");
+    if (actions) {
+      actions.addEventListener(\"click\", event => {
+        const buttonEl = event.target.closest('[data-worst-day-choice]');
+        if (!buttonEl) return;
+        handleWorstDayChoice(buttonEl.getAttribute('data-worst-day-choice'));
+      });
+    }
+    updateWorstDayBanner();
+  }
+
+    function startFiveMinuteSprint(taskId = null) {
     setTaskDetailsCollapsed(false);
     const targetId = taskId || nextTaskId || null;
     startFocus(targetId, { sprintMinutes: 5 });
@@ -8565,6 +9782,8 @@
     updateNextTaskCard();
     updateNextBestOptions();
     updateConflictResolver();
+    refreshGanttSnapshotIfOpen();
+    updateWorstDayBanner();
     updateSleepToolkitUI();
   }
 
@@ -8933,6 +10152,9 @@
     initializeConflictResolverModule();
     initializeDefuseMode();
     initializeDopamineModule();
+    initializeDistractionTools();
+    initializeGanttSnapshot();
+    initializeWorstDayMode();
     const saved = localStorage.getItem("tasks");
     if (saved) {
       tasks = JSON.parse(saved).map(task => {
