@@ -8895,23 +8895,23 @@
 
   function renderGanttSnapshot(plan) {
     ganttPlanState = plan;
-    const container = $(\"ganttBlocks\");
-    const status = $(\"ganttStatus\");
+    const container = $("ganttBlocks");
+    const status = $("ganttStatus");
     if (container) {
-      container.innerHTML = \"\";
+      container.innerHTML = "";
       if (!plan.entries.length) {
-        const empty = document.createElement(\"div\");
+        const empty = document.createElement("div");
         empty.className = "score";
         empty.textContent = "Add a task to see your next blocks.";
         container.appendChild(empty);
       } else {
         plan.entries.forEach((entry, index) => {
-          const block = document.createElement(\"div\");
+          const block = document.createElement("div");
           block.className = "gantt-block";
           block.style.flex = String(Math.max(1, entry.minutes));
-          const title = document.createElement(\"strong\");
+          const title = document.createElement("strong");
           title.textContent = entry.task.name || "Task";
-          const detail = document.createElement(\"small\");
+          const detail = document.createElement("small");
           const startOffset = plan.entries.slice(0, index).reduce((sum, current) => sum + current.minutes, 0);
           const start = new Date(Date.now() + startOffset * 60000);
           detail.textContent = `${entry.minutes} min • starts ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
@@ -8929,8 +8929,8 @@
   }
 
     function updateGanttOverlayProgress() {
-    const bar = $(\"ganttProgressBar\");
-    const status = $(\"ganttStatus\");
+    const bar = $("ganttProgressBar");
+    const status = $("ganttStatus");
     if (!bar || !ganttPlanState) return;
     const total = ganttPlanState.totalMinutes || 0;
     if (!ganttOverlayStartTime || total <= 0) {
@@ -8958,7 +8958,7 @@
   }
 
     function openGanttSnapshot() {
-    const overlay = $(\"ganttSnapshotOverlay\");
+    const overlay = $("ganttSnapshotOverlay");
     if (!overlay) return;
     const plan = buildAdaptiveGanttPlan();
     renderGanttSnapshot(plan);
@@ -8973,7 +8973,7 @@
   }
 
     function closeGanttSnapshot() {
-    const overlay = $(\"ganttSnapshotOverlay\");
+    const overlay = $("ganttSnapshotOverlay");
     if (!overlay) return;
     overlay.classList.add("hidden");
     overlay.setAttribute("aria-hidden", "true");
@@ -8985,8 +8985,8 @@
   }
 
     function refreshGanttSnapshotIfOpen() {
-    const overlay = $(\"ganttSnapshotOverlay\");
-    if (!overlay || overlay.classList.contains(\"hidden\")) return;
+    const overlay = $("ganttSnapshotOverlay");
+    if (!overlay || overlay.classList.contains("hidden")) return;
     const plan = buildAdaptiveGanttPlan();
     renderGanttSnapshot(plan);
     ganttOverlayStartTime = Date.now();
@@ -8994,24 +8994,24 @@
   }
 
     function initializeGanttSnapshot() {
-    const trigger = $(\"ganttSnapshotAction\");
+    const trigger = $("ganttSnapshotAction");
     if (trigger) {
-      trigger.addEventListener(\"click\", openGanttSnapshot);
+      trigger.addEventListener("click", openGanttSnapshot);
     }
-    const closeBtn = $(\"ganttCloseButton\");
+    const closeBtn = $("ganttCloseButton");
     if (closeBtn) {
-      closeBtn.addEventListener(\"click\", closeGanttSnapshot);
+      closeBtn.addEventListener("click", closeGanttSnapshot);
     }
-    const overlay = $(\"ganttSnapshotOverlay\");
+    const overlay = $("ganttSnapshotOverlay");
     if (overlay) {
-      overlay.addEventListener(\"click\", event => {
+      overlay.addEventListener("click", event => {
         if (event.target === overlay) {
           closeGanttSnapshot();
         }
       });
     }
-    document.addEventListener(\"keydown\", event => {
-      if (event.key === \"Escape\") {
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
         closeGanttSnapshot();
       }
     });
@@ -9370,8 +9370,8 @@
   }
 
   function updateWorstDayBanner() {
-    const button = $(\"worstDayButton\");
-    const hint = $(\"worstDayHint\");
+    const button = $("worstDayButton");
+    const hint = $("worstDayHint");
     const focusTask = getMostMeaningfulTask();
     const hasTask = Boolean(focusTask);
     if (button) {
@@ -9385,15 +9385,15 @@
 
     function startWorstDayMode() {
     if (worstDayState.active) return;
-    const overlay = $(\"worstDayOverlay\");
-    const focusLine = $(\"worstDayFocus\");
-    const prompt = $(\"worstDayPrompt\");
-    const timerEl = $(\"worstDayTimer\");
-    const actions = $(\"worstDayActions\");
-    const celebration = $(\"worstDayCelebration\");
+    const overlay = $("worstDayOverlay");
+    const focusLine = $("worstDayFocus");
+    const prompt = $("worstDayPrompt");
+    const timerEl = $("worstDayTimer");
+    const actions = $("worstDayActions");
+    const celebration = $("worstDayCelebration");
     const focusTask = getMostMeaningfulTask();
     if (!overlay || !focusTask) {
-      showToast(\"Worst-Day Mode\", \"Add a task to give yourself something kind to focus on.\");
+      showToast("Worst-Day Mode", "Add a task to give yourself something kind to focus on.");
       return;
     }
     const chunk = deriveMmpChunk(focusTask) || { label: focusTask.name, minutes: 5, subId: null };
@@ -9430,8 +9430,8 @@
 
     function updateWorstDayTimer() {
     if (!worstDayState.active) return;
-    const timerEl = $(\"worstDayTimer\");
-    const prompt = $(\"worstDayPrompt\");
+    const timerEl = $("worstDayTimer");
+    const prompt = $("worstDayPrompt");
     if (!timerEl) return;
     const remaining = Math.max(0, worstDayState.endTime - Date.now());
     const minutes = Math.floor(remaining / 60000);
@@ -9452,18 +9452,18 @@
     worstDayState.countdownId = null;
     worstDayState.active = false;
     worstDayState.endTime = null;
-    const actions = $(\"worstDayActions\");
+    const actions = $("worstDayActions");
     if (actions) {
       actions.classList.remove("hidden");
     }
-    const celebration = $(\"worstDayCelebration\");
+    const celebration = $("worstDayCelebration");
     if (celebration) {
       celebration.textContent = "";
     }
   }
 
     function handleWorstDayChoice(choice) {
-    const celebration = $(\"worstDayCelebration\");
+    const celebration = $("worstDayCelebration");
     if (choice === "laugh") {
       const line = WORST_DAY_LAUGHS[Math.floor(Math.random() * WORST_DAY_LAUGHS.length)] || "You showed up.";
       if (celebration) celebration.textContent = line;
@@ -9476,7 +9476,7 @@
   }
 
     function stopWorstDayMode(options = {}) {
-    const overlay = $(\"worstDayOverlay\");
+    const overlay = $("worstDayOverlay");
     if (worstDayState.countdownId) {
       clearInterval(worstDayState.countdownId);
     }
@@ -9486,35 +9486,35 @@
       overlay.setAttribute("aria-hidden", "true");
     }
     if (options.celebrate) {
-      showToast(\"Worst-Day Mode\", "Five minutes banked. That counts.");
+      showToast("Worst-Day Mode", "Five minutes banked. That counts.");
     }
     updateWorstDayBanner();
   }
 
     function initializeWorstDayMode() {
-    const button = $(\"worstDayButton\");
+    const button = $("worstDayButton");
     if (button) {
-      button.addEventListener(\"click\", startWorstDayMode);
+      button.addEventListener("click", startWorstDayMode);
     }
-    const overlay = $(\"worstDayOverlay\");
+    const overlay = $("worstDayOverlay");
     if (overlay) {
-      overlay.addEventListener(\"click\", event => {
+      overlay.addEventListener("click", event => {
         if (event.target === overlay) {
           stopWorstDayMode();
         }
       });
     }
-    const closeBtn = $(\"worstDayClose\");
+    const closeBtn = $("worstDayClose");
     if (closeBtn) {
-      closeBtn.addEventListener(\"click\", () => stopWorstDayMode());
+      closeBtn.addEventListener("click", () => stopWorstDayMode());
     }
-    const exitBtn = $(\"worstDayExit\");
+    const exitBtn = $("worstDayExit");
     if (exitBtn) {
-      exitBtn.addEventListener(\"click\", () => stopWorstDayMode());
+      exitBtn.addEventListener("click", () => stopWorstDayMode());
     }
-    const actions = $(\"worstDayActions\");
+    const actions = $("worstDayActions");
     if (actions) {
-      actions.addEventListener(\"click\", event => {
+      actions.addEventListener("click", event => {
         const buttonEl = event.target.closest('[data-worst-day-choice]');
         if (!buttonEl) return;
         handleWorstDayChoice(buttonEl.getAttribute('data-worst-day-choice'));
@@ -10072,7 +10072,7 @@
       month: "short",
       day: "numeric"
     });
-    reminder.innerHTML = `Last day to submit and meet the 95-day cutoff: <strong>${formatted}</strong>.`;
+    reminder.innerHTML = `95-day billing/eligibility cutoff: <strong>${formatted}</strong>`;
   }
 
   function registerFieldListeners() {
