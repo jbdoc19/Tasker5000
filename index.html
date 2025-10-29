@@ -2574,6 +2574,9 @@
   let lastFocusTimeBudget = null;
   let syncingEnergySliders = false;
   let conflictArenaSelection = { should: null, want: null };
+  const DEFUSE_MINUTES_MIN = 10;
+  const DEFUSE_MINUTES_MAX = 30;
+  const DEFAULT_DEFUSE_ACTION = "Open the doc & type the title";
   let defuseState = {
     active: false,
     countdown: 90,
@@ -2613,8 +2616,6 @@
   const DEFUSE_BASE_MINUTES_KEY = "defuse.baseMinutes";
   const DEFUSE_ACTION_KEY = "defuse.action";
   const DEFUSE_LOCKS_KEY = "defuse.locks";
-  const DEFUSE_MINUTES_MIN = 10;
-  const DEFUSE_MINUTES_MAX = 30;
   const DOPAMINE_REWARD_KEY = "dopamine.reward";
   const DOPAMINE_INTERVALS = [2, 6, 12];
   const ENERGY_LABELS = {
@@ -2645,7 +2646,6 @@
     { threshold: 30, message: "Fake it: open the doc, type the title, breathe." },
     { threshold: 0, message: "Zone check: distractions locked. You're cleared for takeoff." }
   ];
-  const DEFAULT_DEFUSE_ACTION = "Open the doc & type the title";
   const MMP_MIN_MINUTES = 10;
   const MMP_MAX_MINUTES = 20;
   const CONFLICT_DEFAULT_SPRINT = 12;
@@ -8853,7 +8853,7 @@
       month: "short",
       day: "numeric"
     });
-    reminder.innerHTML = `Make sure that all charts from <strong>${formatted}</strong> must be completed today to be eligible for billing.`;
+    reminder.innerHTML = `Last day to submit and meet the 95-day cutoff: <strong>${formatted}</strong>.`;
   }
 
   function registerFieldListeners() {
