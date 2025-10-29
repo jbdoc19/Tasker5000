@@ -377,8 +377,8 @@
       margin: 0;
     }
     .task-progress {
-      font-size: 0.82rem;
-      color: #d0dcff;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
       font-weight: 500;
     }
     .task-progress-group {
@@ -387,16 +387,16 @@
       gap: 0.25rem;
     }
     .task-progress-meter {
-      background: #111922;
+      background: rgba(148, 163, 184, 0.22);
       border-radius: 999px;
       overflow: hidden;
-      height: 6px;
+      height: 3px;
       width: 100%;
     }
     .task-progress-meter .fill {
       display: block;
       height: 100%;
-      background: #0a84ff;
+      background: rgba(45, 212, 195, 0.85);
       width: 0%;
       transition: width 150ms ease-out;
     }
@@ -2025,12 +2025,68 @@
       box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.18);
     }
 
-    .task-form-toolbar {
+    .task-form-group {
+      position: relative;
+      display: grid;
+      gap: var(--space-2);
+      padding-top: var(--space-3);
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .task-form-group__label {
+      position: absolute;
+      top: -0.75rem;
+      left: 0;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.75);
+      padding: 0 0.35rem;
+      background: linear-gradient(180deg, rgba(15, 20, 26, 1) 40%, rgba(15, 20, 26, 0));
+    }
+
+    .task-more {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: var(--space-1);
-      align-items: center;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .task-more__toggle {
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+
+    .task-more__menu {
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(20, 28, 36, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(15, 20, 26, 0.45);
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      left: 0;
+      min-width: 180px;
+      z-index: 5;
+    }
+
+    .task-more__menu button {
       justify-content: flex-start;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .task-more__menu button:hover,
+    .task-more__menu button:focus-visible {
+      color: var(--text-primary);
+    }
+
+    .section-chip {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
     }
 
     .card-sticky-actions {
@@ -2056,6 +2112,18 @@
       flex-wrap: wrap;
       gap: var(--space-1);
       align-items: center;
+    }
+
+    .btn-quiet {
+      background: rgba(20, 28, 36, 0.35);
+      border-color: rgba(148, 163, 184, 0.18);
+      color: var(--text-secondary);
+    }
+
+    .btn-quiet:hover,
+    .btn-quiet:focus-visible {
+      background: rgba(148, 163, 184, 0.16);
+      color: var(--text-primary);
     }
 
     .modal {
@@ -2173,16 +2241,100 @@
       font-size: 0.75rem;
     }
 
+    .chip-muted {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-secondary);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .next-task-fit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .next-task-fit__info {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.22);
+      color: rgba(226, 232, 240, 0.9);
+      font-size: 0.75rem;
+      cursor: help;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .next-task-actions {
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-2);
+      width: 100%;
+    }
+
+    .next-task-start {
+      width: 100%;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .next-task-start.is-long-press {
+      box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.45);
     }
 
     .due-today-list {
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
+    }
+
+    .due-today-accordion {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .due-today-summary {
+      width: 100%;
+      background: rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+
+    .due-today-summary:hover,
+    .due-today-summary:focus-visible {
+      border-color: rgba(148, 163, 184, 0.35);
+      color: var(--text-primary);
+      background: rgba(148, 163, 184, 0.14);
+    }
+
+    .due-today-summary__icon {
+      font-size: 0.75rem;
+      transition: transform var(--transition);
+    }
+
+    .due-today-accordion[data-open="true"] .due-today-summary__icon {
+      transform: rotate(90deg);
     }
 
     .due-today-item {
@@ -2192,6 +2344,11 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: var(--radius-md);
       padding: var(--space-2);
+    }
+
+    .due-today-item--spotlight {
+      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.25), 0 0 24px rgba(45, 212, 195, 0.18);
+      transition: box-shadow 220ms ease-out;
     }
 
     .due-today-title {
@@ -3224,14 +3381,21 @@
       <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
         <div class="card-head">
           <h2>Next focus</h2>
-          <span id="nextTaskScore" class="chip hidden"></span>
+          <span id="nextTaskScore" class="chip chip-muted next-task-fit hidden"></span>
         </div>
         <p id="nextTaskName" class="next-task-name"></p>
         <p id="nextTaskSubstep" class="next-task-meta"></p>
         <div id="nextTaskChips" class="next-task-meta"></div>
         <div class="next-task-actions">
-          <button id="nextTaskStartFull" class="btn btn-primary" type="button">Start full</button>
-          <button id="nextTaskStartSprint" class="btn btn-secondary" type="button">Start 5-min</button>
+          <button
+            id="nextTaskActionButton"
+            class="btn hero-cta start-action next-task-start"
+            type="button"
+            aria-describedby="nextTaskActionHint"
+          >
+            Start 5-min
+            <span id="nextTaskActionHint" class="visually-hidden">Long-press for Go all in.</span>
+          </button>
         </div>
         <p id="nextTaskEmpty" class="next-task-empty hidden">You're clear for now. Add what matters next.</p>
       </section>
@@ -3239,9 +3403,21 @@
       <section id="dueTodaySection" class="card due-today-card hidden" aria-live="polite">
         <div class="section-heading">
           <h2>Due today</h2>
-          <button id="toggleDueToday" class="link-button hidden" type="button"></button>
+          <span class="chip chip-muted section-chip">Ready today</span>
         </div>
-        <div id="dueTodayList" class="due-today-list"></div>
+        <div id="dueTodayAccordion" class="due-today-accordion" data-open="false">
+          <button
+            id="dueTodaySummary"
+            class="due-today-summary"
+            type="button"
+            aria-expanded="false"
+            aria-controls="dueTodayList"
+          >
+            <span id="dueTodaySummaryText">0 ready • est —</span>
+            <span class="due-today-summary__icon" aria-hidden="true">▸</span>
+          </button>
+          <div id="dueTodayList" class="due-today-list" hidden></div>
+        </div>
         <p id="dueTodayEmpty" class="due-today-empty hidden">Nothing due today. You're caught up.</p>
       </section>
 
@@ -3253,39 +3429,52 @@
           </button>
         </div>
         <div class="card-body" id="addTaskCardBody" aria-hidden="true">
-          <label for="name">Task name
-            <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
-          </label>
-          <label for="taskCategory">Category
-            <select id="taskCategory">
-              <option value="General" selected>General</option>
-              <option value="Admin">Admin</option>
-              <option value="Chart">Chart</option>
-              <option value="Inbox">Inbox</option>
-              <option value="Calls">Calls</option>
-              <option value="Teaching">Teaching</option>
-              <option value="Personal">Personal</option>
-            </select>
-          </label>
-          <div class="task-form-toolbar">
-            <button type="button" class="btn btn-ghost" id="btn-use-template">Use template</button>
-            <button type="button" class="btn btn-ghost" onclick="saveAsTemplate()">Add as Template</button>
-            <button
-              type="button"
-              class="btn btn-ghost"
-              id="expandTaskDetailsButton"
-              aria-controls="taskDetails"
-              aria-expanded="false"
-            >
-              Show details
-            </button>
-          </div>
-          <div id="taskDetails" class="task-details-panel" data-collapsed="true">
-            <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
-              <label for="authorType">Chart Author
-                <select id="authorType">
-                  <option value="attending" selected>Attending</option>
-                  <option value="resident">Resident</option>
+          <div class="task-form-group">
+            <span class="task-form-group__label">New task</span>
+            <label for="name">Task name
+              <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" autofocus />
+            </label>
+            <label for="taskCategory">Category
+              <select id="taskCategory">
+                <option value="General" selected>General</option>
+                <option value="Admin">Admin</option>
+                <option value="Chart">Chart</option>
+                <option value="Inbox">Inbox</option>
+                <option value="Calls">Calls</option>
+                <option value="Teaching">Teaching</option>
+                <option value="Personal">Personal</option>
+              </select>
+            </label>
+            <div class="task-more">
+              <button
+                type="button"
+                class="link-button task-more__toggle"
+                id="taskMoreOptionsToggle"
+                aria-expanded="false"
+                aria-controls="taskMoreOptionsMenu"
+              >
+                More options
+              </button>
+              <div id="taskMoreOptionsMenu" class="task-more__menu" hidden>
+                <button type="button" class="link-button" id="btn-use-template">Use template</button>
+                <button type="button" class="link-button" id="btn-save-template">Add as template</button>
+                <button
+                  type="button"
+                  class="link-button"
+                  id="expandTaskDetailsButton"
+                  aria-controls="taskDetails"
+                  aria-expanded="false"
+                >
+                  Show details
+                </button>
+              </div>
+            </div>
+            <div id="taskDetails" class="task-details-panel" data-collapsed="true">
+              <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
+                <label for="authorType">Chart Author
+                  <select id="authorType">
+                    <option value="attending" selected>Attending</option>
+                    <option value="resident">Resident</option>
                 </select>
               </label>
               <label for="patientType" title="Complex = medically fragile, multi-specialty, or DME-dependent.">Patient Type
@@ -3809,7 +3998,6 @@
   let sprintDurationMinutes = null;
   let sprintEndTime = null;
   let nextTaskId = null;
-  let showAllDueToday = false;
   let lastFocusedBeforeTemplateModal = null;
   const MODULE_STATE_PREFIX = "moduleState_";
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
@@ -8091,8 +8279,7 @@
     const total = task.subTasks.length;
     const completed = task.subTasks.filter(sub => sub.completed).length;
     const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
-    const label = `${completed} of ${total} steps done`;
-    return { total, completed, percent, label };
+    return { total, completed, percent };
   }
 
   function createProgressElement(task) {
@@ -8103,14 +8290,24 @@
 
     const label = document.createElement("div");
     label.className = "task-progress";
-    label.textContent = `${progressData.label} (${progressData.percent} %)`;
+    const stepsLabel = `${progressData.total} ${progressData.total === 1 ? "step" : "steps"}`;
+    let statusText;
+    if (progressData.completed === 0) {
+      statusText = "first step ready.";
+    } else if (progressData.completed >= progressData.total) {
+      statusText = "plan complete.";
+    } else {
+      statusText = `${progressData.completed} done.`;
+    }
+    label.textContent = `${stepsLabel} • ${statusText}`;
     container.appendChild(label);
 
     const meter = document.createElement("div");
     meter.className = "task-progress-meter";
     const fill = document.createElement("span");
     fill.className = "fill";
-    fill.style.width = `${progressData.percent}%`;
+    const fillPercent = progressData.percent <= 0 ? 1 : Math.max(progressData.percent, 1);
+    fill.style.width = `${fillPercent}%`;
     meter.appendChild(fill);
     container.appendChild(meter);
 
@@ -8349,8 +8546,7 @@
     const chipsEl = $("nextTaskChips");
     const scoreEl = $("nextTaskScore");
     const emptyEl = $("nextTaskEmpty");
-    const startFullBtn = $("nextTaskStartFull");
-    const startSprintBtn = $("nextTaskStartSprint");
+    const startActionBtn = $("nextTaskActionButton");
 
     const energyLevel = clampScale(getEnergyLevel(), 3);
     const timeBudget = getTimeBudgetMinutes();
@@ -8372,8 +8568,7 @@
         scoreEl.classList.add("hidden");
       }
       if (emptyEl) emptyEl.classList.remove("hidden");
-      if (startFullBtn) startFullBtn.disabled = true;
-      if (startSprintBtn) startSprintBtn.disabled = true;
+      if (startActionBtn) startActionBtn.disabled = true;
       return;
     }
 
@@ -8397,11 +8592,25 @@
       });
     }
     if (scoreEl) {
-      scoreEl.textContent = `Score ${topTask.priority.toFixed(1)}`;
+      scoreEl.innerHTML = "";
+      const scoreText = document.createElement("span");
+      const rawScore = Number(topTask.priority);
+      const displayScore = Number.isFinite(rawScore) ? Math.round(rawScore) : 0;
+      scoreText.textContent = `Fit ${displayScore}`;
+      const info = document.createElement("span");
+      info.className = "next-task-fit__info";
+      info.textContent = "i";
+      info.title = "Just a nudge, not a grade.";
+      info.setAttribute("aria-label", "Just a nudge, not a grade.");
+      scoreEl.appendChild(scoreText);
+      scoreEl.appendChild(info);
+      const srOnly = document.createElement("span");
+      srOnly.className = "visually-hidden";
+      srOnly.textContent = "Fit guidance. Just a nudge, not a grade.";
+      scoreEl.appendChild(srOnly);
       scoreEl.classList.remove("hidden");
     }
-    if (startFullBtn) startFullBtn.disabled = false;
-    if (startSprintBtn) startSprintBtn.disabled = false;
+    if (startActionBtn) startActionBtn.disabled = false;
   }
 
   const DEFAULT_NEXT_BEST_INPUTS = {
@@ -8900,27 +9109,40 @@
 
   function renderDueTodayList(entries) {
     const section = $("dueTodaySection");
+    const accordion = $("dueTodayAccordion");
     const listEl = $("dueTodayList");
-    const toggleBtn = $("toggleDueToday");
+    const summaryBtn = $("dueTodaySummary");
+    const summaryText = $("dueTodaySummaryText");
     const emptyEl = $("dueTodayEmpty");
-    if (!section || !listEl || !toggleBtn || !emptyEl) return;
+    if (!section || !accordion || !listEl || !summaryBtn || !summaryText || !emptyEl) return;
 
     listEl.innerHTML = "";
 
     if (!entries.length) {
       section.classList.add("hidden");
       emptyEl.classList.remove("hidden");
-      toggleBtn.classList.add("hidden");
-      toggleBtn.textContent = "";
+      accordion.classList.add("hidden");
+      accordion.dataset.open = "false";
+      summaryBtn.setAttribute("aria-expanded", "false");
+      summaryText.textContent = "0 ready • est —";
+      listEl.hidden = true;
       return;
     }
 
     section.classList.remove("hidden");
     emptyEl.classList.add("hidden");
+    accordion.classList.remove("hidden");
 
-    const total = entries.length;
-    const visibleCount = showAllDueToday ? total : Math.min(3, total);
-    entries.slice(0, visibleCount).forEach(entry => {
+    const readyLabel = entries.length === 1 ? "1 ready" : `${entries.length} ready`;
+    const estimatedMinutes = entries.reduce((sum, entry) => {
+      const minutes = estimateTaskMinutes(entry.task);
+      return Number.isFinite(minutes) ? sum + minutes : sum;
+    }, 0);
+    const hasEstimate = Number.isFinite(estimatedMinutes) && estimatedMinutes > 0;
+    const estimateText = hasEstimate ? `est ${Math.max(1, Math.round(estimatedMinutes))} min` : "est —";
+    summaryText.textContent = `${readyLabel} • ${estimateText}`;
+
+    entries.forEach(entry => {
       const item = document.createElement("div");
       item.className = "due-today-item";
 
@@ -8968,12 +9190,31 @@
       listEl.appendChild(item);
     });
 
-    if (total > 3) {
-      toggleBtn.classList.remove("hidden");
-      toggleBtn.textContent = showAllDueToday ? "Show top 3" : `Show all (${total})`;
-    } else {
-      toggleBtn.classList.add("hidden");
-      toggleBtn.textContent = "";
+    const isOpen = accordion.dataset.open === "true";
+    summaryBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    listEl.hidden = !isOpen;
+  }
+
+  function setDueTodayAccordionOpen(open, options = {}) {
+    const accordion = $("dueTodayAccordion");
+    const summaryBtn = $("dueTodaySummary");
+    const listEl = $("dueTodayList");
+    if (!accordion || !summaryBtn || !listEl) return;
+    const nextState = open ? "true" : "false";
+    accordion.dataset.open = nextState;
+    summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    listEl.hidden = !open;
+    if (open && options.highlight !== false) {
+      window.requestAnimationFrame(() => {
+        const firstCard = listEl.querySelector(".due-today-item");
+        if (firstCard) {
+          firstCard.classList.add("due-today-item--spotlight");
+          window.setTimeout(() => firstCard.classList.remove("due-today-item--spotlight"), 900);
+        }
+      });
+    }
+    if (open && options.focusSummary) {
+      summaryBtn.focus();
     }
   }
 
@@ -10050,6 +10291,20 @@
     setTaskDetailsCollapsed(!collapsed);
   }
 
+  function syncAddTaskActions() {
+    const nameField = $("name");
+    const addBtn = $("addTaskBtn");
+    const startBtn = $("startBtn");
+    if (!nameField || !addBtn || !startBtn) return;
+    const hasName = Boolean(nameField.value.trim());
+    const hasTasks = startBtn.dataset.hasTasks === "true";
+    addBtn.classList.toggle("btn-primary", !hasName);
+    addBtn.classList.toggle("btn-quiet", hasName);
+    startBtn.classList.toggle("hero-cta", hasName);
+    startBtn.classList.toggle("btn-secondary", !hasName);
+    startBtn.disabled = !hasName && !hasTasks;
+  }
+
   function setStatusCardCollapsed(collapsed, options = {}) {
     const card = $("statusCard");
     const toggle = $("toggleStatusCard");
@@ -10362,8 +10617,10 @@
     const dueTodayBtn = $("dueTodayAction");
     if (dueTodayBtn) {
       dueTodayBtn.addEventListener("click", () => {
-        showAllDueToday = true;
+        const accordion = $("dueTodayAccordion");
+        const wasOpen = accordion?.dataset.open === "true";
         updateUI();
+        setDueTodayAccordionOpen(true, { highlight: !wasOpen, focusSummary: !wasOpen });
         const section = $("dueTodaySection");
         if (section && !section.classList.contains("hidden")) {
           section.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -10374,29 +10631,62 @@
     if (shieldBtn) {
       shieldBtn.addEventListener("click", activateShield);
     }
-    const startFull = $("nextTaskStartFull");
-    if (startFull) {
-      startFull.addEventListener("click", () => {
-        if (nextTaskId) {
-          startFocus(nextTaskId);
-        } else {
-          startFocus();
+    const nextTaskAction = $("nextTaskActionButton");
+    if (nextTaskAction) {
+      const LONG_PRESS_MS = 650;
+      let longPressTriggered = false;
+      let pressTimer = null;
+
+      const clearPressTimer = () => {
+        if (pressTimer) {
+          window.clearTimeout(pressTimer);
+          pressTimer = null;
         }
+      };
+
+      const handlePointerEnd = () => {
+        if (longPressTriggered) {
+          window.setTimeout(() => nextTaskAction.classList.remove("is-long-press"), 220);
+        }
+        clearPressTimer();
+      };
+
+      nextTaskAction.addEventListener("pointerdown", event => {
+        if (event.button !== 0) return;
+        clearPressTimer();
+        longPressTriggered = false;
+        pressTimer = window.setTimeout(() => {
+          longPressTriggered = true;
+          nextTaskAction.classList.add("is-long-press");
+          if (nextTaskId) {
+            startFocus(nextTaskId);
+          } else {
+            startFocus();
+          }
+        }, LONG_PRESS_MS);
+      });
+
+      nextTaskAction.addEventListener("pointerup", handlePointerEnd);
+      nextTaskAction.addEventListener("pointerleave", handlePointerEnd);
+      nextTaskAction.addEventListener("pointercancel", handlePointerEnd);
+
+      nextTaskAction.addEventListener("click", event => {
+        if (longPressTriggered) {
+          event.preventDefault();
+          longPressTriggered = false;
+          return;
+        }
+        startFiveMinuteSprint(nextTaskId);
       });
     }
-    const startSprint = $("nextTaskStartSprint");
-    if (startSprint) {
-      startSprint.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
-    }
-    const toggleDue = $("toggleDueToday");
-    if (toggleDue) {
-      toggleDue.addEventListener("click", () => {
-        showAllDueToday = !showAllDueToday;
-        updateUI();
-        const section = $("dueTodaySection");
-        if (section && !section.classList.contains("hidden")) {
-          section.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+
+    const summaryToggle = $("dueTodaySummary");
+    if (summaryToggle) {
+      summaryToggle.addEventListener("click", () => {
+        const accordion = $("dueTodayAccordion");
+        if (!accordion) return;
+        const nextOpen = accordion.dataset.open !== "true";
+        setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen });
       });
     }
   }
@@ -10414,6 +10704,58 @@
         openTemplateModal();
       });
     }
+    const saveTemplateBtn = $("btn-save-template");
+    if (saveTemplateBtn) {
+      saveTemplateBtn.addEventListener("click", () => saveAsTemplate());
+    }
+    const moreToggle = $("taskMoreOptionsToggle");
+    const moreMenu = $("taskMoreOptionsMenu");
+    if (moreToggle && moreMenu) {
+      const closeMenu = () => {
+        if (!moreMenu.hidden) {
+          moreMenu.hidden = true;
+          moreToggle.setAttribute("aria-expanded", "false");
+        }
+      };
+      moreToggle.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (moreMenu.hidden) {
+          moreMenu.hidden = false;
+          moreToggle.setAttribute("aria-expanded", "true");
+          const firstOption = moreMenu.querySelector("button");
+          if (firstOption) {
+            window.setTimeout(() => firstOption.focus(), 0);
+          }
+        } else {
+          closeMenu();
+        }
+      });
+      document.addEventListener("click", event => {
+        if (!moreMenu.contains(event.target) && event.target !== moreToggle) {
+          closeMenu();
+        }
+      });
+      moreMenu.addEventListener("click", event => {
+        event.stopPropagation();
+        const actionButton = event.target.closest("button");
+        if (actionButton) {
+          window.setTimeout(() => closeMenu(), 0);
+        }
+      });
+      moreMenu.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          closeMenu();
+          moreToggle.focus();
+        }
+      });
+      moreToggle.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          closeMenu();
+        }
+      });
+    }
     const toggleCardBtn = $("toggleAddTaskCard");
     if (toggleCardBtn) {
       toggleCardBtn.addEventListener("click", toggleAddTaskCard);
@@ -10429,6 +10771,11 @@
       if (closeBtn) {
         closeBtn.addEventListener("click", closeTemplateModal);
       }
+    }
+    syncAddTaskActions();
+    const nameInput = $("name");
+    if (nameInput) {
+      nameInput.addEventListener("input", syncAddTaskActions);
     }
   }
 
@@ -10459,7 +10806,11 @@
 
     const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
-    $("startBtn").disabled = remaining.length === 0;
+    const startBtn = $("startBtn");
+    if (startBtn) {
+      startBtn.dataset.hasTasks = remaining.length > 0 ? "true" : "false";
+    }
+    syncAddTaskActions();
     const timeBudget = getTimeBudgetMinutes();
     const energyLevel = clampScale(getEnergyLevel(), 3);
     const hasTimeBudget = Number.isFinite(timeBudget);
@@ -10544,9 +10895,6 @@
     });
 
     dueTodayEntries.sort((a, b) => computeFocusScore(b.task, energyLevel, timeBudget) - computeFocusScore(a.task, energyLevel, timeBudget));
-    if (!dueTodayEntries.length) {
-      showAllDueToday = false;
-    }
     renderDueTodayList(dueTodayEntries);
     updateNextTaskCard();
     updateNextBestOptions();
