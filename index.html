@@ -2574,7 +2574,6 @@
   let lastFocusTimeBudget = null;
   let syncingEnergySliders = false;
   let conflictArenaSelection = { should: null, want: null };
-  const DEFAULT_DEFUSE_ACTION = "Open the doc & type the title";
   let defuseState = {
     active: false,
     countdown: 90,
@@ -2646,6 +2645,7 @@
     { threshold: 30, message: "Fake it: open the doc, type the title, breathe." },
     { threshold: 0, message: "Zone check: distractions locked. You're cleared for takeoff." }
   ];
+  const DEFAULT_DEFUSE_ACTION = "Open the doc & type the title";
   const MMP_MIN_MINUTES = 10;
   const MMP_MAX_MINUTES = 20;
   const CONFLICT_DEFAULT_SPRINT = 12;
