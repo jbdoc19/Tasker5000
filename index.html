@@ -2331,6 +2331,21 @@
     return getDateKey(dt);
   }
 
+  function getOffsetDateKey(dateKey, offsetDays = 0) {
+    if (!dateKey || typeof dateKey !== "string") return null;
+    const parts = dateKey.split("-").map(part => Number(part));
+    if (parts.length !== 3) return null;
+    const [year, month, day] = parts;
+    if (![year, month, day].every(Number.isFinite)) return null;
+    const dt = new Date(year, month - 1, day);
+    if (Number.isNaN(dt.getTime())) return null;
+    const offset = Number(offsetDays);
+    if (Number.isFinite(offset) && offset !== 0) {
+      dt.setDate(dt.getDate() + offset);
+    }
+    return getDateKey(dt);
+  }
+
   function getYesterdayKey() {
     const dt = new Date();
     dt.setDate(dt.getDate() - 1);
@@ -3388,12 +3403,26 @@
     updateSleepToolkitUI();
   }
 
-  function computeSleepCompletion(dateKey = getTodayKey()) {
-    const checklist = getSleepChecklistEntry(dateKey);
+  function computeSleepCompletionFromChecklist(checklist) {
     const total = SLEEP_CHECKLIST_ITEMS.length;
+    if (!checklist) {
+      return { total, completed: 0, percent: 0 };
+    }
     const completed = SLEEP_CHECKLIST_ITEMS.filter(item => checklist[item.id]).length;
     const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
     return { total, completed, percent };
+  }
+
+  function computeSleepCompletion(dateKey = getTodayKey(), options = {}) {
+    const { createIfMissing = true } = options || {};
+    let checklist;
+    if (createIfMissing) {
+      checklist = getSleepChecklistEntry(dateKey);
+    } else {
+      const state = loadSleepToolkitState();
+      checklist = state.checklist?.[dateKey];
+    }
+    return computeSleepCompletionFromChecklist(checklist);
   }
 
   function renderSleepChecklist(dateKey = getTodayKey()) {
@@ -3464,28 +3493,92 @@
     const summary = $("sleepCorrelationSummary");
     if (!summary) return;
     const state = loadSleepToolkitState();
-    const entries = Object.entries(state.restRatings || {});
-    if (!entries.length) {
-      summary.textContent = "Log rest ratings to see how sleep fuels charting momentum.";
-      return;
-    }
-    let highCount = 0;
-    let highCharts = 0;
-    let lowCount = 0;
-    let lowCharts = 0;
-    entries.forEach(([dateKey, rating]) => {
-      const charts = countChartTasksCompletedOn(dateKey);
-      if (Number(rating) >= 4) {
-        highCount += 1;
-        highCharts += charts;
+    const fragments = [];
+
+    const ratingEntries = Object.entries(state.restRatings || {});
+    if (!ratingEntries.length) {
+      fragments.push("Log rest ratings to see how sleep fuels charting momentum.");
+    } else {
+      let highCount = 0;
+      let highCharts = 0;
+      let lowCount = 0;
+      let lowCharts = 0;
+      ratingEntries.forEach(([dateKey, rating]) => {
+        const nextDayKey = getOffsetDateKey(dateKey, 1);
+        if (!nextDayKey) return;
+        const charts = countChartTasksCompletedOn(nextDayKey);
+        if (Number(rating) >= 4) {
+          highCount += 1;
+          highCharts += charts;
+        } else {
+          lowCount += 1;
+          lowCharts += charts;
+        }
+      });
+      const restedAvgValue = highCount ? highCharts / highCount : null;
+      const draggyAvgValue = lowCount ? lowCharts / lowCount : null;
+      const restedAvg = restedAvgValue !== null ? restedAvgValue.toFixed(1) : "—";
+      const draggyAvg = draggyAvgValue !== null ? draggyAvgValue.toFixed(1) : "—";
+      let ratingText = `Rest rating impact → Rested mornings (≥4) yielded ${restedAvg} next-day chart(s); low-energy mornings (≤3) managed ${draggyAvg}.`;
+      if (restedAvgValue !== null && draggyAvgValue !== null) {
+        const delta = restedAvgValue - draggyAvgValue;
+        if (Number.isFinite(delta) && Math.abs(delta) >= 0.1) {
+          ratingText += ` (≈${delta > 0 ? "+" : ""}${delta.toFixed(1)} boost when you're rested)`;
+        }
       } else {
-        lowCount += 1;
-        lowCharts += charts;
+        ratingText += " Keep logging a mix of scores to sharpen this insight.";
       }
-    });
-    const avgHigh = highCount ? (highCharts / highCount).toFixed(1) : "0.0";
-    const avgLow = lowCount ? (lowCharts / lowCount).toFixed(1) : "0.0";
-    summary.innerHTML = `Rested (≥4): ${avgHigh} chart(s) completed next day.<br/>Draggy (≤3): ${avgLow} chart(s).`;
+      fragments.push(ratingText);
+    }
+
+    const checklistEntries = Object.entries(state.checklist || {});
+    if (!checklistEntries.length) {
+      fragments.push("Check off sleep steps to measure how consistency drives next-day charting.");
+    } else {
+      let strongCount = 0;
+      let strongCharts = 0;
+      let lowCount = 0;
+      let lowCharts = 0;
+      checklistEntries.forEach(([dateKey, checklist]) => {
+        const { percent } = computeSleepCompletionFromChecklist(checklist);
+        const nextDayKey = getOffsetDateKey(dateKey, 1);
+        if (!nextDayKey) return;
+        const charts = countChartTasksCompletedOn(nextDayKey);
+        if (percent >= 80) {
+          strongCount += 1;
+          strongCharts += charts;
+        } else if (percent <= 40) {
+          lowCount += 1;
+          lowCharts += charts;
+        }
+      });
+      if (!strongCount && !lowCount) {
+        fragments.push("Track both dialed-in and skipped nights to see how the checklist nudges tomorrow's throughput.");
+      } else {
+        const strongAvgValue = strongCount ? strongCharts / strongCount : null;
+        const lowAvgValue = lowCount ? lowCharts / lowCount : null;
+        const strongAvg = strongAvgValue !== null ? strongAvgValue.toFixed(1) : "—";
+        const lowAvg = lowAvgValue !== null ? lowAvgValue.toFixed(1) : "—";
+        let checklistText = `Sleep steps impact → Nights hitting ≥80% of steps led to ${strongAvg} chart(s) the next day; nights under 40% slid to ${lowAvg}.`;
+        if (strongAvgValue !== null && lowAvgValue !== null) {
+          const delta = strongAvgValue - lowAvgValue;
+          if (Number.isFinite(delta) && Math.abs(delta) >= 0.1) {
+            checklistText += ` (≈${delta > 0 ? "+" : ""}${delta.toFixed(1)} chart swing when you protect the routine)`;
+          }
+        } else {
+          checklistText += " Keep collecting data on both ends to firm up the comparison.";
+        }
+        fragments.push(checklistText);
+      }
+    }
+
+    if (fragments.length === 0) {
+      fragments.push("Log sleep data to let the system prove that care rituals beat pushing through fatigue.");
+    } else {
+      fragments.push("Let these cues remind you: honoring circadian rhythms outruns brute-force catch-up.");
+    }
+
+    summary.innerHTML = fragments.join("<br/>");
   }
 
   function renderSleepMorningRating() {
