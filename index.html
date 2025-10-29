@@ -7,12 +7,12 @@
   <style>
     :root {
       --hero-teal: #2dd4c3;
-      --surface: #0f141b;
-      --surface-elevated: rgba(18, 22, 28, 0.92);
+      --surface: rgba(20, 26, 32, 0.88);
+      --surface-elevated: rgba(18, 24, 30, 0.92);
       --text-primary: #e6eef7;
-      --text-secondary: #b0becd;
+      --text-secondary: #93a0aa;
       --card-radius: 16px;
-      --card-border-color: #1f272e;
+      --card-border-color: rgba(147, 160, 170, 0.18);
     }
 
     body {
@@ -77,8 +77,8 @@
     .btn:focus-visible,
     .icon-button:focus-visible,
     .link-button:focus-visible {
-      outline: 2px solid var(--hero-teal);
-      outline-offset: 2px;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     button:disabled,
@@ -102,8 +102,24 @@
     }
 
     .hero-cta:focus-visible {
-      outline: 3px solid rgba(45, 212, 195, 0.6);
-      outline-offset: 3px;
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(45, 212, 195, 0.6);
+    }
+
+    button,
+    .btn,
+    .icon-button,
+    .link-button,
+    .hero-cta {
+      transition: transform 120ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease;
+    }
+
+    button:active,
+    .btn:active,
+    .icon-button:active,
+    .link-button:active,
+    .hero-cta:active {
+      transform: scale(1.02);
     }
 
     .start-action {
@@ -449,7 +465,14 @@
       font-size: 0.85rem;
       max-width: 600px;
     }
-    .focus { font-size: 1.5rem; margin: 1rem 0; }
+    .focus {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+      padding: 1.25rem;
+      background: rgba(18, 24, 30, 0.88);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(147, 160, 170, 0.18);
+    }
     .distraction-tools {
       margin-top: 1rem;
       background: rgba(18, 18, 18, 0.95);
@@ -1226,8 +1249,8 @@
       margin: 0;
     }
     .meltdown-sos-button:focus-visible {
-      outline: 2px solid #fff;
-      outline-offset: 2px;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
     .meltdown-shield {
       position: fixed;
@@ -1614,12 +1637,12 @@
 
     :root {
       --accent: var(--hero-teal);
-      --background: #0c1117;
-      --surface: var(--surface-elevated);
-      --surface-muted: rgba(24, 32, 40, 0.92);
+      --background: #12161a;
+      --surface: rgba(18, 24, 30, 0.92);
+      --surface-muted: rgba(22, 28, 34, 0.9);
       --border: var(--card-border-color);
       --text-primary: #e6eef7;
-      --text-secondary: #a9b8c9;
+      --text-secondary: #93a0aa;
       --text-muted: #6b7280;
       --radius-lg: var(--card-radius);
       --radius-md: 12px;
@@ -1629,7 +1652,7 @@
       --space-3: 16px;
       --space-4: 24px;
       --space-5: 32px;
-      --transition: 160ms ease;
+      --transition: 200ms ease-in-out;
     }
 
     body {
@@ -1678,36 +1701,20 @@
         padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 90px;
       }
 
-      .action-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--space-2);
+      .activation-bar {
+        grid-template-columns: 1fr;
+        row-gap: var(--space-2);
+        padding: var(--space-2);
+        border-radius: 20px;
       }
 
-      .action-bar-primary,
-      .action-bar-secondary {
-        width: 100%;
-        margin-left: 0;
-      }
-
-      .action-bar-primary {
-        flex-direction: column;
-      }
-
-      .action-bar .btn {
-        width: 100%;
+      .activation-bar__suggestion {
         justify-content: center;
       }
 
-      .action-bar-secondary {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: var(--space-1);
-      }
-
-      .action-bar-secondary .icon-button {
+      .activation-bar__start,
+      .activation-bar__pause {
         width: 100%;
-        height: 44px;
       }
 
       .card {
@@ -1779,28 +1786,140 @@
       letter-spacing: 0.01em;
     }
 
-    .action-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
+    .activation-bar {
+      position: sticky;
+      top: clamp(0.5rem, 2vw, 1.25rem);
+      z-index: 50;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-3);
-      box-shadow: var(--shadow-soft);
-    }
-
-    .action-bar-primary {
-      display: flex;
       gap: var(--space-2);
-      flex: 1 1 auto;
+      padding: 0.5rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.78);
+      border: 1px solid rgba(147, 160, 170, 0.28);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
     }
 
-    .action-bar-secondary {
-      display: flex;
-      gap: var(--space-1);
-      margin-left: auto;
+    .activation-bar__start {
+      background: var(--hero-teal);
+      color: #022624;
+      border: none;
+      border-radius: 999px;
+      padding: 0.35rem 1.4rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 12px 26px rgba(45, 212, 195, 0.3);
+    }
+
+    .activation-bar__start:hover {
+      background: #27c2b0;
+      color: #011c1a;
+    }
+
+    .activation-bar__suggestion {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 2px;
+      min-height: 44px;
+      padding: 0.35rem 1.2rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(147, 160, 170, 0.18);
+      color: var(--text-secondary);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .activation-bar__suggestion span {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: rgba(147, 160, 170, 0.75);
+    }
+
+    .activation-bar__suggestion strong {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .activation-bar__suggestion[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .activation-bar__suggestion[disabled] strong {
+      color: rgba(147, 160, 170, 0.75);
+    }
+
+    .activation-bar__pause {
+      background: rgba(147, 160, 170, 0.12);
+      color: var(--text-secondary);
+      border: 1px solid rgba(147, 160, 170, 0.18);
+      border-radius: 999px;
+      padding: 0.35rem 1.4rem;
+      font-weight: 500;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .activation-bar__pause:hover {
+      background: rgba(147, 160, 170, 0.2);
+      color: var(--text-primary);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 16, 21, 0.65);
+      opacity: 0;
+      transition: opacity 320ms ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body.sprint-active::before {
+      opacity: 1;
+    }
+
+    body.sprint-active .app-shell {
+      position: relative;
+      z-index: 1;
+    }
+
+    body.sprint-active #nextTaskCard:not(.hidden),
+    body.sprint-active #focus:not(.hidden) {
+      position: relative;
+      z-index: 2;
+    }
+
+    body.sprint-active #nextTaskCard:not(.hidden),
+    body.sprint-active #focus:not(.hidden) .focus {
+      border-color: rgba(45, 212, 195, 0.38);
+      box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.35), 0 0 40px rgba(45, 212, 195, 0.22);
+      animation: sprint-glow 45s ease-in-out infinite;
+    }
+
+    @keyframes sprint-glow {
+      0%,
+      100% {
+        box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.25), 0 0 26px rgba(45, 212, 195, 0.18);
+      }
+      50% {
+        box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.45), 0 0 46px rgba(45, 212, 195, 0.32);
+      }
     }
 
     .btn {
@@ -1815,32 +1934,27 @@
       font-weight: 500;
       cursor: pointer;
       transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
+      min-height: 44px;
     }
 
     a.btn {
       text-decoration: none;
     }
 
-    .btn:focus-visible,
-    .icon-button:focus-visible,
-    .link-button:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
     .icon-button {
       background: transparent;
       border: 1px solid rgba(148, 163, 184, 0.2);
       color: var(--text-secondary);
-      width: 38px;
-      height: 38px;
+      width: 48px;
+      height: 48px;
+      min-height: 48px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 1rem;
       cursor: pointer;
-      transition: transform var(--transition), background var(--transition), color var(--transition);
+      transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
     }
 
     .icon-button:hover,
@@ -1883,7 +1997,7 @@
     .resource-button:focus-visible {
       transform: translateY(-2px);
       border-color: rgba(45, 212, 191, 0.35);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     .resource-button::before {
@@ -1974,6 +2088,10 @@
       display: none;
     }
 
+    .card:not(.card--collapsed) .card-body {
+      animation: module-expand var(--transition);
+    }
+
     .card--collapsed .card-sticky-actions {
       display: none;
     }
@@ -1994,13 +2112,13 @@
     .preflight-toggles {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--space-2);
     }
 
     .preflight-toggle {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
       border: 1px solid rgba(148, 163, 184, 0.2);
       background: transparent;
       color: var(--text-secondary);
@@ -2016,6 +2134,7 @@
     .preflight-toggle:focus-visible {
       background: rgba(148, 163, 184, 0.12);
       color: var(--text-primary);
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     .preflight-toggle.is-active {
@@ -2084,6 +2203,11 @@
       color: var(--text-primary);
     }
 
+    .task-more__menu button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
+    }
+
     .section-chip {
       font-size: 0.72rem;
       letter-spacing: 0.08em;
@@ -2110,7 +2234,7 @@
     .card-sticky-actions__secondary {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--space-1);
+      gap: var(--space-2);
       align-items: center;
     }
 
@@ -2124,6 +2248,11 @@
     .btn-quiet:focus-visible {
       background: rgba(148, 163, 184, 0.16);
       color: var(--text-primary);
+    }
+
+    .btn-quiet:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     .modal {
@@ -2229,7 +2358,7 @@
     .next-task-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--space-1);
+      gap: var(--space-2);
       color: var(--text-secondary);
       font-size: 0.85rem;
     }
@@ -2237,8 +2366,13 @@
     .chip {
       background: rgba(255, 255, 255, 0.06);
       border-radius: 999px;
-      padding: 0.25rem 0.6rem;
-      font-size: 0.75rem;
+      padding: 0.35rem 1.1rem;
+      font-size: 0.8rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
     }
 
     .chip-muted {
@@ -2326,6 +2460,7 @@
       border-color: rgba(148, 163, 184, 0.35);
       color: var(--text-primary);
       background: rgba(148, 163, 184, 0.14);
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     .due-today-summary__icon {
@@ -2363,23 +2498,27 @@
       color: var(--text-secondary);
       display: flex;
       flex-wrap: wrap;
-      gap: var(--space-1);
+      gap: var(--space-2);
     }
 
     .due-today-pills {
       display: inline-flex;
-      gap: var(--space-1);
+      gap: var(--space-2);
       flex-wrap: wrap;
     }
 
     .pill {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       border-radius: 999px;
-      padding: 0.25rem 0.65rem;
+      padding: 0.35rem 1.1rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
       background: transparent;
       color: var(--text-secondary);
       cursor: pointer;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .pill-primary {
@@ -2418,6 +2557,26 @@
       gap: var(--space-2);
     }
 
+    .module-heading__text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    .module-heading__title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .module-heading__tagline {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+    }
+
     .module-caret {
       display: inline-block;
       transition: transform var(--transition);
@@ -2432,10 +2591,26 @@
       padding: 0 var(--space-4) var(--space-4);
       display: grid;
       gap: var(--space-3);
+      transition: opacity var(--transition), transform var(--transition);
     }
 
     .module-body[hidden] {
       display: none;
+    }
+
+    .module-card.is-open .module-body {
+      animation: module-expand var(--transition);
+    }
+
+    @keyframes module-expand {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .module-footnote {
@@ -2543,6 +2718,11 @@
       gap: var(--space-3);
     }
 
+    .next-best-card.is-highlighted {
+      box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.4), 0 0 32px rgba(45, 212, 195, 0.22);
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+
     .next-best-controls {
       border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: var(--radius-md);
@@ -2568,8 +2748,8 @@
     }
 
     .next-best-controls__summary:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     .next-best-controls__summary::-webkit-details-marker {
@@ -3118,6 +3298,11 @@
       color: var(--text-primary);
     }
 
+    .icon-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
+    }
+
     .resource-button {
       text-decoration: none;
       display: grid;
@@ -3290,17 +3475,13 @@
         <p id="worstDayHint" class="worst-day-hint"></p>
       </div>
 
-      <div class="action-bar">
-        <div class="action-bar-primary">
-          <button id="startNextAction" class="btn btn-outline" type="button">Start next task</button>
-          <button id="startSprintAction" class="btn btn-ghost" type="button">Start 5-min</button>
-        </div>
-        <div class="action-bar-secondary">
-          <button id="quickAddAction" class="icon-button" type="button" aria-label="Quick add task">＋</button>
-          <button id="ganttSnapshotAction" class="icon-button" type="button" aria-label="Adaptive Gantt snapshot">⏳</button>
-          <button id="dueTodayAction" class="icon-button" type="button" aria-label="Open due-today list">📋</button>
-          <button id="shieldAction" class="icon-button" type="button" aria-label="Overwhelmed shield">🛡️</button>
-        </div>
+      <div class="activation-bar" role="region" aria-label="Quick focus controls">
+        <button id="activationStart" class="activation-bar__start" type="button">Start 5-min</button>
+        <button id="activationSuggestion" class="activation-bar__suggestion" type="button">
+          <span>Next Best Thing</span>
+          <strong id="activationNextBestText">Refresh Next Best to see a top pick.</strong>
+        </button>
+        <button id="activationPause" class="activation-bar__pause" type="button">Pause / Reset</button>
       </div>
 
       <section id="nextBestEngineCard" class="card next-best-card" aria-live="polite">
@@ -3751,7 +3932,10 @@
           <button class="module-header" type="button" aria-expanded="false">
             <div class="module-heading">
               <span class="module-caret" aria-hidden="true">▸</span>
-              <span>🥊 3-v-3 Conflict Resolver</span>
+              <div class="module-heading__text">
+                <span class="module-heading__title">🥊 3-v-3 Conflict Resolver</span>
+                <span class="module-heading__tagline">Pick 1 vs 1. Fight small.</span>
+              </div>
             </div>
             <span class="info-dot" title="Drag one should-do and one want-to into the arena to settle the debate.">i</span>
           </button>
@@ -3786,7 +3970,10 @@
           <button class="module-header" type="button" aria-expanded="false">
             <div class="module-heading">
               <span class="module-caret" aria-hidden="true">▸</span>
-              <span>🧘 DEFUSE Mode</span>
+              <div class="module-heading__text">
+                <span class="module-heading__title">🧘 DEFUSE Mode</span>
+                <span class="module-heading__tagline">Feelings ≠ instructions.</span>
+              </div>
             </div>
             <span class="info-dot" title="90-second preflight that separates feelings from actions and locks distractions.">i</span>
           </button>
@@ -3838,7 +4025,10 @@
           <button class="module-header" type="button" aria-expanded="false">
             <div class="module-heading">
               <span class="module-caret" aria-hidden="true">▸</span>
-              <span>🎵 Dopamine Retrainer</span>
+              <div class="module-heading__text">
+                <span class="module-heading__title">🎵 Dopamine Retrainer</span>
+                <span class="module-heading__tagline">Longer wins, calmer brain.</span>
+              </div>
             </div>
             <span class="info-dot" title="Stretch reward intervals with a playlist of micro-celebrations.">i</span>
           </button>
@@ -6343,6 +6533,12 @@
     runningTimers.set(sub.id, intervalId);
   }
 
+  function setSprintVisualState(active) {
+    const bodyEl = document.body;
+    if (!bodyEl) return;
+    bodyEl.classList.toggle("sprint-active", Boolean(active));
+  }
+
   function stopFocusTimer(resetDisplay = true) {
     if (focusTimerId) {
       clearInterval(focusTimerId);
@@ -6354,6 +6550,7 @@
     if (resetDisplay) {
       sprintDurationMinutes = null;
       resetDistractionTracking();
+      setSprintVisualState(false);
     }
     setCaughtMeEnabled(false);
     const timerEl = $("focusTimer");
@@ -8871,6 +9068,22 @@
     startFocus(evaluation.task.id, { sprintMinutes: minutes });
   }
 
+  function setActivationSuggestion(evaluation) {
+    const suggestionBtn = $("activationSuggestion");
+    const textEl = $("activationNextBestText");
+    if (!suggestionBtn || !textEl) return;
+    if (evaluation && evaluation.task) {
+      const message = evaluation.chunk?.label || evaluation.task.name;
+      textEl.textContent = message;
+      suggestionBtn.disabled = false;
+      suggestionBtn.setAttribute("aria-disabled", "false");
+    } else {
+      textEl.textContent = "Refresh Next Best to see a top pick.";
+      suggestionBtn.disabled = true;
+      suggestionBtn.setAttribute("aria-disabled", "true");
+    }
+  }
+
   function createNextBestCard(config) {
     const { label, payoff, cta, evaluation, inputs } = config;
     if (!evaluation) return null;
@@ -8994,6 +9207,7 @@
     const empty = $("nextBestEmpty");
     if (!results || !empty) return;
 
+    setActivationSuggestion(null);
     const inputs = getNextBestInputs();
     saveNextBestInputs(inputs);
 
@@ -9047,6 +9261,8 @@
       { key: "easy", label: "Do if easy", payoff: "Low friction win", cta: "Start easy" },
       { key: "buddy", label: "Do with buddy", payoff: "Accountability boost", cta: "Start with buddy" }
     ];
+
+    setActivationSuggestion(picks.now || null);
 
     configs.forEach(config => {
       const evaluation = picks[config.key];
@@ -10394,13 +10610,10 @@
       button.disabled = !hasTask;
       button.setAttribute("aria-disabled", hasTask ? "false" : "true");
     }
-    const sprintShortcut = $("startSprintAction");
-    if (sprintShortcut) {
-      if (hasTask) {
-        sprintShortcut.classList.add("hidden");
-      } else {
-        sprintShortcut.classList.remove("hidden");
-      }
+    const activationStart = $("activationStart");
+    if (activationStart) {
+      activationStart.disabled = !hasTask;
+      activationStart.setAttribute("aria-disabled", hasTask ? "false" : "true");
     }
     if (hint) {
       hint.textContent = hasTask ? `Most meaningful project: ${focusTask.name}` : "Add a task to unlock Worst-Day Mode.";
@@ -10595,42 +10808,27 @@
     updateUI();
   }
 
-  function initializeActionBar() {
-    const startNext = $("startNextAction");
-    if (startNext) {
-      startNext.addEventListener("click", () => {
-        if (nextTaskId) {
-          startFocus(nextTaskId);
-        } else {
-          startFocus();
-        }
+  function initializeActivationBar() {
+    const startBtn = $("activationStart");
+    if (startBtn) {
+      startBtn.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
+    }
+    const suggestionBtn = $("activationSuggestion");
+    if (suggestionBtn) {
+      suggestionBtn.addEventListener("click", () => {
+        if (suggestionBtn.disabled) return;
+        const card = $("nextBestEngineCard");
+        if (!card) return;
+        card.classList.add("is-highlighted");
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.setTimeout(() => card.classList.remove("is-highlighted"), 1200);
       });
     }
-    const sprintAction = $("startSprintAction");
-    if (sprintAction) {
-      sprintAction.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
+    const pauseBtn = $("activationPause");
+    if (pauseBtn) {
+      pauseBtn.addEventListener("click", handleActivationPauseReset);
     }
-    const quickAddBtn = $("quickAddAction");
-    if (quickAddBtn) {
-      quickAddBtn.addEventListener("click", quickAddTask);
-    }
-    const dueTodayBtn = $("dueTodayAction");
-    if (dueTodayBtn) {
-      dueTodayBtn.addEventListener("click", () => {
-        const accordion = $("dueTodayAccordion");
-        const wasOpen = accordion?.dataset.open === "true";
-        updateUI();
-        setDueTodayAccordionOpen(true, { highlight: !wasOpen, focusSummary: !wasOpen });
-        const section = $("dueTodaySection");
-        if (section && !section.classList.contains("hidden")) {
-          section.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    }
-    const shieldBtn = $("shieldAction");
-    if (shieldBtn) {
-      shieldBtn.addEventListener("click", activateShield);
-    }
+    setActivationSuggestion(null);
     const nextTaskAction = $("nextTaskActionButton");
     if (nextTaskAction) {
       const LONG_PRESS_MS = 650;
@@ -10916,12 +11114,13 @@
       setTaskDetailsCollapsed(false);
     }
     const sprintMinutes = Number(options?.sprintMinutes);
+    stopFocusTimer();
     if (Number.isFinite(sprintMinutes) && sprintMinutes > 0) {
       sprintDurationMinutes = sprintMinutes;
     } else {
       sprintDurationMinutes = null;
     }
-    stopFocusTimer();
+    setSprintVisualState(Boolean(sprintDurationMinutes));
     $("capture").classList.add("hidden");
     $("focus").classList.remove("hidden");
     const energyLevel = clampScale(getEnergyLevel(), 3);
@@ -10959,6 +11158,7 @@
       clearRunningTimers();
       stopFocusTimer();
       currentFocusTaskIndex = null;
+      setSprintVisualState(false);
       return;
     }
     const current = focusQueue[0];
@@ -11068,6 +11268,15 @@
     $("focus").classList.add("hidden");
     $("capture").classList.remove("hidden");
     updateUI();
+  }
+
+  function handleActivationPauseReset() {
+    const focusSection = $("focus");
+    if (focusSection && !focusSection.classList.contains("hidden")) {
+      backToCapture();
+      return;
+    }
+    reset();
   }
 
   function reset() {
@@ -11297,7 +11506,7 @@
     initializeStatusCardState();
     initializePreflightToggles();
     initializeAllTasksCardState();
-    initializeActionBar();
+    initializeActivationBar();
     initializeCollapsibleModules();
     initializeMorningLaunchModule();
     initializeLaunchPadModule();
