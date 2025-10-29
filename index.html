@@ -174,6 +174,12 @@
       }
     }
 
+    @keyframes button-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .card,
     .peek,
     .task-card,
@@ -1731,8 +1737,13 @@
     }
 
     .page-header {
-      text-align: center;
-      margin: 8px 0 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      margin: 8px 0 4px;
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
     }
 
     .page-header .title {
@@ -1743,9 +1754,29 @@
     }
 
     .page-header .subtitle {
-      margin-top: 6px;
-      opacity: 0.8;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .header-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.14);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .header-chip__label {
+      opacity: 0.7;
+    }
+
+    .header-chip__value {
+      font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
     .action-bar {
@@ -1777,7 +1808,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      border: none;
+      border: 1px solid transparent;
       border-radius: 999px;
       padding: 0.55rem 1.25rem;
       font-size: 0.95rem;
@@ -1797,28 +1828,10 @@
       outline-offset: 2px;
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #041013;
-      font-weight: 600;
-    }
-
-    .btn-secondary {
-      background: rgba(45, 212, 191, 0.12);
-      color: var(--accent);
-      border: 1px solid rgba(45, 212, 191, 0.25);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
     .icon-button {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: var(--text-primary);
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-secondary);
       width: 38px;
       height: 38px;
       border-radius: 999px;
@@ -1827,7 +1840,7 @@
       justify-content: center;
       font-size: 1rem;
       cursor: pointer;
-      transition: transform var(--transition), background var(--transition);
+      transition: transform var(--transition), background var(--transition), color var(--transition);
     }
 
     .icon-button:hover,
@@ -1852,15 +1865,17 @@
     }
 
     .resource-button {
+      position: relative;
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
-      padding: var(--space-2);
+      padding: calc(var(--space-2) + 2px) var(--space-2);
+      padding-left: calc(var(--space-2) + 18px);
       border-radius: var(--radius-lg);
       border: 1px solid rgba(255, 255, 255, 0.08);
       text-decoration: none;
       color: var(--text-primary);
-      background: linear-gradient(135deg, rgba(45, 212, 191, 0.16), rgba(45, 212, 191, 0));
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.12), rgba(45, 212, 191, 0));
       transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
     }
 
@@ -1869,6 +1884,16 @@
       transform: translateY(-2px);
       border-color: rgba(45, 212, 191, 0.35);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .resource-button::before {
+      content: "";
+      position: absolute;
+      inset: calc(var(--space-2) + 2px) auto calc(var(--space-2) + 2px) var(--space-2);
+      width: 4px;
+      border-radius: 999px;
+      background: var(--resource-accent, rgba(45, 212, 191, 0.85));
+      opacity: 0.9;
     }
 
     .resource-button strong {
@@ -1882,24 +1907,28 @@
       color: var(--text-secondary);
     }
 
-    .resource-button--deep {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0));
-      border-color: rgba(59, 130, 246, 0.18);
+    .resource-button--planning {
+      --resource-accent: rgba(45, 212, 191, 0.85);
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.12), rgba(45, 212, 191, 0));
+      border-color: rgba(45, 212, 191, 0.2);
     }
 
-    .resource-button--sunrise {
-      background: linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(250, 204, 21, 0));
-      border-color: rgba(250, 204, 21, 0.18);
+    .resource-button--strategies {
+      --resource-accent: rgba(99, 102, 241, 0.9);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(99, 102, 241, 0));
+      border-color: rgba(99, 102, 241, 0.22);
     }
 
-    .resource-button--orchid {
-      background: linear-gradient(135deg, rgba(192, 132, 252, 0.18), rgba(192, 132, 252, 0));
-      border-color: rgba(192, 132, 252, 0.18);
+    .resource-button--digest {
+      --resource-accent: rgba(251, 191, 36, 0.9);
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(251, 191, 36, 0));
+      border-color: rgba(251, 191, 36, 0.24);
     }
 
-    .resource-button--emerald {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0));
-      border-color: rgba(16, 185, 129, 0.22);
+    .resource-button--vault {
+      --resource-accent: rgba(167, 139, 250, 0.92);
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.14), rgba(167, 139, 250, 0));
+      border-color: rgba(167, 139, 250, 0.22);
     }
 
     .resource-button small {
@@ -1907,9 +1936,9 @@
       align-items: center;
       gap: 0.35rem;
       font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      color: rgba(226, 232, 240, 0.72);
+      text-transform: none;
+      letter-spacing: 0.01em;
     }
 
     .card {
@@ -1955,6 +1984,45 @@
 
     .status-card .category-progress {
       margin-top: 0;
+    }
+
+    .preflight-panel {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .preflight-toggles {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .preflight-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: transparent;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+    }
+
+    .preflight-toggle:hover,
+    .preflight-toggle:focus-visible {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-primary);
+    }
+
+    .preflight-toggle.is-active {
+      border-color: rgba(45, 212, 191, 0.55);
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.18);
     }
 
     .task-form-toolbar {
@@ -2319,6 +2387,53 @@
     }
 
     .next-best-controls {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
+      background: rgba(15, 20, 27, 0.65);
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .next-best-controls[open] {
+      border-color: rgba(148, 163, 184, 0.28);
+      background: rgba(15, 20, 27, 0.8);
+    }
+
+    .next-best-controls__summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      list-style: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .next-best-controls__summary:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .next-best-controls__summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .next-best-controls__chevron {
+      width: 12px;
+      height: 12px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform var(--transition);
+    }
+
+    .next-best-controls[open] .next-best-controls__chevron {
+      transform: rotate(-135deg);
+    }
+
+    .next-best-controls__form {
+      margin-top: var(--space-2);
       display: grid;
       gap: var(--space-2);
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -2358,30 +2473,167 @@
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
-    .next-best-option {
-      display: grid;
-      gap: 0.6rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius-md);
-      padding: var(--space-2);
+    .next-best-refresh {
       position: relative;
-    }
-
-    .next-best-option h3 {
-      margin: 0;
-      font-size: 1rem;
-    }
-
-    .next-best-option .impact {
       font-size: 0.85rem;
-      color: var(--accent);
+      padding: 0.4rem 1.9rem 0.4rem 0.9rem;
+      min-width: 110px;
+    }
+
+    .next-best-refresh.is-loading {
+      color: rgba(226, 232, 240, 0.55);
+    }
+
+    .next-best-refresh.is-loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 0.75rem;
+      width: 14px;
+      height: 14px;
+      margin-top: -7px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      animation: button-spin 0.8s linear infinite;
+    }
+
+    .next-best-option {
+      position: relative;
+      display: grid;
+      gap: var(--space-2);
+      padding: calc(var(--space-2) + 6px) var(--space-2) var(--space-2);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 20, 27, 0.75);
+      box-shadow: 0 12px 24px rgba(2, 6, 23, 0.35);
+    }
+
+    .next-best-option__label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(226, 232, 240, 0.6);
+    }
+
+    .next-best-option__title {
+      margin: 0;
+      font-size: 1.1rem;
       font-weight: 600;
     }
 
-    .next-best-option .chunk-meta {
-      font-size: 0.85rem;
+    .next-best-option__payoff {
+      margin: 0;
       color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .next-best-option__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .spec-chip {
+      background: rgba(148, 163, 184, 0.16);
+      color: rgba(226, 232, 240, 0.78);
+    }
+
+    .next-best-meter {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .next-best-meter__label {
+      font-size: 0.8rem;
+      color: rgba(226, 232, 240, 0.75);
+      font-weight: 500;
+    }
+
+    .next-best-meter__track {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.18);
+      overflow: hidden;
+    }
+
+    .next-best-meter__bar {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(45, 212, 191, 0.9), rgba(45, 212, 191, 0.2));
+      width: 12%;
+      transition: width 220ms ease;
+    }
+
+    .next-best-meter__scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: rgba(226, 232, 240, 0.6);
+    }
+
+    .next-best-ring {
+      position: absolute;
+      top: var(--space-2);
+      right: var(--space-2);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(226, 232, 240, 0.65);
+    }
+
+    .next-best-ring::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) 0deg, var(--accent) 3.6deg, transparent 3.6deg 360deg);
+      opacity: 0.7;
+    }
+
+    .next-best-ring::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: rgba(12, 17, 23, 0.95);
+    }
+
+    .next-best-ring span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .next-best-cta {
+      justify-self: flex-start;
+      min-width: 150px;
+    }
+
+    .next-best-cta--steady {
+      background: var(--accent);
+      border-color: rgba(45, 212, 191, 0.55);
+      color: #041013;
+    }
+
+    .next-best-cta--low {
+      background: rgba(30, 64, 175, 0.85);
+      border-color: rgba(30, 64, 175, 0.6);
+      color: #e0e7ff;
+      box-shadow: 0 16px 30px rgba(30, 64, 175, 0.35);
+    }
+
+    .next-best-cta--high {
+      background: rgba(52, 211, 153, 0.95);
+      border-color: rgba(52, 211, 153, 0.6);
+      color: #022c22;
+      box-shadow: 0 16px 30px rgba(52, 211, 153, 0.32);
     }
 
     .next-best-empty {
@@ -2656,38 +2908,57 @@
       background: var(--surface-elevated);
     }
 
-    .btn-primary,
-    .btn-secondary,
-    .btn-ghost,
-    .btn-outline,
-    .btn-tertiary {
-      background: rgba(20, 28, 36, 0.8);
+    .btn-primary {
+      background: var(--accent);
+      color: #041013;
+      border: 1px solid rgba(45, 212, 191, 0.55);
+      box-shadow: 0 16px 30px rgba(45, 212, 191, 0.28);
+      font-weight: 600;
+    }
+
+    .btn-secondary {
+      background: rgba(148, 163, 184, 0.14);
+      border: 1px solid rgba(148, 163, 184, 0.25);
       color: var(--text-primary);
-      border: 1px solid var(--card-border-color);
       box-shadow: none;
     }
 
-    .btn-secondary,
     .btn-ghost,
     .btn-outline,
     .btn-tertiary {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.2);
       color: var(--text-secondary);
+      box-shadow: none;
     }
 
-    .btn-primary:hover,
-    .btn-secondary:hover,
-    .btn-ghost:hover,
+    .btn-outline {
+      border-color: rgba(45, 212, 191, 0.45);
+      color: var(--accent);
+    }
+
     .btn-outline:hover,
-    .btn-tertiary:hover {
-      background: rgba(35, 46, 58, 0.85);
-      color: #f5f9ff;
+    .btn-outline:focus-visible {
+      background: rgba(45, 212, 191, 0.08);
+      color: var(--accent);
+    }
+
+    .btn-ghost:hover,
+    .btn-tertiary:hover,
+    .btn-secondary:hover {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-primary);
     }
 
     .icon-button {
       border-radius: 12px;
-      border: 1px solid var(--card-border-color);
-      background: rgba(20, 28, 36, 0.8);
       padding: 0.5rem;
+    }
+
+    .icon-button:hover,
+    .icon-button:focus-visible {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-primary);
     }
 
     .resource-button {
@@ -2754,52 +3025,52 @@
           </p>
           <div class="resource-links">
             <a
-              class="resource-button"
+              class="resource-button resource-button--planning"
               href="https://chatgpt.com/g/g-p-68feee841e7081919a28fe9b3083e9f0-karl/project"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <small>Planning ally</small>
+              <small>planning ally</small>
               <strong>Chat with Karl</strong>
               <span>ADHD-tailored task partner ready to map out your day.</span>
             </a>
             <a
-              class="resource-button resource-button--deep"
+              class="resource-button resource-button--strategies"
               href="https://chatgpt.com/g/g-p-6836a5682d0481918484506cbc1f3082-epic-companion/project"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <small>EPIC strategies</small>
+              <small>strategies</small>
               <strong>EPIC Companion</strong>
               <span>Brainstorm workflows to move faster inside the EHR.</span>
             </a>
             <a
-              class="resource-button resource-button--sunrise"
+              class="resource-button resource-button--digest"
               href="https://notebooklm.google.com/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <small>Article digest</small>
+              <small>digest</small>
               <strong>NotebookLM</strong>
               <span>Summarize research and notes in a focused workspace.</span>
             </a>
             <a
-              class="resource-button resource-button--orchid"
+              class="resource-button resource-button--vault"
               href="https://www.notion.so/Assessments-and-Plans-28131b26f81f803088bad074ee0e00fb?source=copy_link"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <small>Reference vault</small>
+              <small>vault</small>
               <strong>Assessments &amp; Plans</strong>
               <span>Review ready-made assessment and plan examples.</span>
             </a>
             <a
-              class="resource-button resource-button--emerald"
+              class="resource-button resource-button--vault"
               href="https://chatgpt.com/g/g-p-68feff1f73ac819189dcf556e573c912-assessments-plans/project"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <small>Document builder</small>
+              <small>document builder</small>
               <strong>Create Assessments &amp; Plans</strong>
               <span>Draft new assessments from your history and physical notes.</span>
             </a>
@@ -2809,7 +3080,7 @@
 
       <section id="statusCard" class="card card--collapsed status-card" data-collapsed="true" aria-live="polite">
         <div class="card-head">
-          <h2>Status</h2>
+          <h2>Let’s set the stage</h2>
           <button
             id="toggleStatusCard"
             class="link-button"
@@ -2821,7 +3092,38 @@
           </button>
         </div>
         <div class="card-body" id="statusCardBody" aria-hidden="true">
-          <div id="categoryProgress" class="category-progress"></div>
+          <div class="preflight-panel">
+            <div class="preflight-toggles" role="group" aria-label="Pre-flight toggles">
+              <button
+                type="button"
+                class="preflight-toggle"
+                data-preflight-toggle="focusMusic"
+                aria-pressed="false"
+                title="Focus music"
+              >
+                🎧
+              </button>
+              <button
+                type="button"
+                class="preflight-toggle"
+                data-preflight-toggle="dnd"
+                aria-pressed="false"
+                title="Do not disturb"
+              >
+                🔕
+              </button>
+              <button
+                type="button"
+                class="preflight-toggle"
+                data-preflight-toggle="timer"
+                aria-pressed="false"
+                title="Timer length"
+              >
+                ⏱️
+              </button>
+            </div>
+            <div id="categoryProgress" class="category-progress"></div>
+          </div>
         </div>
       </section>
 
@@ -2833,8 +3135,8 @@
 
       <div class="action-bar">
         <div class="action-bar-primary">
-          <button id="startNextAction" class="btn btn-primary" type="button">Start next task</button>
-          <button id="startSprintAction" class="btn btn-secondary" type="button">Start 5-min</button>
+          <button id="startNextAction" class="btn btn-outline" type="button">Start next task</button>
+          <button id="startSprintAction" class="btn btn-ghost" type="button">Start 5-min</button>
         </div>
         <div class="action-bar-secondary">
           <button id="quickAddAction" class="icon-button" type="button" aria-label="Quick add task">＋</button>
@@ -2847,67 +3149,73 @@
       <section id="nextBestEngineCard" class="card next-best-card" aria-live="polite">
         <div class="card-head">
           <h2>⚡ Next Best Thing Engine</h2>
-          <button id="nextBestRefresh" class="link-button" type="button">Refresh</button>
+          <button id="nextBestRefresh" class="btn btn-ghost next-best-refresh" type="button">Refresh</button>
         </div>
         <div class="card-body">
-          <div class="next-best-controls">
-            <label for="nextBestTime">
-              Time available
-              <select id="nextBestTime">
-                <option value="10">10 minutes</option>
-                <option value="15" selected>15 minutes</option>
-                <option value="20">20 minutes</option>
-                <option value="30">30 minutes</option>
-              </select>
-            </label>
-            <div class="next-best-energy">
-              <label for="nextBestEnergy">Energy right now</label>
-              <input
-                id="nextBestEnergy"
-                data-field="energy-level"
-                type="range"
-                min="1"
-                max="5"
-                step="1"
-                value="3"
-              />
-              <span id="nextBestEnergyLabel" class="score">Steady</span>
-            </div>
-            <label for="nextBestDeadline">
-              Deadline pressure (1–5)
-              <select id="nextBestDeadline"></select>
-            </label>
-            <label for="nextBestSize">
-              Task size preference
-              <select id="nextBestSize">
-                <option value="any" selected>Any</option>
-                <option value="small">Small bites</option>
-                <option value="medium">Medium chunks</option>
-                <option value="large">Big swing</option>
-              </select>
-            </label>
-            <div>
-              <span class="score">Friction tags</span>
-              <div class="nbt-frictions" role="group" aria-label="Friction tags">
-                <label>
-                  <input type="checkbox" name="nextBestFriction" value="start" />
-                  Start anxiety
-                </label>
-                <label>
-                  <input type="checkbox" name="nextBestFriction" value="perfection" />
-                  Perfection spiral
-                </label>
-                <label>
-                  <input type="checkbox" name="nextBestFriction" value="social" />
-                  Social energy dip
-                </label>
-                <label>
-                  <input type="checkbox" name="nextBestFriction" value="focus" />
-                  Focus fragmentation
-                </label>
+          <details class="next-best-controls" id="nextBestControls">
+            <summary class="next-best-controls__summary">
+              Adjust inputs
+              <span class="next-best-controls__chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="next-best-controls__form">
+              <label for="nextBestTime">
+                Time available
+                <select id="nextBestTime">
+                  <option value="10">10 minutes</option>
+                  <option value="15" selected>15 minutes</option>
+                  <option value="20">20 minutes</option>
+                  <option value="30">30 minutes</option>
+                </select>
+              </label>
+              <div class="next-best-energy">
+                <label for="nextBestEnergy">Energy right now</label>
+                <input
+                  id="nextBestEnergy"
+                  data-field="energy-level"
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  value="3"
+                />
+                <span id="nextBestEnergyLabel" class="score">Steady</span>
+              </div>
+              <label for="nextBestDeadline">
+                Deadline pressure (1–5)
+                <select id="nextBestDeadline"></select>
+              </label>
+              <label for="nextBestSize">
+                Task size preference
+                <select id="nextBestSize">
+                  <option value="any" selected>Any</option>
+                  <option value="small">Small bites</option>
+                  <option value="medium">Medium chunks</option>
+                  <option value="large">Big swing</option>
+                </select>
+              </label>
+              <div>
+                <span class="score">Friction tags</span>
+                <div class="nbt-frictions" role="group" aria-label="Friction tags">
+                  <label>
+                    <input type="checkbox" name="nextBestFriction" value="start" />
+                    Start anxiety
+                  </label>
+                  <label>
+                    <input type="checkbox" name="nextBestFriction" value="perfection" />
+                    Perfection spiral
+                  </label>
+                  <label>
+                    <input type="checkbox" name="nextBestFriction" value="social" />
+                    Social energy dip
+                  </label>
+                  <label>
+                    <input type="checkbox" name="nextBestFriction" value="focus" />
+                    Focus fragmentation
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
+          </details>
           <div id="nextBestResults" class="next-best-results"></div>
           <p id="nextBestEmpty" class="next-best-empty hidden">Add a task to see your next best options.</p>
         </div>
@@ -3588,6 +3896,7 @@
   const DEFAULT_SUNLIGHT_TIME = "08:00";
   const DEFAULT_LAUNCH_PAD_SITE = "General Clinic";
   const NEXT_BEST_STORAGE_KEY = "nextBest.inputs";
+  const PREFLIGHT_TOGGLES_KEY = "preflight.toggles";
   const DEFUSE_BASE_MINUTES_KEY = "defuse.baseMinutes";
   const DEFUSE_ACTION_KEY = "defuse.action";
   const DEFUSE_LOCKS_KEY = "defuse.locks";
@@ -8102,6 +8411,51 @@
     size: "any",
     frictions: []
   };
+  const DEFAULT_PREFLIGHT_TOGGLES = {
+    focusMusic: false,
+    dnd: false,
+    timer: false
+  };
+
+  function loadPreflightToggles() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(PREFLIGHT_TOGGLES_KEY) || "null");
+      if (stored && typeof stored === "object") {
+        return { ...DEFAULT_PREFLIGHT_TOGGLES, ...stored };
+      }
+    } catch (error) {
+      console.warn("Unable to load pre-flight toggles", error);
+    }
+    return { ...DEFAULT_PREFLIGHT_TOGGLES };
+  }
+
+  function savePreflightToggles(state) {
+    try {
+      localStorage.setItem(PREFLIGHT_TOGGLES_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn("Unable to save pre-flight toggles", error);
+    }
+  }
+
+  function initializePreflightToggles() {
+    const buttons = document.querySelectorAll('[data-preflight-toggle]');
+    if (!buttons.length) return;
+    const state = loadPreflightToggles();
+    buttons.forEach(button => {
+      const key = button.getAttribute("data-preflight-toggle");
+      if (!key) return;
+      const active = Boolean(state[key]);
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+      button.addEventListener("click", () => {
+        const next = !button.classList.contains("is-active");
+        state[key] = next;
+        button.classList.toggle("is-active", next);
+        button.setAttribute("aria-pressed", next ? "true" : "false");
+        savePreflightToggles(state);
+      });
+    });
+  }
 
   function clampMmpMinutes(value) {
     const numeric = Number(value);
@@ -8309,50 +8663,121 @@
   }
 
   function createNextBestCard(config) {
-    const { key, title, subtitle, cta, evaluation } = config;
+    const { label, payoff, cta, evaluation, inputs } = config;
     if (!evaluation) return null;
+
+    const energyValue = Number(inputs?.energy) || DEFAULT_NEXT_BEST_INPUTS.energy;
+    const energyLabelRaw = ENERGY_LABELS && ENERGY_LABELS[energyValue] ? ENERGY_LABELS[energyValue] : "Current";
+    const energyLabel = typeof energyLabelRaw === "string" ? energyLabelRaw : String(energyLabelRaw);
+    const energyMode = energyValue <= 2 ? "low" : energyValue >= 4 ? "high" : "steady";
+    const minutesWindow = Number.isFinite(inputs?.time) ? `${inputs.time}m` : `${Math.max(5, evaluation.chunk?.minutes || DEFAULT_NEXT_BEST_INPUTS.time)}m`;
+
     const card = document.createElement("article");
     card.className = "next-best-option";
+    card.dataset.energyMode = energyMode;
+
+    const ring = document.createElement("div");
+    ring.className = "next-best-ring";
+    const ringLabel = document.createElement("span");
+    ringLabel.textContent = "Primed";
+    ring.appendChild(ringLabel);
+    card.appendChild(ring);
+
+    const labelEl = document.createElement("span");
+    labelEl.className = "next-best-option__label";
+    labelEl.textContent = label;
+    card.appendChild(labelEl);
 
     const heading = document.createElement("h3");
-    heading.textContent = title;
+    heading.className = "next-best-option__title";
+    heading.textContent = evaluation.task.name;
     card.appendChild(heading);
 
-    if (subtitle) {
-      const hint = document.createElement("p");
-      hint.className = "score";
-      hint.textContent = subtitle;
-      card.appendChild(hint);
+    if (payoff) {
+      const payoffLine = document.createElement("p");
+      payoffLine.className = "next-best-option__payoff";
+      payoffLine.textContent = `${payoff} for ${minutesWindow} + ${energyLabel.toLowerCase()} energy`;
+      card.appendChild(payoffLine);
     }
 
-    const name = document.createElement("strong");
-    name.textContent = evaluation.task.name;
-    card.appendChild(name);
+    const chips = document.createElement("div");
+    chips.className = "next-best-option__chips";
 
-    const chunkMeta = document.createElement("div");
-    chunkMeta.className = "chunk-meta";
-    chunkMeta.textContent = `${evaluation.chunk.label} • ${evaluation.chunk.minutes} min`;
-    card.appendChild(chunkMeta);
+    const addChip = text => {
+      if (!text) return;
+      const chip = document.createElement("span");
+      chip.className = "chip spec-chip";
+      chip.textContent = text;
+      chips.appendChild(chip);
+    };
 
-    const impact = document.createElement("div");
-    impact.className = "impact";
-    impact.textContent = `Impact/min: ${evaluation.impactPerMinute.toFixed(2)}`;
-    card.appendChild(impact);
-
-    if (Array.isArray(evaluation.insights) && evaluation.insights.length) {
-      const insights = document.createElement("div");
-      insights.className = "chunk-meta";
-      insights.textContent = evaluation.insights.join(" • ");
-      card.appendChild(insights);
+    const estimatedMinutes = Math.max(1, Math.round(evaluation.estimate || evaluation.chunk?.minutes || inputs?.time || DEFAULT_NEXT_BEST_INPUTS.time));
+    addChip(`Est. time • ${estimatedMinutes}m`);
+    if (evaluation.chunk?.label) {
+      addChip(`Stretch • ${evaluation.chunk.label}`);
     }
+    addChip(`Energy • ${energyLabel}`);
+
+    if (chips.childElementCount) {
+      card.appendChild(chips);
+    }
+
+    const meter = document.createElement("div");
+    meter.className = "next-best-meter";
+    const meterLabel = document.createElement("div");
+    meterLabel.className = "next-best-meter__label";
+    meterLabel.textContent = "Impact/min";
+    meter.appendChild(meterLabel);
+
+    const track = document.createElement("div");
+    track.className = "next-best-meter__track";
+    const bar = document.createElement("div");
+    bar.className = "next-best-meter__bar";
+    const normalizedImpact = Number.isFinite(evaluation.impactPerMinute)
+      ? Math.max(4, Math.min(100, (evaluation.impactPerMinute / 10) * 100))
+      : 4;
+    bar.style.width = `${normalizedImpact}%`;
+    track.appendChild(bar);
+    meter.appendChild(track);
+
+    const scale = document.createElement("div");
+    scale.className = "next-best-meter__scale";
+    const startTick = document.createElement("span");
+    startTick.textContent = "0";
+    const endTick = document.createElement("span");
+    endTick.textContent = "≥10";
+    scale.appendChild(startTick);
+    scale.appendChild(endTick);
+    meter.appendChild(scale);
+    card.appendChild(meter);
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = key === "buddy" ? "btn btn-secondary" : "btn btn-primary";
+    button.className = `btn next-best-cta next-best-cta--${energyMode}`;
     button.textContent = cta || "Start";
-    button.addEventListener("click", () => launchNextBestOption(title, evaluation));
+    button.addEventListener("click", () => launchNextBestOption(label, evaluation));
     card.appendChild(button);
+
     return card;
+  }
+
+  function handleNextBestRefresh(event) {
+    if (event) event.preventDefault();
+    const button = event?.currentTarget || $("nextBestRefresh");
+    if (button) {
+      button.classList.add("is-loading");
+      button.disabled = true;
+    }
+    try {
+      updateNextBestOptions();
+    } finally {
+      if (button) {
+        window.setTimeout(() => {
+          button.classList.remove("is-loading");
+          button.disabled = false;
+        }, 320);
+      }
+    }
   }
 
   function updateNextBestOptions() {
@@ -8409,15 +8834,15 @@
     });
 
     const configs = [
-      { key: "now", title: "Do now", subtitle: "Highest ROI for this energy + time", cta: "Start" },
-      { key: "easy", title: "Do if easy", subtitle: "Low friction win to keep momentum", cta: "Start easy" },
-      { key: "buddy", title: "Do with buddy", subtitle: "Heavier lift – pull in accountability", cta: "Start with buddy" }
+      { key: "now", label: "Do now", payoff: "Highest ROI", cta: "Start" },
+      { key: "easy", label: "Do if easy", payoff: "Low friction win", cta: "Start easy" },
+      { key: "buddy", label: "Do with buddy", payoff: "Accountability boost", cta: "Start with buddy" }
     ];
 
     configs.forEach(config => {
       const evaluation = picks[config.key];
       if (evaluation) {
-        const card = createNextBestCard({ ...config, evaluation });
+        const card = createNextBestCard({ ...config, evaluation, inputs });
         if (card) results.appendChild(card);
       }
     });
@@ -8426,6 +8851,7 @@
   function initializeNextBestEngine() {
     const controlsExist = $("nextBestEngineCard");
     if (!controlsExist) return;
+    const storedRaw = localStorage.getItem(NEXT_BEST_STORAGE_KEY);
     const deadlineSelect = $("nextBestDeadline");
     if (deadlineSelect && deadlineSelect.options.length === 0) {
       for (let i = 1; i <= 5; i += 1) {
@@ -8437,6 +8863,10 @@
     }
     const stored = loadNextBestInputs();
     applyNextBestInputs(stored);
+    const controlsPanel = $("nextBestControls");
+    if (controlsPanel) {
+      controlsPanel.open = !storedRaw;
+    }
 
     const timeSelect = $("nextBestTime");
     if (timeSelect) {
@@ -8463,7 +8893,7 @@
     });
     const refreshBtn = $("nextBestRefresh");
     if (refreshBtn) {
-      refreshBtn.addEventListener("click", updateNextBestOptions);
+      refreshBtn.addEventListener("click", handleNextBestRefresh);
     }
     updateNextBestOptions();
   }
@@ -9709,6 +10139,14 @@
       button.disabled = !hasTask;
       button.setAttribute("aria-disabled", hasTask ? "false" : "true");
     }
+    const sprintShortcut = $("startSprintAction");
+    if (sprintShortcut) {
+      if (hasTask) {
+        sprintShortcut.classList.add("hidden");
+      } else {
+        sprintShortcut.classList.remove("hidden");
+      }
+    }
     if (hint) {
       hint.textContent = hasTask ? `Most meaningful project: ${focusTask.name}` : "Add a task to unlock Worst-Day Mode.";
     }
@@ -10403,7 +10841,7 @@
       month: "short",
       day: "numeric"
     });
-    reminder.innerHTML = `95-day billing/eligibility cutoff: <strong>${formatted}</strong>`;
+    reminder.innerHTML = `<span class="header-chip"><span class="header-chip__label">Eligibility cutoff</span><span class="header-chip__value">${formatted}</span></span>`;
   }
 
   function registerFieldListeners() {
@@ -10509,6 +10947,7 @@
     initializeTaskForm();
     initializeAddTaskCardState();
     initializeStatusCardState();
+    initializePreflightToggles();
     initializeAllTasksCardState();
     initializeActionBar();
     initializeCollapsibleModules();
