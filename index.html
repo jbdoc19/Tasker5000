@@ -22,7 +22,7 @@
       font-weight: 400;
       line-height: 1.5;
       margin: 0;
-      padding: 1.5rem 1.25rem 4rem;
+      padding: 1.5rem 1.25rem 6.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -285,6 +285,25 @@
       letter-spacing: normal !important;
     }
 
+    .card.collapsed,
+    .module-card.collapsed {
+      opacity: 0.78;
+      filter: saturate(0.85);
+    }
+
+    .card.collapsed .card-body,
+    .card.collapsed .card-sticky-actions,
+    .card.collapsed .next-best-results,
+    .card.collapsed .due-today-list,
+    .module-card.collapsed .module-body {
+      display: none !important;
+    }
+
+    .card.collapsed .card-head,
+    .module-card.collapsed .module-header {
+      border-bottom: none;
+    }
+
     .peek { background: #222; margin-top: 1rem; padding: 1rem; border-radius: 6px; max-width: 600px; }
     .peek summary { cursor: pointer; }
     .task-list-header {
@@ -336,6 +355,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      touch-action: pan-y;
     }
     .task-card.is-completed {
       background: #161616;
@@ -1691,22 +1711,19 @@
       }
 
       body {
-        padding: clamp(1.25rem, 5vw, 2rem) clamp(0.85rem, 4vw, 1.75rem) 100px;
+        padding: clamp(1.25rem, 5vw, 2rem) clamp(0.85rem, 4vw, 1.75rem) 140px;
       }
     }
 
     @media (max-width: 600px) {
       body {
-        padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 90px;
+        padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 120px;
       }
 
       .activation-bar {
-        padding: var(--space-2);
-        border-radius: 20px;
-      }
-
-      .activation-bar__start {
-        max-width: none;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92vw, 360px);
       }
 
       .card {
@@ -1778,42 +1795,288 @@
       letter-spacing: 0.01em;
     }
 
-    .activation-bar {
-      position: sticky;
-      top: clamp(0.5rem, 2vw, 1.25rem);
-      z-index: 50;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: var(--space-2);
-      padding: 0.5rem 0.75rem;
-      border-radius: 999px;
-      background: rgba(18, 24, 30, 0.78);
-      border: 1px solid rgba(147, 160, 170, 0.28);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    .momentum-zones {
+      display: grid;
+      gap: clamp(1.5rem, 4vw, 2.5rem);
+      position: relative;
+      width: 100%;
     }
 
-    .activation-bar__start {
+    .momentum-zone {
+      display: grid;
+      gap: var(--space-3);
+      position: relative;
+    }
+
+    .zone-header {
+      position: sticky;
+      top: clamp(0.25rem, 2vw, 0.85rem);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      border-radius: 999px;
+      background: rgba(15, 22, 30, 0.88);
+      border: 1px solid rgba(147, 160, 170, 0.22);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+      z-index: 30;
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+
+    .zone-header.is-docked {
+      transform: translateY(-0.35rem);
+      background: rgba(20, 27, 36, 0.95);
+      border-color: rgba(147, 160, 170, 0.36);
+    }
+
+    .zone-header__icon {
+      font-size: 1.25rem;
+    }
+
+    .zone-header__text {
+      display: grid;
+      gap: 0.1rem;
+    }
+
+    .zone-header__title {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .zone-header__subtitle {
+      margin: 0;
+      font-size: 0.78rem;
+      color: rgba(226, 232, 240, 0.7);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .zone-body {
+      display: grid;
+      gap: clamp(1.15rem, 3vw, 1.8rem);
+      position: relative;
+    }
+
+    .zone-anchor {
+      position: relative;
+      display: block;
+      height: 1px;
+      width: 100%;
+      pointer-events: none;
+      scroll-margin-top: clamp(120px, 15vh, 180px);
+    }
+
+    .zone-return-chip {
+      position: fixed;
+      bottom: clamp(136px, 16vh, 180px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      background: rgba(12, 18, 26, 0.92);
+      border: 1px solid rgba(147, 160, 170, 0.28);
+      color: rgba(226, 232, 240, 0.92);
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      z-index: 75;
+    }
+
+    .zone-return-chip.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -6px);
+    }
+
+    .zone-return-chip a {
+      color: inherit;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .command-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 640px);
+      background: rgba(8, 12, 18, 0.96);
+      border-top: 1px solid rgba(147, 160, 170, 0.2);
+      box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.5);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      z-index: 90;
+    }
+
+    .command-link {
+      padding: 0.65rem 0.5rem 0.4rem;
+      text-decoration: none;
+      color: rgba(226, 232, 240, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .command-link:hover,
+    .command-link:focus-visible {
+      background: rgba(32, 41, 55, 0.9);
+      color: #fff;
+    }
+
+    .command-link.is-active {
+      background: rgba(41, 51, 68, 0.95);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .command-link__icon {
+      font-size: 1.1rem;
+    }
+
+    .focus-recovery-button {
+      position: fixed;
+      right: clamp(1rem, 4vw, 2.5rem);
+      bottom: clamp(148px, 18vh, 196px);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(147, 160, 170, 0.32);
+      background: rgba(18, 24, 32, 0.92);
+      color: rgba(226, 232, 240, 0.92);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      z-index: 85;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+      transition: transform 180ms ease, box-shadow 220ms ease;
+    }
+
+    .focus-recovery-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+    }
+
+    body.is-scrolling .zone-header,
+    body.is-scrolling .activation-fab,
+    body.is-scrolling .command-link {
+      transition-duration: 0s !important;
+    }
+
+    .activation-bar {
+      position: fixed;
+      bottom: clamp(88px, 12vh, 128px);
+      z-index: 80;
+      display: grid;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      border-radius: 24px;
+      background: rgba(10, 15, 22, 0.92);
+      border: 1px solid rgba(147, 160, 170, 0.28);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    }
+
+    .activation-fab {
       background: var(--hero-teal);
       color: #022624;
       border: none;
       border-radius: 999px;
-      padding: 0.45rem 1.6rem;
+      padding: 0.65rem 1.5rem;
       font-weight: 600;
       font-size: 1rem;
-      min-height: 48px;
+      min-height: 52px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 12px 26px rgba(45, 212, 195, 0.3);
+      gap: 0.5rem;
+      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 14px 32px rgba(45, 212, 195, 0.35);
       width: 100%;
-      max-width: 320px;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 220ms ease;
     }
 
-    .activation-bar__start:hover {
-      background: #27c2b0;
-      color: #011c1a;
+    .activation-fab:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .activation-fab:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.45), 0 18px 40px rgba(45, 212, 195, 0.42);
+    }
+
+    .activation-fab__icon {
+      font-size: 1.1rem;
+    }
+
+    .activation-options {
+      display: grid;
+      gap: 0.5rem;
+      padding: 0.35rem;
+      border-radius: 20px;
+      background: rgba(13, 18, 24, 0.85);
+      border: 1px solid rgba(147, 160, 170, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(147, 160, 170, 0.08);
+    }
+
+    .activation-option {
+      border-radius: 16px;
+      padding: 0.55rem 1rem;
+      background: rgba(31, 41, 55, 0.92);
+      border: 1px solid rgba(147, 160, 170, 0.24);
+      font-weight: 500;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .activation-option:hover {
+      background: rgba(45, 55, 72, 0.95);
+      border-color: rgba(148, 163, 184, 0.45);
+    }
+
+    .activation-suggestion {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      border-radius: 999px;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid rgba(147, 160, 170, 0.22);
+      background: rgba(13, 18, 24, 0.82);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      justify-content: center;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .activation-suggestion:disabled,
+    .activation-suggestion[aria-disabled="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .activation-suggestion__label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.75rem;
+      color: rgba(226, 232, 240, 0.65);
     }
 
     body::before {
@@ -1857,6 +2120,125 @@
       50% {
         box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.45), 0 0 46px rgba(45, 212, 195, 0.32);
       }
+    }
+
+    #focus.focus-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: clamp(1.25rem, 5vw, 2.25rem);
+      background: rgba(8, 12, 18, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 140;
+      pointer-events: none;
+    }
+
+    body.focus-overlay-active #focus.focus-overlay {
+      pointer-events: auto;
+    }
+
+    .focus-overlay__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 12, 18, 0.55);
+    }
+
+    .focus-overlay__sheet {
+      position: relative;
+      width: min(100%, 520px);
+      border-radius: 28px 28px 16px 16px;
+      background: rgba(9, 16, 23, 0.98);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: 0 -28px 64px rgba(0, 0, 0, 0.45);
+      padding: clamp(1.25rem, 4vw, 1.75rem);
+      display: grid;
+      gap: var(--space-3);
+      transform: translateY(0);
+      animation: focus-sheet-enter 240ms ease;
+    }
+
+    @keyframes focus-sheet-enter {
+      from {
+        transform: translateY(18px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .focus-overlay__header {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .focus-overlay__progress {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.22);
+      overflow: hidden;
+    }
+
+    .focus-overlay__progress-fill {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, rgba(45, 212, 195, 0.9), rgba(45, 212, 195, 0.2));
+      transition: width 180ms ease;
+    }
+
+    .focus-overlay__body {
+      display: grid;
+      gap: var(--space-3);
+      max-height: clamp(360px, 70vh, 520px);
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .focus-overlay__task {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .focus-overlay__actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .focus-overlay__actions button {
+      border-radius: 14px;
+      padding: 0.6rem 0.9rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    body.focus-overlay-active {
+      overflow: hidden;
+    }
+
+    body.brief-mode .card .card-body,
+    body.brief-mode .card .card-sticky-actions,
+    body.brief-mode .module-card .module-body {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      transition: max-height 200ms ease, opacity 160ms ease;
+    }
+
+    body.brief-mode .card:focus-within .card-body,
+    body.brief-mode .card:hover .card-body,
+    body.brief-mode .card:focus-within .card-sticky-actions,
+    body.brief-mode .card:hover .card-sticky-actions,
+    body.brief-mode .module-card:focus-within .module-body,
+    body.brief-mode .module-card:hover .module-body {
+      max-height: 1200px;
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .btn {
@@ -2894,9 +3276,37 @@
     }
 
     .next-best-results {
-      display: grid;
+      display: flex;
       gap: var(--space-2);
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 0.35rem;
+      margin: 0 -0.25rem;
+      padding-left: 0.25rem;
+    }
+
+    .next-best-results::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .next-best-results::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 999px;
+    }
+
+    @media (min-width: 960px) {
+      .next-best-results {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        overflow: visible;
+        margin: 0;
+        padding: 0;
+      }
+
+      .next-best-option {
+        min-width: 0;
+        scroll-snap-align: unset;
+      }
     }
 
     .next-best-refresh {
@@ -2933,6 +3343,8 @@
       border: 1px solid rgba(148, 163, 184, 0.16);
       background: rgba(15, 20, 27, 0.75);
       box-shadow: 0 12px 24px rgba(2, 6, 23, 0.35);
+      min-width: clamp(240px, 78vw, 320px);
+      scroll-snap-align: center;
     }
 
     .next-best-option__label {
@@ -3446,6 +3858,16 @@
         <div class="subtitle" id="billingReminder"></div>
       </div>
 
+      <div class="momentum-zones">
+        <section id="launchZone" class="momentum-zone" data-zone="launch">
+          <header class="zone-header" data-zone-tab>
+            <span class="zone-header__icon" aria-hidden="true">🚀</span>
+            <div class="zone-header__text">
+              <h2 class="zone-header__title">Launch Zone</h2>
+              <p class="zone-header__subtitle">Quick partners, gentle ramps, and worst-day shields</p>
+            </div>
+          </header>
+          <div class="zone-body">
       <section id="supportLinks" class="card resource-card" aria-labelledby="supportLinksTitle">
         <div class="card-head">
           <h2 id="supportLinksTitle">Quick access partners</h2>
@@ -3564,10 +3986,40 @@
         <p id="worstDayHint" class="worst-day-hint"></p>
       </div>
 
-      <div class="activation-bar" role="region" aria-label="Quick focus controls">
-        <button id="activationStart" class="activation-bar__start" type="button">Start tasks now</button>
+      <div class="activation-bar" id="startFab" role="region" aria-label="Quick focus controls">
+        <button
+          id="activationStart"
+          class="activation-fab"
+          type="button"
+          aria-expanded="false"
+          aria-controls="activationOptions"
+        >
+          <span class="activation-fab__icon" aria-hidden="true">▶️</span>
+          <span class="activation-fab__label">Start tasks now</span>
+        </button>
+        <div id="activationOptions" class="activation-options" hidden>
+          <button type="button" class="activation-option" data-activation-mode="sprint">Start 5-min</button>
+          <button type="button" class="activation-option" data-activation-mode="easy">Easy start</button>
+          <button type="button" class="activation-option" data-activation-mode="buddy">With buddy</button>
+        </div>
+        <button id="activationSuggestion" class="activation-suggestion" type="button" disabled aria-disabled="true">
+          <span class="activation-suggestion__label">Next best:</span>
+          <span id="activationNextBestText">Add a task to unlock focus.</span>
+        </button>
       </div>
 
+          </div>
+        </section>
+        <section id="actionZone" class="momentum-zone" data-zone="action">
+          <header class="zone-header" data-zone-tab>
+            <span class="zone-header__icon" aria-hidden="true">⚡</span>
+            <div class="zone-header__text">
+              <h2 class="zone-header__title">Action Zone</h2>
+              <p class="zone-header__subtitle">Next best focus, active tasks, and due-today radar</p>
+            </div>
+          </header>
+          <div class="zone-body">
+            <span id="focus-engine" class="zone-anchor" aria-hidden="true"></span>
       <section id="nextBestEngineCard" class="card next-best-card" aria-live="polite">
         <div class="card-head">
           <h2>⚡ Next Best Thing Engine</h2>
@@ -3665,6 +4117,7 @@
         <p id="nextTaskEmpty" class="next-task-empty hidden">You're clear for now. Add what matters next.</p>
       </section>
 
+            <span id="tasks-zone" class="zone-anchor" aria-hidden="true"></span>
       <section id="dueTodaySection" class="card due-today-card hidden" aria-live="polite">
         <div class="section-heading">
           <h2>Due today</h2>
@@ -3832,6 +4285,18 @@
         </div>
       </section>
 
+          </div>
+        </section>
+        <section id="recoveryZone" class="momentum-zone" data-zone="recovery">
+          <header class="zone-header" data-zone-tab>
+            <span class="zone-header__icon" aria-hidden="true">🌙</span>
+            <div class="zone-header__text">
+              <h2 class="zone-header__title">Recovery Zone</h2>
+              <p class="zone-header__subtitle">Resolve conflicts, reset your nervous system, refuel dopamine</p>
+            </div>
+          </header>
+          <div class="zone-body">
+            <span id="reset-zone" class="zone-anchor" aria-hidden="true"></span>
       <div class="module-stack">
         <div id="morningLaunchModule" class="module-card" data-module-id="morningLaunchModule">
           <button class="module-header" type="button" aria-expanded="false">
@@ -4133,6 +4598,7 @@
       </div>
     </div>
   </section>
+      </div>
 
   <div id="template-modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="templateModalTitle">
     <div class="modal__content">
@@ -4362,40 +4828,72 @@
     </div>
   </div>
 
-  <section id="focus" class="hidden">
-    <div id="focusTimer" aria-live="polite">🧭 Focus Time: 0:00</div>
-    <div class="focus" tabindex="0" aria-live="polite"></div>
-    <div class="score" id="scoreView"></div>
-    <div id="focusFitHint" aria-live="polite"></div>
-    <div id="distractionTools" class="distraction-tools">
-      <div class="distraction-tools__header">
-        <strong>Distraction cheat sheet</strong>
-        <button id="caughtMeButton" type="button" disabled aria-disabled="true">“Caught me”</button>
-      </div>
-      <div id="distractionPrompt" class="distraction-prompt hidden">
-        <span>What pulled you off course?</span>
-        <div class="distraction-options" role="group" aria-label="Distraction triggers">
-          <button type="button" data-distraction-trigger="tab">Tab hop</button>
-          <button type="button" data-distraction-trigger="ping">Notification ping</button>
-          <button type="button" data-distraction-trigger="thought">Thought spiral</button>
+  <section id="focus" class="focus-overlay hidden" aria-hidden="true">
+    <div class="focus-overlay__backdrop" data-focus-dismiss></div>
+    <div class="focus-overlay__sheet" role="dialog" aria-modal="true" aria-labelledby="focusTimer" tabindex="-1">
+      <header class="focus-overlay__header">
+        <div id="focusTimer" aria-live="polite">🧭 Focus Time: 0:00</div>
+        <div class="focus-overlay__progress" aria-hidden="true">
+          <span id="focusProgressFill" class="focus-overlay__progress-fill"></span>
+        </div>
+      </header>
+      <div class="focus-overlay__body">
+        <div class="focus-overlay__task">
+          <div class="focus" tabindex="0" aria-live="polite"></div>
+          <div class="score" id="scoreView"></div>
+          <div id="focusFitHint" aria-live="polite"></div>
+        </div>
+        <div id="subTaskView"></div>
+        <div id="distractionTools" class="distraction-tools">
+          <div class="distraction-tools__header">
+            <strong>Distraction cheat sheet</strong>
+            <button id="caughtMeButton" type="button" disabled aria-disabled="true">“Caught me”</button>
+          </div>
+          <div id="distractionPrompt" class="distraction-prompt hidden">
+            <span>What pulled you off course?</span>
+            <div class="distraction-options" role="group" aria-label="Distraction triggers">
+              <button type="button" data-distraction-trigger="tab">Tab hop</button>
+              <button type="button" data-distraction-trigger="ping">Notification ping</button>
+              <button type="button" data-distraction-trigger="thought">Thought spiral</button>
+            </div>
+          </div>
+          <ul id="distractionLog" class="distraction-log" aria-live="polite" aria-label="Logged distractions"></ul>
+          <div id="doorwayReset" class="doorway-reset hidden" aria-live="polite">
+            <p id="doorwayResetMessage"></p>
+            <div class="doorway-reset-actions">
+              <button id="doorwayStartButton" type="button">Start 60-second reset</button>
+              <button id="doorwaySkipButton" type="button" class="link-button">Not now</button>
+            </div>
+            <div id="doorwayCountdown" class="doorway-countdown hidden"></div>
+          </div>
         </div>
       </div>
-      <ul id="distractionLog" class="distraction-log" aria-live="polite" aria-label="Logged distractions"></ul>
-      <div id="doorwayReset" class="doorway-reset hidden" aria-live="polite">
-        <p id="doorwayResetMessage"></p>
-        <div class="doorway-reset-actions">
-          <button id="doorwayStartButton" type="button">Start 60-second reset</button>
-          <button id="doorwaySkipButton" type="button" class="link-button">Not now</button>
-        </div>
-        <div id="doorwayCountdown" class="doorway-countdown hidden"></div>
-      </div>
-    </div>
-    <div id="subTaskView"></div>
-    <div>
-      <button onclick="completeTask()">Task complete</button>
-      <button onclick="backToCapture()">Back to capture</button>
+      <footer class="focus-overlay__actions">
+        <button id="focusExtendButton" type="button" class="btn btn-secondary">Add 5 more min</button>
+        <button id="focusAbortButton" type="button" class="btn btn-ghost">Abort</button>
+        <button id="focusCompleteButton" type="button" class="btn hero-cta">Task complete</button>
+      </footer>
     </div>
   </section>
+
+  <button id="focusRecoveryButton" class="focus-recovery-button" type="button" aria-label="Return to last active zone">🧭</button>
+  <div id="zoneReturnChip" class="zone-return-chip" aria-hidden="true">
+    <a href="#actionZone">Return to Focus Zone ⬆️</a>
+  </div>
+  <nav class="command-bar" aria-label="Momentum shortcuts">
+    <a href="#focus-engine" class="command-link">
+      <span class="command-link__icon" aria-hidden="true">⚡</span>
+      <span>Focus</span>
+    </a>
+    <a href="#tasks-zone" class="command-link">
+      <span class="command-link__icon" aria-hidden="true">🩺</span>
+      <span>Tasks</span>
+    </a>
+    <a href="#reset-zone" class="command-link">
+      <span class="command-link__icon" aria-hidden="true">🌙</span>
+      <span>Reset</span>
+    </a>
+  </nav>
 
   <script>
   const $ = id => document.getElementById(id);
@@ -4504,6 +5002,461 @@
   const DOPAMINE_REWARD_KEY = "dopamine.reward";
   const DOPAMINE_INTERVALS = [2, 6, 12];
   const BLOCK_BATCH_STORAGE_KEY = "blockBatch.profiles";
+  const LAST_ZONE_STORAGE_KEY = "momentum.lastZone";
+  const BRIEF_MODE_STORAGE_KEY = "momentum.briefMode";
+  const FOCUS_RECOVERY_TAP_WINDOW = 280;
+
+  let latestNextBestPicks = {};
+  let nextBestUpdatePending = false;
+  let lastActiveZoneId = null;
+  let activationFabExpanded = false;
+  let scrollCalmTimer = null;
+  let taskGestureObserver = null;
+
+  function isElementMostlyInView(element, ratio = 0.3) {
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    const viewHeight = window.innerHeight || document.documentElement.clientHeight;
+    if (rect.height <= 0 || rect.bottom <= 0 || rect.top >= viewHeight) return false;
+    const visibleTop = Math.max(0, -rect.top);
+    const visibleBottom = Math.max(0, Math.min(viewHeight, rect.bottom) - Math.max(0, rect.top));
+    const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+    return visibleHeight / rect.height >= ratio;
+  }
+
+  function scrollToZone(zoneId, options = {}) {
+    if (!zoneId) return;
+    const target = document.getElementById(zoneId);
+    if (!target) return;
+    const behavior = options.behavior || "smooth";
+    target.scrollIntoView({ behavior, block: "start" });
+  }
+
+  function applyBriefMode(enabled, { silent = false } = {}) {
+    document.body.classList.toggle("brief-mode", Boolean(enabled));
+    try {
+      localStorage.setItem(BRIEF_MODE_STORAGE_KEY, enabled ? "1" : "0");
+    } catch (error) {
+      console.warn("Unable to persist brief mode", error);
+    }
+    if (!silent) {
+      showToast("Brief mode", enabled ? "Minimal view on." : "Full detail restored.");
+    }
+  }
+
+  function toggleBriefMode() {
+    const nextState = !document.body.classList.contains("brief-mode");
+    applyBriefMode(nextState);
+  }
+
+  function restoreBriefModePreference() {
+    try {
+      const stored = localStorage.getItem(BRIEF_MODE_STORAGE_KEY);
+      if (stored === "1") {
+        applyBriefMode(true, { silent: true });
+      }
+    } catch (error) {
+      console.warn("Unable to load brief mode preference", error);
+    }
+  }
+
+  function setActivationFabExpanded(expanded) {
+    activationFabExpanded = Boolean(expanded);
+    const fab = $("activationStart");
+    const options = $("activationOptions");
+    const container = $("startFab");
+    if (fab) {
+      fab.setAttribute("aria-expanded", activationFabExpanded ? "true" : "false");
+      fab.classList.toggle("is-open", activationFabExpanded);
+    }
+    if (options) {
+      options.hidden = !activationFabExpanded;
+    }
+    if (container) {
+      container.classList.toggle("is-open", activationFabExpanded);
+    }
+  }
+
+  function updateCommandLinkStates(activeZoneId) {
+    const links = document.querySelectorAll(".command-bar .command-link");
+    links.forEach(link => {
+      const hash = link.getAttribute("href") || "";
+      const targetId = hash.startsWith("#") ? hash.slice(1) : null;
+      const anchor = targetId ? document.getElementById(targetId) : null;
+      const zone = anchor ? anchor.closest(".momentum-zone") : null;
+      const isActive = Boolean(zone && zone.id === activeZoneId);
+      link.classList.toggle("is-active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function persistLastActiveZone(zoneId) {
+    if (!zoneId) return;
+    lastActiveZoneId = zoneId;
+    try {
+      localStorage.setItem(LAST_ZONE_STORAGE_KEY, zoneId);
+    } catch (error) {
+      console.warn("Unable to persist last active zone", error);
+    }
+  }
+
+  function handleActiveZoneChange(zoneId) {
+    if (!zoneId) return;
+    persistLastActiveZone(zoneId);
+    updateCommandLinkStates(zoneId);
+    const focusButton = $("focusRecoveryButton");
+    if (focusButton) {
+      const zoneEl = document.getElementById(zoneId);
+      const title = zoneEl?.querySelector(".zone-header__title")?.textContent?.trim();
+      const label = title ? `Return to ${title}. Double tap to toggle brief mode.` : "Return to last active zone. Double tap to toggle brief mode.";
+      focusButton.setAttribute("aria-label", label);
+      focusButton.dataset.zoneId = zoneId;
+    }
+  }
+
+  function setupMomentumZones() {
+    const zones = Array.from(document.querySelectorAll(".momentum-zone"));
+    if (!zones.length) return;
+
+    const zoneHeaders = Array.from(document.querySelectorAll(".zone-header"));
+    const zoneReturnChip = $("zoneReturnChip");
+    const focusRecoveryButton = $("focusRecoveryButton");
+
+    let storedZoneId = null;
+    try {
+      storedZoneId = localStorage.getItem(LAST_ZONE_STORAGE_KEY);
+    } catch (error) {
+      console.warn("Unable to read last zone", error);
+    }
+
+    const initialZone = zones.find(zone => zone.id === storedZoneId) || zones[0];
+    if (initialZone) {
+      handleActiveZoneChange(initialZone.id);
+    }
+
+    if (typeof IntersectionObserver !== "undefined") {
+      const observer = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              handleActiveZoneChange(entry.target.id);
+            }
+          });
+        },
+        { threshold: 0.35 }
+      );
+      zones.forEach(zone => observer.observe(zone));
+    }
+
+    const commandLinks = document.querySelectorAll(".command-bar .command-link, #zoneReturnChip a");
+    commandLinks.forEach(link => {
+      link.addEventListener("click", event => {
+        const hash = link.getAttribute("href") || "";
+        if (!hash.startsWith("#")) return;
+        event.preventDefault();
+        const targetId = hash.slice(1);
+        if (!targetId) return;
+        scrollToZone(targetId);
+        const anchor = document.getElementById(targetId);
+        const zone = anchor ? anchor.closest(".momentum-zone") : null;
+        if (zone) {
+          handleActiveZoneChange(zone.id);
+        }
+      });
+    });
+
+    const handleScrollEffects = () => {
+      document.body.classList.add("is-scrolling");
+      if (scrollCalmTimer) {
+        window.clearTimeout(scrollCalmTimer);
+      }
+      scrollCalmTimer = window.setTimeout(() => {
+        document.body.classList.remove("is-scrolling");
+      }, 180);
+
+      const actionZone = document.getElementById("actionZone");
+      if (zoneReturnChip && actionZone) {
+        const rect = actionZone.getBoundingClientRect();
+        const shouldShow = rect.top < -120;
+        zoneReturnChip.classList.toggle("is-visible", shouldShow);
+        zoneReturnChip.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+      }
+
+      zoneHeaders.forEach(header => {
+        const rect = header.getBoundingClientRect();
+        const isDocked = rect.top <= 12 && rect.bottom > rect.height * 0.4;
+        header.classList.toggle("is-docked", isDocked);
+      });
+    };
+
+    window.addEventListener("scroll", handleScrollEffects, { passive: true });
+    window.addEventListener("resize", handleScrollEffects);
+    handleScrollEffects();
+
+    if (focusRecoveryButton) {
+      let lastTap = 0;
+      focusRecoveryButton.addEventListener("click", event => {
+        const now = Date.now();
+        if (now - lastTap <= FOCUS_RECOVERY_TAP_WINDOW) {
+          event.preventDefault();
+          toggleBriefMode();
+          lastTap = 0;
+          return;
+        }
+        lastTap = now;
+        const targetZoneId = focusRecoveryButton.dataset.zoneId || lastActiveZoneId || storedZoneId || (zones[0] && zones[0].id);
+        if (targetZoneId) {
+          scrollToZone(targetZoneId);
+        } else {
+          scrollToZone("focus-engine");
+        }
+      });
+    }
+  }
+
+  function setupNextBestObserver() {
+    const target = $("nextBestEngineCard");
+    if (!target || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && nextBestUpdatePending) {
+            updateNextBestOptions({ force: true });
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(target);
+  }
+
+  function setupSmartCollapse() {
+    if (!window.matchMedia) return;
+    const media = window.matchMedia("(max-width: 768px)");
+
+    const resetCards = () => {
+      document.querySelectorAll('.card[data-smart-collapsed="true"]').forEach(card => {
+        card.classList.remove("collapsed");
+        card.removeAttribute("data-smart-collapsed");
+      });
+    };
+
+    const evaluateCards = () => {
+      if (!media.matches) {
+        resetCards();
+        return;
+      }
+      const cards = document.querySelectorAll(".card");
+      cards.forEach(card => {
+        if (!card.isConnected) return;
+        const rect = card.getBoundingClientRect();
+        if (rect.height <= 0) return;
+        if (rect.top < -100) {
+          if (card.getAttribute("data-smart-collapsed") !== "true") {
+            card.classList.add("collapsed");
+            card.setAttribute("data-smart-collapsed", "true");
+          }
+        } else if (card.getAttribute("data-smart-collapsed") === "true" && rect.top > -80) {
+          card.classList.remove("collapsed");
+          card.removeAttribute("data-smart-collapsed");
+        }
+      });
+    };
+
+    let scheduled = false;
+    const scheduleEvaluation = () => {
+      if (!media.matches) return;
+      if (scheduled) return;
+      scheduled = true;
+      window.requestAnimationFrame(() => {
+        scheduled = false;
+        evaluateCards();
+      });
+    };
+
+    const handleMediaChange = event => {
+      if (event.matches) {
+        evaluateCards();
+      } else {
+        resetCards();
+      }
+    };
+
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", handleMediaChange);
+    } else if (typeof media.addListener === "function") {
+      media.addListener(handleMediaChange);
+    }
+
+    window.addEventListener("scroll", scheduleEvaluation, { passive: true });
+    window.addEventListener("resize", scheduleEvaluation);
+    evaluateCards();
+
+    if (typeof MutationObserver !== "undefined") {
+      const observer = new MutationObserver(scheduleEvaluation);
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  }
+
+  function refreshTaskGestureTargets() {
+    const list = $("taskList");
+    if (!list) return;
+    const cards = list.querySelectorAll(".task-card[data-task-id]");
+    cards.forEach(card => {
+      const mode = card.classList.contains("is-completed") ? TASK_LIST_MODES.COMPLETED : TASK_LIST_MODES.ACTIVE;
+      attachTaskGestureHandlers(card, card.dataset.taskId, mode);
+    });
+  }
+
+  function attachTaskGestureHandlers(card, taskId, mode = TASK_LIST_MODES.ACTIVE) {
+    if (!card || !taskId || mode !== TASK_LIST_MODES.ACTIVE) return;
+    if (!window.PointerEvent) return;
+    if (card.dataset.gesturesAttached === "true") return;
+    card.dataset.gesturesAttached = "true";
+
+    const normalizedId = String(taskId);
+    let pointerActive = false;
+    let startX = 0;
+    let startY = 0;
+    let pointerId = null;
+    let handled = false;
+    let longPressTimer = null;
+    const LONG_PRESS_MS = 550;
+    const SWIPE_THRESHOLD = 56;
+    const MAX_VERTICAL_DRIFT = 28;
+
+    const clearLongPress = () => {
+      if (longPressTimer) {
+        window.clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    const resetState = () => {
+      pointerActive = false;
+      handled = false;
+      pointerId = null;
+      clearLongPress();
+    };
+
+    const handlePointerDown = event => {
+      if (!event.isPrimary || event.button !== 0) return;
+      if (event.target.closest("button") || event.target.closest("a")) return;
+      pointerActive = true;
+      handled = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      pointerId = event.pointerId;
+      clearLongPress();
+      longPressTimer = window.setTimeout(() => {
+        handled = true;
+        startEditTask(normalizedId);
+        showToast("Task details", "Opening task editor.");
+      }, LONG_PRESS_MS);
+      if (card.setPointerCapture) {
+        card.setPointerCapture(pointerId);
+      }
+    };
+
+    const handlePointerMove = event => {
+      if (!pointerActive || pointerId !== event.pointerId) return;
+      const dx = event.clientX - startX;
+      const dy = Math.abs(event.clientY - startY);
+      if (dy > MAX_VERTICAL_DRIFT) {
+        clearLongPress();
+        return;
+      }
+      if (!handled && Math.abs(dx) >= SWIPE_THRESHOLD) {
+        handled = true;
+        clearLongPress();
+        if (card.releasePointerCapture && pointerId !== null) {
+          card.releasePointerCapture(pointerId);
+        }
+        pointerActive = false;
+        if (dx > 0) {
+          startFiveMinuteSprint(normalizedId);
+          showToast("Sprint", "Starting a 5-minute focus pass.");
+        } else {
+          markTaskDoneFromPeek(normalizedId);
+          showToast("Task complete", "Marked as done.");
+        }
+      }
+    };
+
+    const handlePointerEnd = event => {
+      if (pointerActive && pointerId === event.pointerId && card.releasePointerCapture) {
+        card.releasePointerCapture(pointerId);
+      }
+      resetState();
+    };
+
+    card.addEventListener("pointerdown", handlePointerDown);
+    card.addEventListener("pointermove", handlePointerMove);
+    card.addEventListener("pointerup", handlePointerEnd);
+    card.addEventListener("pointerleave", handlePointerEnd);
+    card.addEventListener("pointercancel", handlePointerEnd);
+  }
+
+  function setupTaskGestures() {
+    if (!window.PointerEvent) return;
+    const list = $("taskList");
+    if (!list) return;
+    refreshTaskGestureTargets();
+    if (typeof MutationObserver === "undefined") return;
+    if (taskGestureObserver) {
+      taskGestureObserver.disconnect();
+    }
+    taskGestureObserver = new MutationObserver(() => refreshTaskGestureTargets());
+    taskGestureObserver.observe(list, { childList: true });
+  }
+
+  function setupFocusOverlay() {
+    const extendBtn = $("focusExtendButton");
+    if (extendBtn) {
+      extendBtn.addEventListener("click", () => extendSprintBy(5));
+    }
+
+    const abortBtn = $("focusAbortButton");
+    if (abortBtn) {
+      abortBtn.addEventListener("click", () => {
+        backToCapture();
+        setActivationFabExpanded(false);
+      });
+    }
+
+    const completeBtn = $("focusCompleteButton");
+    if (completeBtn) {
+      completeBtn.addEventListener("click", () => completeTask());
+    }
+
+    const overlay = $("focus");
+    if (overlay) {
+      overlay.addEventListener("click", event => {
+        const dismissTarget = event.target.closest("[data-focus-dismiss]");
+        if (dismissTarget) {
+          backToCapture();
+        }
+      });
+    }
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && document.body.classList.contains("focus-overlay-active")) {
+        backToCapture();
+      }
+    });
+  }
+
+  function setupLazyMedia() {
+    const nodes = document.querySelectorAll('img:not([loading]), iframe:not([loading])');
+    nodes.forEach(node => {
+      node.setAttribute("loading", "lazy");
+    });
+  }
+
   const DEFAULT_BLOCK_BATCHES = [
     {
       id: "complex-care",
@@ -6865,7 +7818,15 @@
     timerEl.classList.remove("pulse");
     if (resetDisplay) {
       timerEl.textContent = "🧭 Focus Time: 0:00";
+      setFocusProgress(0);
     }
+  }
+
+  function setFocusProgress(percent) {
+    const fill = $("focusProgressFill");
+    if (!fill) return;
+    const clamped = Math.max(0, Math.min(100, Number(percent) || 0));
+    fill.style.width = `${clamped}%`;
   }
 
   function updateFocusTimerDisplay(elapsedMs) {
@@ -6877,17 +7838,23 @@
         const minutesLeft = Math.floor(remaining / 60000);
         const secondsLeft = Math.floor((remaining % 60000) / 1000);
         timerEl.textContent = `⏱️ Sprint: ${minutesLeft}:${String(secondsLeft).padStart(2, "0")}`;
+        const total = sprintDurationMinutes * 60000;
+        const elapsed = Math.max(0, total - remaining);
+        setFocusProgress(total > 0 ? (elapsed / total) * 100 : 0);
         return;
       }
       sprintDurationMinutes = null;
       sprintEndTime = null;
       timerEl.textContent = "✅ Sprint complete";
+      setFocusProgress(100);
       triggerFocusPing();
       return;
     }
     const minutes = Math.floor(elapsedMs / 60000);
     const seconds = Math.floor((elapsedMs % 60000) / 1000);
     timerEl.textContent = `🧭 Focus Time: ${minutes}:${String(seconds).padStart(2, "0")}`;
+    const gentlePercent = Math.min(100, (elapsedMs / (25 * 60000)) * 100);
+    setFocusProgress(gentlePercent);
   }
 
   function playFocusPing() {
@@ -6940,6 +7907,9 @@
       sprintEndTime = null;
     }
     updateFocusTimerDisplay(0);
+    if (!Number.isFinite(sprintDurationMinutes) || sprintDurationMinutes <= 0) {
+      setFocusProgress(0);
+    }
     focusTimerId = setInterval(() => {
       if (focusTimerStart === null) return;
       const now = Date.now();
@@ -8856,8 +9826,14 @@
   function renderTaskListCard(task, mode, timeBudgetMinutes = null) {
     const card = document.createElement("article");
     card.className = "task-card";
+    if (task?.id) {
+      card.dataset.taskId = String(task.id);
+    }
     if (mode === TASK_LIST_MODES.COMPLETED) {
       card.classList.add("is-completed");
+    }
+    if (mode === TASK_LIST_MODES.ACTIVE && task?.id) {
+      attachTaskGestureHandlers(card, task.id, mode);
     }
 
     const header = document.createElement("div");
@@ -9394,15 +10370,22 @@
     const suggestionBtn = $("activationSuggestion");
     const textEl = $("activationNextBestText");
     if (!suggestionBtn || !textEl) return;
+    const hasActiveTasks = tasks.some(task => !isTaskCompleted(task));
     if (evaluation && evaluation.task) {
       const message = evaluation.chunk?.label || evaluation.task.name;
       textEl.textContent = message;
       suggestionBtn.disabled = false;
       suggestionBtn.setAttribute("aria-disabled", "false");
+      suggestionBtn.dataset.pickKey = "now";
+      suggestionBtn.dataset.taskId = evaluation.task.id || "";
     } else {
-      textEl.textContent = "Refresh Next Best to see a top pick.";
+      textEl.textContent = hasActiveTasks
+        ? "Refresh Next Best to see a top pick."
+        : "Add a task to unlock focus.";
       suggestionBtn.disabled = true;
       suggestionBtn.setAttribute("aria-disabled", "true");
+      delete suggestionBtn.dataset.pickKey;
+      delete suggestionBtn.dataset.taskId;
     }
   }
 
@@ -9513,7 +10496,7 @@
       button.disabled = true;
     }
     try {
-      updateNextBestOptions();
+      updateNextBestOptions({ force: true });
     } finally {
       if (button) {
         window.setTimeout(() => {
@@ -9524,17 +10507,25 @@
     }
   }
 
-  function updateNextBestOptions() {
+  function updateNextBestOptions(options = {}) {
+    const forceUpdate = Boolean(options.force);
     const results = $("nextBestResults");
     const empty = $("nextBestEmpty");
     if (!results || !empty) return;
 
+    if (!forceUpdate && !isElementMostlyInView(results, 0.25)) {
+      nextBestUpdatePending = true;
+      return;
+    }
+
+    nextBestUpdatePending = false;
     setActivationSuggestion(null);
     const inputs = getNextBestInputs();
     saveNextBestInputs(inputs);
 
     results.innerHTML = "";
     empty.classList.add("hidden");
+    latestNextBestPicks = {};
 
     const candidates = tasks.filter(task => !isTaskCompleted(task));
     if (!candidates.length) {
@@ -9593,6 +10584,7 @@
         if (card) results.appendChild(card);
       }
     });
+    latestNextBestPicks = { ...picks };
   }
 
   function initializeNextBestEngine() {
@@ -9655,6 +10647,14 @@
     if (!section || !accordion || !listEl || !summaryBtn || !summaryText || !emptyEl) return;
 
     listEl.innerHTML = "";
+
+    if (!summaryBtn.dataset.listenerBound) {
+      summaryBtn.dataset.listenerBound = "true";
+      summaryBtn.addEventListener("click", () => {
+        const nextOpen = accordion.dataset.open !== "true";
+        setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen });
+      });
+    }
 
     if (!entries.length) {
       section.classList.add("hidden");
@@ -11082,10 +12082,35 @@
     updateWorstDayBanner();
   }
 
-    function startFiveMinuteSprint(taskId = null) {
+  function startFiveMinuteSprint(taskId = null) {
     setTaskDetailsCollapsed(false);
     const targetId = taskId || nextTaskId || null;
     startFocus(targetId, { sprintMinutes: 5 });
+  }
+
+  function extendSprintBy(minutes) {
+    const extraMinutes = Number(minutes);
+    if (!Number.isFinite(extraMinutes) || extraMinutes <= 0) return;
+    const extraMs = extraMinutes * 60000;
+    const now = Date.now();
+    if (focusTimerStart === null) {
+      startFocus(nextTaskId, { sprintMinutes: extraMinutes });
+      return;
+    }
+    if (!Number.isFinite(sprintDurationMinutes) || sprintDurationMinutes <= 0 || !sprintEndTime) {
+      const elapsed = Math.max(0, now - focusTimerStart);
+      sprintDurationMinutes = Math.max(extraMinutes, (elapsed + extraMs) / 60000);
+      sprintEndTime = now + extraMs;
+      setSprintVisualState(true);
+    } else {
+      sprintEndTime += extraMs;
+      const total = Math.max(sprintEndTime - focusTimerStart, extraMs);
+      sprintDurationMinutes = Math.max(sprintDurationMinutes, total / 60000);
+    }
+    const remaining = Math.max(0, sprintEndTime - now);
+    const totalDuration = Math.max(remaining, sprintDurationMinutes * 60000);
+    setFocusProgress(totalDuration > 0 ? ((totalDuration - remaining) / totalDuration) * 100 : 0);
+    showToast("Focus cocoon", `Sprint extended by ${extraMinutes} minute${extraMinutes === 1 ? "" : "s"}.`);
   }
 
   function quickAddTask() {
@@ -11131,11 +12156,21 @@
   }
 
   function initializeActivationBar() {
-    const startBtn = $("activationStart");
-    if (startBtn) {
-      startBtn.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
-    }
+    const container = $("startFab");
+    const startFab = $("activationStart");
+    const options = $("activationOptions");
+    const suggestionBtn = $("activationSuggestion");
+    const labelMap = { now: "Do now", easy: "Do if easy", buddy: "Do with buddy" };
     const nextTaskAction = $("nextTaskActionButton");
+
+    const activatePick = pickKey => {
+      if (!pickKey) return false;
+      const evaluation = latestNextBestPicks[pickKey];
+      if (!evaluation) return false;
+      launchNextBestOption(labelMap[pickKey] || "Start", evaluation);
+      return true;
+    };
+
     if (nextTaskAction) {
       const LONG_PRESS_MS = 650;
       let longPressTriggered = false;
@@ -11184,13 +12219,72 @@
       });
     }
 
-    const summaryToggle = $("dueTodaySummary");
-    if (summaryToggle) {
-      summaryToggle.addEventListener("click", () => {
-        const accordion = $("dueTodayAccordion");
-        if (!accordion) return;
-        const nextOpen = accordion.dataset.open !== "true";
-        setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen });
+    if (startFab) {
+      startFab.addEventListener("click", event => {
+        event.preventDefault();
+        if (startFab.disabled) return;
+        setActivationFabExpanded(!activationFabExpanded);
+      });
+    }
+
+    if (options) {
+      options.addEventListener("click", event => {
+        const button = event.target.closest('[data-activation-mode]');
+        if (!button) return;
+        const mode = button.getAttribute('data-activation-mode');
+        setActivationFabExpanded(false);
+        if (mode === "sprint") {
+          if (!activatePick("now")) {
+            startFiveMinuteSprint(nextTaskId);
+          }
+          return;
+        }
+        if (mode === "easy") {
+          if (!activatePick("easy")) {
+            const fallbackId = latestNextBestPicks.now?.task?.id || nextTaskId;
+            if (fallbackId) {
+              startFocus(fallbackId);
+            } else {
+              showToast("Easy start", "Add a task to unlock easy-mode suggestions.");
+            }
+          }
+          return;
+        }
+        if (mode === "buddy") {
+          if (!activatePick("buddy")) {
+            const fallbackId = latestNextBestPicks.now?.task?.id || nextTaskId;
+            if (fallbackId) {
+              startFocus(fallbackId, { expandDetails: true });
+              showToast("Buddy start", "Ping your buddy and press start together.");
+            } else {
+              showToast("Buddy start", "Add a task to team up with someone.");
+            }
+          }
+        }
+      });
+    }
+
+    if (suggestionBtn) {
+      suggestionBtn.addEventListener("click", () => {
+        const pickKey = suggestionBtn.dataset.pickKey;
+        if (!activatePick(pickKey)) {
+          startFiveMinuteSprint(nextTaskId);
+        }
+      });
+    }
+
+    document.addEventListener("click", event => {
+      if (!activationFabExpanded) return;
+      if (container && container.contains(event.target)) return;
+      setActivationFabExpanded(false);
+    });
+
+    if (container) {
+      container.addEventListener("keydown", event => {
+        if (event.key === "Escape" && activationFabExpanded) {
+          setActivationFabExpanded(false);
+          event.stopPropagation();
+        }
       });
     }
   }
@@ -11358,6 +12452,7 @@
     refreshGanttSnapshotIfOpen();
     updateWorstDayBanner();
     updateSleepToolkitUI();
+    refreshTaskGestureTargets();
   }
 
   function toggleShowAllActive() {
@@ -11379,8 +12474,21 @@
       sprintDurationMinutes = null;
     }
     setSprintVisualState(Boolean(sprintDurationMinutes));
-    $("capture").classList.add("hidden");
-    $("focus").classList.remove("hidden");
+    setActivationFabExpanded(false);
+    const captureSection = $("capture");
+    if (captureSection) {
+      captureSection.setAttribute("aria-hidden", "true");
+    }
+    const focusSection = $("focus");
+    if (focusSection) {
+      focusSection.classList.remove("hidden");
+      focusSection.setAttribute("aria-hidden", "false");
+      const focusSheet = focusSection.querySelector(".focus-overlay__sheet");
+      if (focusSheet) {
+        window.requestAnimationFrame(() => focusSheet.focus());
+      }
+    }
+    document.body.classList.add("focus-overlay-active");
     const energyLevel = clampScale(getEnergyLevel(), 3);
     const timeBudget = getTimeBudgetMinutes();
     lastFocusEnergyLevel = energyLevel;
@@ -11523,8 +12631,19 @@
     clearRunningTimers();
     stopFocusTimer();
     currentFocusTaskIndex = null;
-    $("focus").classList.add("hidden");
-    $("capture").classList.remove("hidden");
+    const focusSection = $("focus");
+    if (focusSection) {
+      focusSection.classList.add("hidden");
+      focusSection.setAttribute("aria-hidden", "true");
+    }
+    const captureSection = $("capture");
+    if (captureSection) {
+      captureSection.classList.remove("hidden");
+      captureSection.removeAttribute("aria-hidden");
+    }
+    document.body.classList.remove("focus-overlay-active");
+    setSprintVisualState(false);
+    setActivationFabExpanded(false);
     updateUI();
   }
 
@@ -12201,6 +13320,13 @@
     if (nextStepBtn) {
       nextStepBtn.addEventListener("click", completeCurrentMeltdownStep);
     }
+    restoreBriefModePreference();
+    setupMomentumZones();
+    setupNextBestObserver();
+    setupSmartCollapse();
+    setupTaskGestures();
+    setupFocusOverlay();
+    setupLazyMedia();
     initializeChartFields();
     registerFieldListeners();
     registerTaskListModeControl();
