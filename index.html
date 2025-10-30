@@ -342,10 +342,8 @@
       border: 1px solid #2a2a2a;
     }
     .task-card-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.75rem;
-      align-items: flex-start;
+      display: block;
+      margin-bottom: 0.15rem;
     }
     .task-card-title-group {
       display: flex;
@@ -371,6 +369,7 @@
       display: flex;
       gap: 0.25rem;
       flex-wrap: wrap;
+      justify-content: flex-start;
     }
     .task-card-actions button {
       font-size: 0.8rem;
@@ -8371,7 +8370,11 @@
   }
 
   function persist() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+    try {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    } catch (error) {
+      console.warn("Unable to persist tasks", error);
+    }
   }
 
   function buildTaskDraftFromForm() {
@@ -8882,18 +8885,21 @@
 
     if (mode === TASK_LIST_MODES.ACTIVE) {
       const startNowBtn = document.createElement("button");
+      startNowBtn.type = "button";
       startNowBtn.textContent = "Start Now";
       startNowBtn.title = "Focus on this task";
       startNowBtn.onclick = () => startFocus(task.id);
       actions.appendChild(startNowBtn);
 
       const completeBtn = document.createElement("button");
+      completeBtn.type = "button";
       completeBtn.textContent = "Mark Done";
       completeBtn.title = "Complete task";
       completeBtn.onclick = () => markTaskDoneFromPeek(task.id);
       actions.appendChild(completeBtn);
 
       const editBtn = document.createElement("button");
+      editBtn.type = "button";
       editBtn.textContent = "✏️";
       editBtn.title = "Edit task";
       editBtn.onclick = () => startEditTask(task.id);
@@ -8901,6 +8907,7 @@
     }
 
     const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
     deleteBtn.textContent = "🗑️";
     deleteBtn.title = "Delete task";
     deleteBtn.onclick = () => {
@@ -8917,8 +8924,8 @@
     };
     actions.appendChild(deleteBtn);
 
-    header.appendChild(actions);
     card.appendChild(header);
+    card.appendChild(actions);
 
     const descriptors = buildTaskDescriptors(task);
     if (descriptors.length) {
