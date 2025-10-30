@@ -1702,19 +1702,12 @@
       }
 
       .activation-bar {
-        grid-template-columns: 1fr;
-        row-gap: var(--space-2);
         padding: var(--space-2);
         border-radius: 20px;
       }
 
-      .activation-bar__suggestion {
-        justify-content: center;
-      }
-
-      .activation-bar__start,
-      .activation-bar__pause {
-        width: 100%;
+      .activation-bar__start {
+        max-width: none;
       }
 
       .card {
@@ -1790,8 +1783,8 @@
       position: sticky;
       top: clamp(0.5rem, 2vw, 1.25rem);
       z-index: 50;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
+      display: flex;
+      justify-content: center;
       align-items: center;
       gap: var(--space-2);
       padding: 0.5rem 0.75rem;
@@ -1807,76 +1800,21 @@
       color: #022624;
       border: none;
       border-radius: 999px;
-      padding: 0.35rem 1.4rem;
+      padding: 0.45rem 1.6rem;
       font-weight: 600;
-      font-size: 0.95rem;
-      min-height: 44px;
+      font-size: 1rem;
+      min-height: 48px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 12px 26px rgba(45, 212, 195, 0.3);
+      width: 100%;
+      max-width: 320px;
     }
 
     .activation-bar__start:hover {
       background: #27c2b0;
       color: #011c1a;
-    }
-
-    .activation-bar__suggestion {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 2px;
-      min-height: 44px;
-      padding: 0.35rem 1.2rem;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(147, 160, 170, 0.18);
-      color: var(--text-secondary);
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .activation-bar__suggestion span {
-      display: block;
-      font-size: 0.8rem;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: rgba(147, 160, 170, 0.75);
-    }
-
-    .activation-bar__suggestion strong {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .activation-bar__suggestion[disabled] {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .activation-bar__suggestion[disabled] strong {
-      color: rgba(147, 160, 170, 0.75);
-    }
-
-    .activation-bar__pause {
-      background: rgba(147, 160, 170, 0.12);
-      color: var(--text-secondary);
-      border: 1px solid rgba(147, 160, 170, 0.18);
-      border-radius: 999px;
-      padding: 0.35rem 1.4rem;
-      font-weight: 500;
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .activation-bar__pause:hover {
-      background: rgba(147, 160, 170, 0.2);
-      color: var(--text-primary);
     }
 
     body::before {
@@ -2164,48 +2102,18 @@
       background: linear-gradient(180deg, rgba(15, 20, 26, 1) 40%, rgba(15, 20, 26, 0));
     }
 
-    .task-more {
+    .task-inline-actions {
       display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-      align-items: flex-start;
-      position: relative;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.25rem 0;
     }
 
-    .task-more__toggle {
+    .task-inline-actions .link-button {
+      margin: 0;
       font-size: 0.85rem;
       color: var(--accent);
-    }
-
-    .task-more__menu {
-      display: grid;
-      gap: 0.35rem;
-      padding: 0.5rem 0.75rem;
-      background: rgba(20, 28, 36, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 12px;
-      box-shadow: 0 12px 32px rgba(15, 20, 26, 0.45);
-      position: absolute;
-      top: calc(100% + 0.35rem);
-      left: 0;
-      min-width: 180px;
-      z-index: 5;
-    }
-
-    .task-more__menu button {
-      justify-content: flex-start;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-    }
-
-    .task-more__menu button:hover,
-    .task-more__menu button:focus-visible {
-      color: var(--text-primary);
-    }
-
-    .task-more__menu button:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
     }
 
     .section-chip {
@@ -2316,6 +2224,188 @@
 
     .template-card button {
       justify-self: flex-start;
+    }
+
+    .template-module__actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .block-batch-layout {
+      display: grid;
+      grid-template-columns: minmax(180px, 220px) 1fr;
+      gap: 1.25rem;
+      align-items: start;
+      margin-top: 1rem;
+    }
+
+    .block-batch-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .block-batch-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .block-batch-item__edit {
+      background: rgba(18, 24, 30, 0.92);
+      border: 1px solid rgba(147, 160, 170, 0.18);
+      border-radius: 10px;
+      padding: 0.35rem 0.55rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .block-batch-item__edit:hover {
+      color: var(--text-primary);
+    }
+
+    .block-batch-item__select {
+      text-align: left;
+      padding: 0.45rem 0.75rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-primary);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .block-batch-item.is-active .block-batch-item__select {
+      border-color: rgba(45, 212, 195, 0.45);
+      background: rgba(45, 212, 195, 0.12);
+      color: var(--hero-teal);
+    }
+
+    .block-batch-item__select:focus-visible,
+    .block-batch-item__edit:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.55);
+    }
+
+    .block-batch-counts {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .block-batch-count {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0.85rem;
+      border-radius: 14px;
+      border: 1px solid rgba(147, 160, 170, 0.2);
+      background: rgba(17, 23, 30, 0.75);
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+
+    .block-batch-count.is-active {
+      border-color: rgba(45, 212, 195, 0.4);
+      background: rgba(45, 212, 195, 0.08);
+    }
+
+    .block-batch-count span {
+      font-weight: 500;
+    }
+
+    .block-batch-count input[type="number"] {
+      max-width: 80px;
+      background: rgba(12, 18, 24, 0.95);
+      border-radius: 10px;
+      border: 1px solid rgba(147, 160, 170, 0.3);
+      color: var(--text-primary);
+      padding: 0.4rem 0.6rem;
+      text-align: right;
+      font-size: 0.95rem;
+    }
+
+    .block-batch-editor {
+      margin-top: 1.5rem;
+      padding: 1.1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(147, 160, 170, 0.18);
+      background: rgba(12, 18, 24, 0.85);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .block-batch-editor.hidden {
+      display: none;
+    }
+
+    .block-batch-editor__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .block-batch-editor__grid {
+      display: grid;
+      gap: 0.85rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .block-batch-editor textarea {
+      min-height: 90px;
+    }
+
+    .block-batch-editor__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .block-batch-footer {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .block-batch-footer label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      gap: 0.35rem;
+    }
+
+    .block-batch-footer input[type="date"] {
+      min-width: 160px;
+    }
+
+    @media (max-width: 768px) {
+      .block-batch-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .block-batch-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .block-batch-item {
+        grid-template-columns: auto;
+        gap: 0.35rem;
+      }
+
+      .block-batch-item__edit {
+        justify-self: flex-start;
+      }
+
+      .block-batch-item__select {
+        width: auto;
+      }
     }
 
 
@@ -3476,12 +3566,7 @@
       </div>
 
       <div class="activation-bar" role="region" aria-label="Quick focus controls">
-        <button id="activationStart" class="activation-bar__start" type="button">Start 5-min</button>
-        <button id="activationSuggestion" class="activation-bar__suggestion" type="button">
-          <span>Next Best Thing</span>
-          <strong id="activationNextBestText">Refresh Next Best to see a top pick.</strong>
-        </button>
-        <button id="activationPause" class="activation-bar__pause" type="button">Pause / Reset</button>
+        <button id="activationStart" class="activation-bar__start" type="button">Start tasks now</button>
       </div>
 
       <section id="nextBestEngineCard" class="card next-best-card" aria-live="polite">
@@ -3626,29 +3711,18 @@
                 <option value="Personal">Personal</option>
               </select>
             </label>
-            <div class="task-more">
+            <div class="task-inline-actions" aria-label="Task helpers">
+              <button type="button" class="link-button" id="btn-use-template">Use template</button>
+              <button type="button" class="link-button" id="btn-save-template">Add as template</button>
               <button
                 type="button"
-                class="link-button task-more__toggle"
-                id="taskMoreOptionsToggle"
+                class="link-button"
+                id="expandTaskDetailsButton"
+                aria-controls="taskDetails"
                 aria-expanded="false"
-                aria-controls="taskMoreOptionsMenu"
               >
-                More options
+                Show details
               </button>
-              <div id="taskMoreOptionsMenu" class="task-more__menu" hidden>
-                <button type="button" class="link-button" id="btn-use-template">Use template</button>
-                <button type="button" class="link-button" id="btn-save-template">Add as template</button>
-                <button
-                  type="button"
-                  class="link-button"
-                  id="expandTaskDetailsButton"
-                  aria-controls="taskDetails"
-                  aria-expanded="false"
-                >
-                  Show details
-                </button>
-              </div>
             </div>
             <div id="taskDetails" class="task-details-panel" data-collapsed="true">
               <div id="chartFields" class="chart-fields is-hidden" aria-hidden="true">
@@ -3924,6 +3998,9 @@
             <span class="info-dot" title="Pull in proven task blueprints without rewriting every field.">i</span>
           </button>
           <div class="module-body" hidden>
+            <div class="template-module__actions">
+              <button id="blockBatchOpen" class="btn btn-secondary" type="button">Block Batch</button>
+            </div>
             <div id="templateButtons"></div>
           </div>
         </div>
@@ -4062,6 +4139,153 @@
     <div class="modal__content">
       <div class="modal__head"><strong id="templateModalTitle">Choose a template</strong><button class="modal__close" type="button">✕</button></div>
       <div class="template-grid" id="template-grid"></div>
+    </div>
+  </div>
+
+  <div
+    id="block-batch-modal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="blockBatchModalTitle"
+  >
+    <div class="modal__content">
+      <div class="modal__head">
+        <strong id="blockBatchModalTitle">Block Batch Menu</strong>
+        <button class="modal__close" type="button">✕</button>
+      </div>
+      <div class="block-batch-layout">
+        <div class="block-batch-list" id="blockBatchList" role="listbox" aria-label="Batch types"></div>
+        <div>
+          <div class="block-batch-counts" id="blockBatchCounts"></div>
+          <div id="blockBatchEditor" class="block-batch-editor hidden" aria-live="polite">
+            <div class="block-batch-editor__head">
+              <h3 id="blockBatchEditorTitle">Edit default profile</h3>
+              <button type="button" class="link-button" id="blockBatchEditorClose">Done</button>
+            </div>
+            <div class="block-batch-editor__grid">
+              <label for="blockBatchCategory">Category
+                <select id="blockBatchCategory">
+                  <option value="General">General</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Chart">Chart</option>
+                  <option value="Inbox">Inbox</option>
+                  <option value="Calls">Calls</option>
+                  <option value="Teaching">Teaching</option>
+                  <option value="Personal">Personal</option>
+                </select>
+              </label>
+              <label for="blockBatchAuthor">Chart Author
+                <select id="blockBatchAuthor">
+                  <option value="attending">Attending</option>
+                  <option value="resident">Resident</option>
+                </select>
+              </label>
+              <label for="blockBatchPatient">Patient Type
+                <select id="blockBatchPatient">
+                  <option value="Non-Complex">Non-Complex</option>
+                  <option value="Complex">Complex</option>
+                </select>
+              </label>
+              <label for="blockBatchVisit">Visit Type
+                <select id="blockBatchVisit">
+                  <option value="Follow-Up">Follow-Up</option>
+                  <option value="Establish Care">Establish Care</option>
+                  <option value="Well Child Visit">Well Child Visit</option>
+                  <option value="Acute Visit">Acute Visit</option>
+                </select>
+              </label>
+              <label for="blockBatchClinic">Clinic Site
+                <select id="blockBatchClinic">
+                  <option value="General Clinic">General Clinic</option>
+                  <option value="St PJ’s Shelter">St PJ’s Shelter</option>
+                  <option value="Craniofacial Clinic">Craniofacial Clinic</option>
+                </select>
+              </label>
+              <label for="blockBatchImportance">Importance (1–5)
+                <select id="blockBatchImportance">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label for="blockBatchUrgency">Urgency (1–5)
+                <select id="blockBatchUrgency">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label for="blockBatchNovelty">Novelty (1–5)
+                <select id="blockBatchNovelty">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label for="blockBatchInterest">Interest (1–5)
+                <select id="blockBatchInterest">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label for="blockBatchExternalPressure">External Pressure (1–5)
+                <select id="blockBatchExternalPressure">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label for="blockBatchTimeToStart">Time to Start (1–5)
+                <select id="blockBatchTimeToStart">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label for="blockBatchDifficulty">Difficulty (1–5)
+                <select id="blockBatchDifficulty">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+            </div>
+            <label for="blockBatchSubtasks">Default subtasks
+              <textarea id="blockBatchSubtasks" placeholder="One subtask per line"></textarea>
+            </label>
+            <label class="sound-toggle" for="blockBatchUseChartTemplate">
+              <input type="checkbox" id="blockBatchUseChartTemplate" /> Use chart smart defaults
+            </label>
+            <div class="block-batch-editor__actions">
+              <button id="blockBatchResetProfile" type="button" class="btn btn-ghost">Reset to default</button>
+              <button id="blockBatchSaveProfile" type="button" class="btn btn-primary">Save profile</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="block-batch-footer">
+        <label for="blockBatchDate">Service date
+          <input type="date" id="blockBatchDate" />
+        </label>
+        <button id="blockBatchAdd" class="btn btn-primary" type="button">Add</button>
+      </div>
     </div>
   </div>
 
@@ -4280,6 +4504,90 @@
   const DEFUSE_LOCKS_KEY = "defuse.locks";
   const DOPAMINE_REWARD_KEY = "dopamine.reward";
   const DOPAMINE_INTERVALS = [2, 6, 12];
+  const BLOCK_BATCH_STORAGE_KEY = "blockBatch.profiles";
+  const DEFAULT_BLOCK_BATCHES = [
+    {
+      id: "complex-care",
+      label: "Complex Care",
+      prefix: "CLX",
+      defaultProfile: {
+        category: "Chart",
+        authorType: "attending",
+        patientType: "Complex",
+        visitType: "Follow-Up",
+        clinicSite: "General Clinic",
+        importance: 4,
+        urgency: 4,
+        novelty: 2,
+        interest: 3,
+        externalPressure: 4,
+        timeToStart: 2,
+        difficulty: 3,
+        subTasks: [
+          "Review vitals and growth chart",
+          "Summarize specialty updates",
+          "Draft plan and follow-up steps"
+        ],
+        useChartTemplate: true
+      }
+    },
+    {
+      id: "st-pjs",
+      label: "St. PJ’s Shelter",
+      prefix: "SPJ",
+      defaultProfile: {
+        category: "Chart",
+        authorType: "attending",
+        patientType: "Complex",
+        visitType: "Follow-Up",
+        clinicSite: "St PJ’s Shelter",
+        importance: 4,
+        urgency: 5,
+        novelty: 3,
+        interest: 3,
+        externalPressure: 4,
+        timeToStart: 2,
+        difficulty: 3,
+        subTasks: [
+          "Confirm shelter coordination notes",
+          "Capture social work updates",
+          "List pending referrals"
+        ],
+        useChartTemplate: true
+      }
+    },
+    {
+      id: "craniofacial",
+      label: "Craniofacial Clinic",
+      prefix: "CRN",
+      defaultProfile: {
+        category: "Chart",
+        authorType: "attending",
+        patientType: "Complex",
+        visitType: "Follow-Up",
+        clinicSite: "Craniofacial Clinic",
+        importance: 5,
+        urgency: 4,
+        novelty: 3,
+        interest: 4,
+        externalPressure: 4,
+        timeToStart: 3,
+        difficulty: 3,
+        subTasks: [
+          "Pull imaging summary",
+          "Outline surgical recommendations",
+          "Document caregiver education"
+        ],
+        useChartTemplate: true
+      }
+    }
+  ];
+  let blockBatchProfiles = {};
+  let blockBatchState = {
+    activeId: DEFAULT_BLOCK_BATCHES.length ? DEFAULT_BLOCK_BATCHES[0].id : null,
+    counts: {}
+  };
+  let blockBatchIdCounter = 0;
   const ENERGY_LABELS = {
     1: "Foggy",
     2: "Sleepy",
@@ -7479,6 +7787,13 @@
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+  }
+
+  function addDays(date, amount) {
+    const base = date instanceof Date && !Number.isNaN(date.getTime()) ? new Date(date) : new Date();
+    const offset = Number.isFinite(Number(amount)) ? Number(amount) : 0;
+    base.setDate(base.getDate() + offset);
+    return base;
   }
 
   function calculateDaysSince(dateString) {
@@ -10813,22 +11128,6 @@
     if (startBtn) {
       startBtn.addEventListener("click", () => startFiveMinuteSprint(nextTaskId));
     }
-    const suggestionBtn = $("activationSuggestion");
-    if (suggestionBtn) {
-      suggestionBtn.addEventListener("click", () => {
-        if (suggestionBtn.disabled) return;
-        const card = $("nextBestEngineCard");
-        if (!card) return;
-        card.classList.add("is-highlighted");
-        card.scrollIntoView({ behavior: "smooth", block: "start" });
-        window.setTimeout(() => card.classList.remove("is-highlighted"), 1200);
-      });
-    }
-    const pauseBtn = $("activationPause");
-    if (pauseBtn) {
-      pauseBtn.addEventListener("click", handleActivationPauseReset);
-    }
-    setActivationSuggestion(null);
     const nextTaskAction = $("nextTaskActionButton");
     if (nextTaskAction) {
       const LONG_PRESS_MS = 650;
@@ -10905,54 +11204,6 @@
     const saveTemplateBtn = $("btn-save-template");
     if (saveTemplateBtn) {
       saveTemplateBtn.addEventListener("click", () => saveAsTemplate());
-    }
-    const moreToggle = $("taskMoreOptionsToggle");
-    const moreMenu = $("taskMoreOptionsMenu");
-    if (moreToggle && moreMenu) {
-      const closeMenu = () => {
-        if (!moreMenu.hidden) {
-          moreMenu.hidden = true;
-          moreToggle.setAttribute("aria-expanded", "false");
-        }
-      };
-      moreToggle.addEventListener("click", event => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (moreMenu.hidden) {
-          moreMenu.hidden = false;
-          moreToggle.setAttribute("aria-expanded", "true");
-          const firstOption = moreMenu.querySelector("button");
-          if (firstOption) {
-            window.setTimeout(() => firstOption.focus(), 0);
-          }
-        } else {
-          closeMenu();
-        }
-      });
-      document.addEventListener("click", event => {
-        if (!moreMenu.contains(event.target) && event.target !== moreToggle) {
-          closeMenu();
-        }
-      });
-      moreMenu.addEventListener("click", event => {
-        event.stopPropagation();
-        const actionButton = event.target.closest("button");
-        if (actionButton) {
-          window.setTimeout(() => closeMenu(), 0);
-        }
-      });
-      moreMenu.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-          event.stopPropagation();
-          closeMenu();
-          moreToggle.focus();
-        }
-      });
-      moreToggle.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-          closeMenu();
-        }
-      });
     }
     const toggleCardBtn = $("toggleAddTaskCard");
     if (toggleCardBtn) {
@@ -11270,15 +11521,6 @@
     updateUI();
   }
 
-  function handleActivationPauseReset() {
-    const focusSection = $("focus");
-    if (focusSection && !focusSection.classList.contains("hidden")) {
-      backToCapture();
-      return;
-    }
-    reset();
-  }
-
   function reset() {
     if (!confirm("Clear all tasks?")) return;
     cancelEdit();
@@ -11384,6 +11626,465 @@
       wrapper.appendChild(deleteBtn);
       container.appendChild(wrapper);
     });
+  }
+
+  function normalizeBlockBatchProfile(profile = {}) {
+    const normalized = {
+      category: profile.category || "General",
+      authorType: profile.authorType || "attending",
+      patientType: normalizePatientType(profile.patientType || "Non-Complex"),
+      visitType: normalizeVisitType(profile.visitType || "Follow-Up"),
+      clinicSite: normalizeClinicSite(profile.clinicSite || "General Clinic"),
+      importance: clampScale(profile.importance, 1),
+      urgency: clampScale(profile.urgency, 3),
+      novelty: clampScale(profile.novelty, 1),
+      interest: clampScale(profile.interest, 1),
+      externalPressure: clampScale(profile.externalPressure, 1),
+      timeToStart: clampScale(profile.timeToStart, 1),
+      difficulty: clampScale(profile.difficulty, 1),
+      useChartTemplate: Boolean(profile.useChartTemplate)
+    };
+    if (Array.isArray(profile.subTasks)) {
+      normalized.subTasks = profile.subTasks.map(line => line.trim()).filter(Boolean);
+    } else if (typeof profile.subTasks === "string") {
+      normalized.subTasks = profile.subTasks
+        .split("\n")
+        .map(line => line.trim())
+        .filter(Boolean);
+    } else {
+      normalized.subTasks = [];
+    }
+    return normalized;
+  }
+
+  function getBlockBatchDefinition(batchId) {
+    return DEFAULT_BLOCK_BATCHES.find(batch => batch.id === batchId) || null;
+  }
+
+  function getBlockBatchProfile(batchId) {
+    const definition = getBlockBatchDefinition(batchId);
+    if (!definition) return null;
+    const base = normalizeBlockBatchProfile(definition.defaultProfile);
+    const stored = blockBatchProfiles[batchId];
+    if (!stored) {
+      return { ...base };
+    }
+    const overrides = normalizeBlockBatchProfile(stored);
+    const merged = { ...base, ...overrides };
+    merged.subTasks = overrides.subTasks.slice();
+    merged.useChartTemplate = overrides.useChartTemplate;
+    return merged;
+  }
+
+  function loadBlockBatchProfiles() {
+    const saved = localStorage.getItem(BLOCK_BATCH_STORAGE_KEY);
+    blockBatchProfiles = {};
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === "object") {
+        Object.entries(parsed).forEach(([batchId, profile]) => {
+          if (!getBlockBatchDefinition(batchId)) return;
+          blockBatchProfiles[batchId] = normalizeBlockBatchProfile(profile);
+        });
+      }
+    } catch (error) {
+      console.warn("Block batch profiles could not be parsed", error);
+      blockBatchProfiles = {};
+    }
+  }
+
+  function saveBlockBatchProfiles() {
+    localStorage.setItem(BLOCK_BATCH_STORAGE_KEY, JSON.stringify(blockBatchProfiles));
+  }
+
+  function renderBlockBatchList() {
+    const list = $("blockBatchList");
+    if (!list) return;
+    list.innerHTML = "";
+    const activeId = blockBatchState.activeId || (DEFAULT_BLOCK_BATCHES[0]?.id || null);
+    DEFAULT_BLOCK_BATCHES.forEach(definition => {
+      const item = document.createElement("div");
+      item.className = "block-batch-item";
+      item.dataset.batchId = definition.id;
+      if (definition.id === activeId) {
+        item.classList.add("is-active");
+      }
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "block-batch-item__edit";
+      editBtn.setAttribute("aria-label", `Edit ${definition.label} default profile`);
+      editBtn.textContent = "✏️";
+      editBtn.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        showBlockBatchEditor(definition.id);
+      });
+      const selectBtn = document.createElement("button");
+      selectBtn.type = "button";
+      selectBtn.className = "block-batch-item__select";
+      selectBtn.textContent = definition.label;
+      selectBtn.setAttribute("role", "option");
+      selectBtn.setAttribute("aria-selected", definition.id === activeId ? "true" : "false");
+      selectBtn.addEventListener("click", () => setActiveBlockBatch(definition.id, { focusInput: true }));
+      item.appendChild(editBtn);
+      item.appendChild(selectBtn);
+      list.appendChild(item);
+    });
+  }
+
+  function renderBlockBatchCounts() {
+    const container = $("blockBatchCounts");
+    if (!container) return;
+    container.innerHTML = "";
+    const activeId = blockBatchState.activeId;
+    DEFAULT_BLOCK_BATCHES.forEach(definition => {
+      const label = document.createElement("label");
+      label.className = "block-batch-count";
+      label.dataset.batchId = definition.id;
+      if (definition.id === activeId) {
+        label.classList.add("is-active");
+      }
+      const title = document.createElement("span");
+      title.textContent = definition.label;
+      const input = document.createElement("input");
+      input.type = "number";
+      input.id = `blockBatchCount-${definition.id}`;
+      input.name = `blockBatchCount-${definition.id}`;
+      input.min = "0";
+      input.step = "1";
+      const current = Number(blockBatchState.counts?.[definition.id] || 0);
+      input.value = String(current);
+      input.addEventListener("input", () => {
+        const parsed = Math.max(0, Math.floor(Number(input.value) || 0));
+        input.value = String(parsed);
+        blockBatchState.counts[definition.id] = parsed;
+      });
+      input.addEventListener("focus", () => {
+        if (blockBatchState.activeId !== definition.id) {
+          setActiveBlockBatch(definition.id);
+        } else {
+          updateBlockBatchHighlights();
+        }
+      });
+      label.appendChild(title);
+      label.appendChild(input);
+      container.appendChild(label);
+    });
+  }
+
+  function updateBlockBatchHighlights({ focusInput = false } = {}) {
+    const activeId = blockBatchState.activeId;
+    const list = $("blockBatchList");
+    if (list) {
+      list.querySelectorAll(".block-batch-item").forEach(item => {
+        const isActive = item.dataset.batchId === activeId;
+        item.classList.toggle("is-active", isActive);
+        const optionBtn = item.querySelector(".block-batch-item__select");
+        if (optionBtn) {
+          optionBtn.setAttribute("aria-selected", isActive ? "true" : "false");
+        }
+      });
+    }
+    const countsContainer = $("blockBatchCounts");
+    if (countsContainer) {
+      countsContainer.querySelectorAll(".block-batch-count").forEach(wrapper => {
+        wrapper.classList.toggle("is-active", wrapper.dataset.batchId === activeId);
+      });
+    }
+    if (focusInput) {
+      const targetInput = document.getElementById(`blockBatchCount-${activeId}`);
+      if (targetInput) {
+        window.setTimeout(() => {
+          targetInput.focus();
+          targetInput.select();
+        }, 0);
+      }
+    }
+  }
+
+  function setActiveBlockBatch(batchId, options = {}) {
+    const definition = getBlockBatchDefinition(batchId);
+    if (!definition) return;
+    blockBatchState.activeId = definition.id;
+    updateBlockBatchHighlights(options);
+  }
+
+  function populateBlockBatchEditor(batchId) {
+    const editor = $("blockBatchEditor");
+    if (!editor) return;
+    const profile = getBlockBatchProfile(batchId);
+    const definition = getBlockBatchDefinition(batchId);
+    if (!profile || !definition) return;
+    editor.dataset.batchId = batchId;
+    const title = $("blockBatchEditorTitle");
+    if (title) {
+      title.textContent = `Edit default profile · ${definition.label}`;
+    }
+    const setValue = (id, value) => {
+      const field = $(id);
+      if (!field) return;
+      field.value = value;
+    };
+    setValue("blockBatchCategory", profile.category || "General");
+    setValue("blockBatchAuthor", profile.authorType || "attending");
+    setValue("blockBatchPatient", profile.patientType || "Non-Complex");
+    setValue("blockBatchVisit", profile.visitType || "Follow-Up");
+    setValue("blockBatchClinic", profile.clinicSite || "General Clinic");
+    setValue("blockBatchImportance", String(profile.importance || 1));
+    setValue("blockBatchUrgency", String(profile.urgency || 3));
+    setValue("blockBatchNovelty", String(profile.novelty || 1));
+    setValue("blockBatchInterest", String(profile.interest || 1));
+    setValue("blockBatchExternalPressure", String(profile.externalPressure || 1));
+    setValue("blockBatchTimeToStart", String(profile.timeToStart || 1));
+    setValue("blockBatchDifficulty", String(profile.difficulty || 1));
+    const subtasksField = $("blockBatchSubtasks");
+    if (subtasksField) {
+      subtasksField.value = (profile.subTasks || []).join("\n");
+    }
+    const templateToggle = $("blockBatchUseChartTemplate");
+    if (templateToggle) {
+      templateToggle.checked = Boolean(profile.useChartTemplate);
+    }
+  }
+
+  function showBlockBatchEditor(batchId) {
+    const editor = $("blockBatchEditor");
+    if (!editor) return;
+    setActiveBlockBatch(batchId);
+    populateBlockBatchEditor(batchId);
+    editor.classList.remove("hidden");
+    const firstField = editor.querySelector("select, textarea, input");
+    if (firstField) {
+      window.setTimeout(() => firstField.focus(), 0);
+    }
+  }
+
+  function hideBlockBatchEditor() {
+    const editor = $("blockBatchEditor");
+    if (!editor) return;
+    editor.classList.add("hidden");
+    delete editor.dataset.batchId;
+  }
+
+  function handleBlockBatchSaveProfile() {
+    const batchId = blockBatchState.activeId;
+    if (!batchId) return;
+    const profile = normalizeBlockBatchProfile({
+      category: $("blockBatchCategory")?.value || "General",
+      authorType: $("blockBatchAuthor")?.value || "attending",
+      patientType: $("blockBatchPatient")?.value || "Non-Complex",
+      visitType: $("blockBatchVisit")?.value || "Follow-Up",
+      clinicSite: $("blockBatchClinic")?.value || "General Clinic",
+      importance: $("blockBatchImportance")?.value || 1,
+      urgency: $("blockBatchUrgency")?.value || 3,
+      novelty: $("blockBatchNovelty")?.value || 1,
+      interest: $("blockBatchInterest")?.value || 1,
+      externalPressure: $("blockBatchExternalPressure")?.value || 1,
+      timeToStart: $("blockBatchTimeToStart")?.value || 1,
+      difficulty: $("blockBatchDifficulty")?.value || 1,
+      subTasks: $("blockBatchSubtasks")?.value || "",
+      useChartTemplate: $("blockBatchUseChartTemplate")?.checked || false
+    });
+    blockBatchProfiles[batchId] = profile;
+    saveBlockBatchProfiles();
+    const definition = getBlockBatchDefinition(batchId);
+    if (definition) {
+      showToast("Block Batch", `${definition.label} profile saved.`);
+    }
+    hideBlockBatchEditor();
+  }
+
+  function handleBlockBatchResetProfile() {
+    const batchId = blockBatchState.activeId;
+    if (!batchId) return;
+    delete blockBatchProfiles[batchId];
+    saveBlockBatchProfiles();
+    populateBlockBatchEditor(batchId);
+    const definition = getBlockBatchDefinition(batchId);
+    if (definition) {
+      showToast("Block Batch", `${definition.label} profile reset to default.`);
+    }
+  }
+
+  function buildBlockBatchTaskName(prefix, serviceDate, index) {
+    const date = serviceDate instanceof Date && !Number.isNaN(serviceDate.getTime()) ? serviceDate : new Date();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${prefix}_${month}_${day}_pt${index + 1}`;
+  }
+
+  function buildTaskFromBatchProfile(profile, overrides = {}) {
+    if (!profile) return null;
+    const normalized = normalizeBlockBatchProfile(profile);
+    const nowIso = new Date().toISOString();
+    const dateOfService = overrides.dateOfService || null;
+    const dueDate = overrides.dueDate || null;
+    const task = {
+      id: `${Date.now()}-${blockBatchIdCounter++}`,
+      name: overrides.name || "Block Batch Task",
+      category: normalized.category,
+      authorType: normalized.authorType,
+      patientType: normalized.patientType,
+      visitType: normalized.visitType,
+      clinicSite: normalized.clinicSite,
+      dateOfService,
+      daysSinceVisit: calculateDaysSince(dateOfService),
+      importance: normalized.importance,
+      urgency: normalized.urgency,
+      novelty: normalized.novelty,
+      interest: normalized.interest,
+      externalPressure: normalized.externalPressure,
+      timeToStart: normalized.timeToStart,
+      difficulty: normalized.difficulty,
+      dueDate,
+      completed: false,
+      completedAt: null,
+      createdAt: nowIso,
+      addedAt: nowIso,
+      subTasks: [],
+      firstThreeMode: false,
+      firstThreeUnlocked: true,
+      firstThreeSteps: [],
+      useChartTemplate: Boolean(normalized.useChartTemplate)
+    };
+    const basePriority = computePriority({ ...task, subTasks: [] });
+    const subLines = Array.isArray(normalized.subTasks) ? normalized.subTasks : [];
+    task.subTasks = subLines.map(line => createSubTask(line, basePriority));
+    if (isChartTask(task)) {
+      const defaultsAdded = ensureChartSubTasks(task, { basePriority });
+      if (defaultsAdded) {
+        task.subTasks = task.subTasks.map(sub => normalizeSubTask(sub, basePriority));
+      }
+    }
+    maybeUnlockFirstThree(task, { silent: true });
+    task.priority = computePriority(task);
+    updateChartDurationForTask(task);
+    return task;
+  }
+
+  function resetBlockBatchCounts() {
+    blockBatchState.counts = {};
+    const container = $("blockBatchCounts");
+    if (container) {
+      container.querySelectorAll('input[type="number"]').forEach(input => {
+        input.value = "0";
+      });
+    }
+  }
+
+  function handleBlockBatchAdd() {
+    const dateField = $("blockBatchDate");
+    const rawDate = dateField && dateField.value ? dateField.value : null;
+    let serviceDateObj = rawDate ? new Date(rawDate) : new Date();
+    if (Number.isNaN(serviceDateObj.getTime())) {
+      serviceDateObj = new Date();
+    }
+    const serviceDate = formatDateForInput(serviceDateObj);
+    const dueDate = formatDateForInput(addDays(serviceDateObj, 3));
+    const additions = [];
+    DEFAULT_BLOCK_BATCHES.forEach(definition => {
+      const count = Math.max(0, Number(blockBatchState.counts?.[definition.id] || 0));
+      if (!count) return;
+      const profile = getBlockBatchProfile(definition.id);
+      for (let index = 0; index < count; index += 1) {
+        const name = buildBlockBatchTaskName(definition.prefix, serviceDateObj, index);
+        const task = buildTaskFromBatchProfile(profile, {
+          name,
+          dateOfService: serviceDate,
+          dueDate
+        });
+        if (task) {
+          additions.push(task);
+        }
+      }
+    });
+    if (!additions.length) {
+      showToast("Block Batch", "Set at least one batch count to add tasks.");
+      return;
+    }
+    additions.forEach(task => tasks.push(task));
+    persist();
+    updateUI();
+    showToast("Block Batch", `Added ${additions.length} tasks.`);
+    resetBlockBatchCounts();
+    closeBlockBatchModal();
+  }
+
+  function updateBlockBatchModal({ focusActive = false } = {}) {
+    renderBlockBatchList();
+    renderBlockBatchCounts();
+    updateBlockBatchHighlights({ focusInput: focusActive });
+  }
+
+  function openBlockBatchModal() {
+    const modal = $("block-batch-modal");
+    if (!modal) return;
+    loadBlockBatchProfiles();
+    if (!blockBatchState.activeId && DEFAULT_BLOCK_BATCHES.length) {
+      blockBatchState.activeId = DEFAULT_BLOCK_BATCHES[0].id;
+    }
+    updateBlockBatchModal({ focusActive: true });
+    hideBlockBatchEditor();
+    const dateField = $("blockBatchDate");
+    if (dateField) {
+      const today = formatDateForInput(new Date());
+      dateField.value = dateField.value || today;
+    }
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    const firstOption = modal.querySelector(".block-batch-item__select");
+    if (firstOption) {
+      window.setTimeout(() => firstOption.focus(), 0);
+    }
+  }
+
+  function closeBlockBatchModal() {
+    const modal = $("block-batch-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+    hideBlockBatchEditor();
+    resetBlockBatchCounts();
+  }
+
+  function initializeBlockBatchModule() {
+    const openBtn = $("blockBatchOpen");
+    const modal = $("block-batch-modal");
+    if (!openBtn || !modal) return;
+    openBtn.addEventListener("click", () => openBlockBatchModal());
+    const closeBtn = modal.querySelector(".modal__close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => closeBlockBatchModal());
+    }
+    modal.addEventListener("click", event => {
+      if (event.target === modal) {
+        closeBlockBatchModal();
+      }
+    });
+    modal.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        closeBlockBatchModal();
+      }
+    });
+    const saveBtn = $("blockBatchSaveProfile");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", handleBlockBatchSaveProfile);
+    }
+    const resetBtn = $("blockBatchResetProfile");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", handleBlockBatchResetProfile);
+    }
+    const closeEditorBtn = $("blockBatchEditorClose");
+    if (closeEditorBtn) {
+      closeEditorBtn.addEventListener("click", hideBlockBatchEditor);
+    }
+    const addBtn = $("blockBatchAdd");
+    if (addBtn) {
+      addBtn.addEventListener("click", handleBlockBatchAdd);
+    }
+    loadBlockBatchProfiles();
   }
 
   function updateBillingReminder() {
@@ -11502,6 +12203,7 @@
     initializeSoundPreference();
     initializeFirstThreeWizard();
     initializeTaskForm();
+    initializeBlockBatchModule();
     initializeAddTaskCardState();
     initializeStatusCardState();
     initializePreflightToggles();
