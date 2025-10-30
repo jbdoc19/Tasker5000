@@ -15,6 +15,12 @@
       --card-border-color: rgba(147, 160, 170, 0.18);
     }
 
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     body {
       background: #0c1117;
       color: var(--text-primary);
@@ -873,6 +879,26 @@
       }
       .worst-day-button {
         font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .starter-micro-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+
+      .starter-micro-header .start-action,
+      .starter-micro-header .starter-rescue {
+        width: 100%;
+        margin: 0;
+      }
+
+      .starter-fit-chips {
+        justify-content: center;
+        flex-wrap: wrap;
+        overflow: visible;
       }
     }
     .distraction-tools {
@@ -2093,6 +2119,10 @@
       transition: transform 220ms ease;
     }
 
+    .focus-sheet[aria-hidden="true"] {
+      display: none;
+    }
+
     .focus-sheet.is-open {
       transform: translate(-50%, 0);
     }
@@ -2203,23 +2233,30 @@
     .resources-drawer {
       position: fixed;
       top: 0;
-      right: 0;
       bottom: 0;
-      width: min(360px, 86vw);
+      right: 0;
+      --drawer-width: min(360px, 86vw);
+      --drawer-padding: clamp(1.25rem, 4vw, 1.75rem);
+      width: var(--drawer-width);
+      padding: var(--drawer-padding);
       background: rgba(10, 14, 20, 0.97);
       border-left: 1px solid rgba(147, 160, 170, 0.28);
       box-shadow: -18px 0 42px rgba(0, 0, 0, 0.5);
-      transform: translateX(100%);
-      transition: transform 220ms ease;
       z-index: 102;
-      display: flex;
+      display: none;
       flex-direction: column;
       gap: 1.25rem;
-      padding: clamp(1.25rem, 4vw, 1.75rem);
+      pointer-events: none;
+      transform: translateX(1rem);
+      opacity: 0;
+      transition: transform 220ms ease, opacity 220ms ease;
     }
 
     .resources-drawer.is-open {
+      display: flex;
+      pointer-events: auto;
       transform: translateX(0);
+      opacity: 1;
     }
 
     .resources-drawer__header {
@@ -4028,6 +4065,7 @@
     body {
       font-weight: 400;
       line-height: 1.5;
+      overflow-x: hidden;
     }
 
     .card,
