@@ -1254,23 +1254,6 @@
       margin-top: 1rem;
     }
     [aria-live] { outline: none; }
-    .meltdown-sos-button {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 1.5rem;
-      background: #ff4d4f;
-      color: #fff;
-      font-weight: 600;
-      border-radius: 999px;
-      padding: 0.75rem 1.25rem;
-      box-shadow: 0 8px 20px rgba(255, 77, 79, 0.35);
-      z-index: 1200;
-      margin: 0;
-    }
-    .meltdown-sos-button:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6);
-    }
     .meltdown-shield {
       position: fixed;
       bottom: 1.5rem;
@@ -1720,12 +1703,6 @@
         padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 120px;
       }
 
-      .activation-bar {
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(92vw, 360px);
-      }
-
       .card {
         padding: var(--space-3);
         gap: var(--space-2);
@@ -1752,26 +1729,30 @@
       }
     }
 
-    .page-header {
+    .app-header {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 6px;
-      margin: 8px 0 4px;
-      padding-bottom: var(--space-2);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      gap: 0.4rem;
+      margin-bottom: var(--space-2);
     }
 
-    .page-header .title {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .app-header__title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .app-header__title h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 3vw, 1.65rem);
       font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
-    .page-header .subtitle {
-      font-size: 0.85rem;
+    .app-header__subtitle {
+      margin: 0;
       color: var(--text-secondary);
+      font-size: 0.95rem;
     }
 
     .header-chip {
@@ -1796,64 +1777,40 @@
     }
 
     .momentum-zones {
-      display: grid;
-      gap: clamp(1.5rem, 4vw, 2.5rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.5rem, 4vw, 2.4rem);
       position: relative;
       width: 100%;
     }
 
     .momentum-zone {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: var(--space-3);
       position: relative;
     }
 
+    .momentum-zone[data-zone="action"] {
+      order: 0;
+    }
+
+    .momentum-zone[data-zone="launch"] {
+      order: 1;
+    }
+
+    .momentum-zone[data-zone="recovery"] {
+      order: 2;
+    }
+
     .zone-header {
-      position: sticky;
-      top: clamp(0.25rem, 2vw, 0.85rem);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 1rem;
-      border-radius: 999px;
-      background: rgba(15, 22, 30, 0.88);
-      border: 1px solid rgba(147, 160, 170, 0.22);
-      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
-      z-index: 30;
-      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
-    }
-
-    .zone-header.is-docked {
-      transform: translateY(-0.35rem);
-      background: rgba(20, 27, 36, 0.95);
-      border-color: rgba(147, 160, 170, 0.36);
-    }
-
-    .zone-header__icon {
-      font-size: 1.25rem;
-    }
-
-    .zone-header__text {
-      display: grid;
-      gap: 0.1rem;
-    }
-
-    .zone-header__title {
-      margin: 0;
-      font-size: 1.05rem;
-    }
-
-    .zone-header__subtitle {
-      margin: 0;
-      font-size: 0.78rem;
-      color: rgba(226, 232, 240, 0.7);
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
+      display: none !important;
     }
 
     .zone-body {
-      display: grid;
-      gap: clamp(1.15rem, 3vw, 1.8rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.4rem, 4vw, 2.1rem);
       position: relative;
     }
 
@@ -1866,54 +1823,25 @@
       scroll-margin-top: clamp(120px, 15vh, 180px);
     }
 
-    .zone-return-chip {
-      position: fixed;
-      bottom: clamp(136px, 16vh, 180px);
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 0.45rem 1rem;
-      border-radius: 999px;
-      background: rgba(12, 18, 26, 0.92);
-      border: 1px solid rgba(147, 160, 170, 0.28);
-      color: rgba(226, 232, 240, 0.92);
-      font-size: 0.85rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 180ms ease, transform 180ms ease;
-      z-index: 75;
-    }
-
-    .zone-return-chip.is-visible {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, -6px);
-    }
-
-    .zone-return-chip a {
-      color: inherit;
-      text-decoration: none;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
     .command-bar {
       position: fixed;
       bottom: 0;
       left: 50%;
-      transform: translateX(-50%);
-      width: min(100%, 640px);
-      background: rgba(8, 12, 18, 0.96);
+      transform: translate3d(-50%, 0, 0);
+      width: min(100%, 680px);
+      background: rgba(8, 12, 18, 0.94);
       border-top: 1px solid rgba(147, 160, 170, 0.2);
       box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.5);
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       z-index: 90;
+      transition: opacity 200ms ease, transform 220ms ease;
+    }
+
+    .command-bar.is-hidden {
+      opacity: 0;
+      transform: translate3d(-50%, 16px, 0);
+      pointer-events: none;
     }
 
     .command-link {
@@ -1928,6 +1856,10 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       transition: background 160ms ease, color 160ms ease;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      cursor: pointer;
     }
 
     .command-link:hover,
@@ -1946,137 +1878,438 @@
       font-size: 1.1rem;
     }
 
-    .focus-recovery-button {
-      position: fixed;
-      right: clamp(1rem, 4vw, 2.5rem);
-      bottom: clamp(148px, 18vh, 196px);
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 1px solid rgba(147, 160, 170, 0.32);
-      background: rgba(18, 24, 32, 0.92);
-      color: rgba(226, 232, 240, 0.92);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .primary-action {
+      background: var(--surface-elevated);
+      border: 1px solid var(--card-border-color);
+      border-radius: var(--card-radius);
+      width: min(100%, 720px);
+      margin: 0 auto clamp(1.5rem, 4vw, 2.2rem);
+      padding: clamp(1.25rem, 4vw, 1.7rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .primary-action::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(45, 212, 195, 0.12), rgba(45, 212, 195, 0));
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .primary-action__context h2 {
+      margin: 0;
       font-size: 1.1rem;
-      z-index: 85;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-      transition: transform 180ms ease, box-shadow 220ms ease;
+      letter-spacing: 0.02em;
     }
 
-    .focus-recovery-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+    .primary-action__hint {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 48ch;
     }
 
-    body.is-scrolling .zone-header,
-    body.is-scrolling .activation-fab,
-    body.is-scrolling .command-link {
-      transition-duration: 0s !important;
+    .zone-body > .card {
+      width: min(100%, 720px);
+      margin: 0 auto;
     }
 
-    .activation-bar {
+    .focus-fab {
       position: fixed;
-      bottom: clamp(88px, 12vh, 128px);
-      z-index: 80;
-      display: grid;
-      gap: var(--space-2);
-      padding: var(--space-2);
-      border-radius: 24px;
-      background: rgba(10, 15, 22, 0.92);
-      border: 1px solid rgba(147, 160, 170, 0.28);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
-    }
-
-    .activation-fab {
+      right: clamp(1.25rem, 5vw, 2.5rem);
+      bottom: clamp(5.5rem, 16vh, 7.5rem);
       background: var(--hero-teal);
       color: #022624;
       border: none;
       border-radius: 999px;
-      padding: 0.65rem 1.5rem;
+      padding: 0.75rem 1.5rem;
       font-weight: 600;
       font-size: 1rem;
-      min-height: 52px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 14px 32px rgba(45, 212, 195, 0.35);
-      width: 100%;
+      gap: 0.55rem;
+      box-shadow: 0 18px 42px rgba(45, 212, 195, 0.32);
+      z-index: 110;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 220ms ease, background 180ms ease;
+    }
+
+    .focus-fab:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 48px rgba(45, 212, 195, 0.36);
+      background: #27c2b0;
+    }
+
+    .focus-fab:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .focus-fab:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.55), 0 18px 42px rgba(45, 212, 195, 0.32);
+    }
+
+    .focus-sheet__backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 10, 16, 0.6);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 104;
+    }
+
+    .focus-sheet__backdrop.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .focus-sheet {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translate(-50%, 110%);
+      width: min(100%, 560px);
+      background: rgba(10, 14, 20, 0.96);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border: 1px solid rgba(147, 160, 170, 0.28);
+      box-shadow: 0 -20px 48px rgba(0, 0, 0, 0.55);
+      padding: 1.2rem clamp(1rem, 4vw, 1.6rem);
+      z-index: 105;
+      transition: transform 220ms ease;
+    }
+
+    .focus-sheet.is-open {
+      transform: translate(-50%, 0);
+    }
+
+    .focus-sheet__handle {
+      width: 64px;
+      height: 6px;
+      margin: 0 auto 1rem;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.35);
+      border: none;
+      cursor: pointer;
+    }
+
+    .focus-sheet__content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .focus-sheet__header h2 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .focus-sheet__preview {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .focus-sheet__options {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .focus-sheet__option {
+      border-radius: 16px;
+      border: 1px solid rgba(147, 160, 170, 0.24);
+      padding: 0.75rem 1rem;
+      background: rgba(20, 26, 34, 0.9);
+      color: var(--text-primary);
+      font-weight: 500;
+      display: grid;
+      gap: 0.25rem;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .focus-sheet__option:hover:not(:disabled),
+    .focus-sheet__option:focus-visible {
+      background: rgba(30, 38, 48, 0.95);
+      border-color: rgba(45, 212, 195, 0.4);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .focus-sheet__option--primary {
+      background: var(--hero-teal);
+      color: #022624;
+      border-color: transparent;
+      box-shadow: 0 16px 40px rgba(45, 212, 195, 0.32);
+    }
+
+    .focus-sheet__option--primary:hover {
+      background: #27c2b0;
+    }
+
+    .focus-sheet__option--suggestion {
+      background: rgba(15, 22, 30, 0.92);
+      border-style: dashed;
+    }
+
+    .focus-sheet__option:disabled,
+    .focus-sheet__option[aria-disabled="true"] {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .focus-sheet__option-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .focus-sheet__option-detail {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 10, 16, 0.55);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 101;
+    }
+
+    .drawer-backdrop.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .resources-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(360px, 86vw);
+      background: rgba(10, 14, 20, 0.97);
+      border-left: 1px solid rgba(147, 160, 170, 0.28);
+      box-shadow: -18px 0 42px rgba(0, 0, 0, 0.5);
+      transform: translateX(100%);
+      transition: transform 220ms ease;
+      z-index: 102;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding: clamp(1.25rem, 4vw, 1.75rem);
+    }
+
+    .resources-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .resources-drawer__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .resources-drawer__header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .resources-drawer__close {
+      border: none;
+      background: rgba(148, 163, 184, 0.16);
+      border-radius: 999px;
+      color: var(--text-primary);
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+
+    .resources-drawer__body {
+      display: grid;
+      gap: 0.85rem;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
+
+    .command-link--drawer {
+      letter-spacing: 0.05em;
+    }
+
+    .meltdown-sos-button {
+      position: fixed;
+      right: clamp(1.25rem, 5vw, 2.5rem);
+      bottom: clamp(8.5rem, 22vh, 11rem);
+      background: #ff4d4f;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 0.75rem 1.3rem;
+      box-shadow: 0 16px 36px rgba(255, 77, 79, 0.4);
+      z-index: 120;
+      border: none;
       cursor: pointer;
       transition: transform 180ms ease, box-shadow 220ms ease;
     }
 
-    .activation-fab:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .activation-fab:hover:not(:disabled) {
+    .meltdown-sos-button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.45), 0 18px 40px rgba(45, 212, 195, 0.42);
+      box-shadow: 0 18px 42px rgba(255, 77, 79, 0.45);
     }
 
-    .activation-fab__icon {
-      font-size: 1.1rem;
+    .meltdown-sos-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.6), 0 18px 42px rgba(255, 77, 79, 0.45);
     }
 
-    .activation-options {
-      display: grid;
-      gap: 0.5rem;
-      padding: 0.35rem;
+    .sos-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: clamp(1rem, 5vw, 1.75rem);
+      background: rgba(6, 10, 16, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 130;
+    }
+
+    .sos-card {
+      width: min(320px, 92vw);
+      background: rgba(10, 14, 20, 0.95);
+      border: 1px solid rgba(147, 160, 170, 0.28);
       border-radius: 20px;
-      background: rgba(13, 18, 24, 0.85);
-      border: 1px solid rgba(147, 160, 170, 0.18);
-      box-shadow: inset 0 0 0 1px rgba(147, 160, 170, 0.08);
+      padding: clamp(1rem, 4vw, 1.5rem);
+      display: grid;
+      gap: 1rem;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
     }
 
-    .activation-option {
-      border-radius: 16px;
-      padding: 0.55rem 1rem;
-      background: rgba(31, 41, 55, 0.92);
-      border: 1px solid rgba(147, 160, 170, 0.24);
-      font-weight: 500;
-      font-size: 0.95rem;
+    .sos-card__header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: background 160ms ease, border-color 160ms ease;
+      justify-content: space-between;
+      gap: 1rem;
     }
 
-    .activation-option:hover {
-      background: rgba(45, 55, 72, 0.95);
-      border-color: rgba(148, 163, 184, 0.45);
+    .sos-card__header h2 {
+      margin: 0;
+      font-size: 1.05rem;
     }
 
-    .activation-suggestion {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      border-radius: 999px;
-      padding: 0.4rem 0.8rem;
-      border: 1px solid rgba(147, 160, 170, 0.22);
-      background: rgba(13, 18, 24, 0.82);
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      justify-content: center;
-      width: 100%;
+    .sos-card__close {
+      border: none;
+      background: rgba(148, 163, 184, 0.14);
+      color: var(--text-primary);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
     }
 
-    .activation-suggestion:disabled,
-    .activation-suggestion[aria-disabled="true"] {
-      opacity: 0.6;
-      cursor: not-allowed;
+    .sos-card__actions {
+      display: grid;
+      gap: 0.75rem;
     }
 
-    .activation-suggestion__label {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.75rem;
-      color: rgba(226, 232, 240, 0.65);
+    .sos-card__action-group {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .sos-card__action {
+      border: 1px solid rgba(147, 160, 170, 0.28);
+      border-radius: 14px;
+      background: rgba(18, 24, 32, 0.92);
+      color: var(--text-primary);
+      padding: 0.65rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .sos-card__action:hover,
+    .sos-card__action:focus-visible {
+      background: rgba(28, 38, 48, 0.95);
+      border-color: rgba(45, 212, 195, 0.35);
+      outline: none;
+    }
+
+    .sos-card__detail {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .sos-card__hint {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .defuse-modal {
+      width: min(520px, 94vw);
+      margin: auto;
+      background: rgba(12, 17, 24, 0.96);
+      border-radius: 20px;
+      border: 1px solid rgba(147, 160, 170, 0.28);
+      box-shadow: 0 24px 52px rgba(0, 0, 0, 0.6);
+      display: grid;
+      gap: 1rem;
+      padding: clamp(1.25rem, 4vw, 1.75rem);
+    }
+
+    .defuse-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .defuse-modal__header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .defuse-modal__close {
+      border: none;
+      background: rgba(148, 163, 184, 0.16);
+      color: var(--text-primary);
+      border-radius: 999px;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+
+    .defuse-modal__body {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .sos-overlay.hidden,
+    .defuse-overlay.hidden {
+      display: none;
+    }
+
+    body.is-scrolling .zone-header,
+    body.is-scrolling .focus-fab,
+    body.is-scrolling .command-link {
+      transition-duration: 0s !important;
     }
 
     body::before {
@@ -3175,10 +3408,6 @@
       z-index: 1500;
     }
 
-    .meltdown-sos-button {
-      display: none;
-    }
-
     .module-stack {
       display: grid;
       gap: var(--space-3);
@@ -3853,10 +4082,22 @@
 
   <section id="capture">
     <div class="app-shell">
-      <div class="page-header">
-        <div class="title">🎯 Task Focus</div>
-        <div class="subtitle" id="billingReminder"></div>
-      </div>
+      <header class="app-header">
+        <div class="app-header__title">
+          <h1>Task Focus</h1>
+          <p id="headerSubtitle" class="app-header__subtitle"></p>
+        </div>
+        <p class="billing-reminder" id="billingReminder"></p>
+      </header>
+
+      <section class="primary-action" aria-labelledby="primaryActionTitle">
+        <div class="primary-action__context">
+          <h2 id="primaryActionTitle">Command cockpit</h2>
+          <p class="primary-action__hint">
+            Next suggested: <span id="focusLaunchHint">Add a task to unlock focus.</span>
+          </p>
+        </div>
+      </section>
 
       <div class="momentum-zones">
         <section id="launchZone" class="momentum-zone" data-zone="launch">
@@ -3868,70 +4109,8 @@
             </div>
           </header>
           <div class="zone-body">
-      <section id="supportLinks" class="card resource-card" aria-labelledby="supportLinksTitle">
-        <div class="card-head">
-          <h2 id="supportLinksTitle">Quick access partners</h2>
-        </div>
-        <div class="card-body">
-          <p class="resource-intro">
-            Launch the assistants and knowledge bases you rely on for planning, EPIC efficiency, and assessment templates.
-          </p>
-          <div class="resource-links">
-            <a
-              class="resource-button resource-button--planning"
-              href="https://chatgpt.com/g/g-p-68feee841e7081919a28fe9b3083e9f0-karl/project"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <small>planning ally</small>
-              <strong>Chat with Karl</strong>
-              <span>ADHD-tailored task partner ready to map out your day.</span>
-            </a>
-            <a
-              class="resource-button resource-button--strategies"
-              href="https://chatgpt.com/g/g-p-6836a5682d0481918484506cbc1f3082-epic-companion/project"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <small>strategies</small>
-              <strong>EPIC Companion</strong>
-              <span>Brainstorm workflows to move faster inside the EHR.</span>
-            </a>
-            <a
-              class="resource-button resource-button--digest"
-              href="https://notebooklm.google.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <small>digest</small>
-              <strong>NotebookLM</strong>
-              <span>Summarize research and notes in a focused workspace.</span>
-            </a>
-            <a
-              class="resource-button resource-button--vault"
-              href="https://www.notion.so/Assessments-and-Plans-28131b26f81f803088bad074ee0e00fb?source=copy_link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <small>vault</small>
-              <strong>Assessments &amp; Plans</strong>
-              <span>Review ready-made assessment and plan examples.</span>
-            </a>
-            <a
-              class="resource-button resource-button--vault"
-              href="https://chatgpt.com/g/g-p-68feff1f73ac819189dcf556e573c912-assessments-plans/project"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <small>document builder</small>
-              <strong>Create Assessments &amp; Plans</strong>
-              <span>Draft new assessments from your history and physical notes.</span>
-            </a>
-          </div>
-        </div>
-      </section>
 
-      <section id="statusCard" class="card card--collapsed status-card" data-collapsed="true" aria-live="polite">
+            <section id="statusCard" class="card card--collapsed status-card" data-collapsed="true" aria-live="polite">
         <div class="card-head">
           <h2>Let’s set the stage</h2>
           <button
@@ -3979,34 +4158,6 @@
           </div>
         </div>
       </section>
-
-      <div class="worst-day-banner" role="region" aria-labelledby="worstDayBannerTitle">
-        <h2 id="worstDayBannerTitle">😵‍💫 Worst-Day Mode</h2>
-        <button id="worstDayButton" class="worst-day-button hero-cta start-action" type="button">Start 5 minutes</button>
-        <p id="worstDayHint" class="worst-day-hint"></p>
-      </div>
-
-      <div class="activation-bar" id="startFab" role="region" aria-label="Quick focus controls">
-        <button
-          id="activationStart"
-          class="activation-fab"
-          type="button"
-          aria-expanded="false"
-          aria-controls="activationOptions"
-        >
-          <span class="activation-fab__icon" aria-hidden="true">▶️</span>
-          <span class="activation-fab__label">Start tasks now</span>
-        </button>
-        <div id="activationOptions" class="activation-options" hidden>
-          <button type="button" class="activation-option" data-activation-mode="sprint">Start 5-min</button>
-          <button type="button" class="activation-option" data-activation-mode="easy">Easy start</button>
-          <button type="button" class="activation-option" data-activation-mode="buddy">With buddy</button>
-        </div>
-        <button id="activationSuggestion" class="activation-suggestion" type="button" disabled aria-disabled="true">
-          <span class="activation-suggestion__label">Next best:</span>
-          <span id="activationNextBestText">Add a task to unlock focus.</span>
-        </button>
-      </div>
 
           </div>
         </section>
@@ -4507,61 +4658,6 @@
           </div>
         </div>
 
-        <div id="defuseModule" class="module-card" data-module-id="defuseModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <div class="module-heading__text">
-                <span class="module-heading__title">🧘 DEFUSE Mode</span>
-                <span class="module-heading__tagline">Feelings ≠ instructions.</span>
-              </div>
-            </div>
-            <span class="info-dot" title="90-second preflight that separates feelings from actions and locks distractions.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="defuse-grid">
-              <div class="defuse-steps">
-                <strong>Preflight (90s)</strong>
-                <div id="defusePrompt">Feeling ≠ instruction. You can feel tired and still send the email.</div>
-                <div class="defuse-progress" aria-hidden="true">
-                  <span id="defuseProgressFill"></span>
-                </div>
-                <div class="score">Countdown: <span id="defuseCountdown">90s</span></div>
-              </div>
-              <div>
-                <strong>Fake it action</strong>
-                <div class="intention-buttons">
-                  <button type="button" data-defuse-action="Open the doc & type the title">Open doc + type title</button>
-                  <button type="button" data-defuse-action="Write one bullet in the note">Draft one bullet</button>
-                  <button type="button" data-defuse-action="Send the 2-sentence update">Send the 2-sentence update</button>
-                </div>
-                <p id="defuseActionPreview" class="score">Action picked: Open the doc & type the title</p>
-              </div>
-              <div>
-                <strong>Zone locks</strong>
-                <div id="defuseLocks" class="defuse-locks">
-                  <label><input type="checkbox" value="Messages" /> Messages</label>
-                  <label><input type="checkbox" value="Email" /> Email</label>
-                  <label><input type="checkbox" value="Instagram" /> Instagram</label>
-                  <label><input type="checkbox" value="YouTube" /> YouTube</label>
-                </div>
-              </div>
-              <div>
-                <strong>Uptime sprint</strong>
-                <p id="defuseUptime" class="score">Next sprint: 10 minutes</p>
-                <div class="defuse-progress" aria-hidden="true">
-                  <span id="defuseUptimeFill"></span>
-                </div>
-              </div>
-              <div class="conflict-actions">
-                <button id="defuseStart" type="button" class="btn btn-primary">Start DEFUSE</button>
-                <button id="defuseCancel" type="button" class="btn btn-ghost" disabled>Cancel</button>
-              </div>
-              <div id="defuseStatus" class="score" aria-live="polite"></div>
-            </div>
-          </div>
-        </div>
-
         <div id="dopamineModule" class="module-card" data-module-id="dopamineModule">
           <button class="module-header" type="button" aria-expanded="false">
             <div class="module-heading">
@@ -4788,6 +4884,159 @@
     </div>
   </div>
 
+  <button
+    id="startFocusFab"
+    class="focus-fab"
+    type="button"
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-controls="focusLaunchSheet"
+  >
+    <span class="focus-fab__icon" aria-hidden="true">▶️</span>
+    <span class="focus-fab__label">Start Focus</span>
+  </button>
+
+  <div id="focusLaunchBackdrop" class="focus-sheet__backdrop" hidden></div>
+  <section
+    id="focusLaunchSheet"
+    class="focus-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="focusLaunchTitle"
+  >
+    <button id="focusLaunchHandle" class="focus-sheet__handle" type="button" aria-label="Close focus launcher"></button>
+    <div class="focus-sheet__content">
+      <header class="focus-sheet__header">
+        <h2 id="focusLaunchTitle">Start Focus</h2>
+        <p class="focus-sheet__preview">
+          Next suggested: <span id="focusSuggestionText">Add a task to unlock focus.</span>
+        </p>
+      </header>
+      <div class="focus-sheet__options">
+        <button
+          type="button"
+          class="focus-sheet__option focus-sheet__option--primary start-action"
+          data-focus-mode="sprint"
+        >
+          5-min Sprint
+        </button>
+        <button type="button" class="focus-sheet__option" data-focus-mode="session">Full Session</button>
+        <button
+          type="button"
+          id="focusSuggestionButton"
+          class="focus-sheet__option focus-sheet__option--suggestion"
+          data-focus-mode="suggestion"
+          disabled
+          aria-disabled="true"
+        >
+          <span class="focus-sheet__option-label">Next Suggested Task</span>
+          <span id="focusSuggestionDetail" class="focus-sheet__option-detail">Add a task to unlock focus.</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div id="resourcesBackdrop" class="drawer-backdrop" hidden></div>
+  <aside
+    id="resourcesDrawer"
+    class="resources-drawer"
+    aria-hidden="true"
+    aria-labelledby="resourcesTitle"
+    tabindex="-1"
+  >
+    <header class="resources-drawer__header">
+      <h2 id="resourcesTitle">Quick Access Partners</h2>
+      <button id="resourcesClose" class="resources-drawer__close" type="button" aria-label="Close resources">✕</button>
+    </header>
+    <div class="resources-drawer__body">
+      <a
+        class="resource-button resource-button--planning"
+        href="https://chatgpt.com/g/g-p-68feee841e7081919a28fe9b3083e9f0-karl/project"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <small>planning ally</small>
+        <strong>Chat with Karl</strong>
+        <span>ADHD-tailored task partner ready to map out your day.</span>
+      </a>
+      <a
+        class="resource-button resource-button--strategies"
+        href="https://chatgpt.com/g/g-p-6836a5682d0481918484506cbc1f3082-epic-companion/project"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <small>strategies</small>
+        <strong>EPIC Companion</strong>
+        <span>Brainstorm workflows to move faster inside the EHR.</span>
+      </a>
+      <a
+        class="resource-button resource-button--digest"
+        href="https://notebooklm.google.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <small>digest</small>
+        <strong>NotebookLM</strong>
+        <span>Summarize research and notes in a focused workspace.</span>
+      </a>
+      <a
+        class="resource-button resource-button--vault"
+        href="https://www.notion.so/Assessments-and-Plans-28131b26f81f803088bad074ee0e00fb?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <small>vault</small>
+        <strong>Assessments &amp; Plans</strong>
+        <span>Review ready-made assessment and plan examples.</span>
+      </a>
+      <a
+        class="resource-button resource-button--vault"
+        href="https://chatgpt.com/g/g-p-68feff1f73ac819189dcf556e573c912-assessments-plans/project"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <small>document builder</small>
+        <strong>Create Assessments &amp; Plans</strong>
+        <span>Draft new assessments from your history and physical notes.</span>
+      </a>
+    </div>
+  </aside>
+
+  <button
+    id="meltdownSosButton"
+    class="meltdown-sos-button"
+    type="button"
+    aria-haspopup="dialog"
+    aria-controls="sosOverlay"
+  >
+    SOS Tools
+  </button>
+
+  <div
+    id="sosOverlay"
+    class="sos-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sosOverlayTitle"
+  >
+    <div class="sos-card">
+      <header class="sos-card__header">
+        <h2 id="sosOverlayTitle">Crisis Support</h2>
+        <button id="sosOverlayClose" class="sos-card__close" type="button" aria-label="Close crisis support">✕</button>
+      </header>
+      <div class="sos-card__actions">
+        <div class="sos-card__action-group">
+          <button id="worstDayButton" class="sos-card__action start-action" type="button">😵‍💫 Worst-Day Mode</button>
+          <p id="worstDayHint" class="sos-card__detail"></p>
+        </div>
+        <button id="sosDefuse" class="sos-card__action" type="button">🧘 DEFUSE Mode</button>
+        <button id="sosShield" class="sos-card__action" type="button">🛡️ Meltdown Shield</button>
+      </div>
+      <p class="sos-card__hint">Need a reset? These stay ready until you close them.</p>
+    </div>
+  </div>
+
   <!-- Focus mode -->
   <div id="ganttSnapshotOverlay" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="ganttSnapshotTitle">
     <div class="gantt-card">
@@ -4825,6 +5074,64 @@
         <div id="worstDayCelebration" class="worst-day-celebration" aria-live="polite"></div>
       </div>
       <button id="worstDayExit" class="link-button" type="button">Leave Worst-Day Mode</button>
+    </div>
+  </div>
+
+  <div
+    id="defuseOverlay"
+    class="modal-overlay hidden defuse-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="defuseOverlayTitle"
+  >
+    <div class="defuse-modal">
+      <header class="defuse-modal__header">
+        <h3 id="defuseOverlayTitle">🧘 DEFUSE Mode</h3>
+        <button id="defuseClose" class="defuse-modal__close" type="button" aria-label="Close DEFUSE mode">✕</button>
+      </header>
+      <div id="defuseModule" class="defuse-modal__body" data-module-id="defuseModule">
+        <div class="defuse-grid">
+          <div class="defuse-steps">
+            <strong>Preflight (90s)</strong>
+            <div id="defusePrompt">Feeling ≠ instruction. You can feel tired and still send the email.</div>
+            <div class="defuse-progress" aria-hidden="true">
+              <span id="defuseProgressFill"></span>
+            </div>
+            <div class="score">Countdown: <span id="defuseCountdown">90s</span></div>
+          </div>
+          <div>
+            <strong>Fake it action</strong>
+            <div class="intention-buttons">
+              <button type="button" data-defuse-action="Open the doc & type the title">Open doc + type title</button>
+              <button type="button" data-defuse-action="Write one bullet in the note">Draft one bullet</button>
+              <button type="button" data-defuse-action="Send the 2-sentence update">Send the 2-sentence update</button>
+            </div>
+            <p id="defuseActionPreview" class="score">Action picked: Open the doc & type the title</p>
+          </div>
+          <div>
+            <strong>Zone locks</strong>
+            <div id="defuseLocks" class="defuse-locks">
+              <label><input type="checkbox" value="Messages" /> Messages</label>
+              <label><input type="checkbox" value="Email" /> Email</label>
+              <label><input type="checkbox" value="Instagram" /> Instagram</label>
+              <label><input type="checkbox" value="YouTube" /> YouTube</label>
+            </div>
+          </div>
+          <div>
+            <strong>Uptime sprint</strong>
+            <p id="defuseUptime" class="score">Next sprint: 10 minutes</p>
+            <div class="defuse-progress" aria-hidden="true">
+              <span id="defuseUptimeFill"></span>
+            </div>
+          </div>
+          <div class="conflict-actions">
+            <button id="defuseStart" type="button" class="btn btn-primary">Start DEFUSE</button>
+            <button id="defuseCancel" type="button" class="btn btn-ghost" disabled>Cancel</button>
+          </div>
+          <div id="defuseStatus" class="score" aria-live="polite"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -4876,10 +5183,6 @@
     </div>
   </section>
 
-  <button id="focusRecoveryButton" class="focus-recovery-button" type="button" aria-label="Return to last active zone">🧭</button>
-  <div id="zoneReturnChip" class="zone-return-chip" aria-hidden="true">
-    <a href="#actionZone">Return to Focus Zone ⬆️</a>
-  </div>
   <nav class="command-bar" aria-label="Momentum shortcuts">
     <a href="#focus-engine" class="command-link">
       <span class="command-link__icon" aria-hidden="true">⚡</span>
@@ -4889,6 +5192,16 @@
       <span class="command-link__icon" aria-hidden="true">🩺</span>
       <span>Tasks</span>
     </a>
+    <button
+      id="resourcesToggle"
+      class="command-link command-link--drawer"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="resourcesDrawer"
+    >
+      <span class="command-link__icon" aria-hidden="true">📁</span>
+      <span>Resources</span>
+    </button>
     <a href="#reset-zone" class="command-link">
       <span class="command-link__icon" aria-hidden="true">🌙</span>
       <span>Reset</span>
@@ -4921,7 +5234,6 @@
     "sleepToolkitModule",
     "templateModule",
     "conflictResolverModule",
-    "defuseModule",
     "dopamineModule"
   ];
   const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
@@ -5004,14 +5316,14 @@
   const BLOCK_BATCH_STORAGE_KEY = "blockBatch.profiles";
   const LAST_ZONE_STORAGE_KEY = "momentum.lastZone";
   const BRIEF_MODE_STORAGE_KEY = "momentum.briefMode";
-  const FOCUS_RECOVERY_TAP_WINDOW = 280;
 
   let latestNextBestPicks = {};
   let nextBestUpdatePending = false;
   let lastActiveZoneId = null;
-  let activationFabExpanded = false;
+  let focusLaunchOpen = false;
   let scrollCalmTimer = null;
   let taskGestureObserver = null;
+  let lastDefuseOpener = null;
 
   function isElementMostlyInView(element, ratio = 0.3) {
     if (!element) return false;
@@ -5060,20 +5372,33 @@
     }
   }
 
-  function setActivationFabExpanded(expanded) {
-    activationFabExpanded = Boolean(expanded);
-    const fab = $("activationStart");
-    const options = $("activationOptions");
-    const container = $("startFab");
+  function setFocusLaunchOpen(open) {
+    focusLaunchOpen = Boolean(open);
+    const fab = $("startFocusFab");
+    const sheet = $("focusLaunchSheet");
+    const backdrop = $("focusLaunchBackdrop");
     if (fab) {
-      fab.setAttribute("aria-expanded", activationFabExpanded ? "true" : "false");
-      fab.classList.toggle("is-open", activationFabExpanded);
+      fab.setAttribute("aria-expanded", focusLaunchOpen ? "true" : "false");
     }
-    if (options) {
-      options.hidden = !activationFabExpanded;
+    if (sheet) {
+      sheet.classList.toggle("is-open", focusLaunchOpen);
+      sheet.setAttribute("aria-hidden", focusLaunchOpen ? "false" : "true");
     }
-    if (container) {
-      container.classList.toggle("is-open", activationFabExpanded);
+    if (backdrop) {
+      if (focusLaunchOpen) {
+        backdrop.hidden = false;
+        requestAnimationFrame(() => backdrop.classList.add("is-visible"));
+      } else {
+        backdrop.classList.remove("is-visible");
+        window.setTimeout(() => {
+          if (!focusLaunchOpen) {
+            backdrop.hidden = true;
+          }
+        }, 220);
+      }
+    }
+    if (!focusLaunchOpen && fab) {
+      fab.focus();
     }
   }
 
@@ -5108,23 +5433,11 @@
     if (!zoneId) return;
     persistLastActiveZone(zoneId);
     updateCommandLinkStates(zoneId);
-    const focusButton = $("focusRecoveryButton");
-    if (focusButton) {
-      const zoneEl = document.getElementById(zoneId);
-      const title = zoneEl?.querySelector(".zone-header__title")?.textContent?.trim();
-      const label = title ? `Return to ${title}. Double tap to toggle brief mode.` : "Return to last active zone. Double tap to toggle brief mode.";
-      focusButton.setAttribute("aria-label", label);
-      focusButton.dataset.zoneId = zoneId;
-    }
   }
 
   function setupMomentumZones() {
     const zones = Array.from(document.querySelectorAll(".momentum-zone"));
     if (!zones.length) return;
-
-    const zoneHeaders = Array.from(document.querySelectorAll(".zone-header"));
-    const zoneReturnChip = $("zoneReturnChip");
-    const focusRecoveryButton = $("focusRecoveryButton");
 
     let storedZoneId = null;
     try {
@@ -5133,7 +5446,11 @@
       console.warn("Unable to read last zone", error);
     }
 
-    const initialZone = zones.find(zone => zone.id === storedZoneId) || zones[0];
+    const fallbackZone =
+      document.getElementById("actionZone") ||
+      document.getElementById("launchZone") ||
+      zones[0];
+    const initialZone = zones.find(zone => zone.id === storedZoneId) || fallbackZone;
     if (initialZone) {
       handleActiveZoneChange(initialZone.id);
     }
@@ -5152,7 +5469,7 @@
       zones.forEach(zone => observer.observe(zone));
     }
 
-    const commandLinks = document.querySelectorAll(".command-bar .command-link, #zoneReturnChip a");
+    const commandLinks = document.querySelectorAll(".command-bar .command-link");
     commandLinks.forEach(link => {
       link.addEventListener("click", event => {
         const hash = link.getAttribute("href") || "";
@@ -5177,45 +5494,11 @@
       scrollCalmTimer = window.setTimeout(() => {
         document.body.classList.remove("is-scrolling");
       }, 180);
-
-      const actionZone = document.getElementById("actionZone");
-      if (zoneReturnChip && actionZone) {
-        const rect = actionZone.getBoundingClientRect();
-        const shouldShow = rect.top < -120;
-        zoneReturnChip.classList.toggle("is-visible", shouldShow);
-        zoneReturnChip.setAttribute("aria-hidden", shouldShow ? "false" : "true");
-      }
-
-      zoneHeaders.forEach(header => {
-        const rect = header.getBoundingClientRect();
-        const isDocked = rect.top <= 12 && rect.bottom > rect.height * 0.4;
-        header.classList.toggle("is-docked", isDocked);
-      });
     };
 
     window.addEventListener("scroll", handleScrollEffects, { passive: true });
     window.addEventListener("resize", handleScrollEffects);
     handleScrollEffects();
-
-    if (focusRecoveryButton) {
-      let lastTap = 0;
-      focusRecoveryButton.addEventListener("click", event => {
-        const now = Date.now();
-        if (now - lastTap <= FOCUS_RECOVERY_TAP_WINDOW) {
-          event.preventDefault();
-          toggleBriefMode();
-          lastTap = 0;
-          return;
-        }
-        lastTap = now;
-        const targetZoneId = focusRecoveryButton.dataset.zoneId || lastActiveZoneId || storedZoneId || (zones[0] && zones[0].id);
-        if (targetZoneId) {
-          scrollToZone(targetZoneId);
-        } else {
-          scrollToZone("focus-engine");
-        }
-      });
-    }
   }
 
   function setupNextBestObserver() {
@@ -5424,7 +5707,7 @@
     if (abortBtn) {
       abortBtn.addEventListener("click", () => {
         backToCapture();
-        setActivationFabExpanded(false);
+        setFocusLaunchOpen(false);
       });
     }
 
@@ -10367,21 +10650,28 @@
   }
 
   function setActivationSuggestion(evaluation) {
-    const suggestionBtn = $("activationSuggestion");
-    const textEl = $("activationNextBestText");
-    if (!suggestionBtn || !textEl) return;
+    const suggestionBtn = $("focusSuggestionButton");
+    const detailEl = $("focusSuggestionDetail");
+    const previewEl = $("focusSuggestionText");
+    const heroHint = $("focusLaunchHint");
+    if (!suggestionBtn || !detailEl || !previewEl || !heroHint) return;
     const hasActiveTasks = tasks.some(task => !isTaskCompleted(task));
     if (evaluation && evaluation.task) {
       const message = evaluation.chunk?.label || evaluation.task.name;
-      textEl.textContent = message;
+      detailEl.textContent = message;
+      previewEl.textContent = message;
+      heroHint.textContent = message;
       suggestionBtn.disabled = false;
       suggestionBtn.setAttribute("aria-disabled", "false");
       suggestionBtn.dataset.pickKey = "now";
       suggestionBtn.dataset.taskId = evaluation.task.id || "";
     } else {
-      textEl.textContent = hasActiveTasks
+      const fallback = hasActiveTasks
         ? "Refresh Next Best to see a top pick."
         : "Add a task to unlock focus.";
+      detailEl.textContent = fallback;
+      previewEl.textContent = fallback;
+      heroHint.textContent = fallback;
       suggestionBtn.disabled = true;
       suggestionBtn.setAttribute("aria-disabled", "true");
       delete suggestionBtn.dataset.pickKey;
@@ -11932,10 +12222,10 @@
       button.disabled = !hasTask;
       button.setAttribute("aria-disabled", hasTask ? "false" : "true");
     }
-    const activationStart = $("activationStart");
-    if (activationStart) {
-      activationStart.disabled = !hasTask;
-      activationStart.setAttribute("aria-disabled", hasTask ? "false" : "true");
+    const focusFab = $("startFocusFab");
+    if (focusFab) {
+      focusFab.disabled = !hasTask;
+      focusFab.setAttribute("aria-disabled", hasTask ? "false" : "true");
     }
     if (hint) {
       hint.textContent = hasTask ? `Most meaningful project: ${focusTask.name}` : "Add a task to unlock Worst-Day Mode.";
@@ -12155,11 +12445,13 @@
     updateUI();
   }
 
-  function initializeActivationBar() {
-    const container = $("startFab");
-    const startFab = $("activationStart");
-    const options = $("activationOptions");
-    const suggestionBtn = $("activationSuggestion");
+  function initializeFocusLaunchSheet() {
+    const fab = $("startFocusFab");
+    const sheet = $("focusLaunchSheet");
+    const backdrop = $("focusLaunchBackdrop");
+    const handle = $("focusLaunchHandle");
+    const suggestionBtn = $("focusSuggestionButton");
+    const options = sheet ? sheet.querySelector(".focus-sheet__options") : null;
     const labelMap = { now: "Do now", easy: "Do if easy", buddy: "Do with buddy" };
     const nextTaskAction = $("nextTaskActionButton");
 
@@ -12219,46 +12511,49 @@
       });
     }
 
-    if (startFab) {
-      startFab.addEventListener("click", event => {
+    if (fab) {
+      fab.addEventListener("click", event => {
         event.preventDefault();
-        if (startFab.disabled) return;
-        setActivationFabExpanded(!activationFabExpanded);
+        if (fab.disabled) return;
+        setFocusLaunchOpen(!focusLaunchOpen);
       });
+    }
+
+    if (handle) {
+      handle.addEventListener("click", () => setFocusLaunchOpen(false));
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener("click", () => setFocusLaunchOpen(false));
     }
 
     if (options) {
       options.addEventListener("click", event => {
-        const button = event.target.closest('[data-activation-mode]');
-        if (!button) return;
-        const mode = button.getAttribute('data-activation-mode');
-        setActivationFabExpanded(false);
+        const button = event.target.closest(".focus-sheet__option");
+        if (!button || button.disabled || button.getAttribute("aria-disabled") === "true") return;
+        const mode = button.getAttribute("data-focus-mode");
+        setFocusLaunchOpen(false);
         if (mode === "sprint") {
           if (!activatePick("now")) {
             startFiveMinuteSprint(nextTaskId);
           }
           return;
         }
-        if (mode === "easy") {
+        if (mode === "session") {
           if (!activatePick("easy")) {
             const fallbackId = latestNextBestPicks.now?.task?.id || nextTaskId;
             if (fallbackId) {
               startFocus(fallbackId);
             } else {
-              showToast("Easy start", "Add a task to unlock easy-mode suggestions.");
+              startFocus();
             }
           }
           return;
         }
-        if (mode === "buddy") {
-          if (!activatePick("buddy")) {
-            const fallbackId = latestNextBestPicks.now?.task?.id || nextTaskId;
-            if (fallbackId) {
-              startFocus(fallbackId, { expandDetails: true });
-              showToast("Buddy start", "Ping your buddy and press start together.");
-            } else {
-              showToast("Buddy start", "Add a task to team up with someone.");
-            }
+        if (mode === "suggestion") {
+          const pickKey = button.dataset.pickKey || "now";
+          if (!activatePick(pickKey)) {
+            startFiveMinuteSprint(nextTaskId);
           }
         }
       });
@@ -12267,26 +12562,196 @@
     if (suggestionBtn) {
       suggestionBtn.addEventListener("click", () => {
         const pickKey = suggestionBtn.dataset.pickKey;
+        setFocusLaunchOpen(false);
         if (!activatePick(pickKey)) {
           startFiveMinuteSprint(nextTaskId);
         }
       });
     }
 
-    document.addEventListener("click", event => {
-      if (!activationFabExpanded) return;
-      if (container && container.contains(event.target)) return;
-      setActivationFabExpanded(false);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && focusLaunchOpen) {
+        setFocusLaunchOpen(false);
+      }
     });
+  }
 
-    if (container) {
-      container.addEventListener("keydown", event => {
-        if (event.key === "Escape" && activationFabExpanded) {
-          setActivationFabExpanded(false);
-          event.stopPropagation();
+  function openDefuseOverlay() {
+    const overlay = $("defuseOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    const closeBtn = $("defuseClose");
+    if (closeBtn) {
+      closeBtn.focus();
+    }
+  }
+
+  function closeDefuseOverlay() {
+    const overlay = $("defuseOverlay");
+    if (!overlay) return;
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    if (lastDefuseOpener) {
+      lastDefuseOpener.focus();
+      lastDefuseOpener = null;
+    }
+  }
+
+  function initializeDefuseOverlay() {
+    const overlay = $("defuseOverlay");
+    if (!overlay) return;
+    const closeBtn = $("defuseClose");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => closeDefuseOverlay());
+    }
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        closeDefuseOverlay();
+      }
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !overlay.classList.contains("hidden")) {
+        closeDefuseOverlay();
+      }
+    });
+  }
+
+  function initializeResourcesDrawer() {
+    const toggle = $("resourcesToggle");
+    const drawer = $("resourcesDrawer");
+    const closeBtn = $("resourcesClose");
+    const backdrop = $("resourcesBackdrop");
+    if (!toggle || !drawer || !backdrop) return;
+
+    let drawerOpen = false;
+    const setDrawerOpen = open => {
+      drawerOpen = Boolean(open);
+      drawer.classList.toggle("is-open", drawerOpen);
+      drawer.setAttribute("aria-hidden", drawerOpen ? "false" : "true");
+      if (drawerOpen) {
+        backdrop.hidden = false;
+        requestAnimationFrame(() => backdrop.classList.add("is-visible"));
+        drawer.focus();
+      } else {
+        backdrop.classList.remove("is-visible");
+        window.setTimeout(() => {
+          if (!drawerOpen) {
+            backdrop.hidden = true;
+          }
+        }, 200);
+        toggle.focus();
+      }
+    };
+
+    toggle.addEventListener("click", () => setDrawerOpen(true));
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => setDrawerOpen(false));
+    }
+    backdrop.addEventListener("click", () => setDrawerOpen(false));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && drawerOpen) {
+        setDrawerOpen(false);
+      }
+    });
+  }
+
+  function initializeSosPanel() {
+    const sosButton = $("meltdownSosButton");
+    const overlay = $("sosOverlay");
+    const closeBtn = $("sosOverlayClose");
+    const shieldBtn = $("sosShield");
+    const defuseBtn = $("sosDefuse");
+    const worstDayBtn = $("worstDayButton");
+    if (!sosButton || !overlay) return;
+
+    let sosOpen = false;
+    const setSosOpen = open => {
+      sosOpen = Boolean(open);
+      if (sosOpen) {
+        overlay.classList.remove("hidden");
+        overlay.setAttribute("aria-hidden", "false");
+        if (closeBtn) {
+          closeBtn.focus();
         }
+      } else {
+        overlay.classList.add("hidden");
+        overlay.setAttribute("aria-hidden", "true");
+        sosButton.focus();
+      }
+    };
+
+    sosButton.addEventListener("click", () => setSosOpen(true));
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => setSosOpen(false));
+    }
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        setSosOpen(false);
+      }
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && sosOpen) {
+        setSosOpen(false);
+      }
+    });
+    if (shieldBtn) {
+      shieldBtn.addEventListener("click", () => {
+        setSosOpen(false);
+        activateShield();
       });
     }
+    if (defuseBtn) {
+      defuseBtn.addEventListener("click", () => {
+        setSosOpen(false);
+        lastDefuseOpener = sosButton;
+        openDefuseOverlay();
+      });
+    }
+    if (worstDayBtn) {
+      worstDayBtn.addEventListener("click", () => setSosOpen(false));
+    }
+  }
+
+  function initializeCommandBarAutohide() {
+    const bar = document.querySelector(".command-bar");
+    if (!bar) return;
+    let lastScrollY = window.scrollY || 0;
+    let rafId = null;
+    let hidden = false;
+
+    const evaluate = () => {
+      rafId = null;
+      const currentY = window.scrollY || 0;
+      const delta = currentY - lastScrollY;
+      const hide = currentY > 96 && delta > 6;
+      const reveal = delta < -6 || currentY <= 96;
+      if (hide && !hidden) {
+        bar.classList.add("is-hidden");
+        hidden = true;
+      } else if (reveal && hidden) {
+        bar.classList.remove("is-hidden");
+        hidden = false;
+      }
+      lastScrollY = currentY;
+    };
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (rafId !== null) return;
+        rafId = window.requestAnimationFrame(evaluate);
+      },
+      { passive: true }
+    );
+
+    window.addEventListener("focusin", () => {
+      if (hidden) {
+        bar.classList.remove("is-hidden");
+        hidden = false;
+      }
+      lastScrollY = window.scrollY || 0;
+    });
   }
 
   function initializeTaskForm() {
@@ -12474,7 +12939,7 @@
       sprintDurationMinutes = null;
     }
     setSprintVisualState(Boolean(sprintDurationMinutes));
-    setActivationFabExpanded(false);
+    setFocusLaunchOpen(false);
     const captureSection = $("capture");
     if (captureSection) {
       captureSection.setAttribute("aria-hidden", "true");
@@ -12643,7 +13108,7 @@
     }
     document.body.classList.remove("focus-overlay-active");
     setSprintVisualState(false);
-    setActivationFabExpanded(false);
+    setFocusLaunchOpen(false);
     updateUI();
   }
 
@@ -13213,6 +13678,21 @@
     loadBlockBatchProfiles();
   }
 
+  function updateHeaderSubtitle() {
+    const subtitle = $("headerSubtitle");
+    if (!subtitle) return;
+    try {
+      const formatted = new Date().toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "short",
+        day: "numeric"
+      });
+      subtitle.textContent = formatted;
+    } catch (error) {
+      subtitle.textContent = "";
+    }
+  }
+
   function updateBillingReminder() {
     const reminder = $("billingReminder");
     if (!reminder) return;
@@ -13332,6 +13812,7 @@
     registerTaskListModeControl();
     registerTimeBudgetControl();
     setDefaultFieldValues();
+    updateHeaderSubtitle();
     updateBillingReminder();
     initializeSoundPreference();
     initializeFirstThreeWizard();
@@ -13341,7 +13822,11 @@
     initializeStatusCardState();
     initializePreflightToggles();
     initializeAllTasksCardState();
-    initializeActivationBar();
+    initializeFocusLaunchSheet();
+    initializeResourcesDrawer();
+    initializeSosPanel();
+    initializeCommandBarAutohide();
+    initializeDefuseOverlay();
     initializeCollapsibleModules();
     initializeMorningLaunchModule();
     initializeLaunchPadModule();
