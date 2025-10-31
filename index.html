@@ -14019,11 +14019,37 @@
     initializeBlockBatchModule();
     initializeAddTaskCardState();
     initializePreflightToggles();
-    initializeAllTasksCardState();
-    initializeFocusLaunchSheet();
-    initializeQuickCaptureModal();
-    initializeResourcesDrawer();
-    initializeSosPanel();
+initializeAllTasksCardState();
+initializeFocusLaunchSheet();
+initializeQuickCaptureModal();
+
+// === START: Add Quick Capture long-press feature ===
+function initializeStartFabQuickCapture() {
+  // Use standard DOM selector instead of $() helper (for reliability)
+  const fab = document.getElementById("startFocusFab");
+  if (!fab) return;
+
+  const LONG_PRESS_MS = 600;
+  let timer = null;
+
+  fab.addEventListener("pointerdown", () => {
+    timer = setTimeout(() => {
+      // This calls your existing quick capture modal
+      openQuickCaptureModal();
+    }, LONG_PRESS_MS);
+  });
+
+  ["pointerup", "pointerleave", "pointercancel"].forEach(type => {
+    fab.addEventListener(type, () => clearTimeout(timer));
+  });
+}
+
+// Initialize it right after the quick-capture modal
+initializeStartFabQuickCapture();
+// === END: Quick Capture long-press feature ===
+
+initializeResourcesDrawer();
+initializeSosPanel();
     initializeCommandBarAutohide();
     initializeDefuseOverlay();
     initializeCollapsibleModules();
