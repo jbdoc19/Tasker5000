@@ -156,26 +156,64 @@
         }
       }
 
+      .support {
+        position: relative;
+      }
+
+      .support-dock {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .rescue-pill {
+        border-radius: 999px;
+        background: rgba(249, 112, 122, 0.24);
+        border: 1px solid rgba(249, 112, 122, 0.45);
+        color: #ffd5d7;
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: transform 160ms ease, box-shadow 180ms ease;
+      }
+
+      .rescue-pill:active {
+        transform: scale(0.97);
+      }
+
       .support-ribbon {
+        position: absolute;
+        inset: auto 0 0 0;
+        transform: translateY(calc(100% + 16px));
         border-radius: calc(var(--card-radius) - 2px);
         border: 1px solid rgba(79, 99, 119, 0.35);
         background: var(--surface);
-        padding: 10px 14px;
-        position: relative;
-        transition: box-shadow 180ms ease, transform 180ms ease;
+        padding: 18px 16px;
+        display: grid;
+        gap: 16px;
+        box-shadow: 0 18px 32px rgba(3, 8, 14, 0.6);
+        transition: transform 220ms ease, opacity 200ms ease;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 55;
+      }
+
+      .support-ribbon.visible {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .support-ribbon .ribbon-handle {
+        width: 46px;
+        height: 4px;
+        border-radius: 4px;
+        background: rgba(148, 163, 184, 0.4);
+        margin: 0 auto;
       }
 
       .support-ribbon .calm-tools {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
         gap: 12px;
-      }
-
-      .support-ribbon .toggle-row {
-        display: flex;
-        gap: 10px;
-        flex: 1;
+        justify-content: space-between;
       }
 
       .support-ribbon .toggle {
@@ -188,36 +226,50 @@
         text-align: center;
       }
 
-      .support-ribbon .rescue-pill {
-        border-radius: 999px;
-        background: rgba(249, 112, 122, 0.18);
-        border: 1px solid rgba(249, 112, 122, 0.32);
-        color: #ffd5d7;
-        font-weight: 600;
-        padding: 10px 16px;
+      .support-ribbon .toggle[aria-pressed="true"] {
+        background: rgba(255, 255, 255, 0.12);
       }
 
-      .support-ribbon .rescue-pill:active {
-        transform: scale(0.98);
-      }
-
-      .rescue-overlay {
-        position: absolute;
-        inset: auto 0 0 0;
+      .rescue-sheet {
+        position: fixed;
+        inset: auto 0 0;
         transform: translateY(100%);
         background: rgba(10, 15, 21, 0.96);
         border-radius: var(--card-radius) var(--card-radius) 0 0;
         border: 1px solid rgba(249, 112, 122, 0.35);
         box-shadow: 0 -24px 36px rgba(6, 9, 15, 0.6);
-        padding: 20px 18px 32px;
+        padding: 22px 20px 36px;
         display: grid;
-        gap: 16px;
+        gap: 18px;
         transition: transform 220ms ease;
-        z-index: 60;
+        z-index: 80;
+        pointer-events: none;
       }
 
-      .support-ribbon.expanded .rescue-overlay {
-        transform: translateY(-12px);
+      .rescue-sheet.open {
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .rescue-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .rescue-head h3 {
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.015em;
+      }
+
+      .rescue-head button {
+        background: none;
+        border: 1px solid rgba(249, 112, 122, 0.35);
+        border-radius: 12px;
+        color: rgba(255, 226, 228, 0.85);
+        padding: 6px 12px;
+        font-size: 0.9rem;
       }
 
       .rescue-tabs {
@@ -235,9 +287,13 @@
         font-weight: 600;
       }
 
+      .rescue-tab.active {
+        background: rgba(249, 112, 122, 0.24);
+      }
+
       .rescue-body {
         font-size: 0.9rem;
-        line-height: 1.45;
+        line-height: 1.5;
         color: rgba(255, 228, 230, 0.88);
       }
 
@@ -317,6 +373,20 @@
       .focus-tools-row {
         display: flex;
         gap: 10px;
+      }
+
+      .focus-inline-panel {
+        border-radius: var(--card-radius);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(7, 13, 20, 0.88);
+        padding: 14px 16px;
+        font-size: 0.85rem;
+        color: var(--ink-muted);
+        display: none;
+      }
+
+      .focus-inline-panel.active {
+        display: block;
       }
 
       .focus-tools-row button {
@@ -412,6 +482,12 @@
         display: grid;
         gap: 8px;
         padding: 10px 16px calc(env(safe-area-inset-bottom) + 10px);
+        pointer-events: none;
+        z-index: 50;
+      }
+
+      .bottom-area > * {
+        pointer-events: auto;
       }
 
       .bottom-nav {
@@ -432,6 +508,10 @@
         gap: 4px;
         color: var(--ink-muted);
         font-size: 0.68rem;
+      }
+
+      .nav-item.active {
+        color: var(--teal);
       }
 
       .nav-item span.icon {
@@ -465,16 +545,20 @@
         background: rgba(8, 20, 20, 0.96);
         overflow: hidden;
         transform: translateY(calc(100% + 12px));
-        transition: transform 200ms ease;
+        transition: transform 200ms ease, opacity 200ms ease;
         height: var(--capture-height);
         display: flex;
         align-items: center;
         padding: 0 12px;
         gap: 10px;
+        pointer-events: none;
+        opacity: 0;
       }
 
       .capture-strip.open {
         transform: translateY(0);
+        pointer-events: auto;
+        opacity: 1;
       }
 
       .capture-strip input {
@@ -516,6 +600,34 @@
         opacity: 1;
         pointer-events: auto;
         transform: translateY(0);
+      }
+
+      .corridor-scrim {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 9, 15, 0.6);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 200ms ease;
+        z-index: 70;
+      }
+
+      .corridor-scrim.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #zDebugOutline {
+        position: fixed;
+        border: 1px dashed rgba(255, 0, 128, 0.8);
+        pointer-events: none;
+        mix-blend-mode: screen;
+        z-index: 999;
+        transition: all 120ms ease;
+      }
+
+      .app-shell.capture-open {
+        padding-bottom: calc(var(--nav-height) + var(--capture-height) + 28px);
       }
 
       .smart-nudge button {
@@ -560,7 +672,7 @@
     </style>
   </head>
   <body>
-    <div class="app-shell">
+    <div class="app-shell" id="appShell">
       <header class="app-headline">
         <h1>Focus Corridor</h1>
         <span>One glide at a time</span>
@@ -577,25 +689,32 @@
             </div>
           </button>
         </section>
-        <section class="support" aria-label="Support ribbon">
-          <div class="support-ribbon" id="supportRibbon">
+        <section class="support" aria-label="Support tools">
+          <div class="support-dock">
+            <button class="rescue-pill" id="rescueTrigger" type="button" aria-expanded="false" aria-controls="rescueSheet">
+              Rescue
+            </button>
+          </div>
+          <div class="support-ribbon" id="supportRibbon" aria-hidden="true">
+            <div class="ribbon-handle" aria-hidden="true"></div>
             <div class="calm-tools">
-              <div class="toggle-row">
-                <button class="toggle" data-toggle="audio" type="button">🎧</button>
-                <button class="toggle" data-toggle="silence" type="button">🔕</button>
-                <button class="toggle" data-toggle="timer" type="button">⏱</button>
-              </div>
-              <button class="rescue-pill" id="rescueTrigger" type="button">Rescue</button>
+              <button class="toggle" data-toggle="audio" type="button" aria-pressed="false">🎧</button>
+              <button class="toggle" data-toggle="silence" type="button" aria-pressed="false">🔕</button>
+              <button class="toggle" data-toggle="timer" type="button" aria-pressed="false">⏱</button>
             </div>
-            <div class="rescue-overlay" id="rescueOverlay" role="dialog" aria-modal="true">
-              <div class="rescue-tabs">
-                <button class="rescue-tab" data-tab="defuse" type="button">Defuse</button>
-                <button class="rescue-tab" data-tab="worst" type="button">Worst Day</button>
-                <button class="rescue-tab" data-tab="melt" type="button">Meltdown</button>
-              </div>
-              <div class="rescue-body" id="rescueBody">
-                Easy breathing reset · Inhale for 4, hold for 2, exhale for 6. Repeat 5 times.
-              </div>
+          </div>
+          <div class="rescue-sheet" id="rescueSheet" role="dialog" aria-modal="true" aria-hidden="true">
+            <header class="rescue-head">
+              <h3>Rescue Modes</h3>
+              <button type="button" id="rescueClose" aria-label="Close rescue sheet">✕</button>
+            </header>
+            <div class="rescue-tabs" role="tablist">
+              <button class="rescue-tab active" data-tab="defuse" role="tab" aria-selected="true" type="button">Defuse</button>
+              <button class="rescue-tab" data-tab="worst" role="tab" aria-selected="false" type="button">Worst Day</button>
+              <button class="rescue-tab" data-tab="melt" role="tab" aria-selected="false" type="button">Meltdown</button>
+            </div>
+            <div class="rescue-body" id="rescueBody">
+              Easy breathing reset · Inhale for 4, hold for 2, exhale for 6. Repeat 5 times.
             </div>
           </div>
         </section>
@@ -617,6 +736,7 @@
             <button type="button" data-action="adjust">Adjust</button>
             <button type="button" data-action="stuck">I'm stuck</button>
           </div>
+          <div class="focus-inline-panel" id="chipPanel" aria-live="polite"></div>
         </section>
         <section class="dashboards">
           <div class="accordion open" data-accordion="today">
@@ -657,7 +777,7 @@
         </section>
       </main>
       <footer class="bottom-area" aria-label="Navigation and quick capture">
-        <div class="capture-strip" id="captureStrip">
+        <div class="capture-strip" id="captureStrip" aria-hidden="true">
           <input type="text" id="quickTask" placeholder="Type a task and release" />
           <button type="button" id="saveTask">Save</button>
         </div>
@@ -668,21 +788,21 @@
             <button type="button" id="nudgeGo">Let's go</button>
           </div>
         </div>
-        <nav class="bottom-nav">
-          <button class="nav-item" type="button">
+        <nav class="bottom-nav" role="navigation" aria-label="Primary">
+          <button class="nav-item" data-nav="home" type="button" aria-pressed="true">
             <span class="icon">🏠</span>
             Home
           </button>
-          <button class="nav-item" type="button">
+          <button class="nav-item" data-nav="plan" type="button" aria-pressed="false">
             <span class="icon">📅</span>
             Plan
           </button>
-          <button class="capture-trigger" id="captureTrigger" type="button">+</button>
-          <button class="nav-item" type="button">
+          <button class="capture-trigger" id="captureTrigger" type="button" aria-expanded="false" aria-controls="captureStrip">+</button>
+          <button class="nav-item" data-nav="wins" type="button" aria-pressed="false">
             <span class="icon">⭐</span>
             Wins
           </button>
-          <button class="nav-item" type="button">
+          <button class="nav-item" data-nav="settings" type="button" aria-pressed="false">
             <span class="icon">⚙️</span>
             Settings
           </button>
@@ -690,6 +810,15 @@
       </footer>
     </div>
     <script>
+      const appShell = document.getElementById("appShell");
+      const corridorScrim = document.getElementById("corridorScrim") ?? (() => {
+        const scrim = document.createElement("div");
+        scrim.id = "corridorScrim";
+        scrim.className = "corridor-scrim";
+        scrim.setAttribute("aria-hidden", "true");
+        appShell.appendChild(scrim);
+        return scrim;
+      })();
       const sprintBar = document.getElementById("sprintBar");
       const sprintLabel = document.getElementById("sprintLabel");
       const sprintMetrics = document.getElementById("sprintMetrics");
@@ -702,15 +831,39 @@
       const nudgeGo = document.getElementById("nudgeGo");
       const supportRibbon = document.getElementById("supportRibbon");
       const rescueTrigger = document.getElementById("rescueTrigger");
-      const rescueOverlay = document.getElementById("rescueOverlay");
+      const rescueSheet = document.getElementById("rescueSheet");
+      const rescueClose = document.getElementById("rescueClose");
       const rescueBody = document.getElementById("rescueBody");
+      const rescueTabs = Array.from(document.querySelectorAll(".rescue-sheet .rescue-tab"));
+      const ribbonToggles = Array.from(document.querySelectorAll(".support-ribbon .toggle"));
       const focusCard = document.getElementById("focusCard");
       const focusSlot = document.getElementById("focusSlot");
       const focusTitle = document.getElementById("focusTitle");
       const focusMeta = document.getElementById("focusMeta");
       const altChips = document.getElementById("altChips");
+      const chipPanel = document.getElementById("chipPanel");
       const accordionHeaders = document.querySelectorAll(".accordion-header");
       const accordionAdd = document.getElementById("accordionAdd");
+      const navItems = Array.from(document.querySelectorAll(".bottom-nav .nav-item"));
+
+      chipPanel.dataset.active = "";
+
+      if (navItems.length) {
+        navItems[0].classList.add("active");
+      }
+
+      navItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          navItems.forEach((nav) => {
+            nav.classList.remove("active");
+            nav.setAttribute("aria-pressed", "false");
+          });
+          item.classList.add("active");
+          item.setAttribute("aria-pressed", "true");
+          vibrate(8);
+          console.info(`Navigate: ${item.dataset.nav}`);
+        });
+      });
 
       const sprintDuration = 5 * 60;
       let sprintState = "idle";
@@ -778,11 +931,16 @@
         });
       }
 
-      function resetSprint() {
+      function stopSprint(options = {}) {
+        const { restartLabel = "Start 5-min" } = options;
+        if (sprintTimer) {
+          clearInterval(sprintTimer);
+          sprintTimer = null;
+        }
         sprintState = "idle";
-        sprintRemaining = sprintDuration;
-        sprintLabel.textContent = "Start 5-min";
         sprintBar.classList.remove("active", "complete", "glow");
+        sprintRemaining = sprintDuration;
+        sprintLabel.textContent = restartLabel;
         updateSprintMetrics();
       }
 
@@ -803,11 +961,7 @@
         }, 650);
         showNudge();
         setTimeout(() => {
-          sprintBar.classList.remove("glow", "complete");
-          sprintLabel.textContent = "Start again";
-          sprintState = "idle";
-          sprintRemaining = sprintDuration;
-          updateSprintMetrics();
+          stopSprint({ restartLabel: "Start again" });
         }, 1600);
       }
 
@@ -834,12 +988,12 @@
             clearInterval(sprintTimer);
           }
           sprintTimer = setInterval(tickSprint, 1000);
+        } else if (sprintState === "active") {
+          vibrate(18);
+          stopSprint();
         } else if (sprintState === "complete") {
           vibrate(20);
-          sprintBar.classList.remove("complete", "glow");
-          sprintLabel.textContent = "Start 5-min";
-          sprintState = "idle";
-          updateSprintMetrics();
+          stopSprint();
         }
       });
 
@@ -880,24 +1034,136 @@
         melt: "Meltdown plan · Dim lights, weighted blanket, countdown from 30 together."
       };
 
-      supportRibbon.addEventListener("click", (event) => {
-        if (event.target.matches(".rescue-tab")) {
-          const tab = event.target.dataset.tab;
-          rescueBody.textContent = rescueMessages[tab];
-          vibrate(8);
+      function openRibbon() {
+        closeRescueSheet();
+        closeCapture({ resetInput: false });
+        supportRibbon.classList.add("visible");
+        supportRibbon.setAttribute("aria-hidden", "false");
+        highlightTopLayer();
+      }
+
+      function closeRibbon() {
+        supportRibbon.classList.remove("visible");
+        supportRibbon.setAttribute("aria-hidden", "true");
+        highlightTopLayer();
+      }
+
+      function showScrim(reason) {
+        corridorScrim.dataset.active = reason;
+        corridorScrim.classList.add("visible");
+        corridorScrim.setAttribute("aria-hidden", "false");
+      }
+
+      function hideScrim(reason) {
+        if (!reason || corridorScrim.dataset.active === reason) {
+          corridorScrim.classList.remove("visible");
+          corridorScrim.setAttribute("aria-hidden", "true");
+          delete corridorScrim.dataset.active;
         }
+      }
+
+      function openRescueSheet() {
+        closeCapture({ resetInput: false });
+        closeRibbon();
+        rescueSheet.classList.add("open");
+        rescueSheet.setAttribute("aria-hidden", "false");
+        rescueTrigger.setAttribute("aria-expanded", "true");
+        showScrim("rescue");
+        vibrate(18);
+        requestAnimationFrame(() => {
+          rescueTabs[0]?.focus();
+        });
+        highlightTopLayer();
+      }
+
+      function closeRescueSheet() {
+        if (!rescueSheet.classList.contains("open")) return;
+        rescueSheet.classList.remove("open");
+        rescueSheet.setAttribute("aria-hidden", "true");
+        rescueTrigger.setAttribute("aria-expanded", "false");
+        hideScrim("rescue");
+        rescueTrigger.focus();
+        highlightTopLayer();
+      }
+
+      let rescuePointerStartY = null;
+      let rescueGestureHandled = false;
+
+      rescueTrigger.addEventListener("pointerdown", (event) => {
+        rescuePointerStartY = event.clientY ?? event.touches?.[0]?.clientY ?? null;
+        rescueGestureHandled = false;
+      });
+
+      rescueTrigger.addEventListener("pointerup", (event) => {
+        if (rescuePointerStartY == null) return;
+        const endY = event.clientY ?? event.changedTouches?.[0]?.clientY ?? rescuePointerStartY;
+        const delta = rescuePointerStartY - endY;
+        if (delta > 24) {
+          openRibbon();
+          rescueGestureHandled = true;
+          vibrate(12);
+        } else if (delta < -24 && supportRibbon.classList.contains("visible")) {
+          closeRibbon();
+          rescueGestureHandled = true;
+          vibrate(10);
+        }
+        rescuePointerStartY = null;
+      });
+
+      rescueTrigger.addEventListener("pointercancel", () => {
+        rescuePointerStartY = null;
       });
 
       rescueTrigger.addEventListener("click", (event) => {
-        event.stopPropagation();
-        supportRibbon.classList.toggle("expanded");
-        vibrate(18);
+        if (rescueGestureHandled) {
+          rescueGestureHandled = false;
+          return;
+        }
+        if (rescueSheet.classList.contains("open")) {
+          closeRescueSheet();
+        } else {
+          openRescueSheet();
+        }
       });
 
-      document.addEventListener("click", (event) => {
-        if (supportRibbon.classList.contains("expanded") && !supportRibbon.contains(event.target)) {
-          supportRibbon.classList.remove("expanded");
+      rescueTrigger.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          openRibbon();
+        } else if (event.key === "ArrowDown") {
+          event.preventDefault();
+          closeRibbon();
         }
+      });
+
+      rescueClose.addEventListener("click", () => {
+        closeRescueSheet();
+      });
+
+      corridorScrim.addEventListener("click", () => {
+        closeRescueSheet();
+        closeRibbon();
+        closeCapture({ resetInput: false });
+      });
+
+      rescueTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const tabName = tab.dataset.tab;
+          rescueTabs.forEach((node) => {
+            node.classList.toggle("active", node === tab);
+            node.setAttribute("aria-selected", node === tab ? "true" : "false");
+          });
+          rescueBody.textContent = rescueMessages[tabName];
+          vibrate(8);
+        });
+      });
+
+      ribbonToggles.forEach((toggle) => {
+        toggle.addEventListener("click", () => {
+          const pressed = toggle.getAttribute("aria-pressed") === "true";
+          toggle.setAttribute("aria-pressed", String(!pressed));
+          vibrate(6);
+        });
       });
 
       function updateFocusCard() {
@@ -912,6 +1178,9 @@
         });
         focusCard.classList.remove("swipe-left", "swipe-right");
         updateAltChips();
+        chipPanel.classList.remove("active");
+        chipPanel.textContent = "";
+        chipPanel.dataset.active = "";
       }
 
       function updateAltChips() {
@@ -928,6 +1197,29 @@
           altChips.appendChild(chip);
         });
       }
+
+      const chipMessages = {
+        refresh: "Surface the next best micro-move to keep momentum warm.",
+        adjust: "Lighten the scope or swap to a friendlier slice for right now.",
+        stuck: "SOS kit: text your anchor, sip water, breathe for 30 seconds together."
+      };
+
+      document.querySelectorAll(".focus-tools-row button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const action = button.dataset.action;
+          if (chipPanel.dataset.active === action) {
+            chipPanel.dataset.active = "";
+            chipPanel.textContent = "";
+            chipPanel.classList.remove("active");
+            vibrate(6);
+            return;
+          }
+          chipPanel.dataset.active = action;
+          chipPanel.textContent = chipMessages[action] ?? "Micro-coaching coming soon.";
+          chipPanel.classList.add("active");
+          vibrate(8);
+        });
+      });
 
       let startX = null;
 
@@ -981,13 +1273,36 @@
       }
 
       function openCapture() {
-        captureStrip.classList.add("open");
-        quickTask.focus();
+        closeRescueSheet();
+        closeRibbon();
+        if (!captureStrip.classList.contains("open")) {
+          captureStrip.classList.add("open");
+          captureStrip.setAttribute("aria-hidden", "false");
+          captureTrigger.setAttribute("aria-expanded", "true");
+          appShell.classList.add("capture-open");
+        }
+        requestAnimationFrame(() => {
+          try {
+            quickTask.focus({ preventScroll: true });
+          } catch (error) {
+            quickTask.focus();
+          }
+        });
+        highlightTopLayer();
       }
 
-      function closeCapture() {
+      function closeCapture(options = {}) {
+        if (!captureStrip.classList.contains("open")) return;
+        const { resetInput = true } = options;
         captureStrip.classList.remove("open");
-        quickTask.value = "";
+        captureStrip.setAttribute("aria-hidden", "true");
+        captureTrigger.setAttribute("aria-expanded", "false");
+        appShell.classList.remove("capture-open");
+        if (resetInput) {
+          quickTask.value = "";
+        }
+        quickTask.dataset.voice = "";
+        highlightTopLayer();
       }
 
       captureTrigger.addEventListener("click", () => {
@@ -1011,9 +1326,20 @@
 
       let swipeStartY = null;
       document.addEventListener("pointerdown", (event) => {
+        const target = event.target;
+        if (supportRibbon.classList.contains("visible") && !supportRibbon.contains(target) && target !== rescueTrigger) {
+          closeRibbon();
+        }
+        if (rescueSheet.classList.contains("open") && !target.closest(".rescue-sheet") && target !== rescueTrigger) {
+          closeRescueSheet();
+        }
+        if (captureStrip.classList.contains("open") && !captureStrip.contains(target) && target !== captureTrigger) {
+          closeCapture({ resetInput: false });
+        }
         if (event.clientY > window.innerHeight - 120) {
           swipeStartY = event.clientY;
         }
+        highlightTopLayer();
       });
 
       document.addEventListener("pointerup", (event) => {
@@ -1046,18 +1372,48 @@
         if (voiceActive) {
           openCapture();
           voiceActive = false;
+          quickTask.dataset.voice = "";
         }
       });
 
-      document.addEventListener("click", (event) => {
-        if (!captureStrip.contains(event.target) && !captureTrigger.contains(event.target)) {
-          closeCapture();
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeRescueSheet();
+          closeRibbon();
+          closeCapture({ resetInput: false });
         }
       });
 
-      rescueOverlay.addEventListener("click", (event) => {
-        event.stopPropagation();
+      const debugOutline = document.createElement("div");
+      debugOutline.id = "zDebugOutline";
+      document.body.appendChild(debugOutline);
+
+      function highlightTopLayer() {
+        const x = window.innerWidth / 2;
+        const y = window.innerHeight / 2;
+        const elements = document.elementsFromPoint(x, y) ?? [];
+        const topElement = elements.find((el) => el !== debugOutline && el !== document.body && el !== document.documentElement);
+        if (!topElement) {
+          debugOutline.style.opacity = "0";
+          return;
+        }
+        const rect = topElement.getBoundingClientRect();
+        debugOutline.style.opacity = "1";
+        debugOutline.style.left = `${rect.left}px`;
+        debugOutline.style.top = `${rect.top}px`;
+        debugOutline.style.width = `${rect.width}px`;
+        debugOutline.style.height = `${rect.height}px`;
+        clearTimeout(debugOutline._hideTimer);
+        debugOutline._hideTimer = setTimeout(() => {
+          debugOutline.style.opacity = "0";
+        }, 1600);
+      }
+
+      highlightTopLayer();
+      window.addEventListener("resize", () => {
+        highlightTopLayer();
       });
+      window.__corridorHighlightLayer = highlightTopLayer;
 
       updateFocusCard();
       updateSprintMetrics();
