@@ -5408,7 +5408,9 @@
   const MODULE_STATE_PREFIX = "moduleState_";
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
-  const ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.collapsed";
+  const LEGACY_ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.collapsed";
+  const ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.accordionState";
+  const CATEGORY_PROGRESS_STATE_KEY = "ui.categoryProgress.collapsed";
   const COLLAPSIBLE_MODULE_IDS = [
     "morningLaunchModule",
     "launchPadModule",
@@ -10196,6 +10198,13 @@
     const emptyEl = $("categoryProgressEmpty");
     if (!accordion || !summaryBtn || !summaryText || !panel || !cont || !emptyEl) return;
 
+    if (!accordion.dataset.stateInitialized) {
+      const stored = localStorage.getItem(CATEGORY_PROGRESS_STATE_KEY);
+      const open = stored === "expanded";
+      setCategoryProgressOpen(open, { skipPersist: true });
+      accordion.dataset.stateInitialized = "true";
+    }
+
     if (!summaryBtn.dataset.listenerBound) {
       summaryBtn.dataset.listenerBound = "true";
       summaryBtn.addEventListener("click", () => {
@@ -10220,7 +10229,7 @@
       accordion.classList.add("hidden");
       emptyEl.classList.remove("hidden");
       summaryText.textContent = "No category progress yet";
-      setCategoryProgressOpen(false);
+      setCategoryProgressOpen(false, { skipPersist: true });
       panel.hidden = true;
       return;
     }
@@ -10264,6 +10273,7 @@
     const isOpen = accordion.dataset.open === "true";
     summaryBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     panel.hidden = !isOpen;
+    panel.setAttribute("aria-hidden", isOpen ? "false" : "true");
   }
 
   function buildTaskDescriptors(task) {
@@ -11304,7 +11314,7 @@
     }
   }
 
-  function setCategoryProgressOpen(open) {
+  function setCategoryProgressOpen(open, options = {}) {
     const accordion = $("categoryProgressAccordion");
     const summaryBtn = $("categoryProgressSummary");
     const panel = $("categoryProgressPanel");
@@ -11313,6 +11323,10 @@
     accordion.dataset.open = nextState;
     summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
     panel.hidden = !open;
+    panel.setAttribute("aria-hidden", open ? "false" : "true");
+    if (!options.skipPersist) {
+      localStorage.setItem(CATEGORY_PROGRESS_STATE_KEY, open ? "expanded" : "collapsed");
+    }
   }
 
   function computeWantScore(task) {
@@ -12174,7 +12188,14 @@
       });
     }
     const stored = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
-    const open = stored === "expanded";
+    let open = stored === "expanded";
+    if (stored !== "expanded" && stored !== "collapsed") {
+      const legacy = localStorage.getItem(LEGACY_ALL_TASKS_CARD_STATE_KEY);
+      if (legacy !== null) {
+        localStorage.removeItem(LEGACY_ALL_TASKS_CARD_STATE_KEY);
+      }
+      open = false;
+    }
     setAllTasksAccordionOpen(open, { skipPersist: true });
   }
 
