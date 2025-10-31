@@ -12974,7 +12974,30 @@
       nameInput.addEventListener("input", syncAddTaskActions);
     }
   }
+// === START: Long-press Quick Capture from Focus button ===
+function initializeFocusFabLongPress() {
+  const fab = document.getElementById("nextTaskActionButton");
+  if (!fab) return;
 
+  const LONG_PRESS_MS = 600;
+  let timer = null;
+
+  fab.addEventListener("pointerdown", () => {
+    timer = setTimeout(() => {
+      // open your Quick Capture modal
+      openModal();
+    }, LONG_PRESS_MS);
+  });
+
+  ["pointerup", "pointerleave", "pointercancel"].forEach(type =>
+    fab.addEventListener(type, () => clearTimeout(timer))
+  );
+}
+
+// Call this once at startup
+initializeFocusFabLongPress();
+// === END: Long-press Quick Capture from Focus button ===
+    
   // main UI update
   function updateUI() {
     tasks = tasks.map(recalcTaskPriority);
