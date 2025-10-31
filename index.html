@@ -13,6 +13,9 @@
       --text-secondary: #93a0aa;
       --card-radius: 16px;
       --card-border-color: rgba(147, 160, 170, 0.18);
+      --page-gutter: clamp(1rem, 4vw, 2.25rem);
+      --page-padding-top: clamp(1.5rem, 4vw, 2.5rem);
+      --page-padding-bottom: 120px;
     }
 
     *,
@@ -33,7 +36,7 @@
       font-weight: 400;
       line-height: 1.5;
       margin: 0;
-      padding: 1.5rem 1.25rem 5rem;
+      padding: var(--page-padding-top) 0 var(--page-padding-bottom);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -244,6 +247,8 @@
       border-radius: var(--card-radius);
       border: 1px solid var(--card-border-color);
       background: var(--surface-elevated);
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .resource-button,
@@ -1426,6 +1431,12 @@
       gap: 0.75rem;
       flex-wrap: wrap;
       margin-bottom: 0.75rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .task-list-header > * {
+      min-width: 0;
     }
     .time-budget-control {
       display: flex;
@@ -1486,7 +1497,7 @@
       min-width: 0;
     }
     .task-title {
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 3.6vw, 1.1rem);
       font-weight: 600;
       margin: 0;
       line-height: 1.4;
@@ -2891,14 +2902,16 @@
       margin: 0;
       min-height: 100vh;
       width: 100%;
+      max-width: 100vw;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.25rem) 120px;
+      padding: var(--page-padding-top) 0 var(--page-padding-bottom);
       line-height: 1.5;
       font-weight: 400;
+      overflow-x: hidden;
     }
 
     .app-shell {
@@ -2907,6 +2920,9 @@
       display: flex;
       flex-direction: column;
       gap: var(--space-4);
+      padding-inline: var(--page-gutter);
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     @media (max-width: 1024px) {
@@ -2916,18 +2932,21 @@
     }
 
     @media (max-width: 768px) {
-      .app-shell {
-        width: min(100%, 720px);
+      :root {
+        --page-gutter: clamp(0.85rem, 4vw, 1.75rem);
+        --page-padding-top: clamp(1.25rem, 5vw, 2rem);
       }
 
-      body {
-        padding: clamp(1.25rem, 5vw, 2rem) clamp(0.85rem, 4vw, 1.75rem) 120px;
+      .app-shell {
+        width: min(100%, 720px);
       }
     }
 
     @media (max-width: 600px) {
-      body {
-        padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 100px;
+      :root {
+        --page-gutter: clamp(0.75rem, 5vw, 1.25rem);
+        --page-padding-top: clamp(1rem, 6vw, 1.5rem);
+        --page-padding-bottom: 100px;
       }
 
       .card {
@@ -2953,6 +2972,17 @@
       .toast-container {
         left: var(--space-2);
         right: var(--space-2);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .task-card-actions {
+        width: 100%;
+      }
+
+      .task-card-actions button {
+        flex: 1 1 100%;
+        width: 100%;
       }
     }
 
@@ -3009,6 +3039,8 @@
       gap: clamp(1.5rem, 4vw, 2.4rem);
       position: relative;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
     }
 
     .momentum-zone {
@@ -3016,6 +3048,7 @@
       flex-direction: column;
       gap: var(--space-3);
       position: relative;
+      min-width: 0;
     }
 
     .momentum-zone[data-zone="action"] {
@@ -3039,6 +3072,7 @@
       flex-direction: column;
       gap: clamp(1.4rem, 4vw, 2.1rem);
       position: relative;
+      min-width: 0;
     }
 
     .zone-anchor {
