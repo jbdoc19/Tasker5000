@@ -3687,7 +3687,7 @@
       display: grid;
       gap: var(--space-3);
       width: 580px;
-      margin: 0;
+      margin: 0 auto;
     }
 
     @keyframes focus-sheet-enter {
@@ -11603,20 +11603,13 @@
       paddingPx = parseFloat(overlayStyle.paddingLeft) || 0;
     }
     const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
-    const designWidth = 580;
     const availableWidth = Math.max(0, viewportWidth - paddingPx * 2);
-    const sheetStyle = window.getComputedStyle(focusSheet);
-    const sheetWidth = parseFloat(sheetStyle.width) || focusSheet.clientWidth || availableWidth || designWidth;
+    const designWidth = 580;
     const scale = availableWidth > 0 ? Math.min(1, availableWidth / designWidth) : 1;
-    const scaledWidth = designWidth * scale;
-    const offset = Math.max(0, (sheetWidth - scaledWidth) / 2);
-    const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
-    const safeOffset = Number.isFinite(offset) ? offset : 0;
-    inner.style.transformOrigin = "top left";
-    inner.style.transform = `translateX(${safeOffset}px) scale(${safeScale})`;
-    inner.style.marginInline = "0";
+    inner.style.transformOrigin = "top center";
+    inner.style.transform = `scale(${scale})`;
     const rawHeight = inner.offsetHeight;
-    focusSheet.style.minHeight = `${rawHeight * safeScale}px`;
+    focusSheet.style.minHeight = `${rawHeight * scale}px`;
   }
 
   function formatDateForInput(date) {
