@@ -1921,12 +1921,10 @@
 
     @media (max-width: 540px) {
       #focus.focus-overlay {
-        padding: clamp(0.6rem, 4vw, 1rem);
         align-items: stretch;
       }
 
       .focus-overlay__sheet {
-        width: 100%;
         border-radius: 22px 22px 14px 14px;
       }
 
@@ -3633,11 +3631,19 @@
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      padding: clamp(1.25rem, 5vw, 2.25rem);
+      --sheet-pad: clamp(1rem, 5vw, 2.25rem);
+      padding: var(--sheet-pad);
       background: rgba(8, 12, 18, 0.7);
       backdrop-filter: blur(10px);
       z-index: 140;
       pointer-events: none;
+      overflow-x: hidden;
+    }
+
+    @supports (width: 1dvw) {
+      #focus.focus-overlay {
+        --sheet-pad: clamp(1rem, 5dvw, 2.25rem);
+      }
     }
 
     body.focus-overlay-active #focus.focus-overlay {
@@ -3652,7 +3658,9 @@
 
     .focus-overlay__sheet {
       position: relative;
-      width: min(94vw, 580px);
+      width: min(calc(100vw - (2 * var(--sheet-pad))), 580px);
+      max-width: 100%;
+      overflow: hidden;
       border-radius: 28px 28px 16px 16px;
       background: rgba(9, 16, 23, 0.98);
       border: 1px solid rgba(148, 163, 184, 0.22);
@@ -3662,6 +3670,24 @@
       gap: var(--space-3);
       transform: translateY(0);
       animation: focus-sheet-enter 240ms ease;
+    }
+
+    @supports (width: 1dvw) {
+      .focus-overlay__sheet {
+        width: min(calc(100dvw - (2 * var(--sheet-pad))), 580px);
+      }
+    }
+
+    .focus-overlay__sheet * {
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .focus-overlay__sheet-inner {
+      display: grid;
+      gap: var(--space-3);
+      width: 580px;
+      margin: 0;
     }
 
     @keyframes focus-sheet-enter {
@@ -8175,12 +8201,24 @@
 
     const overlay = $("focus");
     if (overlay) {
+      const focusSheet = overlay.querySelector(".focus-overlay__sheet");
+      if (focusSheet && !focusSheet.querySelector(".focus-overlay__sheet-inner")) {
+        const inner = document.createElement("div");
+        inner.className = "focus-overlay__sheet-inner";
+        while (focusSheet.firstChild) {
+          inner.appendChild(focusSheet.firstChild);
+        }
+        focusSheet.appendChild(inner);
+      }
       overlay.addEventListener("click", event => {
         const dismissTarget = event.target.closest("[data-focus-dismiss]");
         if (dismissTarget) {
           backToCapture();
         }
       });
+      if (focusSheet) {
+        ensureFocusOverlayResizeListeners();
+      }
     }
 
     document.addEventListener("keydown", event => {
@@ -11517,6 +11555,68 @@
       ? renderChartTask(referenceTask, resolvedIndex)
       : renderSimpleSubTasks(referenceTask, resolvedIndex);
     subTaskView.appendChild(content);
+    requestFocusOverlayFit();
+  }
+
+  function requestFocusOverlayFit() {
+    if (focusOverlayFitScheduled) return;
+    focusOverlayFitScheduled = true;
+    window.requestAnimationFrame(() => {
+      focusOverlayFitScheduled = false;
+      fitFocusOverlayToScreen();
+    });
+  }
+
+  function ensureFocusOverlayResizeListeners() {
+    if (focusOverlayResizeListenersBound) return;
+    focusOverlayResizeListenersBound = true;
+    const scheduleFit = () => requestFocusOverlayFit();
+    window.addEventListener("resize", scheduleFit);
+    window.addEventListener("orientationchange", scheduleFit);
+  }
+
+  function fitFocusOverlayToScreen() {
+    const overlay = $("focus");
+    if (!overlay || overlay.classList.contains("hidden")) return;
+    const focusSheet = overlay.querySelector(".focus-overlay__sheet");
+    if (!focusSheet) return;
+    const inner = focusSheet.querySelector(".focus-overlay__sheet-inner");
+    if (!inner) return;
+    const overlayStyle = window.getComputedStyle(overlay);
+    const sheetPadValue = overlayStyle.getPropertyValue("--sheet-pad").trim();
+    let paddingPx = 0;
+    if (sheetPadValue) {
+      if (sheetPadValue.endsWith("px")) {
+        paddingPx = parseFloat(sheetPadValue);
+      } else if (document.body) {
+        const temp = document.createElement("div");
+        temp.style.position = "absolute";
+        temp.style.visibility = "hidden";
+        temp.style.pointerEvents = "none";
+        temp.style.paddingLeft = sheetPadValue;
+        document.body.appendChild(temp);
+        paddingPx = parseFloat(window.getComputedStyle(temp).paddingLeft) || 0;
+        temp.remove();
+      }
+    }
+    if (!paddingPx) {
+      paddingPx = parseFloat(overlayStyle.paddingLeft) || 0;
+    }
+    const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+    const designWidth = 580;
+    const availableWidth = Math.max(0, viewportWidth - paddingPx * 2);
+    const sheetStyle = window.getComputedStyle(focusSheet);
+    const sheetWidth = parseFloat(sheetStyle.width) || focusSheet.clientWidth || availableWidth || designWidth;
+    const scale = availableWidth > 0 ? Math.min(1, availableWidth / designWidth) : 1;
+    const scaledWidth = designWidth * scale;
+    const offset = Math.max(0, (sheetWidth - scaledWidth) / 2);
+    const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+    const safeOffset = Number.isFinite(offset) ? offset : 0;
+    inner.style.transformOrigin = "top left";
+    inner.style.transform = `translateX(${safeOffset}px) scale(${safeScale})`;
+    inner.style.marginInline = "0";
+    const rawHeight = inner.offsetHeight;
+    focusSheet.style.minHeight = `${rawHeight * safeScale}px`;
   }
 
   function formatDateForInput(date) {
@@ -11664,6 +11764,8 @@
   let tasks = [];
   let templates = [];
   let focusQueue = [];
+  let focusOverlayFitScheduled = false;
+  let focusOverlayResizeListenersBound = false;
   let editingTaskId = null;
   let focusTimerId = null;
   let focusTimerStart = null;
@@ -15687,8 +15789,13 @@ initializeFocusFabLongPress();
       focusSection.classList.remove("hidden");
       focusSection.setAttribute("aria-hidden", "false");
       const focusSheet = focusSection.querySelector(".focus-overlay__sheet");
+      ensureFocusOverlayResizeListeners();
+      requestFocusOverlayFit();
       if (focusSheet) {
-        window.requestAnimationFrame(() => focusSheet.focus());
+        window.requestAnimationFrame(() => {
+          focusSheet.focus();
+          requestFocusOverlayFit();
+        });
       }
     }
     document.body.classList.add("focus-overlay-active");
