@@ -318,6 +318,58 @@
       z-index: 10;
     }
 
+    .developer-brief {
+      width: min(100%, 760px);
+      margin: 3rem auto 2.5rem;
+      padding: 1.5rem;
+      background: rgba(12, 18, 24, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: var(--card-radius);
+      color: var(--text-primary);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .developer-brief h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .developer-brief p {
+      margin: 0.35rem 0;
+      color: var(--text-primary);
+    }
+
+    .developer-brief ol {
+      margin: 0;
+      padding-left: 1.25rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .developer-brief li {
+      line-height: 1.6;
+    }
+
+    .developer-brief li strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .developer-brief ul {
+      margin: 0.5rem 0 0.5rem 1.25rem;
+      padding: 0;
+      list-style: disc;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .developer-brief ul ul {
+      margin-left: 1.1rem;
+      list-style: circle;
+    }
+
     .starter-micro-header {
       position: sticky;
       top: 0.75rem;
@@ -5348,6 +5400,145 @@
       <span>Reset</span>
     </a>
   </nav>
+
+  <section class="developer-brief" aria-labelledby="routineTilesSpec">
+    <h2 id="routineTilesSpec">Routine Tiles – End-to-End UX (tap, long-press, swipe, and smart nudging)</h2>
+    <ol>
+      <li>
+        <strong>First-time setup</strong>
+        <ul>
+          <li>When the user opens Resources, each routine appears as a tile (Morning Launch, Environmental Reminders, Sleep Toolkit, Dopamine Retrainer, etc.).</li>
+          <li>Each tile shows the title, a small emoji icon, a one-line micro-prompt, and a soft gradient that matches its mood.</li>
+          <li>The first time a tile is seen, a brief hint appears: “Tap to open • Hold to Quick-Launch • Swipe for shortcuts.”</li>
+          <li>If notifications are supported, the first time the user opens a tile that has timing (Morning, Sleep, Environment), the app asks: “Add daily reminder?” with a preset time and the option to adjust.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Idle/stack behavior (what the user sees before touching anything)</strong>
+        <ul>
+          <li>Tiles are vertically stacked.</li>
+          <li>The most relevant tile subtly “levitates” 2–4dp and has a slow 3–4s shimmer based on context.</li>
+          <li>Context cues:
+            <ul>
+              <li>Morning → Morning tile glows.</li>
+              <li>Evening → Sleep tile glows.</li>
+              <li>After Rescue usage → Conflict Resolver tile glows.</li>
+            </ul>
+          </li>
+          <li>Micro-prompt under each title reads like an invitation, e.g., “Ready for takeoff? Start your day ritual.”</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Single-tap on a tile (expand to choose)</strong>
+        <ul>
+          <li>Tapping a tile expands it in place.</li>
+          <li>Expansion shows the routine’s steps or key actions (e.g., “Step 1: Hydrate,” “Step 2: Start 5-min focus,” etc.).</li>
+          <li>The top of the expanded view includes one big action button: “Start Routine.”</li>
+          <li>Below, show up to three quick actions as chips: “Refresh,” “Adjust,” “I’m stuck.”</li>
+          <li>Accessibility state updates: aria-expanded=true; other open tiles collapse.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Long-press on a tile (Quick-Launch preview)</strong>
+        <ul>
+          <li>Press and hold for ~600ms.</li>
+          <li>A compact overlay slides up from the tile showing the first two steps (or the user’s last used shortcut) and one large “Quick-Launch” button.</li>
+          <li>Releasing the hold triggers a subtle haptic tick and keeps the overlay visible; tapping “Quick-Launch” starts the routine immediately.</li>
+          <li>If the user lets go before 600ms, nothing happens (prevents accidental launches).</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Swipe right on a tile (immediate start)</strong>
+        <ul>
+          <li>Swiping right on a familiar tile immediately begins the routine without opening it.</li>
+          <li>A mini banner appears at the bottom: “Morning Launch started — Undo?” with a 3-second timeout.</li>
+          <li>Haptic tick on start; the tile briefly glows to confirm activation.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Swipe left on a tile (edit/configure)</strong>
+        <ul>
+          <li>Swiping left opens a small editor sheet for that routine.</li>
+          <li>The sheet contains: rename, reorder steps, set default Quick-Launch action, and set reminder time if applicable.</li>
+          <li>Saving closes the sheet with a soft “saved” toast; the tile updates its micro-prompt if relevant.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Remember last used tool and surface it next time</strong>
+        <ul>
+          <li>After a routine completes, the app stores the last used sub-tool or shortcut for that tile.</li>
+          <li>Next time the user long-presses the same tile, that shortcut is preselected in the Quick-Launch preview.</li>
+          <li>The micro-prompt updates to reflect recency, e.g., “Last time: 5-min warmup • Ready to repeat?”</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Visual and emotional feedback on action</strong>
+        <ul>
+          <li>On Start or Quick-Launch: tiny haptic tick + 200ms glow pulse on the tile.</li>
+          <li>While a routine is running: the tile shows a thin progress halo; the gradient animates slowly.</li>
+          <li>On completion: a brief confetti shimmer and a toast like “Routine done — nice work.”</li>
+          <li>“Start next?” chip appears for 5 seconds to chain another micro-win.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Smart prioritization logic (when tiles nudge themselves)</strong>
+        <ul>
+          <li>Time-based:
+            <ul>
+              <li>Morning (6:00–11:00): Morning tile gets priority glow and appears 1 position higher.</li>
+              <li>Evening (19:00–23:00): Sleep tile gets priority glow.</li>
+              <li>One hour before preferred bedtime: Environmental Reminders nudges forward with “Prep for tomorrow?” text.</li>
+            </ul>
+          </li>
+          <li>State-based: if the user triggered Rescue in the last 30 min, the Conflict Resolver tile adds a gentle pulse and micro-prompt: “Need a reframe?”</li>
+          <li>Streak-based: if the user completes a routine 3 days in a row, the tile shows “Streak: 3” and a confident micro-prompt: “Keep the glide going.”</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Notifications and deep-linking back to tiles</strong>
+        <ul>
+          <li>If reminders are enabled for a tile, the user receives a notification at the chosen time with friendly copy and emoji.</li>
+          <li>Tapping a notification opens the app directly to the correct tile, expanded and ready to start.</li>
+          <li>If the app is in focus when a reminder fires, show a non-blocking banner: “Ready for Morning Launch?” with “Start” and “Later” actions.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Failure-safe and exit paths</strong>
+        <ul>
+          <li>At any time in an expanded tile, “Back” collapses it without losing selection state.</li>
+          <li>If a routine is started by mistake, the Undo banner cancels within 3 seconds.</li>
+          <li>If a gesture conflicts (e.g., swipe triggers browser back), the app prefers the tile gesture and shows a one-time tooltip explaining the action.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Accessibility and touch ergonomics</strong>
+        <ul>
+          <li>All tap targets ≥48dp with 8–12dp spacing.</li>
+          <li>aria-expanded is correctly toggled; tiles act as buttons for assistive tech.</li>
+          <li>High-contrast mode preserves gradients but boosts text and icon contrast to AA.</li>
+          <li>Haptics are subtle and can be toggled off in Settings.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Performance and motion guidelines</strong>
+        <ul>
+          <li>All tile animations under 250ms; no competing multi-axis motion.</li>
+          <li>When multiple tiles update (e.g., morning context shift), only the prioritized tile animates to avoid noise.</li>
+          <li>Motion respects “Reduce motion” OS setting, switching to fades.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Success criteria for the feature</strong>
+        <ul>
+          <li>A routine can be launched in one gesture from the collapsed state (swipe right or long-press → Quick-Launch → one tap).</li>
+          <li>From notification tap to routine start requires at most one additional tap.</li>
+          <li>The most context-relevant tile consistently appears visually dominant without pushing content offscreen.</li>
+          <li>Users report fewer taps to begin a routine and a higher rate of completion within a week.</li>
+        </ul>
+      </li>
+    </ol>
+    <p>When this is live, the flow becomes: see the right tile → act with one gesture → feel a small win → roll into the next.</p>
+  </section>
 
   <script>
   const $ = id => document.getElementById(id);
