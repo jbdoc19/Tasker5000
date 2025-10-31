@@ -13374,11 +13374,23 @@
   function initializeDueTodayAccordionState() {
     const sections = getDueTodaySections();
     if (!sections.length) return;
+
     sections.forEach(({ accordion, summaryBtn, listEl }) => {
       if (!accordion || !summaryBtn || !listEl) return;
+
+      // Set initial state to CLOSED
       accordion.dataset.open = "false";
       summaryBtn.setAttribute("aria-expanded", "false");
       listEl.hidden = true;
+
+      // Attach click listener once during initialization
+      if (!summaryBtn.dataset.listenerBound) {
+        summaryBtn.dataset.listenerBound = "true";
+        summaryBtn.addEventListener("click", () => {
+          const nextOpen = accordion.dataset.open !== "true";
+          setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen, source: accordion });
+        });
+      }
     });
   }
 
@@ -13451,13 +13463,6 @@
     if (!instances.length) return;
 
     instances.forEach(({ section, accordion, summaryBtn, summaryText, listEl, emptyEl }) => {
-      if (!summaryBtn.dataset.listenerBound) {
-        summaryBtn.dataset.listenerBound = "true";
-        summaryBtn.addEventListener("click", () => {
-          const nextOpen = accordion.dataset.open !== "true";
-          setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen, source: section });
-        });
-      }
       listEl.innerHTML = "";
       if (!entries.length) {
         section.classList.add("hidden");
@@ -13499,13 +13504,6 @@
     if (!instances.length) return;
 
     instances.forEach(({ section, accordion, summaryBtn, summaryText, listEl, emptyEl }) => {
-      if (!summaryBtn.dataset.listenerBound) {
-        summaryBtn.dataset.listenerBound = "true";
-        summaryBtn.addEventListener("click", () => {
-          const nextOpen = accordion.dataset.open !== "true";
-          setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen, source: section });
-        });
-      }
       listEl.innerHTML = "";
       if (!entries.length) {
         section.classList.add("hidden");
