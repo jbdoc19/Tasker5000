@@ -4403,17 +4403,15 @@
           <div class="zone-body">
             <span id="tasks-zone" class="zone-anchor" aria-hidden="true"></span>
       <section class="card due-today-card hidden" aria-live="polite" data-due-today-section>
+        <div class="section-heading">
+          <h2>Due today</h2>
+          <span class="chip chip-muted section-chip">Ready today</span>
+        </div>
         <div class="due-today-accordion" data-open="false" data-accordion="dueToday">
-          <div class="section-heading">
-            <div class="section-heading__title">
-              <h2>Due today</h2>
-              <span class="chip chip-muted section-chip">Ready today</span>
-            </div>
-            <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
-              <span data-due-today-summary-text>0 ready • est —</span>
-              <span class="due-today-summary__icon" aria-hidden="true">▸</span>
-            </button>
-          </div>
+          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+            <span data-due-today-summary-text>0 ready • est —</span>
+            <span class="due-today-summary__icon" aria-hidden="true">▸</span>
+          </button>
           <div class="due-today-list" hidden data-accordion-panel data-due-today-list></div>
         </div>
         <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
@@ -4421,17 +4419,15 @@
 
 
       <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
+        <div class="section-heading">
+          <h2 data-all-tasks-title>All Tasks</h2>
+          <span class="chip chip-muted section-chip hidden" data-all-tasks-summary-chip></span>
+        </div>
         <div class="due-today-accordion" data-open="false" data-accordion="allTasks">
-          <div class="section-heading">
-            <div class="section-heading__title">
-              <h2 data-all-tasks-title>All Tasks</h2>
-              <span class="chip chip-muted section-chip hidden" data-all-tasks-summary-chip></span>
-            </div>
-            <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
-              <span data-all-tasks-summary-text>0 active</span>
-              <span class="due-today-summary__icon" aria-hidden="true">▸</span>
-            </button>
-          </div>
+          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+            <span data-all-tasks-summary-text>0 active</span>
+            <span class="due-today-summary__icon" aria-hidden="true">▸</span>
+          </button>
           <div class="all-tasks-panel" hidden data-accordion-panel data-all-tasks-panel>
             <div class="task-panel-actions">
               <button id="openAddTaskPanel" class="btn btn-primary" type="button">Add task</button>
@@ -11154,6 +11150,68 @@
         item.appendChild(progressElement);
       }
     }
+    if (isChartTask(entry.task)
+      && Number.isFinite(Number(entry.task.chartDurationMinutes))
+      && Number(entry.task.chartDurationMinutes) > 0) {
+      metaBits.push(`Chart ${formatDuration(Number(entry.task.chartDurationMinutes))}`);
+    }
+    meta.textContent = metaBits.join(" • ");
+    item.appendChild(meta);
+
+    if (entry.task.subTasks && entry.task.subTasks.length) {
+      const progressElement = createProgressElement(entry.task);
+      if (progressElement) {
+        item.appendChild(progressElement);
+      }
+    }
+
+    const pillRow = document.createElement("div");
+    pillRow.className = "due-today-pills";
+    const sprintBtn = document.createElement("button");
+    sprintBtn.className = "pill pill-primary";
+    sprintBtn.type = "button";
+    sprintBtn.textContent = "Start 5m";
+    sprintBtn.addEventListener("click", () => startFiveMinuteSprint(entry.task.id));
+    pillRow.appendChild(sprintBtn);
+
+    const fullBtn = document.createElement("button");
+    fullBtn.className = "pill";
+    fullBtn.type = "button";
+    fullBtn.textContent = "Start full";
+    fullBtn.addEventListener("click", () => startFocus(entry.task.id));
+    pillRow.appendChild(fullBtn);
+
+    item.appendChild(pillRow);
+    return item;
+  }
+
+  function renderDueTodayList(entries) {
+    const instances = getDueTodaySections();
+    if (!instances.length) return;
+
+    instances.forEach(({ section, accordion, summaryBtn, summaryText, listEl, emptyEl }) => {
+      if (!summaryBtn.dataset.listenerBound) {
+        summaryBtn.dataset.listenerBound = "true";
+        summaryBtn.addEventListener("click", () => {
+          const nextOpen = accordion.dataset.open !== "true";
+          setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen, source: section });
+        });
+      }
+      listEl.innerHTML = "";
+      if (!entries.length) {
+        section.classList.add("hidden");
+        emptyEl.classList.remove("hidden");
+        accordion.classList.add("hidden");
+        accordion.dataset.open = "false";
+        summaryBtn.setAttribute("aria-expanded", "false");
+        summaryText.textContent = "0 ready • est —";
+        listEl.hidden = true;
+      } else {
+        section.classList.remove("hidden");
+        emptyEl.classList.add("hidden");
+        accordion.classList.remove("hidden");
+      }
+    });
 
     const pillRow = document.createElement("div");
     pillRow.className = "due-today-pills";
