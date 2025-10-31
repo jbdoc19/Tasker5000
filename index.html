@@ -4374,45 +4374,33 @@
           </header>
           <div class="zone-body">
             <span id="tasks-zone" class="zone-anchor" aria-hidden="true"></span>
-      <section id="dueTodaySection" class="card due-today-card hidden" aria-live="polite">
+      <section class="card due-today-card hidden" aria-live="polite" data-due-today-section>
         <div class="section-heading">
           <h2>Due today</h2>
           <span class="chip chip-muted section-chip">Ready today</span>
         </div>
-        <div id="dueTodayAccordion" class="due-today-accordion" data-open="false">
-          <button
-            id="dueTodaySummary"
-            class="due-today-summary"
-            type="button"
-            aria-expanded="false"
-            aria-controls="dueTodayList"
-          >
-            <span id="dueTodaySummaryText">0 ready • est —</span>
+        <div class="due-today-accordion" data-open="false" data-accordion="dueToday">
+          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+            <span data-due-today-summary-text>0 ready • est —</span>
             <span class="due-today-summary__icon" aria-hidden="true">▸</span>
           </button>
-          <div id="dueTodayList" class="due-today-list" hidden></div>
+          <div class="due-today-list" hidden data-accordion-panel data-due-today-list></div>
         </div>
-        <p id="dueTodayEmpty" class="due-today-empty hidden">Nothing due today. You're caught up.</p>
+        <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
       </section>
 
 
-      <section id="allTasksCard" class="card all-tasks-card" aria-live="polite">
+      <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
         <div class="section-heading">
-          <h2 id="allTasksTitle">All Tasks</h2>
-          <span id="allTasksSummaryChip" class="chip chip-muted section-chip hidden"></span>
+          <h2 data-all-tasks-title>All Tasks</h2>
+          <span class="chip chip-muted section-chip hidden" data-all-tasks-summary-chip></span>
         </div>
-        <div id="allTasksAccordion" class="due-today-accordion" data-open="false">
-          <button
-            id="allTasksSummary"
-            class="due-today-summary"
-            type="button"
-            aria-expanded="false"
-            aria-controls="allTasksPanel"
-          >
-            <span id="allTasksSummaryText">0 active</span>
+        <div class="due-today-accordion" data-open="false" data-accordion="allTasks">
+          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+            <span data-all-tasks-summary-text>0 active</span>
             <span class="due-today-summary__icon" aria-hidden="true">▸</span>
           </button>
-          <div id="allTasksPanel" class="all-tasks-panel" hidden>
+          <div class="all-tasks-panel" hidden data-accordion-panel data-all-tasks-panel>
             <div class="task-panel-actions">
               <button id="openAddTaskPanel" class="btn btn-primary" type="button">Add task</button>
             </div>
@@ -11076,39 +11064,116 @@
     updateNextBestOptions();
   }
 
-  function renderDueTodayList(entries) {
-    const section = $("dueTodaySection");
-    const accordion = $("dueTodayAccordion");
-    const listEl = $("dueTodayList");
-    const summaryBtn = $("dueTodaySummary");
-    const summaryText = $("dueTodaySummaryText");
-    const emptyEl = $("dueTodayEmpty");
-    if (!section || !accordion || !listEl || !summaryBtn || !summaryText || !emptyEl) return;
+  function prepareAccordionContainers() {
+    const counters = {};
+    document.querySelectorAll('[data-accordion]').forEach(container => {
+      const name = container.dataset.accordion || "accordion";
+      const index = counters[name] || 0;
+      counters[name] = index + 1;
+      const summary = container.querySelector('[data-accordion-summary]');
+      const panel = container.querySelector('[data-accordion-panel]');
+      if (!summary || !panel) return;
+      const suffix = index === 0 ? "" : `-${index}`;
+      const panelId = `${name}Panel${suffix}`;
+      panel.id = panelId;
+      summary.setAttribute("aria-controls", panelId);
+    });
+  }
 
-    listEl.innerHTML = "";
+  function getDueTodaySections() {
+    return Array.from(document.querySelectorAll('[data-due-today-section]'))
+      .map(section => {
+        const accordion = section.querySelector('[data-accordion="dueToday"]');
+        const summaryBtn = accordion?.querySelector('[data-accordion-summary]');
+        const summaryText = accordion?.querySelector('[data-due-today-summary-text]');
+        const listEl = section.querySelector('[data-due-today-list]');
+        const emptyEl = section.querySelector('[data-due-today-empty]');
+        return { section, accordion, summaryBtn, summaryText, listEl, emptyEl };
+      })
+      .filter(instance => instance.section && instance.accordion && instance.summaryBtn && instance.summaryText && instance.listEl && instance.emptyEl);
+  }
 
-    if (!summaryBtn.dataset.listenerBound) {
-      summaryBtn.dataset.listenerBound = "true";
-      summaryBtn.addEventListener("click", () => {
-        const nextOpen = accordion.dataset.open !== "true";
-        setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen });
-      });
+  function createDueTodayItem(entry) {
+    const item = document.createElement("div");
+    item.className = "due-today-item";
+
+    const title = document.createElement("p");
+    title.className = "due-today-title";
+    title.textContent = entry.task.name;
+    item.appendChild(title);
+
+    const meta = document.createElement("div");
+    meta.className = "due-today-meta";
+    const metaBits = ["Due today"];
+    if (entry.fallback && entry.task.dateOfService) {
+      metaBits.push(`Visit ${entry.task.dateOfService}`);
     }
+    if (isChartTask(entry.task)
+      && Number.isFinite(Number(entry.task.chartDurationMinutes))
+      && Number(entry.task.chartDurationMinutes) > 0) {
+      metaBits.push(`Chart ${formatDuration(Number(entry.task.chartDurationMinutes))}`);
+    }
+    meta.textContent = metaBits.join(" • ");
+    item.appendChild(meta);
+
+    if (entry.task.subTasks && entry.task.subTasks.length) {
+      const progressElement = createProgressElement(entry.task);
+      if (progressElement) {
+        item.appendChild(progressElement);
+      }
+    }
+
+    const pillRow = document.createElement("div");
+    pillRow.className = "due-today-pills";
+    const sprintBtn = document.createElement("button");
+    sprintBtn.className = "pill pill-primary";
+    sprintBtn.type = "button";
+    sprintBtn.textContent = "Start 5m";
+    sprintBtn.addEventListener("click", () => startFiveMinuteSprint(entry.task.id));
+    pillRow.appendChild(sprintBtn);
+
+    const fullBtn = document.createElement("button");
+    fullBtn.className = "pill";
+    fullBtn.type = "button";
+    fullBtn.textContent = "Start full";
+    fullBtn.addEventListener("click", () => startFocus(entry.task.id));
+    pillRow.appendChild(fullBtn);
+
+    item.appendChild(pillRow);
+    return item;
+  }
+
+  function renderDueTodayList(entries) {
+    const instances = getDueTodaySections();
+    if (!instances.length) return;
+
+    instances.forEach(({ section, accordion, summaryBtn, summaryText, listEl, emptyEl }) => {
+      if (!summaryBtn.dataset.listenerBound) {
+        summaryBtn.dataset.listenerBound = "true";
+        summaryBtn.addEventListener("click", () => {
+          const nextOpen = accordion.dataset.open !== "true";
+          setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen, source: section });
+        });
+      }
+      listEl.innerHTML = "";
+      if (!entries.length) {
+        section.classList.add("hidden");
+        emptyEl.classList.remove("hidden");
+        accordion.classList.add("hidden");
+        accordion.dataset.open = "false";
+        summaryBtn.setAttribute("aria-expanded", "false");
+        summaryText.textContent = "0 ready • est —";
+        listEl.hidden = true;
+      } else {
+        section.classList.remove("hidden");
+        emptyEl.classList.add("hidden");
+        accordion.classList.remove("hidden");
+      }
+    });
 
     if (!entries.length) {
-      section.classList.add("hidden");
-      emptyEl.classList.remove("hidden");
-      accordion.classList.add("hidden");
-      accordion.dataset.open = "false";
-      summaryBtn.setAttribute("aria-expanded", "false");
-      summaryText.textContent = "0 ready • est —";
-      listEl.hidden = true;
       return;
     }
-
-    section.classList.remove("hidden");
-    emptyEl.classList.add("hidden");
-    accordion.classList.remove("hidden");
 
     const readyLabel = entries.length === 1 ? "1 ready" : `${entries.length} ready`;
     const estimatedMinutes = entries.reduce((sum, entry) => {
@@ -11117,83 +11182,41 @@
     }, 0);
     const hasEstimate = Number.isFinite(estimatedMinutes) && estimatedMinutes > 0;
     const estimateText = hasEstimate ? `est ${Math.max(1, Math.round(estimatedMinutes))} min` : "est —";
-    summaryText.textContent = `${readyLabel} • ${estimateText}`;
 
-    entries.forEach(entry => {
-      const item = document.createElement("div");
-      item.className = "due-today-item";
-
-      const title = document.createElement("p");
-      title.className = "due-today-title";
-      title.textContent = entry.task.name;
-      item.appendChild(title);
-
-      const meta = document.createElement("div");
-      meta.className = "due-today-meta";
-      const metaBits = ["Due today"];
-      if (entry.fallback && entry.task.dateOfService) {
-        metaBits.push(`Visit ${entry.task.dateOfService}`);
-      }
-      if (isChartTask(entry.task) && Number.isFinite(Number(entry.task.chartDurationMinutes)) && Number(entry.task.chartDurationMinutes) > 0) {
-        metaBits.push(`Chart ${formatDuration(Number(entry.task.chartDurationMinutes))}`);
-      }
-      meta.textContent = metaBits.join(" • ");
-      item.appendChild(meta);
-
-      if (entry.task.subTasks && entry.task.subTasks.length) {
-        const progressElement = createProgressElement(entry.task);
-        if (progressElement) {
-          item.appendChild(progressElement);
-        }
-      }
-
-      const pillRow = document.createElement("div");
-      pillRow.className = "due-today-pills";
-      const sprintBtn = document.createElement("button");
-      sprintBtn.className = "pill pill-primary";
-      sprintBtn.type = "button";
-      sprintBtn.textContent = "Start 5m";
-      sprintBtn.addEventListener("click", () => startFiveMinuteSprint(entry.task.id));
-      pillRow.appendChild(sprintBtn);
-
-      const fullBtn = document.createElement("button");
-      fullBtn.className = "pill";
-      fullBtn.type = "button";
-      fullBtn.textContent = "Start full";
-      fullBtn.addEventListener("click", () => startFocus(entry.task.id));
-      pillRow.appendChild(fullBtn);
-
-      item.appendChild(pillRow);
-      listEl.appendChild(item);
+    instances.forEach(({ accordion, summaryBtn, summaryText, listEl }) => {
+      summaryText.textContent = `${readyLabel} • ${estimateText}`;
+      entries.forEach(entry => {
+        listEl.appendChild(createDueTodayItem(entry));
+      });
+      const isOpen = accordion.dataset.open === "true";
+      summaryBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      listEl.hidden = !isOpen;
     });
-
-    const isOpen = accordion.dataset.open === "true";
-    summaryBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    listEl.hidden = !isOpen;
   }
 
   function setDueTodayAccordionOpen(open, options = {}) {
-    const accordion = $("dueTodayAccordion");
-    const summaryBtn = $("dueTodaySummary");
-    const listEl = $("dueTodayList");
-    if (!accordion || !summaryBtn || !listEl) return;
-    const nextState = open ? "true" : "false";
-    accordion.dataset.open = nextState;
-    summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    listEl.hidden = !open;
-    if (open && options.highlight !== false) {
-      window.requestAnimationFrame(() => {
-        const firstCard = listEl.querySelector(".due-today-item");
-        if (firstCard) {
-          firstCard.classList.add("due-today-item--spotlight");
-          window.setTimeout(() => firstCard.classList.remove("due-today-item--spotlight"), 900);
-        }
-      });
-    }
-    if (open && options.focusSummary) {
-      summaryBtn.focus();
-    }
-    if (open && !options.skipSync) {
+    const { highlight = true, focusSummary = false, skipSync = false, source = null } = options;
+    const instances = getDueTodaySections();
+    if (!instances.length) return;
+    instances.forEach(({ accordion, summaryBtn, listEl, section }) => {
+      const nextState = open ? "true" : "false";
+      accordion.dataset.open = nextState;
+      summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      listEl.hidden = !open;
+      if (open && highlight !== false && (!source || source === section || source === accordion)) {
+        window.requestAnimationFrame(() => {
+          const firstCard = listEl.querySelector(".due-today-item");
+          if (firstCard) {
+            firstCard.classList.add("due-today-item--spotlight");
+            window.setTimeout(() => firstCard.classList.remove("due-today-item--spotlight"), 900);
+          }
+        });
+      }
+      if (open && focusSummary && (!source || source === section || source === accordion)) {
+        summaryBtn.focus();
+      }
+    });
+    if (open && !skipSync) {
       setAllTasksAccordionOpen(false, { skipSync: true });
     }
   }
@@ -12046,16 +12069,32 @@
   }
 
 
+  function getAllTasksCards() {
+    return Array.from(document.querySelectorAll('[data-all-tasks-card]'))
+      .map(card => {
+        const accordion = card.querySelector('[data-accordion="allTasks"]');
+        const summaryBtn = accordion?.querySelector('[data-accordion-summary]');
+        const summaryText = card.querySelector('[data-all-tasks-summary-text]');
+        const summaryChip = card.querySelector('[data-all-tasks-summary-chip]');
+        const panel = card.querySelector('[data-all-tasks-panel]');
+        const title = card.querySelector('[data-all-tasks-title]');
+        return { card, accordion, summaryBtn, summaryText, summaryChip, panel, title };
+      })
+      .filter(instance => instance.card && instance.accordion && instance.summaryBtn && instance.summaryText && instance.panel);
+  }
+
   function initializeAllTasksCardState() {
-    const accordion = $("allTasksAccordion");
-    const summaryBtn = $("allTasksSummary");
-    if (summaryBtn && accordion && !summaryBtn.dataset.listenerBound) {
-      summaryBtn.dataset.listenerBound = "true";
-      summaryBtn.addEventListener("click", () => {
-        const nextOpen = accordion.dataset.open !== "true";
-        setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen });
-      });
-    }
+    const cards = getAllTasksCards();
+    if (!cards.length) return;
+    cards.forEach(({ accordion, summaryBtn, card }) => {
+      if (!summaryBtn.dataset.listenerBound) {
+        summaryBtn.dataset.listenerBound = "true";
+        summaryBtn.addEventListener("click", () => {
+          const nextOpen = accordion.dataset.open !== "true";
+          setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen, source: card });
+        });
+      }
+    });
     const stored = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
     const open = stored === "expanded";
     setAllTasksAccordionOpen(open, { skipPersist: true });
@@ -12248,19 +12287,19 @@
 
 
   function setAllTasksAccordionOpen(open, options = {}) {
-    const accordion = $("allTasksAccordion");
-    const summaryBtn = $("allTasksSummary");
-    const panel = $("allTasksPanel");
-    if (!accordion || !summaryBtn || !panel) return;
-    const { skipPersist = false, highlight = false, skipSync = false } = options;
-    accordion.dataset.open = open ? "true" : "false";
-    summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    panel.hidden = !open;
-    panel.setAttribute("aria-hidden", open ? "false" : "true");
-    if (open && highlight) {
-      panel.classList.add("is-highlighted");
-      window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
-    }
+    const { skipPersist = false, highlight = false, skipSync = false, source = null } = options;
+    const cards = getAllTasksCards();
+    if (!cards.length) return;
+    cards.forEach(({ accordion, summaryBtn, panel, card }) => {
+      accordion.dataset.open = open ? "true" : "false";
+      summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      panel.hidden = !open;
+      panel.setAttribute("aria-hidden", open ? "false" : "true");
+      if (open && highlight && (!source || source === card || source === accordion || source === panel)) {
+        panel.classList.add("is-highlighted");
+        window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
+      }
+    });
     if (open && !skipSync) {
       setDueTodayAccordionOpen(false, { skipSync: true });
     }
@@ -13013,27 +13052,24 @@ initializeFocusFabLongPress();
 
     const totalTasks = tasks.length;
     const activeTasksCount = tasks.filter(t => !isTaskCompleted(t)).length;
-    const allTasksTitle = $("allTasksTitle");
-    if (allTasksTitle) {
-      allTasksTitle.textContent = `All Tasks (${totalTasks})`;
-    }
-
-    const allTasksSummaryText = $("allTasksSummaryText");
-    if (allTasksSummaryText) {
-      allTasksSummaryText.textContent = totalTasks
-        ? `${activeTasksCount} active • ${totalTasks} total`
-        : "No tasks yet";
-    }
-
-    const allTasksSummaryChip = $("allTasksSummaryChip");
-    if (allTasksSummaryChip) {
-      if (totalTasks) {
-        allTasksSummaryChip.textContent = activeCategory === "All" ? "All categories" : activeCategory;
-        allTasksSummaryChip.classList.remove("hidden");
-      } else {
-        allTasksSummaryChip.classList.add("hidden");
+    getAllTasksCards().forEach(({ title, summaryText, summaryChip }) => {
+      if (title) {
+        title.textContent = `All Tasks (${totalTasks})`;
       }
-    }
+      if (summaryText) {
+        summaryText.textContent = totalTasks
+          ? `${activeTasksCount} active • ${totalTasks} total`
+          : "No tasks yet";
+      }
+      if (summaryChip) {
+        if (totalTasks) {
+          summaryChip.textContent = activeCategory === "All" ? "All categories" : activeCategory;
+          summaryChip.classList.remove("hidden");
+        } else {
+          summaryChip.classList.add("hidden");
+        }
+      }
+    });
 
     const taskList = $("taskList");
     taskList.innerHTML = "";
@@ -14028,6 +14064,7 @@ initializeFocusFabLongPress();
     if (nextStepBtn) {
       nextStepBtn.addEventListener("click", completeCurrentMeltdownStep);
     }
+    prepareAccordionContainers();
     function showToast(message, duration = 2000) {
   const toast = document.createElement("div");
   toast.textContent = message;
