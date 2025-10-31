@@ -11580,6 +11580,12 @@
     if (!overlay || overlay.classList.contains("hidden")) return;
     const focusSheet = overlay.querySelector(".focus-overlay__sheet");
     if (!focusSheet) return;
+    overlay.style.maxWidth = "100vw";
+    overlay.style.width = "100%";
+    overlay.style.overflowX = "hidden";
+    focusSheet.style.maxWidth = "100vw";
+    focusSheet.style.width = "100%";
+    focusSheet.style.overflow = "hidden";
     const inner = focusSheet.querySelector(".focus-overlay__sheet-inner");
     if (!inner) return;
     const overlayStyle = window.getComputedStyle(overlay);
@@ -15781,6 +15787,9 @@ initializeFocusFabLongPress();
     if (focusSection) {
       focusSection.classList.remove("hidden");
       focusSection.setAttribute("aria-hidden", "false");
+      focusSection.style.maxWidth = "100vw";
+      focusSection.style.width = "100%";
+      focusSection.style.overflowX = "hidden";
       const focusSheet = focusSection.querySelector(".focus-overlay__sheet");
       ensureFocusOverlayResizeListeners();
       requestFocusOverlayFit();
@@ -15792,6 +15801,7 @@ initializeFocusFabLongPress();
       }
     }
     document.body.classList.add("focus-overlay-active");
+    document.body.style.overflowX = "hidden";
     const energyLevel = clampScale(getEnergyLevel(), 3);
     const timeBudget = getTimeBudgetMinutes();
     lastFocusEnergyLevel = energyLevel;
@@ -15938,6 +15948,16 @@ initializeFocusFabLongPress();
     if (focusSection) {
       focusSection.classList.add("hidden");
       focusSection.setAttribute("aria-hidden", "true");
+      focusSection.style.removeProperty("max-width");
+      focusSection.style.removeProperty("width");
+      focusSection.style.removeProperty("overflow-x");
+      const focusSheet = focusSection.querySelector(".focus-overlay__sheet");
+      if (focusSheet) {
+        focusSheet.style.removeProperty("max-width");
+        focusSheet.style.removeProperty("width");
+        focusSheet.style.removeProperty("overflow");
+        focusSheet.style.removeProperty("min-height");
+      }
     }
     const captureSection = $("capture");
     if (captureSection) {
@@ -15945,6 +15965,7 @@ initializeFocusFabLongPress();
       captureSection.removeAttribute("aria-hidden");
     }
     document.body.classList.remove("focus-overlay-active");
+    document.body.style.removeProperty("overflow-x");
     setSprintVisualState(false);
     setFocusLaunchOpen(false);
     updateUI();
