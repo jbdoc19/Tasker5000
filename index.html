@@ -1907,6 +1907,70 @@
         overflow: visible;
       }
     }
+
+    @media (max-width: 540px) {
+      #focus.focus-overlay {
+        padding: clamp(0.6rem, 4vw, 1rem);
+        align-items: stretch;
+      }
+
+      .focus-overlay__sheet {
+        width: 100%;
+        border-radius: 22px 22px 14px 14px;
+      }
+
+      .focus-overlay__body {
+        padding-right: 0;
+        gap: var(--space-2);
+      }
+
+      .focus {
+        font-size: 1.35rem;
+        padding: 1rem;
+      }
+
+      .subtask-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+          "checkbox name actions"
+          ". timer timer";
+        column-gap: 0.4rem;
+        row-gap: 0.35rem;
+        align-items: center;
+      }
+
+      .subtask-row > input[type="checkbox"] {
+        grid-area: checkbox;
+      }
+
+      .subtask-name {
+        grid-area: name;
+        margin-left: 0.15rem;
+      }
+
+      .subtask-actions {
+        grid-area: actions;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+      }
+
+      .subtask-actions button {
+        padding: 0.28rem 0.45rem;
+      }
+
+      .timer-label {
+        grid-area: timer;
+        margin-left: 0;
+        justify-self: end;
+        min-width: 0;
+        font-size: 0.72rem;
+      }
+
+      .distraction-tools {
+        width: 100%;
+      }
+    }
     .distraction-tools {
       margin-top: 1rem;
       background: rgba(18, 18, 18, 0.95);
@@ -2249,7 +2313,7 @@
     .timer-label {
       font-size: 0.75rem;
       color: #9aa0a6;
-      min-width: 110px;
+      min-width: 96px;
       text-align: right;
       margin-left: auto;
     }
@@ -3554,12 +3618,12 @@
 
     .focus-overlay__sheet {
       position: relative;
-      width: min(100%, 520px);
+      width: min(94vw, 580px);
       border-radius: 28px 28px 16px 16px;
       background: rgba(9, 16, 23, 0.98);
       border: 1px solid rgba(148, 163, 184, 0.22);
       box-shadow: 0 -28px 64px rgba(0, 0, 0, 0.45);
-      padding: clamp(1.25rem, 4vw, 1.75rem);
+      padding: clamp(1.1rem, 4vw, 1.75rem);
       display: grid;
       gap: var(--space-3);
       transform: translateY(0);
