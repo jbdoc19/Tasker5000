@@ -21,6 +21,11 @@
       box-sizing: border-box;
     }
 
+    html {
+      width: 100%;
+      max-width: 100vw;
+    }
+
     body {
       background: #0c1117;
       color: var(--text-primary);
@@ -28,10 +33,14 @@
       font-weight: 400;
       line-height: 1.5;
       margin: 0;
-      padding: 1.5rem 1.25rem 6.5rem;
+      padding: 1.5rem 1.25rem 5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+      max-width: 100vw;
+      min-width: 0;
+      overflow-x: hidden;
     }
 
     h1,
@@ -2848,13 +2857,13 @@
       }
 
       body {
-        padding: clamp(1.25rem, 5vw, 2rem) clamp(0.85rem, 4vw, 1.75rem) 140px;
+        padding: clamp(1.25rem, 5vw, 2rem) clamp(0.85rem, 4vw, 1.75rem) 120px;
       }
     }
 
     @media (max-width: 600px) {
       body {
-        padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 120px;
+        padding: clamp(1rem, 6vw, 1.5rem) clamp(0.75rem, 5vw, 1.25rem) 100px;
       }
 
       .card {
@@ -5279,7 +5288,16 @@
             <span id="nextTaskActionHint" class="visually-hidden">Long-press for quick capture.</span>
           </button>
           <div id="nextTaskChips" class="starter-fit-chips" aria-live="polite"></div>
-          <button id="rescueLaunchButton" class="btn starter-rescue" type="button">🛟 Rescue</button>
+          <button
+            id="rescueLaunchButton"
+            class="btn starter-rescue"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="sosOverlay"
+            aria-expanded="false"
+          >
+            🛟 Rescue
+          </button>
         </div>
 
         <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
@@ -6291,18 +6309,6 @@
     </div>
   </div>
 
-  <button
-    id="startFocusFab"
-    class="focus-fab"
-    type="button"
-    aria-haspopup="dialog"
-    aria-expanded="false"
-    aria-controls="focusLaunchSheet"
-  >
-    <span class="focus-fab__icon" aria-hidden="true">▶️</span>
-    <span class="focus-fab__label">Start Focus</span>
-  </button>
-
   <div id="focusLaunchBackdrop" class="focus-sheet__backdrop" hidden></div>
   <section
     id="focusLaunchSheet"
@@ -6441,16 +6447,6 @@
       </a>
     </div>
   </aside>
-
-  <button
-    id="meltdownSosButton"
-    class="meltdown-sos-button"
-    type="button"
-    aria-haspopup="dialog"
-    aria-controls="sosOverlay"
-  >
-    SOS Tools
-  </button>
 
   <div
     id="sosOverlay"
@@ -7686,6 +7682,7 @@
   let scrollCalmTimer = null;
   let taskGestureObserver = null;
   let lastDefuseOpener = null;
+  let lastSosTrigger = null;
 
   function isElementMostlyInView(element, ratio = 0.3) {
     if (!element) return false;
@@ -11742,9 +11739,12 @@
     panel.classList.add("hidden");
     panel.setAttribute("aria-hidden", "true");
     resetMeltdownShieldProgress();
-    const sosButton = $("meltdownSosButton");
-    if (sosButton) {
-      sosButton.focus();
+    const focusTarget =
+      lastSosTrigger ||
+      $("rescueLaunchButton") ||
+      $("meltdownSosButton");
+    if (focusTarget) {
+      window.requestAnimationFrame(() => focusTarget.focus());
     }
   }
 
@@ -13371,6 +13371,17 @@
       .filter(instance => instance.section && instance.accordion && instance.summaryBtn && instance.summaryText && instance.listEl && instance.emptyEl);
   }
 
+  function initializeDueTodayAccordionState() {
+    const sections = getDueTodaySections();
+    if (!sections.length) return;
+    sections.forEach(({ accordion, summaryBtn, listEl }) => {
+      if (!accordion || !summaryBtn || !listEl) return;
+      accordion.dataset.open = "false";
+      summaryBtn.setAttribute("aria-expanded", "false");
+      listEl.hidden = true;
+    });
+  }
+
   function createDueTodayItem(entry) {
     const item = document.createElement("div");
     item.className = "due-today-item";
@@ -14435,9 +14446,16 @@
         });
       }
     });
-    const stored = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
-    const open = stored === "expanded";
-    setAllTasksAccordionOpen(open, { skipPersist: true });
+    let storedState = null;
+    try {
+      storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
+      if (storedState !== "collapsed") {
+        localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "collapsed");
+      }
+    } catch (error) {
+      console.warn("Unable to access stored All Tasks state", error);
+    }
+    setAllTasksAccordionOpen(false, { skipPersist: true });
   }
 
   function focusFirstEditableField() {
@@ -15197,59 +15215,88 @@
   }
 
   function initializeSosPanel() {
-    const sosButton = $("meltdownSosButton");
     const overlay = $("sosOverlay");
     const closeBtn = $("sosOverlayClose");
     const shieldBtn = $("sosShield");
     const defuseBtn = $("sosDefuse");
     const worstDayBtn = $("worstDayButton");
-    if (!sosButton || !overlay) return;
+    const triggers = ["rescueLaunchButton", "meltdownSosButton"].map(id => $(id)).filter(Boolean);
+    if (!triggers.length || !overlay) return;
 
     let sosOpen = false;
-    const setSosOpen = open => {
+    let activeTrigger = null;
+
+    const updateTriggerExpanded = () => {
+      triggers.forEach(trigger => {
+        trigger.setAttribute("aria-expanded", sosOpen && trigger === activeTrigger ? "true" : "false");
+      });
+    };
+
+    updateTriggerExpanded();
+
+    const setSosOpen = (open, { restoreFocus = true, focusTarget = null } = {}) => {
       sosOpen = Boolean(open);
+      updateTriggerExpanded();
       if (sosOpen) {
         overlay.classList.remove("hidden");
         overlay.setAttribute("aria-hidden", "false");
         if (closeBtn) {
           closeBtn.focus();
         }
+        lastSosTrigger = activeTrigger || triggers[0] || null;
       } else {
         overlay.classList.add("hidden");
         overlay.setAttribute("aria-hidden", "true");
-        sosButton.focus();
+        if (restoreFocus) {
+          const target = focusTarget || activeTrigger || lastSosTrigger || triggers[0] || null;
+          if (target) {
+            window.requestAnimationFrame(() => target.focus());
+          }
+        }
       }
     };
 
-    sosButton.addEventListener("click", () => setSosOpen(true));
+    triggers.forEach(trigger => {
+      trigger.addEventListener("click", () => {
+        activeTrigger = trigger;
+        lastSosTrigger = trigger;
+        setSosOpen(true);
+      });
+    });
+
     if (closeBtn) {
       closeBtn.addEventListener("click", () => setSosOpen(false));
     }
+
     overlay.addEventListener("click", event => {
       if (event.target === overlay) {
         setSosOpen(false);
       }
     });
+
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && sosOpen) {
         setSosOpen(false);
       }
     });
+
     if (shieldBtn) {
       shieldBtn.addEventListener("click", () => {
-        setSosOpen(false);
+        setSosOpen(false, { restoreFocus: false });
         activateShield();
       });
     }
+
     if (defuseBtn) {
       defuseBtn.addEventListener("click", () => {
-        setSosOpen(false);
-        lastDefuseOpener = sosButton;
+        setSosOpen(false, { restoreFocus: false });
+        lastDefuseOpener = activeTrigger || lastSosTrigger || triggers[0] || null;
         openDefuseOverlay();
       });
     }
+
     if (worstDayBtn) {
-      worstDayBtn.addEventListener("click", () => setSosOpen(false));
+      worstDayBtn.addEventListener("click", () => setSosOpen(false, { restoreFocus: false }));
     }
   }
 
@@ -16441,43 +16488,18 @@ initializeFocusFabLongPress();
     initializeBlockBatchModule();
     initializeAddTaskCardState();
     initializePreflightToggles();
-initializeAllTasksCardState();
-initializeFocusLaunchSheet();
-initializeQuickCaptureModal();
-
-// === START: Add Quick Capture long-press feature ===
-function initializeStartFabQuickCapture() {
-  // Use standard DOM selector instead of $() helper (for reliability)
-  const fab = document.getElementById("startFocusFab");
-  if (!fab) return;
-
-  const LONG_PRESS_MS = 600;
-  let timer = null;
-
-  fab.addEventListener("pointerdown", () => {
-    timer = setTimeout(() => {
-      // This calls your existing quick capture modal
-      openQuickCaptureModal();
-    }, LONG_PRESS_MS);
-  });
-
-  ["pointerup", "pointerleave", "pointercancel"].forEach(type => {
-    fab.addEventListener(type, () => clearTimeout(timer));
-  });
-}
-
-// Initialize it right after the quick-capture modal
-initializeStartFabQuickCapture();
-// === END: Quick Capture long-press feature ===
-
+    initializeDueTodayAccordionState();
+    initializeAllTasksCardState();
+    initializeFocusLaunchSheet();
+    initializeQuickCaptureModal();
 
 // === START: Accordions ===
 // Existing accordion wiring lives in renderDueTodayList and initializeAllTasksCardState.
 // Keep the two sections mutually exclusive by collapsing the other when one opens.
 // === END: Accordions ===
     
-initializeResourcesDrawer();
-initializeSosPanel();
+    initializeResourcesDrawer();
+    initializeSosPanel();
     initializeCommandBarAutohide();
     initializeDefuseOverlay();
     initializeCollapsibleModules();
