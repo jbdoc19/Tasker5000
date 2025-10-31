@@ -318,6 +318,1003 @@
       z-index: 10;
     }
 
+    .routine-stack {
+      display: grid;
+      gap: 1.1rem;
+      width: min(100%, 780px);
+      margin-top: 1.25rem;
+      position: relative;
+      z-index: 12;
+    }
+
+    .routine-preferences {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.25rem 0.5rem 0;
+    }
+
+    .routine-preferences__toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(12, 20, 30, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .routine-preferences__toggle:hover {
+      background: rgba(15, 24, 36, 0.75);
+      color: var(--text-primary);
+    }
+
+    .routine-preferences__toggle input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: #38bdf8;
+    }
+
+    .routine-preferences__label {
+      font-weight: 500;
+    }
+
+    .routine-tile {
+      position: relative;
+      border-radius: 22px;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .routine-tile__surface {
+      position: relative;
+      border-radius: inherit;
+      padding: 1.1rem 1.2rem 1.1rem;
+      color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 24px 36px rgba(5, 12, 21, 0.45);
+      transition: transform 180ms ease, box-shadow 220ms ease;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1f2937, #111827);
+      --routine-context-glow-alpha: 0.18;
+    }
+
+    .routine-tile__surface::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transition: opacity 200ms ease;
+      pointer-events: none;
+    }
+
+    .routine-tile:hover .routine-tile__surface::before {
+      opacity: 0.15;
+    }
+
+    .routine-tile__surface:focus-within {
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.22), 0 26px 40px rgba(6, 10, 20, 0.6);
+    }
+
+    .routine-tile__trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .routine-tile__info {
+      display: grid;
+      gap: 0.35rem;
+      flex: 1;
+    }
+
+    .routine-tile__title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .routine-tile__prompt {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .routine-tile__meta {
+      display: grid;
+      gap: 0.35rem;
+      align-items: center;
+      justify-items: end;
+      min-width: 2.5rem;
+    }
+
+    .routine-info-dot {
+      width: 1.6rem;
+      height: 1.6rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.22);
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .routine-tile__chevron {
+      display: inline-block;
+      width: 0.85rem;
+      height: 0.85rem;
+      border-right: 2px solid rgba(255, 255, 255, 0.75);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.75);
+      transform: rotate(-45deg);
+      transition: transform 200ms ease;
+    }
+
+    .routine-tile--open .routine-tile__chevron {
+      transform: rotate(45deg);
+    }
+
+    .routine-accent {
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .routine-accent__icon {
+      font-size: 1.35rem;
+      animation: routine-accent-bounce 2.4s infinite ease-in-out;
+    }
+
+    @keyframes routine-accent-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .routine-tile__body {
+      margin-top: 1rem;
+      border-radius: 18px;
+      background: rgba(10, 16, 24, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 1rem;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 240ms ease, padding 240ms ease;
+    }
+
+    .routine-tile--open .routine-tile__body {
+      padding: 1rem;
+    }
+
+    .routine-tile__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+
+    .routine-start-btn {
+      background: rgba(255, 255, 255, 0.92);
+      color: #0b1520;
+      border: none;
+      padding: 0.7rem 1.35rem;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 180ms ease;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.35);
+    }
+
+    .routine-start-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.4);
+    }
+
+    .routine-quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .routine-chip {
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(148, 163, 184, 0.15);
+      color: rgba(226, 232, 240, 0.95);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .routine-chip:hover {
+      background: rgba(148, 163, 184, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .routine-tile__content {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .routine-tile__surface.routine-theme--morning {
+      background: linear-gradient(135deg, #f97316, #facc15);
+    }
+
+    .routine-tile__surface.routine-theme--environment {
+      background: linear-gradient(135deg, #4ade80, #14b8a6);
+    }
+
+    .routine-tile__surface.routine-theme--sleep {
+      background: linear-gradient(135deg, #4338ca, #8b5cf6);
+    }
+
+    .routine-tile__surface.routine-theme--conflict {
+      background: linear-gradient(135deg, #2563eb, #f87171);
+    }
+
+    .routine-tile__surface.routine-theme--dopamine {
+      background: linear-gradient(135deg, #0ea5e9, #f43f5e);
+    }
+
+    .routine-tile__surface.routine-theme--utility {
+      background: linear-gradient(135deg, #475569, #94a3b8);
+    }
+
+    .routine-tile--context .routine-tile__surface {
+      animation: routine-context-glow 3.2s ease-in-out infinite;
+    }
+
+    @keyframes routine-context-glow {
+      0%,
+      100% {
+        box-shadow:
+          0 26px 36px rgba(7, 13, 24, 0.55),
+          0 0 0 0 rgba(255, 255, 255, var(--routine-context-glow-alpha, 0.18));
+      }
+      50% {
+        box-shadow:
+          0 28px 40px rgba(7, 13, 24, 0.6),
+          0 0 0 14px rgba(255, 255, 255, calc(var(--routine-context-glow-alpha, 0.18) * 0.6));
+      }
+    }
+    .routine-tile__surface.is-pulsing {
+      animation: routine-start-pulse 220ms ease;
+    }
+    @keyframes routine-start-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.01); }
+      100% { transform: scale(1); }
+    }
+
+    .routine-reminder {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.82);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .routine-quick-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 14, 22, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: inherit;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 5;
+    }
+
+    .routine-quick-overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .routine-quick-overlay__content {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 18px;
+      padding: 1.1rem;
+      width: min(100%, 320px);
+      display: grid;
+      gap: 0.75rem;
+      text-align: left;
+      color: #e2e8f0;
+      box-shadow: 0 24px 36px rgba(2, 6, 14, 0.55);
+    }
+
+    .routine-quick-overlay__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .routine-quick-overlay__list {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    .routine-quick-overlay__action {
+      background: #38bdf8;
+      border: none;
+      border-radius: 12px;
+      padding: 0.6rem 1rem;
+      font-weight: 600;
+      color: #03121f;
+      cursor: pointer;
+    }
+
+    .routine-tile.is-running::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+      border: 2px solid rgba(255, 255, 255, 0.65);
+      opacity: 0.85;
+      animation: routine-running-halo 1.6s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes routine-running-halo {
+      0% { transform: scale(0.92); opacity: 0.9; }
+      60% { opacity: 0.4; }
+      100% { transform: scale(1.05); opacity: 0; }
+    }
+
+    .routine-tile--celebrate::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: inherit;
+      background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.45), transparent 60%), radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.35), transparent 55%), radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.4), transparent 65%);
+      opacity: 0;
+      animation: routine-celebrate 900ms ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes routine-celebrate {
+      0% { opacity: 0; transform: scale(0.9); }
+      20% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.05); }
+    }
+
+    .routine-tile__surface.swiping {
+      transition: none;
+    }
+
+    .routine-sheet {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 200;
+    }
+
+    .routine-sheet.is-visible {
+      display: grid;
+    }
+
+    .routine-sheet__scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 12, 20, 0.65);
+      backdrop-filter: blur(4px);
+    }
+
+    .routine-sheet__panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 24px 24px 0 0;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 1.4rem 1.2rem 1.75rem;
+      box-shadow: 0 -22px 45px rgba(2, 6, 14, 0.65);
+      transform: translateY(100%);
+      transition: transform 240ms ease;
+      max-height: 88vh;
+      overflow-y: auto;
+      display: grid;
+      gap: 1rem;
+      color: #e2e8f0;
+    }
+
+    .routine-sheet.is-visible .routine-sheet__panel {
+      transform: translateY(0);
+    }
+
+    .routine-sheet__title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .routine-sheet__field {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .routine-sheet__field input,
+    .routine-sheet__field textarea,
+    .routine-sheet__field select {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 12px;
+      color: #e2e8f0;
+      padding: 0.55rem 0.65rem;
+      font-family: inherit;
+    }
+
+    .routine-sheet__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .routine-sheet__actions button {
+      border-radius: 12px;
+      padding: 0.55rem 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .routine-sheet__save {
+      background: #38bdf8;
+      border: none;
+      color: #04111d;
+    }
+
+    .routine-sheet__cancel {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #cbd5f5;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .routine-tile__surface,
+      .routine-tile__body,
+      .routine-tile__chevron,
+      .routine-accent__icon,
+      .routine-tile__surface::before,
+      .routine-quick-overlay,
+      .routine-sheet__panel {
+        transition-duration: 0ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .routine-tile--context .routine-tile__surface {
+        animation: none;
+      }
+    }
+
+    .routine-stack {
+      display: grid;
+      gap: 1.1rem;
+      width: min(100%, 780px);
+      margin-top: 1.25rem;
+      position: relative;
+      z-index: 12;
+    }
+
+    .routine-preferences {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.25rem 0.5rem 0;
+    }
+
+    .routine-preferences__toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(12, 20, 30, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .routine-preferences__toggle:hover {
+      background: rgba(15, 24, 36, 0.75);
+      color: var(--text-primary);
+    }
+
+    .routine-preferences__toggle input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: #38bdf8;
+    }
+
+    .routine-preferences__label {
+      font-weight: 500;
+    }
+
+    .routine-tile {
+      position: relative;
+      border-radius: 22px;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .routine-tile__surface {
+      position: relative;
+      border-radius: inherit;
+      padding: 1.1rem 1.2rem 1.1rem;
+      color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 24px 36px rgba(5, 12, 21, 0.45);
+      transition: transform 180ms ease, box-shadow 220ms ease;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1f2937, #111827);
+    }
+
+    .routine-tile__surface::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transition: opacity 200ms ease;
+      pointer-events: none;
+    }
+
+    .routine-tile:hover .routine-tile__surface::before {
+      opacity: 0.15;
+    }
+
+    .routine-tile__surface:focus-within {
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.22), 0 26px 40px rgba(6, 10, 20, 0.6);
+    }
+
+    .routine-tile__trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .routine-tile__info {
+      display: grid;
+      gap: 0.35rem;
+      flex: 1;
+    }
+
+    .routine-tile__title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .routine-tile__prompt {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .routine-tile__meta {
+      display: grid;
+      gap: 0.35rem;
+      align-items: center;
+      justify-items: end;
+      min-width: 2.5rem;
+    }
+
+    .routine-info-dot {
+      width: 1.6rem;
+      height: 1.6rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.22);
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .routine-tile__chevron {
+      display: inline-block;
+      width: 0.85rem;
+      height: 0.85rem;
+      border-right: 2px solid rgba(255, 255, 255, 0.75);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.75);
+      transform: rotate(-45deg);
+      transition: transform 200ms ease;
+    }
+
+    .routine-tile--open .routine-tile__chevron {
+      transform: rotate(45deg);
+    }
+
+    .routine-accent {
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .routine-accent__icon {
+      font-size: 1.35rem;
+      animation: routine-accent-bounce 2.4s infinite ease-in-out;
+    }
+
+    @keyframes routine-accent-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .routine-tile__body {
+      margin-top: 1rem;
+      border-radius: 18px;
+      background: rgba(10, 16, 24, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 1rem;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 240ms ease, padding 240ms ease;
+    }
+
+    .routine-tile--open .routine-tile__body {
+      padding: 1rem;
+    }
+
+    .routine-tile__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+
+    .routine-start-btn {
+      background: rgba(255, 255, 255, 0.92);
+      color: #0b1520;
+      border: none;
+      padding: 0.7rem 1.35rem;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 180ms ease;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.35);
+    }
+
+    .routine-start-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.4);
+    }
+
+    .routine-quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .routine-chip {
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(148, 163, 184, 0.15);
+      color: rgba(226, 232, 240, 0.95);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .routine-chip:hover {
+      background: rgba(148, 163, 184, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .routine-tile__content {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .routine-tile__surface.routine-theme--morning {
+      background: linear-gradient(135deg, #f97316, #facc15);
+    }
+
+    .routine-tile__surface.routine-theme--environment {
+      background: linear-gradient(135deg, #4ade80, #14b8a6);
+    }
+
+    .routine-tile__surface.routine-theme--sleep {
+      background: linear-gradient(135deg, #4338ca, #8b5cf6);
+    }
+
+    .routine-tile__surface.routine-theme--conflict {
+      background: linear-gradient(135deg, #2563eb, #f87171);
+    }
+
+    .routine-tile__surface.routine-theme--dopamine {
+      background: linear-gradient(135deg, #0ea5e9, #f43f5e);
+    }
+
+    .routine-tile__surface.routine-theme--utility {
+      background: linear-gradient(135deg, #475569, #94a3b8);
+    }
+
+    .routine-tile--context .routine-tile__surface {
+      animation: routine-context-glow 3.2s ease-in-out infinite;
+    }
+
+    @keyframes routine-context-glow {
+      0%,
+      100% {
+        box-shadow:
+          0 26px 36px rgba(7, 13, 24, 0.55),
+          0 0 0 0 rgba(255, 255, 255, var(--routine-context-glow-alpha, 0.18));
+      }
+      50% {
+        box-shadow:
+          0 28px 40px rgba(7, 13, 24, 0.6),
+          0 0 0 14px rgba(255, 255, 255, calc(var(--routine-context-glow-alpha, 0.18) * 0.6));
+      }
+    }
+    .routine-tile__surface.is-pulsing {
+      animation: routine-start-pulse 220ms ease;
+    }
+    @keyframes routine-start-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.01); }
+      100% { transform: scale(1); }
+    }
+
+    .routine-reminder {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.82);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .routine-quick-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 14, 22, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: inherit;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 5;
+    }
+
+    .routine-quick-overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .routine-quick-overlay__content {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 18px;
+      padding: 1.1rem;
+      width: min(100%, 320px);
+      display: grid;
+      gap: 0.75rem;
+      text-align: left;
+      color: #e2e8f0;
+      box-shadow: 0 24px 36px rgba(2, 6, 14, 0.55);
+    }
+
+    .routine-quick-overlay__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .routine-quick-overlay__list {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    .routine-quick-overlay__action {
+      background: #38bdf8;
+      border: none;
+      border-radius: 12px;
+      padding: 0.6rem 1rem;
+      font-weight: 600;
+      color: #03121f;
+      cursor: pointer;
+    }
+
+    .routine-tile.is-running::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+      border: 2px solid rgba(255, 255, 255, 0.65);
+      opacity: 0.85;
+      animation: routine-running-halo 1.6s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes routine-running-halo {
+      0% { transform: scale(0.92); opacity: 0.9; }
+      60% { opacity: 0.4; }
+      100% { transform: scale(1.05); opacity: 0; }
+    }
+
+    .routine-tile--celebrate::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: inherit;
+      background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.45), transparent 60%),
+        radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.35), transparent 55%),
+        radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.4), transparent 65%);
+      opacity: 0;
+      animation: routine-celebrate 900ms ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes routine-celebrate {
+      0% { opacity: 0; transform: scale(0.9); }
+      20% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.05); }
+    }
+
+    .routine-tile__surface.swiping {
+      transition: none;
+    }
+
+    .routine-sheet {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 200;
+    }
+
+    .routine-sheet.is-visible {
+      display: grid;
+    }
+
+    .routine-sheet__scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 12, 20, 0.65);
+      backdrop-filter: blur(4px);
+    }
+
+    .routine-sheet__panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 24px 24px 0 0;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 1.4rem 1.2rem 1.75rem;
+      box-shadow: 0 -22px 45px rgba(2, 6, 14, 0.65);
+      transform: translateY(100%);
+      transition: transform 240ms ease;
+      max-height: 88vh;
+      overflow-y: auto;
+      display: grid;
+      gap: 1rem;
+      color: #e2e8f0;
+    }
+
+    .routine-sheet.is-visible .routine-sheet__panel {
+      transform: translateY(0);
+    }
+
+    .routine-sheet__title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .routine-sheet__field {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .routine-sheet__field input,
+    .routine-sheet__field textarea,
+    .routine-sheet__field select {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 12px;
+      color: #e2e8f0;
+      padding: 0.55rem 0.65rem;
+      font-family: inherit;
+    }
+
+    .routine-sheet__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .routine-sheet__actions button {
+      border-radius: 12px;
+      padding: 0.55rem 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .routine-sheet__save {
+      background: #38bdf8;
+      border: none;
+      color: #04111d;
+    }
+
+    .routine-sheet__cancel {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #cbd5f5;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .routine-tile__surface,
+      .routine-tile__body,
+      .routine-tile__chevron,
+      .routine-accent__icon,
+      .routine-tile__surface::before,
+      .routine-quick-overlay,
+      .routine-sheet__panel {
+        transition-duration: 0ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .routine-tile--context .routine-tile__surface {
+        animation: none;
+      }
+    }
+
     .starter-micro-header {
       position: sticky;
       top: 0.75rem;
@@ -1567,10 +2564,36 @@
       min-width: 220px;
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
     }
-    .toast strong {
+        .toast strong {
       display: block;
       margin-bottom: 0.25rem;
       font-size: 0.95rem;
+    }
+    .toast__action {
+      margin-top: 0.6rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: #f8fafc;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .toast__action:hover {
+      background: rgba(148, 163, 184, 0.2);
+    }
+    .toast--bottom {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1600;
+    }
+    .toast--inline {
+      border-left-color: #38bdf8;
     }
     .wizard-overlay,
     .modal-overlay {
@@ -4469,249 +5492,492 @@
           </header>
           <div class="zone-body">
             <span id="reset-zone" class="zone-anchor" aria-hidden="true"></span>
-      <div class="module-stack">
-        <div id="morningLaunchModule" class="module-card" data-module-id="morningLaunchModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <span>🌅 Morning Launch Sequence</span>
+      <div class="routine-stack" id="routineTileStack">
+        <div class="routine-preferences" aria-label="Routine preferences">
+          <label class="routine-preferences__toggle" for="routineHapticsToggle">
+            <input type="checkbox" id="routineHapticsToggle" />
+            <span class="routine-preferences__label">Enable haptic nudges</span>
+          </label>
+        </div>
+
+        <article
+          id="morningLaunchModule"
+          class="routine-tile"
+          data-module-id="morningLaunchModule"
+          data-routine-id="morning"
+          role="group"
+          aria-label="Morning Launch Sequence"
+        >
+          <div class="routine-tile__surface routine-theme--morning" data-routine-surface>
+            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+              <span class="routine-accent" aria-hidden="true">
+                <span class="routine-accent__icon" data-accent-icon>🌅</span>
+              </span>
+              <div class="routine-tile__info">
+                <span class="routine-tile__title" data-routine-title>🌅 Morning Launch Sequence</span>
+                <span class="routine-tile__prompt" data-routine-prompt>Ready for takeoff? Start your day ritual.</span>
+              </div>
+              <div class="routine-tile__meta">
+                <span class="routine-info-dot" title="Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day." aria-hidden="true">i</span>
+                <span class="routine-reminder" data-routine-reminder></span>
+                <span class="routine-tile__chevron" aria-hidden="true"></span>
+              </div>
+            </button>
+            <div class="routine-quick-overlay" data-routine-quick-overlay>
+              <div class="routine-quick-overlay__content">
+                <h3 class="routine-quick-overlay__title">Morning Launch Preview</h3>
+                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+              </div>
             </div>
-            <span class="info-dot" title="Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="module-toggle">
-              <label for="morningLaunchToggle">Enable Morning Launch</label>
-              <input type="checkbox" id="morningLaunchToggle" />
-            </div>
-            <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
-            <div id="morningLaunchContent" class="hidden" aria-hidden="true">
-              <div class="progress-strip" aria-hidden="true">
-                <span id="morningLaunchProgress"></span>
-              </div>
-              <div id="morningLaunchStatus" class="score"></div>
-              <div class="module-inline-actions">
-                <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
-                <button id="morningLaunchSkipBtn" type="button">Skip today</button>
-              </div>
-              <div class="morning-blocks">
-                <article class="routine-block" data-block="move">
-                  <h3>MOVE — Light Aerobic + Sunlight</h3>
-                  <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
-                  <div class="countdown-display" id="moveCountdown">20:00</div>
-                  <div class="module-inline-actions">
-                    <button id="moveStartBtn" type="button">Start 20-min timer</button>
-                    <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
-                  </div>
-                </article>
-                <article class="routine-block" data-block="reflect">
-                  <h3>REFLECT — Cold Splash + Intention</h3>
-                  <small>Reset with a cold rinse, then name the tone for your day.</small>
-                  <div class="intention-buttons">
-                    <button type="button" data-intention="Calm & steady">Calm & steady</button>
-                    <button type="button" data-intention="Playful & connected">Playful & connected</button>
-                    <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
-                  </div>
-                  <label for="morningIntention" style="margin:0;">
-                    <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
-                  </label>
-                  <div class="module-inline-actions">
-                    <button id="reflectCompleteBtn" type="button">Save intention</button>
-                  </div>
-                </article>
-                <article class="routine-block" data-block="plan">
-                  <h3>PLAN — Process Anchors</h3>
-                  <small>Lock in process-based actions and block time before the day takes over.</small>
-                  <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
-                  <div class="module-inline-actions">
-                    <button id="planCompleteBtn" type="button">Plan locked in</button>
-                  </div>
-                </article>
-              </div>
-              <div class="energy-rating">
-                <label for="morningEnergy" style="margin:0;">Energy check-in</label>
-                <input id="morningEnergy" data-field="energy-level" type="range" min="1" max="5" step="1" value="3" />
-                <span id="morningEnergyLabel">--</span>
-                <button id="morningEnergySave" type="button">Log energy</button>
-              </div>
-              <div class="morning-chart-wrapper">
-                <canvas
-                  id="morningLaunchChart"
-                  class="chart-canvas"
-                  width="360"
-                  height="160"
-                  role="img"
-                  aria-label="Line chart of morning launch completion and energy trends"
-                ></canvas>
-                <div class="chart-legend" aria-hidden="true">
-                  <span><span class="legend-swatch completion"></span>Ready progress</span>
-                  <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
+            <div class="routine-tile__body" data-routine-body hidden>
+              <div class="routine-tile__actions">
+                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                <div class="routine-quick-actions" role="group" aria-label="Morning Launch quick actions">
+                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
                 </div>
-                <div id="morningLaunchChartSummary" class="module-note"></div>
               </div>
-              <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
+              <div class="routine-tile__content">
+                <div class="module-body" data-routine-content>
+                  <div class="module-toggle">
+                    <label for="morningLaunchToggle">Enable Morning Launch</label>
+                    <input type="checkbox" id="morningLaunchToggle" />
+                  </div>
+                  <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
+                  <div id="morningLaunchContent" class="hidden" aria-hidden="true">
+                    <div class="progress-strip" aria-hidden="true">
+                      <span id="morningLaunchProgress"></span>
+                    </div>
+                    <div id="morningLaunchStatus" class="score"></div>
+                    <div class="module-inline-actions">
+                      <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
+                      <button id="morningLaunchSkipBtn" type="button">Skip today</button>
+                    </div>
+                    <div class="morning-blocks">
+                      <article class="routine-block" data-block="move">
+                        <h3>MOVE — Light Aerobic + Sunlight</h3>
+                        <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
+                        <div class="countdown-display" id="moveCountdown">20:00</div>
+                        <div class="module-inline-actions">
+                          <button id="moveStartBtn" type="button">Start 20-min timer</button>
+                          <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
+                        </div>
+                      </article>
+                      <article class="routine-block" data-block="reflect">
+                        <h3>REFLECT — Cold Splash + Intention</h3>
+                        <small>Reset with a cold rinse, then name the tone for your day.</small>
+                        <div class="intention-buttons">
+                          <button type="button" data-intention="Calm &amp; steady">Calm &amp; steady</button>
+                          <button type="button" data-intention="Playful &amp; connected">Playful &amp; connected</button>
+                          <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
+                        </div>
+                        <label for="morningIntention" style="margin:0;">
+                          <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
+                        </label>
+                        <div class="module-inline-actions">
+                          <button id="reflectCompleteBtn" type="button">Save intention</button>
+                        </div>
+                      </article>
+                      <article class="routine-block" data-block="plan">
+                        <h3>PLAN — Process Anchors</h3>
+                        <small>Lock in process-based actions and block time before the day takes over.</small>
+                        <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
+                        <div class="module-inline-actions">
+                          <button id="planCompleteBtn" type="button">Plan locked in</button>
+                        </div>
+                      </article>
+                    </div>
+                    <div class="energy-rating">
+                      <label for="morningEnergy" style="margin:0;">Energy check-in</label>
+                      <input id="morningEnergy" data-field="energy-level" type="range" min="1" max="5" step="1" value="3" />
+                      <span id="morningEnergyLabel">--</span>
+                      <button id="morningEnergySave" type="button">Log energy</button>
+                    </div>
+                    <div class="morning-chart-wrapper">
+                      <canvas
+                        id="morningLaunchChart"
+                        class="chart-canvas"
+                        width="360"
+                        height="160"
+                        role="img"
+                        aria-label="Line chart of morning launch completion and energy trends"
+                      ></canvas>
+                      <div class="chart-legend" aria-hidden="true">
+                        <span><span class="legend-swatch completion"></span>Ready progress</span>
+                        <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
+                      </div>
+                      <div id="morningLaunchChartSummary" class="module-note"></div>
+                    </div>
+                    <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
 
-        <div id="launchPadModule" class="module-card" data-module-id="launchPadModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <span>🚀 Environmental Reminders & Launch Pads</span>
-            </div>
-            <span class="info-dot" title="Curate a nightly launch pad so tomorrow starts calm, stocked, and on time.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="module-toggle">
-              <label for="launchPadReminderTime">Reminder time</label>
-              <input type="time" id="launchPadReminderTime" />
-            </div>
-            <div class="launch-pad-summary" id="launchPadSummary"></div>
-            <div class="module-inline-actions">
-              <button id="openLaunchPadModal" type="button">Evening checklist</button>
-              <button id="launchPadMorningReview" type="button">Morning review</button>
-            </div>
-            <div class="launch-pad-settings">
-              <label for="launchPadSiteSelect">Clinic / environment
-                <select id="launchPadSiteSelect"></select>
-              </label>
-              <div class="module-inline-actions">
-                <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
-                <button id="launchPadAddItem" type="button">Add Item</button>
-                <button id="launchPadLoadPreset" type="button">Reset to preset</button>
+        <article
+          id="launchPadModule"
+          class="routine-tile"
+          data-module-id="launchPadModule"
+          data-routine-id="environment"
+          role="group"
+          aria-label="Environmental Reminders and Launch Pads"
+        >
+          <div class="routine-tile__surface routine-theme--environment" data-routine-surface>
+            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+              <span class="routine-accent" aria-hidden="true">
+                <span class="routine-accent__icon" data-accent-icon>🚀</span>
+              </span>
+              <div class="routine-tile__info">
+                <span class="routine-tile__title" data-routine-title>🚀 Environmental Reminders &amp; Launch Pads</span>
+                <span class="routine-tile__prompt" data-routine-prompt>Tap to reset your surroundings.</span>
               </div>
-              <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
+              <div class="routine-tile__meta">
+                <span class="routine-info-dot" title="Curate a nightly launch pad so tomorrow starts calm, stocked, and on time." aria-hidden="true">i</span>
+                <span class="routine-reminder" data-routine-reminder></span>
+                <span class="routine-tile__chevron" aria-hidden="true"></span>
+              </div>
+            </button>
+            <div class="routine-quick-overlay" data-routine-quick-overlay>
+              <div class="routine-quick-overlay__content">
+                <h3 class="routine-quick-overlay__title">Environmental Reset Preview</h3>
+                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+              </div>
+            </div>
+            <div class="routine-tile__body" data-routine-body hidden>
+              <div class="routine-tile__actions">
+                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                <div class="routine-quick-actions" role="group" aria-label="Environmental routine quick actions">
+                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+                </div>
+              </div>
+              <div class="routine-tile__content">
+                <div class="module-body" data-routine-content>
+                  <div class="module-toggle">
+                    <label for="launchPadReminderTime">Reminder time</label>
+                    <input type="time" id="launchPadReminderTime" />
+                  </div>
+                  <div class="launch-pad-summary" id="launchPadSummary"></div>
+                  <div class="module-inline-actions">
+                    <button id="openLaunchPadModal" type="button">Evening checklist</button>
+                    <button id="launchPadMorningReview" type="button">Morning review</button>
+                  </div>
+                  <div class="launch-pad-settings">
+                    <label for="launchPadSiteSelect">Clinic / environment
+                      <select id="launchPadSiteSelect"></select>
+                    </label>
+                    <div class="module-inline-actions">
+                      <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
+                      <button id="launchPadAddItem" type="button">Add Item</button>
+                      <button id="launchPadLoadPreset" type="button">Reset to preset</button>
+                    </div>
+                    <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
 
-        <div id="sleepToolkitModule" class="module-card" data-module-id="sleepToolkitModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <span>😴 Sleep & Circadian Rhythm Toolkit</span>
-            </div>
-            <span class="info-dot" title="Stabilize melatonin and cortisol rhythms with gentle wind-down and light cues.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="module-toggle">
-              <label for="sleepToolkitToggle">Enable toolkit</label>
-              <input type="checkbox" id="sleepToolkitToggle" />
-            </div>
-            <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
-              <div class="sleep-checklist" id="sleepChecklist"></div>
-              <div id="sleepCompletionSummary" class="sleep-summary"></div>
-              <div class="module-inline-actions">
-                <label for="melatoninReminderToggle" style="flex:1;">
-                  <input type="checkbox" id="melatoninReminderToggle" /> Melatonin reminder
-                </label>
-                <label for="melatoninReminderTime" style="margin:0;">Time
-                  <input type="time" id="melatoninReminderTime" />
-                </label>
+        <article
+          id="sleepToolkitModule"
+          class="routine-tile"
+          data-module-id="sleepToolkitModule"
+          data-routine-id="sleep"
+          role="group"
+          aria-label="Sleep and Circadian Rhythm Toolkit"
+        >
+          <div class="routine-tile__surface routine-theme--sleep" data-routine-surface>
+            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+              <span class="routine-accent" aria-hidden="true">
+                <span class="routine-accent__icon" data-accent-icon>😴</span>
+              </span>
+              <div class="routine-tile__info">
+                <span class="routine-tile__title" data-routine-title>😴 Sleep &amp; Circadian Rhythm Toolkit</span>
+                <span class="routine-tile__prompt" data-routine-prompt>Wind down mode is ready.</span>
               </div>
-              <div class="module-inline-actions">
-                <label for="sunlightReminderToggle" style="flex:1;">
-                  <input type="checkbox" id="sunlightReminderToggle" /> Morning sunlight alert
-                </label>
-                <label for="sunlightReminderTime" style="margin:0;">Time
-                  <input type="time" id="sunlightReminderTime" />
-                </label>
+              <div class="routine-tile__meta">
+                <span class="routine-info-dot" title="Stabilize melatonin and cortisol rhythms with gentle wind-down and light cues." aria-hidden="true">i</span>
+                <span class="routine-reminder" data-routine-reminder></span>
+                <span class="routine-tile__chevron" aria-hidden="true"></span>
               </div>
-              <div id="sunlightAlert" class="sunlight-alert hidden" aria-live="polite"></div>
-              <div id="sleepMorningRating" class="energy-rating"></div>
-              <div id="sleepCorrelationSummary" class="sleep-summary"></div>
-              <div class="sleep-tips" id="sleepTips"></div>
+            </button>
+            <div class="routine-quick-overlay" data-routine-quick-overlay>
+              <div class="routine-quick-overlay__content">
+                <h3 class="routine-quick-overlay__title">Sleep Toolkit Preview</h3>
+                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+              </div>
+            </div>
+            <div class="routine-tile__body" data-routine-body hidden>
+              <div class="routine-tile__actions">
+                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                <div class="routine-quick-actions" role="group" aria-label="Sleep routine quick actions">
+                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+                </div>
+              </div>
+              <div class="routine-tile__content">
+                <div class="module-body" data-routine-content>
+                  <div class="module-toggle">
+                    <label for="sleepToolkitToggle">Enable toolkit</label>
+                    <input type="checkbox" id="sleepToolkitToggle" />
+                  </div>
+                  <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
+                    <div class="sleep-checklist" id="sleepChecklist"></div>
+                    <div id="sleepCompletionSummary" class="sleep-summary"></div>
+                    <div class="module-inline-actions">
+                      <label for="melatoninReminderToggle" style="flex:1;">
+                        <input type="checkbox" id="melatoninReminderToggle" /> Melatonin reminder
+                      </label>
+                      <label for="melatoninReminderTime" style="margin:0;">Time
+                        <input type="time" id="melatoninReminderTime" />
+                      </label>
+                    </div>
+                    <div class="module-inline-actions">
+                      <label for="sunlightReminderToggle" style="flex:1;">
+                        <input type="checkbox" id="sunlightReminderToggle" /> Morning sunlight alert
+                      </label>
+                      <label for="sunlightReminderTime" style="margin:0;">Time
+                        <input type="time" id="sunlightReminderTime" />
+                      </label>
+                    </div>
+                    <div id="sunlightAlert" class="sunlight-alert hidden" aria-live="polite"></div>
+                    <div id="sleepMorningRating" class="energy-rating"></div>
+                    <div id="sleepCorrelationSummary" class="sleep-summary"></div>
+                    <div class="sleep-tips" id="sleepTips"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
 
-        <div id="templateModule" class="module-card" data-module-id="templateModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <span>🧩 Templates</span>
+        <article
+          id="templateModule"
+          class="routine-tile routine-tile--utility"
+          data-module-id="templateModule"
+          data-routine-id="templates"
+          role="group"
+          aria-label="Templates"
+        >
+          <div class="routine-tile__surface routine-theme--utility" data-routine-surface>
+            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+              <span class="routine-accent" aria-hidden="true">
+                <span class="routine-accent__icon" data-accent-icon>🧩</span>
+              </span>
+              <div class="routine-tile__info">
+                <span class="routine-tile__title" data-routine-title>🧩 Templates</span>
+                <span class="routine-tile__prompt" data-routine-prompt>Quick launch your best blueprints.</span>
+              </div>
+              <div class="routine-tile__meta">
+                <span class="routine-info-dot" title="Pull in proven task blueprints without rewriting every field." aria-hidden="true">i</span>
+                <span class="routine-reminder" data-routine-reminder></span>
+                <span class="routine-tile__chevron" aria-hidden="true"></span>
+              </div>
+            </button>
+            <div class="routine-quick-overlay" data-routine-quick-overlay>
+              <div class="routine-quick-overlay__content">
+                <h3 class="routine-quick-overlay__title">Template Shortcut</h3>
+                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+              </div>
             </div>
-            <span class="info-dot" title="Pull in proven task blueprints without rewriting every field.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="template-module__actions">
-              <button id="blockBatchOpen" class="btn btn-secondary" type="button">Block Batch</button>
+            <div class="routine-tile__body" data-routine-body hidden>
+              <div class="routine-tile__actions">
+                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                <div class="routine-quick-actions" role="group" aria-label="Template quick actions">
+                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+                </div>
+              </div>
+              <div class="routine-tile__content">
+                <div class="module-body" data-routine-content>
+                  <div class="template-module__actions">
+                    <button id="blockBatchOpen" class="btn btn-secondary" type="button">Block Batch</button>
+                  </div>
+                  <div id="templateButtons"></div>
+                </div>
+              </div>
             </div>
-            <div id="templateButtons"></div>
           </div>
-        </div>
+        </article>
 
-        <div id="conflictResolverModule" class="module-card" data-module-id="conflictResolverModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <div class="module-heading__text">
-                <span class="module-heading__title">🥊 3-v-3 Conflict Resolver</span>
-                <span class="module-heading__tagline">Pick 1 vs 1. Fight small.</span>
+        <article
+          id="conflictResolverModule"
+          class="routine-tile"
+          data-module-id="conflictResolverModule"
+          data-routine-id="conflict"
+          role="group"
+          aria-label="3-v-3 Conflict Resolver"
+        >
+          <div class="routine-tile__surface routine-theme--conflict" data-routine-surface>
+            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+              <span class="routine-accent" aria-hidden="true">
+                <span class="routine-accent__icon" data-accent-icon>🥊</span>
+              </span>
+              <div class="routine-tile__info">
+                <span class="routine-tile__title" data-routine-title>🥊 3-v-3 Conflict Resolver</span>
+                <span class="routine-tile__prompt" data-routine-prompt>Reframe your mind in 3x3 steps.</span>
+              </div>
+              <div class="routine-tile__meta">
+                <span class="routine-info-dot" title="Drag one should-do and one want-to into the arena to settle the debate." aria-hidden="true">i</span>
+                <span class="routine-reminder" data-routine-reminder></span>
+                <span class="routine-tile__chevron" aria-hidden="true"></span>
+              </div>
+            </button>
+            <div class="routine-quick-overlay" data-routine-quick-overlay>
+              <div class="routine-quick-overlay__content">
+                <h3 class="routine-quick-overlay__title">Conflict Resolver Preview</h3>
+                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
               </div>
             </div>
-            <span class="info-dot" title="Drag one should-do and one want-to into the arena to settle the debate.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="conflict-grid">
-              <div class="conflict-column">
-                <h3>Top 3 should-do</h3>
-                <div id="conflictShouldList" class="conflict-list" aria-live="polite"></div>
+            <div class="routine-tile__body" data-routine-body hidden>
+              <div class="routine-tile__actions">
+                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                <div class="routine-quick-actions" role="group" aria-label="Conflict resolver quick actions">
+                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+                </div>
               </div>
-              <div class="conflict-column">
-                <h3>Top 3 want-to</h3>
-                <div id="conflictWantList" class="conflict-list" aria-live="polite"></div>
+              <div class="routine-tile__content">
+                <div class="module-body" data-routine-content>
+                  <div class="conflict-grid">
+                    <div class="conflict-column">
+                      <h3>Top 3 should-do</h3>
+                      <div id="conflictShouldList" class="conflict-list" aria-live="polite"></div>
+                    </div>
+                    <div class="conflict-column">
+                      <h3>Top 3 want-to</h3>
+                      <div id="conflictWantList" class="conflict-list" aria-live="polite"></div>
+                    </div>
+                  </div>
+                  <div
+                    id="conflictArena"
+                    class="conflict-arena"
+                    role="application"
+                    aria-live="polite"
+                    aria-label="Drag contenders here"
+                  >
+                    <div id="conflictArenaPrompt">Drag a contender from each side into the arena.</div>
+                  </div>
+                  <div class="conflict-actions">
+                    <button id="conflictReset" type="button" class="btn btn-ghost">Reset arena</button>
+                  </div>
+                  <div id="conflictResult" class="score" aria-live="polite"></div>
+                </div>
               </div>
             </div>
-            <div
-              id="conflictArena"
-              class="conflict-arena"
-              role="application"
-              aria-live="polite"
-              aria-label="Drag contenders here"
-            >
-              <div id="conflictArenaPrompt">Drag a contender from each side into the arena.</div>
-            </div>
-            <div class="conflict-actions">
-              <button id="conflictReset" type="button" class="btn btn-ghost">Reset arena</button>
-            </div>
-            <div id="conflictResult" class="score" aria-live="polite"></div>
           </div>
-        </div>
+        </article>
 
-        <div id="dopamineModule" class="module-card" data-module-id="dopamineModule">
-          <button class="module-header" type="button" aria-expanded="false">
-            <div class="module-heading">
-              <span class="module-caret" aria-hidden="true">▸</span>
-              <div class="module-heading__text">
-                <span class="module-heading__title">🎵 Dopamine Retrainer</span>
-                <span class="module-heading__tagline">Longer wins, calmer brain.</span>
+        <article
+          id="dopamineModule"
+          class="routine-tile"
+          data-module-id="dopamineModule"
+          data-routine-id="dopamine"
+          role="group"
+          aria-label="Dopamine Retrainer"
+        >
+          <div class="routine-tile__surface routine-theme--dopamine" data-routine-surface>
+            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+              <span class="routine-accent" aria-hidden="true">
+                <span class="routine-accent__icon" data-accent-icon>🎵</span>
+              </span>
+              <div class="routine-tile__info">
+                <span class="routine-tile__title" data-routine-title>🎵 Dopamine Retrainer</span>
+                <span class="routine-tile__prompt" data-routine-prompt>Train focus with a 5-min win.</span>
+              </div>
+              <div class="routine-tile__meta">
+                <span class="routine-info-dot" title="Stretch reward intervals with a playlist of micro-celebrations." aria-hidden="true">i</span>
+                <span class="routine-reminder" data-routine-reminder></span>
+                <span class="routine-tile__chevron" aria-hidden="true"></span>
+              </div>
+            </button>
+            <div class="routine-quick-overlay" data-routine-quick-overlay>
+              <div class="routine-quick-overlay__content">
+                <h3 class="routine-quick-overlay__title">Dopamine Retrainer Preview</h3>
+                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
               </div>
             </div>
-            <span class="info-dot" title="Stretch reward intervals with a playlist of micro-celebrations.">i</span>
-          </button>
-          <div class="module-body" hidden>
-            <div class="dopamine-playlist">
-              <label for="dopamineReward">Reward style
-                <select id="dopamineReward">
-                  <option value="music">Music stinger</option>
-                  <option value="confetti">GIF confetti</option>
-                  <option value="coin">Coin sound</option>
-                  <option value="stretch">Stretch cue</option>
-                </select>
-              </label>
-              <div class="dopamine-intervals" id="dopamineIntervals" aria-live="polite"></div>
-              <div class="dopamine-progress" aria-hidden="true">
-                <span id="dopamineProgressFill"></span>
+            <div class="routine-tile__body" data-routine-body hidden>
+              <div class="routine-tile__actions">
+                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                <div class="routine-quick-actions" role="group" aria-label="Dopamine retrainer quick actions">
+                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+                </div>
               </div>
-              <div class="conflict-actions">
-                <button id="dopamineStart" type="button" class="btn btn-primary">Start playlist</button>
-                <button id="dopamineStop" type="button" class="btn btn-ghost" disabled>Stop</button>
+              <div class="routine-tile__content">
+                <div class="module-body" data-routine-content>
+                  <div class="dopamine-playlist">
+                    <label for="dopamineReward">Reward style
+                      <select id="dopamineReward">
+                        <option value="music">Music stinger</option>
+                        <option value="confetti">GIF confetti</option>
+                        <option value="coin">Coin sound</option>
+                        <option value="stretch">Stretch cue</option>
+                      </select>
+                    </label>
+                    <div class="dopamine-intervals" id="dopamineIntervals" aria-live="polite"></div>
+                    <div class="dopamine-progress" aria-hidden="true">
+                      <span id="dopamineProgressFill"></span>
+                    </div>
+                    <div class="conflict-actions">
+                      <button id="dopamineStart" type="button" class="btn btn-primary">Start playlist</button>
+                      <button id="dopamineStop" type="button" class="btn btn-ghost" disabled>Stop</button>
+                    </div>
+                    <div id="dopamineStatus" class="score" aria-live="polite"></div>
+                  </div>
+                </div>
               </div>
-              <div id="dopamineStatus" class="score" aria-live="polite"></div>
             </div>
           </div>
+        </article>
+      </div>      <div id="routineEditSheet" class="routine-sheet" role="dialog" aria-modal="true" aria-labelledby="routineEditTitle">
+        <div class="routine-sheet__scrim" data-routine-sheet-dismiss></div>
+        <div class="routine-sheet__panel" role="document">
+          <h3 id="routineEditTitle" class="routine-sheet__title">Edit routine</h3>
+          <div class="routine-sheet__field">
+            <label for="routineNameInput">Routine name</label>
+            <input id="routineNameInput" type="text" autocomplete="off" />
+          </div>
+          <div class="routine-sheet__field">
+            <label for="routineStepsInput">Steps (one per line)</label>
+            <textarea id="routineStepsInput" rows="4"></textarea>
+          </div>
+          <div class="routine-sheet__field">
+            <label for="routineQuickSelect">Default quick launch</label>
+            <select id="routineQuickSelect"></select>
+          </div>
+          <div class="routine-sheet__field">
+            <label for="routineReminderTime">Reminder time</label>
+            <input id="routineReminderTime" type="time" />
+          </div>
+          <div class="routine-sheet__field">
+            <label class="routine-preferences__toggle" for="routineHapticsInSheet">
+              <input type="checkbox" id="routineHapticsInSheet" />
+              <span class="routine-preferences__label">Enable haptic nudges</span>
+            </label>
+          </div>
+          <div class="routine-sheet__actions">
+            <button type="button" class="routine-sheet__cancel" data-routine-sheet-cancel>Cancel</button>
+            <button type="button" class="routine-sheet__save" data-routine-sheet-save>Save</button>
+          </div>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -5074,6 +6340,38 @@
           <span class="focus-sheet__option-label">Next Suggested Task</span>
           <span id="focusSuggestionDetail" class="focus-sheet__option-detail">Add a task to unlock focus.</span>
         </button>
+      <div id="routineEditSheet" class="routine-sheet" role="dialog" aria-modal="true" aria-labelledby="routineEditTitle">
+        <div class="routine-sheet__scrim" data-routine-sheet-dismiss></div>
+        <div class="routine-sheet__panel" role="document">
+          <h3 id="routineEditTitle" class="routine-sheet__title">Edit routine</h3>
+          <div class="routine-sheet__field">
+            <label for="routineNameInput">Routine name</label>
+            <input id="routineNameInput" type="text" autocomplete="off" />
+          </div>
+          <div class="routine-sheet__field">
+            <label for="routineStepsInput">Steps (one per line)</label>
+            <textarea id="routineStepsInput" rows="4"></textarea>
+          </div>
+          <div class="routine-sheet__field">
+            <label for="routineQuickSelect">Default quick launch</label>
+            <select id="routineQuickSelect"></select>
+          </div>
+          <div class="routine-sheet__field">
+            <label for="routineReminderTime">Reminder time</label>
+            <input id="routineReminderTime" type="time" />
+          </div>
+          <div class="routine-sheet__field">
+            <label class="routine-preferences__toggle" for="routineHapticsInSheet">
+              <input type="checkbox" id="routineHapticsInSheet" />
+              <span class="routine-preferences__label">Enable haptic nudges</span>
+            </label>
+          </div>
+          <div class="routine-sheet__actions">
+            <button type="button" class="routine-sheet__cancel" data-routine-sheet-cancel>Cancel</button>
+            <button type="button" class="routine-sheet__save" data-routine-sheet-save>Save</button>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   </section>
@@ -5368,14 +6666,938 @@
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
   const ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.collapsed";
-  const COLLAPSIBLE_MODULE_IDS = [
-    "morningLaunchModule",
-    "launchPadModule",
-    "sleepToolkitModule",
-    "templateModule",
-    "conflictResolverModule",
-    "dopamineModule"
+  const COLLAPSIBLE_MODULE_IDS = [];
+  const ROUTINE_STATE_KEY = "ui.routines.metadata";
+  const ROUTINE_HAPTIC_KEY = "ui.routines.haptics";
+  const ROUTINE_REMINDER_TIMERS = new Map();
+  const ROUTINE_CONTEXT_RECENT_MS = 2 * 60 * 60 * 1000;
+  const ROUTINE_DEFINITIONS = [
+    {
+      id: "morning",
+      moduleId: "morningLaunchModule",
+      title: "Morning Launch Sequence",
+      emoji: "🌅",
+      microPrompt: "Ready for takeoff? Start your day ritual.",
+      defaultSteps: [
+        "Move — Light aerobic + sunlight",
+        "Reflect — Cold splash + intention",
+        "Plan — Process anchors"
+      ],
+      previewSteps: [
+        "Move — Light aerobic + sunlight",
+        "Reflect — Cold splash + intention"
+      ],
+      quickLaunchRef: "moveStartBtn",
+      category: "morning",
+      reminderBody: "Ready for takeoff?",
+      stuckMessage: "Take a sunrise peek and breathe for four counts — then try the first step."
+    },
+    {
+      id: "environment",
+      moduleId: "launchPadModule",
+      title: "Environmental Reminders & Launch Pads",
+      emoji: "🚀",
+      microPrompt: "Tap to reset your surroundings.",
+      defaultSteps: [
+        "Stage tomorrow's essentials",
+        "Reset work surface",
+        "Preview morning checklist"
+      ],
+      previewSteps: [
+        "Stage tomorrow's essentials",
+        "Preview morning checklist"
+      ],
+      quickLaunchRef: "openLaunchPadModal",
+      category: "environment",
+      reminderBody: "Tap to reset your surroundings.",
+      stuckMessage: "Focus on just one surface — toss clutter into a quick bin sprint."
+    },
+    {
+      id: "sleep",
+      moduleId: "sleepToolkitModule",
+      title: "Sleep & Circadian Rhythm Toolkit",
+      emoji: "😴",
+      microPrompt: "Wind down mode is ready.",
+      defaultSteps: [
+        "Dim lights & park screens",
+        "Stack melatonin + stretch",
+        "Morning sunlight reminder"
+      ],
+      previewSteps: [
+        "Dim lights & park screens",
+        "Stack melatonin + stretch"
+      ],
+      quickLaunchRef: "sleepToolkitToggle",
+      category: "sleep",
+      reminderBody: "Wind down mode is ready.",
+      stuckMessage: "Try a 2-minute legs-up-the-wall reset before continuing."
+    },
+    {
+      id: "conflict",
+      moduleId: "conflictResolverModule",
+      title: "3-v-3 Conflict Resolver",
+      emoji: "🥊",
+      microPrompt: "Reframe your mind in 3x3 steps.",
+      defaultSteps: [
+        "List top 3 should-do",
+        "List top 3 want-to",
+        "Drag contenders into the arena"
+      ],
+      previewSteps: [
+        "List top 3 should-do",
+        "List top 3 want-to"
+      ],
+      quickLaunchRef: null,
+      category: "conflict",
+      reminderBody: "Reframe with a quick 3x3.",
+      stuckMessage: "Limit the duel to one should-do vs one want-to — jot both before deciding."
+    },
+    {
+      id: "dopamine",
+      moduleId: "dopamineModule",
+      title: "Dopamine Retrainer",
+      emoji: "🎵",
+      microPrompt: "Train focus with a 5-min win.",
+      defaultSteps: [
+        "Pick a reward style",
+        "Start the playlist timer",
+        "Stretch the victory window"
+      ],
+      previewSteps: [
+        "Pick a reward style",
+        "Start the playlist timer"
+      ],
+      quickLaunchRef: "dopamineStart",
+      category: "dopamine",
+      reminderBody: "Train focus with a 5-min win.",
+      stuckMessage: "Take one song-length pause, then restart the timer with a micro goal."
+    },
+    {
+      id: "templates",
+      moduleId: "templateModule",
+      title: "Templates",
+      emoji: "🧩",
+      microPrompt: "Quick launch your best blueprints.",
+      defaultSteps: [
+        "Open Block Batch",
+        "Apply saved template"
+      ],
+      previewSteps: [
+        "Open Block Batch",
+        "Apply saved template"
+      ],
+      quickLaunchRef: "blockBatchOpen",
+      category: "utility",
+      allowReminder: false,
+      reminderBody: "Blueprints are ready.",
+      stuckMessage: "Pick the template that covers 80% and tweak only the edges."
+    }
   ];
+  let routineState = {};
+  let routineHapticsEnabled = true;
+  const routineTiles = new Map();
+  let openRoutineId = null;
+  let routineContextIntervalId = null;
+
+  function getRoutineDefinition(id) {
+    return ROUTINE_DEFINITIONS.find(def => def.id === id) || null;
+  }
+
+  function loadRoutineState() {
+    let stored = {};
+    try {
+      const raw = localStorage.getItem(ROUTINE_STATE_KEY);
+      if (raw) {
+        stored = JSON.parse(raw);
+      }
+    } catch (error) {
+      stored = {};
+    }
+    const state = {};
+    ROUTINE_DEFINITIONS.forEach(def => {
+      const data = stored && typeof stored === "object" ? stored[def.id] : null;
+      const storedSteps = Array.isArray(data?.steps) ? data.steps.filter(Boolean).map(step => String(step)) : [];
+      const steps = storedSteps.length ? storedSteps : [...def.defaultSteps];
+      state[def.id] = {
+        id: def.id,
+        title: typeof data?.title === "string" && data.title.trim() ? data.title.trim() : def.title,
+        lastUsed: typeof data?.lastUsed === "string" ? data.lastUsed : null,
+        usageCount: Number.isFinite(data?.usageCount) ? Number(data.usageCount) : 0,
+        streak: Number.isFinite(data?.streak) ? Number(data.streak) : 0,
+        reminderTime: typeof data?.reminderTime === "string" ? data.reminderTime : null,
+        steps,
+        quickLaunch: typeof data?.quickLaunch === "string" && steps.includes(data.quickLaunch)
+          ? data.quickLaunch
+          : steps[0] || null
+      };
+    });
+    return state;
+  }
+
+  function saveRoutineState() {
+    try {
+      localStorage.setItem(ROUTINE_STATE_KEY, JSON.stringify(routineState));
+    } catch (error) {
+      // ignore persistence errors
+    }
+  }
+
+  function formatRoutineTimeAgo(iso) {
+    const date = new Date(iso);
+    if (!iso || Number.isNaN(date.getTime())) {
+      return "just now";
+    }
+    const diff = Date.now() - date.getTime();
+    if (diff < 0) return "just now";
+    const minute = 60000;
+    const hour = 3600000;
+    const day = 86400000;
+    if (diff < minute) {
+      return "just now";
+    }
+    if (diff < hour) {
+      const mins = Math.max(1, Math.round(diff / minute));
+      return `${mins} min${mins === 1 ? "" : "s"} ago`;
+    }
+    if (diff < day) {
+      const hours = Math.max(1, Math.round(diff / hour));
+      return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    }
+    const days = Math.max(1, Math.round(diff / day));
+    return `${days} day${days === 1 ? "" : "s"} ago`;
+  }
+
+  function computeRoutinePrompt(def, meta) {
+    if (!meta) return def.microPrompt;
+    if (Number(meta.streak) >= 3) {
+      return `${meta.streak}-day streak — keep it going!`;
+    }
+    if (meta.lastUsed) {
+      return `Last used: ${formatRoutineTimeAgo(meta.lastUsed)}. Ready again?`;
+    }
+    return def.microPrompt;
+  }
+
+  function populateRoutineOverlay(id) {
+    const tile = routineTiles.get(id);
+    if (!tile) return;
+    const overlay = tile.querySelector('[data-routine-quick-overlay]');
+    if (!overlay) return;
+    const list = overlay.querySelector('[data-quick-preview]');
+    const button = overlay.querySelector('[data-quick-launch]');
+    const def = getRoutineDefinition(id);
+    const meta = routineState[id];
+    if (list) {
+      list.innerHTML = "";
+      const steps = (meta?.steps && meta.steps.length ? meta.steps : def.defaultSteps).slice(0, 2);
+      steps.forEach(step => {
+        const li = document.createElement("li");
+        li.textContent = step;
+        list.appendChild(li);
+      });
+    }
+    if (button) {
+      button.textContent = `Quick launch ${meta?.title || def.title}`;
+    }
+  }
+
+  function updateRoutineTile(id) {
+    const tile = routineTiles.get(id);
+    const def = getRoutineDefinition(id);
+    const meta = routineState[id];
+    if (!tile || !def || !meta) return;
+    const titleEl = tile.querySelector('[data-routine-title]');
+    const promptEl = tile.querySelector('[data-routine-prompt]');
+    const reminderEl = tile.querySelector('[data-routine-reminder]');
+    const startBtn = tile.querySelector('[data-routine-start]');
+    if (titleEl) {
+      titleEl.textContent = `${def.emoji} ${meta.title || def.title}`;
+    }
+    if (promptEl) {
+      promptEl.textContent = computeRoutinePrompt(def, meta);
+    }
+    if (reminderEl) {
+      reminderEl.textContent = meta.reminderTime && def.allowReminder !== false ? `Reminder • ${meta.reminderTime}` : "";
+    }
+    if (startBtn && tile.dataset.running !== "true") {
+      startBtn.textContent = "Start Routine";
+    }
+    populateRoutineOverlay(id);
+  }
+
+  function toggleRoutineTile(id) {
+    const tile = routineTiles.get(id);
+    if (!tile) return;
+    if (tile.classList.contains("routine-tile--open")) {
+      closeRoutineTile(id);
+    } else {
+      openRoutineTile(id);
+    }
+  }
+
+  function openRoutineTile(id, options = {}) {
+    const tile = routineTiles.get(id);
+    if (!tile) return;
+    if (openRoutineId && openRoutineId !== id) {
+      closeRoutineTile(openRoutineId);
+    }
+    openRoutineId = id;
+    const body = tile.querySelector('[data-routine-body]');
+    const trigger = tile.querySelector('[data-routine-trigger]');
+    if (!body) return;
+    body.hidden = false;
+    const targetHeight = body.scrollHeight;
+    body.style.maxHeight = `${targetHeight}px`;
+    tile.classList.add("routine-tile--open");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "true");
+    }
+    window.setTimeout(() => {
+      if (tile.classList.contains("routine-tile--open")) {
+        body.style.maxHeight = "none";
+      }
+    }, 260);
+    if (options.scrollIntoView !== false) {
+      tile.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  function closeRoutineTile(id) {
+    const tile = routineTiles.get(id);
+    if (!tile) return;
+    const body = tile.querySelector('[data-routine-body]');
+    const trigger = tile.querySelector('[data-routine-trigger]');
+    if (!body) return;
+    tile.classList.remove("routine-tile--open");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+    }
+    const currentHeight = body.scrollHeight;
+    body.style.maxHeight = `${currentHeight}px`;
+    requestAnimationFrame(() => {
+      body.style.maxHeight = "0px";
+    });
+    window.setTimeout(() => {
+      if (!tile.classList.contains("routine-tile--open")) {
+        body.hidden = true;
+      }
+    }, 260);
+    if (openRoutineId === id) {
+      openRoutineId = null;
+    }
+  }
+
+  function closeRoutineQuickOverlay(id) {
+    const tile = routineTiles.get(id);
+    if (!tile) return;
+    const overlay = tile.querySelector('[data-routine-quick-overlay]');
+    if (overlay) {
+      overlay.classList.remove("is-visible");
+    }
+  }
+
+  function quickLaunchRoutine(id) {
+    const def = getRoutineDefinition(id);
+    if (!def) return;
+    if (def.quickLaunchRef) {
+      const target = document.getElementById(def.quickLaunchRef);
+      if (target) {
+        target.click();
+      }
+    }
+    startRoutine(id, { source: "quickLaunch" });
+    closeRoutineQuickOverlay(id);
+  }
+
+  function attachRoutineGestures(tile, def) {
+    const surface = tile.querySelector('[data-routine-surface]');
+    if (!surface) return;
+    const LONG_PRESS_MS = 600;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let isSwipe = false;
+    let longPressTimer = null;
+    let longPressTriggered = false;
+
+    const clearTimers = () => {
+      if (longPressTimer) {
+        window.clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    surface.addEventListener("pointerdown", event => {
+      if (event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      isSwipe = false;
+      longPressTriggered = false;
+      tile.dataset.ignoreNextClick = "false";
+      surface.setPointerCapture(pointerId);
+      clearTimers();
+      longPressTimer = window.setTimeout(() => {
+        longPressTriggered = true;
+        tile.dataset.ignoreNextClick = "true";
+        populateRoutineOverlay(def.id);
+        const overlay = tile.querySelector('[data-routine-quick-overlay]');
+        if (overlay) {
+          overlay.classList.add("is-visible");
+        }
+        triggerRoutineHaptic([10]);
+      }, LONG_PRESS_MS);
+    });
+
+    surface.addEventListener("pointermove", event => {
+      if (event.pointerId !== pointerId) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (Math.abs(dy) > 10) {
+        clearTimers();
+      }
+      if (!isSwipe && Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy)) {
+        isSwipe = true;
+        clearTimers();
+        surface.classList.add("swiping");
+      }
+      if (isSwipe) {
+        event.preventDefault();
+        const clamped = Math.max(-120, Math.min(120, dx));
+        surface.style.transform = `translateX(${clamped}px)`;
+      }
+    });
+
+    const release = event => {
+      if (event.pointerId !== pointerId) return;
+      surface.releasePointerCapture(pointerId);
+      clearTimers();
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      surface.classList.remove("swiping");
+      surface.style.transform = "";
+      pointerId = null;
+      if (isSwipe) {
+        if (dx > 80) {
+          tile.dataset.ignoreNextClick = "true";
+          startRoutine(def.id, { source: "swipe" });
+        } else if (dx < -80) {
+          tile.dataset.ignoreNextClick = "true";
+          openRoutineEdit(def.id);
+        }
+        return;
+      }
+      if (longPressTriggered) {
+        return;
+      }
+    };
+
+    surface.addEventListener("pointerup", release);
+    surface.addEventListener("pointercancel", release);
+    surface.addEventListener("pointerleave", event => {
+      if (event.pointerId === pointerId) {
+        clearTimers();
+      }
+    });
+  }
+
+  function triggerRoutineHaptic(pattern = [12]) {
+    if (!routineHapticsEnabled) return;
+    if (navigator?.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch (error) {
+        // ignore vibration errors
+      }
+    }
+  }
+
+  function startRoutine(id, options = {}) {
+    const def = getRoutineDefinition(id);
+    const tile = routineTiles.get(id);
+    const meta = routineState[id];
+    if (!def || !tile || !meta) return;
+    closeRoutineQuickOverlay(id);
+    const shouldExpand = !options.source || options.source === "tap";
+    if (shouldExpand) {
+      openRoutineTile(id, { scrollIntoView: options.source !== "quickLaunch" });
+    }
+    const previous = {
+      lastUsed: meta.lastUsed,
+      usageCount: meta.usageCount,
+      streak: meta.streak
+    };
+    const now = new Date();
+    const todayKey = getDateKey(now);
+    const previousKey = meta.lastUsed ? getDateKey(new Date(meta.lastUsed)) : null;
+    meta.lastUsed = now.toISOString();
+    meta.usageCount = (meta.usageCount || 0) + 1;
+    if (previousKey === todayKey) {
+      meta.streak = meta.streak || 1;
+    } else if (previousKey === getOffsetDateKey(todayKey, -1)) {
+      meta.streak = (meta.streak || 0) + 1;
+    } else {
+      meta.streak = 1;
+    }
+    saveRoutineState();
+    updateRoutineTile(id);
+    tile.dataset.running = "true";
+    tile.classList.add("is-running");
+    const surface = tile.querySelector('[data-routine-surface]');
+    if (surface) {
+      surface.classList.add("is-pulsing");
+      window.setTimeout(() => surface.classList.remove("is-pulsing"), 250);
+    }
+    const startBtn = tile.querySelector('[data-routine-start]');
+    if (startBtn) {
+      startBtn.textContent = "Mark complete";
+    }
+    triggerRoutineHaptic();
+    if (typeof playFocusPing === "function") {
+      playFocusPing();
+    }
+    window.setTimeout(() => tile.classList.remove("is-running"), 1800);
+    const message = options.source === "swipe"
+      ? `${def.emoji} ${meta.title || def.title} started — undo?`
+      : `${def.emoji} Routine started.`;
+    const toastOptions = options.source === "swipe"
+      ? {
+          action: {
+            label: "Undo",
+            onClick: () => undoRoutineStart(id, previous)
+          },
+          position: "bottom",
+          timeout: 4000
+        }
+      : { timeout: 3500 };
+    showToast(meta.title || def.title, message, toastOptions);
+    updateRoutineContextGlow();
+  }
+
+  function undoRoutineStart(id, previous) {
+    const tile = routineTiles.get(id);
+    const meta = routineState[id];
+    if (!tile || !meta) return;
+    meta.lastUsed = previous.lastUsed || null;
+    meta.usageCount = Number.isFinite(previous.usageCount) ? previous.usageCount : 0;
+    meta.streak = Number.isFinite(previous.streak) ? previous.streak : 0;
+    saveRoutineState();
+    updateRoutineTile(id);
+    tile.dataset.running = "false";
+    tile.classList.remove("is-running");
+    const startBtn = tile.querySelector('[data-routine-start]');
+    if (startBtn) {
+      startBtn.textContent = "Start Routine";
+    }
+    updateRoutineContextGlow();
+  }
+
+  function completeRoutine(id) {
+    const tile = routineTiles.get(id);
+    const def = getRoutineDefinition(id);
+    const meta = routineState[id];
+    if (!tile || !def || !meta) return;
+    tile.dataset.running = "false";
+    tile.classList.remove("is-running");
+    tile.classList.add("routine-tile--celebrate");
+    window.setTimeout(() => tile.classList.remove("routine-tile--celebrate"), 900);
+    const startBtn = tile.querySelector('[data-routine-start]');
+    if (startBtn) {
+      startBtn.textContent = "Start Routine";
+    }
+    triggerRoutineHaptic([16, 32, 16]);
+    showToast(meta.title || def.title, "Routine done — nice work!", { timeout: 4200 });
+    updateRoutineContextGlow();
+  }
+
+  function handleRoutineQuickAction(id, action) {
+    const def = getRoutineDefinition(id);
+    const meta = routineState[id];
+    if (!def || !meta) return;
+    switch (action) {
+      case "refresh":
+        meta.lastUsed = null;
+        meta.streak = 0;
+        saveRoutineState();
+        updateRoutineTile(id);
+        showToast(meta.title || def.title, "Micro prompt refreshed.", { timeout: 2500 });
+        updateRoutineContextGlow();
+        break;
+      case "adjust":
+        openRoutineEdit(id);
+        break;
+      case "stuck":
+        showToast(meta.title || def.title, def.stuckMessage || "Take one tiny step toward the next action.", { timeout: 4000 });
+        break;
+      default:
+        break;
+    }
+  }
+
+  let activeRoutineEditId = null;
+
+  function openRoutineEdit(id) {
+    const sheet = document.getElementById("routineEditSheet");
+    const meta = routineState[id];
+    const def = getRoutineDefinition(id);
+    if (!sheet || !meta || !def) return;
+    closeRoutineQuickOverlay(id);
+    activeRoutineEditId = id;
+    const nameField = document.getElementById("routineNameInput");
+    const stepsField = document.getElementById("routineStepsInput");
+    const quickSelect = document.getElementById("routineQuickSelect");
+    const reminderField = document.getElementById("routineReminderTime");
+    if (nameField) nameField.value = meta.title || def.title;
+    if (stepsField) stepsField.value = meta.steps.join("\n");
+    if (quickSelect) {
+      quickSelect.innerHTML = "";
+      meta.steps.forEach(step => {
+        const option = document.createElement("option");
+        option.value = step;
+        option.textContent = step;
+        quickSelect.appendChild(option);
+      });
+      if (meta.quickLaunch && meta.steps.includes(meta.quickLaunch)) {
+        quickSelect.value = meta.quickLaunch;
+      }
+    }
+    if (reminderField) {
+      reminderField.value = meta.reminderTime || "";
+      reminderField.disabled = def.allowReminder === false;
+    }
+    const sheetToggle = document.getElementById("routineHapticsInSheet");
+    if (sheetToggle) {
+      sheetToggle.checked = routineHapticsEnabled;
+    }
+    sheet.classList.add("is-visible");
+    const panel = sheet.querySelector('.routine-sheet__panel');
+    if (panel) {
+      panel.setAttribute("tabindex", "-1");
+      panel.focus({ preventScroll: true });
+    }
+  }
+
+  function closeRoutineEdit() {
+    const sheet = document.getElementById("routineEditSheet");
+    if (!sheet) return;
+    sheet.classList.remove("is-visible");
+    activeRoutineEditId = null;
+  }
+
+  function setRoutineHaptics(enabled) {
+    routineHapticsEnabled = Boolean(enabled);
+    try {
+      localStorage.setItem(ROUTINE_HAPTIC_KEY, routineHapticsEnabled ? "true" : "false");
+    } catch (error) {
+      // ignore
+    }
+    const toggle = document.getElementById("routineHapticsToggle");
+    const sheetToggle = document.getElementById("routineHapticsInSheet");
+    if (toggle) toggle.checked = routineHapticsEnabled;
+    if (sheetToggle) sheetToggle.checked = routineHapticsEnabled;
+  }
+
+  async function saveRoutineEdit() {
+    if (!activeRoutineEditId) {
+      closeRoutineEdit();
+      return;
+    }
+    const def = getRoutineDefinition(activeRoutineEditId);
+    const meta = routineState[activeRoutineEditId];
+    if (!def || !meta) {
+      closeRoutineEdit();
+      return;
+    }
+    const nameField = document.getElementById("routineNameInput");
+    const stepsField = document.getElementById("routineStepsInput");
+    const quickSelect = document.getElementById("routineQuickSelect");
+    const reminderField = document.getElementById("routineReminderTime");
+    meta.title = nameField?.value?.trim() || def.title;
+    const steps = (stepsField?.value || "")
+      .split(/\n+/)
+      .map(step => step.trim())
+      .filter(Boolean);
+    meta.steps = steps.length ? steps : [...def.defaultSteps];
+    if (quickSelect) {
+      quickSelect.innerHTML = "";
+      meta.steps.forEach(step => {
+        const option = document.createElement("option");
+        option.value = step;
+        option.textContent = step;
+        quickSelect.appendChild(option);
+      });
+    }
+    const selectedQuick = quickSelect?.value && meta.steps.includes(quickSelect.value) ? quickSelect.value : meta.steps[0] || null;
+    meta.quickLaunch = selectedQuick;
+    if (def.allowReminder !== false && reminderField) {
+      const timeValue = reminderField.value || null;
+      meta.reminderTime = timeValue;
+      if (timeValue) {
+        const granted = await ensureNotificationPermission();
+        if (!granted) {
+          meta.reminderTime = null;
+          reminderField.value = "";
+          showToast(meta.title, "Notifications blocked. Reminder cleared.", { timeout: 3500 });
+        }
+      }
+      scheduleRoutineReminder(activeRoutineEditId);
+    }
+    saveRoutineState();
+    updateRoutineTile(activeRoutineEditId);
+    closeRoutineEdit();
+    showToast(meta.title, "Routine updated", { timeout: 2600 });
+    updateRoutineContextGlow();
+  }
+
+  function syncRoutineReminderDisplays() {
+    ROUTINE_DEFINITIONS.forEach(def => updateRoutineTile(def.id));
+  }
+
+  async function ensureNotificationPermission() {
+    if (!("Notification" in window)) return false;
+    if (Notification.permission === "granted") return true;
+    if (Notification.permission === "denied") return false;
+    try {
+      const result = await Notification.requestPermission();
+      return result === "granted";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function cancelRoutineReminder(id) {
+    const timer = ROUTINE_REMINDER_TIMERS.get(id);
+    if (timer) {
+      window.clearTimeout(timer);
+      ROUTINE_REMINDER_TIMERS.delete(id);
+    }
+  }
+
+  function scheduleRoutineReminder(id) {
+    cancelRoutineReminder(id);
+    const def = getRoutineDefinition(id);
+    const meta = routineState[id];
+    if (!def || !meta || def.allowReminder === false || !meta.reminderTime) return;
+    const [hours, minutes] = meta.reminderTime.split(":").map(part => Number(part));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return;
+    const now = new Date();
+    const next = new Date();
+    next.setHours(hours, minutes, 0, 0);
+    if (next.getTime() <= now.getTime()) {
+      next.setDate(next.getDate() + 1);
+    }
+    const delay = Math.max(0, next.getTime() - now.getTime());
+    const timerId = window.setTimeout(() => {
+      deliverRoutineReminder(id);
+      ROUTINE_REMINDER_TIMERS.delete(id);
+      scheduleRoutineReminder(id);
+    }, delay);
+    ROUTINE_REMINDER_TIMERS.set(id, timerId);
+  }
+
+  async function deliverRoutineReminder(id) {
+    const def = getRoutineDefinition(id);
+    const meta = routineState[id];
+    if (!def || !meta) return;
+    const title = `${def.emoji} ${meta.title || def.title}`;
+    const body = def.reminderBody || def.microPrompt;
+    if (document.visibilityState !== "hidden") {
+      openRoutineTile(id, { scrollIntoView: true });
+      showToast(title, body, {
+        action: { label: "Open", onClick: () => openRoutineTile(id) },
+        timeout: 5000,
+        className: "toast--inline"
+      });
+      return;
+    }
+    if (!("serviceWorker" in navigator)) return;
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      if (Notification.permission === "granted") {
+        registration.showNotification(title, {
+          body,
+          tag: `routine-${id}`,
+          data: { routineId: id },
+          renotify: true
+        });
+      }
+    } catch (error) {
+      // ignore notification failures
+    }
+  }
+
+  function updateRoutineContextGlow() {
+    const priority = computeRoutinePriority();
+    ROUTINE_DEFINITIONS.forEach(def => {
+      const tile = routineTiles.get(def.id);
+      if (!tile) return;
+      const surface = tile.querySelector('[data-routine-surface]');
+      if (priority === def.id) {
+        tile.classList.add("routine-tile--context");
+        const meta = routineState[def.id];
+        const alpha = computeRoutineGlowAlpha(meta);
+        if (surface) {
+          surface.style.setProperty("--routine-context-glow-alpha", alpha.toFixed(2));
+        }
+      } else {
+        tile.classList.remove("routine-tile--context");
+        if (surface) {
+          surface.style.removeProperty("--routine-context-glow-alpha");
+        }
+      }
+    });
+  }
+
+  function computeRoutinePriority() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour <= 11) return "morning";
+    if (hour >= 19 || hour <= 23) return "sleep";
+    const conflict = routineState.conflict;
+    if (conflict?.lastUsed) {
+      const last = new Date(conflict.lastUsed).getTime();
+      if (!Number.isNaN(last) && Date.now() - last < ROUTINE_CONTEXT_RECENT_MS) {
+        return "conflict";
+      }
+    }
+    return null;
+  }
+
+  function computeRoutineGlowAlpha(meta) {
+    const base = 0.18;
+    if (!meta) return base;
+    const now = Date.now();
+    const hour = 60 * 60 * 1000;
+    const day = 24 * hour;
+    let alpha = base;
+    if (!meta.lastUsed) {
+      alpha = 0.26;
+    } else {
+      const last = new Date(meta.lastUsed).getTime();
+      if (!Number.isNaN(last)) {
+        const diff = Math.max(0, now - last);
+        if (diff < 3 * hour) {
+          alpha = 0.14;
+        } else if (diff < 12 * hour) {
+          alpha = 0.18;
+        } else if (diff < day) {
+          alpha = 0.22;
+        } else {
+          alpha = 0.26;
+        }
+      } else {
+        alpha = 0.22;
+      }
+    }
+    if (Number(meta.streak) >= 3) {
+      alpha = Math.max(0.12, alpha - 0.02);
+    }
+    return Math.min(0.28, Math.max(0.12, alpha));
+  }
+
+  function initializeRoutineTiles() {
+    routineState = loadRoutineState();
+    try {
+      const storedHaptics = localStorage.getItem(ROUTINE_HAPTIC_KEY);
+      if (storedHaptics !== null) {
+        routineHapticsEnabled = storedHaptics === "true";
+      }
+    } catch (error) {
+      routineHapticsEnabled = true;
+    }
+    ROUTINE_DEFINITIONS.forEach(def => {
+      const tile = document.querySelector(`[data-routine-id="${def.id}"]`);
+      if (!tile) return;
+      routineTiles.set(def.id, tile);
+      tile.dataset.running = "false";
+      const trigger = tile.querySelector('[data-routine-trigger]');
+      const startBtn = tile.querySelector('[data-routine-start]');
+      const quickActions = tile.querySelectorAll('[data-quick-action]');
+      const overlay = tile.querySelector('[data-routine-quick-overlay]');
+      if (trigger) {
+        trigger.setAttribute("role", "button");
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.addEventListener("click", () => {
+          if (tile.dataset.ignoreNextClick === "true") {
+            tile.dataset.ignoreNextClick = "false";
+            return;
+          }
+          toggleRoutineTile(def.id);
+        });
+      }
+      if (startBtn) {
+        startBtn.addEventListener("click", () => {
+          if (tile.dataset.running === "true") {
+            completeRoutine(def.id);
+          } else {
+            startRoutine(def.id, { source: "tap" });
+          }
+        });
+      }
+      quickActions.forEach(button => {
+        button.addEventListener("click", () => handleRoutineQuickAction(def.id, button.getAttribute("data-quick-action")));
+      });
+      if (overlay) {
+        const quickLaunchBtn = overlay.querySelector('[data-quick-launch]');
+        if (quickLaunchBtn) {
+          quickLaunchBtn.addEventListener("click", () => quickLaunchRoutine(def.id));
+        }
+        overlay.addEventListener("click", event => {
+          if (event.target === overlay) {
+            closeRoutineQuickOverlay(def.id);
+          }
+        });
+      }
+      attachRoutineGestures(tile, def);
+      updateRoutineTile(def.id);
+      if (def.allowReminder !== false) {
+        scheduleRoutineReminder(def.id);
+      }
+    });
+    setRoutineHaptics(routineHapticsEnabled);
+    const hapticsToggle = document.getElementById("routineHapticsToggle");
+    if (hapticsToggle) {
+      hapticsToggle.addEventListener("change", event => setRoutineHaptics(event.target.checked));
+    }
+    const sheetToggle = document.getElementById("routineHapticsInSheet");
+    if (sheetToggle) {
+      sheetToggle.addEventListener("change", event => setRoutineHaptics(event.target.checked));
+    }
+    const sheet = document.getElementById("routineEditSheet");
+    if (sheet) {
+      const scrim = sheet.querySelector('[data-routine-sheet-dismiss]');
+      const cancelBtn = sheet.querySelector('[data-routine-sheet-cancel]');
+      const saveBtn = sheet.querySelector('[data-routine-sheet-save]');
+      if (scrim) scrim.addEventListener("click", () => closeRoutineEdit());
+      if (cancelBtn) cancelBtn.addEventListener("click", () => closeRoutineEdit());
+      if (saveBtn) saveBtn.addEventListener("click", () => saveRoutineEdit());
+    }
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && document.getElementById("routineEditSheet")?.classList.contains("is-visible")) {
+        closeRoutineEdit();
+      }
+    });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js").catch(() => {});
+    }
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener("message", event => {
+        const data = event.data || {};
+        if (data.type === "routine-reminder" && data.routineId) {
+          openRoutineTile(data.routineId, { scrollIntoView: true });
+        }
+      });
+    }
+    const hashMatch = window.location.hash && window.location.hash.match(/^#routine-(.+)$/);
+    if (hashMatch && routineTiles.has(hashMatch[1])) {
+      openRoutineTile(hashMatch[1], { scrollIntoView: true });
+    }
+    updateRoutineContextGlow();
+    if (routineContextIntervalId) {
+      window.clearInterval(routineContextIntervalId);
+    }
+    routineContextIntervalId = window.setInterval(updateRoutineContextGlow, 60 * 1000);
+  }
+
   const chartFieldIds = ["authorType", "patientType", "visitType", "clinicSite", "dateOfService"];
   let storedChartFieldValues = null;
   let currentScaleDescriptorCategory = "general";
@@ -6116,22 +8338,50 @@
 
   function showToast(title, message, options = {}) {
     const container = getToastContainer();
-    if (!container) return;
+    const useContainer = options.position !== "bottom";
+    if (useContainer && !container) return;
     const toast = document.createElement("div");
-    toast.className = "toast";
+    toast.className = `toast${options.className ? ` ${options.className}` : ""}`;
+    if (options.position === "bottom") {
+      toast.classList.add("toast--bottom");
+    }
     toast.setAttribute("role", "status");
-    const heading = document.createElement("strong");
-    heading.textContent = title;
-    toast.appendChild(heading);
+    if (typeof title === "string" && title.trim()) {
+      const heading = document.createElement("strong");
+      heading.textContent = title;
+      toast.appendChild(heading);
+    }
     const body = document.createElement("div");
     body.textContent = message;
     toast.appendChild(body);
-    container.appendChild(toast);
+    if (options.action && typeof options.action.onClick === "function") {
+      const actionBtn = document.createElement("button");
+      actionBtn.type = "button";
+      actionBtn.className = "toast__action";
+      actionBtn.textContent = options.action.label || "Action";
+      actionBtn.addEventListener("click", () => {
+        options.action.onClick();
+        toast.remove();
+      });
+      toast.appendChild(actionBtn);
+    }
+    if (useContainer) {
+      container.appendChild(toast);
+    } else {
+      document.body.appendChild(toast);
+    }
     const timeout = Number.isFinite(options.timeout) ? options.timeout : 6000;
-    setTimeout(() => {
+    const hide = () => {
       toast.classList.add("hidden");
-      setTimeout(() => toast.remove(), 350);
-    }, timeout);
+      window.setTimeout(() => toast.remove(), 350);
+      if (typeof options.onClose === "function") {
+        options.onClose();
+      }
+    };
+    if (timeout > 0) {
+      window.setTimeout(hide, timeout);
+    }
+    return toast;
   }
 
   function getDateKey(date = new Date()) {
@@ -12409,6 +14659,11 @@
   }
 
   function openModuleById(id) {
+    const routineDef = getRoutineDefinition(id) || ROUTINE_DEFINITIONS.find(def => def.moduleId === id);
+    if (routineDef) {
+      openRoutineTile(routineDef.id, { scrollIntoView: true });
+      return;
+    }
     const module = $(id);
     if (!module) return;
     const body = module.querySelector(".module-body");
@@ -12419,21 +14674,7 @@
   }
 
   function initializeCollapsibleModules() {
-    COLLAPSIBLE_MODULE_IDS.forEach(id => {
-      const module = $(id);
-      if (!module) return;
-      const header = module.querySelector(".module-header");
-      const body = module.querySelector(".module-body");
-      if (!header || !body) return;
-      const stored = localStorage.getItem(`${MODULE_STATE_PREFIX}${id}`);
-      const isOpen = stored === "open";
-      setModuleOpenState(module, body, isOpen, header);
-      header.addEventListener("click", () => {
-        const nextState = !module.classList.contains("is-open");
-        setModuleOpenState(module, body, nextState, header);
-        localStorage.setItem(`${MODULE_STATE_PREFIX}${id}`, nextState ? "open" : "closed");
-      });
-    });
+    initializeRoutineTiles();
   }
 
   function getMostMeaningfulTask() {
