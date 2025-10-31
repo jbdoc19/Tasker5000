@@ -14096,6 +14096,43 @@ function initializeStartFabQuickCapture() {
 initializeStartFabQuickCapture();
 // === END: Quick Capture long-press feature ===
 
+
+// === START: Wire up existing Due Today / All Tasks accordions ===
+function initializeTaskAccordions() {
+  const dueSummary = document.getElementById("dueTodaySummary");
+  const dueList = document.getElementById("dueTodayList");
+  const allSummary = document.getElementById("allTasksSummary");
+  const allList = document.getElementById("allTasksList");
+
+  if (!dueSummary || !allSummary) return;
+
+  function toggleAccordion(summaryBtn, contentDiv) {
+    const isOpen = summaryBtn.getAttribute("aria-expanded") === "true";
+    summaryBtn.setAttribute("aria-expanded", !isOpen);
+    contentDiv.hidden = isOpen;
+    summaryBtn.querySelector("span[aria-hidden='true']").textContent = isOpen ? "▸" : "▾";
+  }
+
+  dueSummary.addEventListener("click", () => {
+    toggleAccordion(dueSummary, dueList);
+    // collapse All Tasks if open
+    allSummary.setAttribute("aria-expanded", false);
+    allList.hidden = true;
+    allSummary.querySelector("span[aria-hidden='true']").textContent = "▸";
+  });
+
+  allSummary.addEventListener("click", () => {
+    toggleAccordion(allSummary, allList);
+    // collapse Due Today if open
+    dueSummary.setAttribute("aria-expanded", false);
+    dueList.hidden = true;
+    dueSummary.querySelector("span[aria-hidden='true']").textContent = "▸";
+  });
+}
+
+initializeTaskAccordions();
+// === END: Accordions ===
+    
 initializeResourcesDrawer();
 initializeSosPanel();
     initializeCommandBarAutohide();
