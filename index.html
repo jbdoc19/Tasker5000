@@ -3170,6 +3170,19 @@
       align-items: center;
       justify-content: space-between;
       gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .section-heading__title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .section-heading__title .section-chip {
+      margin-left: 0;
     }
 
     .section-heading h2,
@@ -3287,18 +3300,31 @@
     }
 
     .due-today-summary {
-      width: 100%;
       background: rgba(148, 163, 184, 0.08);
       border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: var(--radius-md);
-      padding: 0.75rem 1rem;
-      display: flex;
+      padding: 0.55rem 0.9rem;
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
+      gap: var(--space-1);
       color: var(--text-secondary);
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       transition: border-color var(--transition), color var(--transition), background var(--transition);
+      flex-shrink: 1;
+      width: auto;
+      min-width: 0;
+      margin-left: auto;
+      max-width: 100%;
+    }
+
+    .due-today-summary span[data-due-today-summary-text],
+    .due-today-summary span[data-all-tasks-summary-text] {
+      white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .due-today-summary:hover,
@@ -3312,6 +3338,8 @@
     .due-today-summary__icon {
       font-size: 0.75rem;
       transition: transform var(--transition);
+      margin-left: var(--space-1);
+      flex-shrink: 0;
     }
 
     .due-today-accordion[data-open="true"] .due-today-summary__icon {
@@ -11122,6 +11150,68 @@
         item.appendChild(progressElement);
       }
     }
+    if (isChartTask(entry.task)
+      && Number.isFinite(Number(entry.task.chartDurationMinutes))
+      && Number(entry.task.chartDurationMinutes) > 0) {
+      metaBits.push(`Chart ${formatDuration(Number(entry.task.chartDurationMinutes))}`);
+    }
+    meta.textContent = metaBits.join(" • ");
+    item.appendChild(meta);
+
+    if (entry.task.subTasks && entry.task.subTasks.length) {
+      const progressElement = createProgressElement(entry.task);
+      if (progressElement) {
+        item.appendChild(progressElement);
+      }
+    }
+
+    const pillRow = document.createElement("div");
+    pillRow.className = "due-today-pills";
+    const sprintBtn = document.createElement("button");
+    sprintBtn.className = "pill pill-primary";
+    sprintBtn.type = "button";
+    sprintBtn.textContent = "Start 5m";
+    sprintBtn.addEventListener("click", () => startFiveMinuteSprint(entry.task.id));
+    pillRow.appendChild(sprintBtn);
+
+    const fullBtn = document.createElement("button");
+    fullBtn.className = "pill";
+    fullBtn.type = "button";
+    fullBtn.textContent = "Start full";
+    fullBtn.addEventListener("click", () => startFocus(entry.task.id));
+    pillRow.appendChild(fullBtn);
+
+    item.appendChild(pillRow);
+    return item;
+  }
+
+  function renderDueTodayList(entries) {
+    const instances = getDueTodaySections();
+    if (!instances.length) return;
+
+    instances.forEach(({ section, accordion, summaryBtn, summaryText, listEl, emptyEl }) => {
+      if (!summaryBtn.dataset.listenerBound) {
+        summaryBtn.dataset.listenerBound = "true";
+        summaryBtn.addEventListener("click", () => {
+          const nextOpen = accordion.dataset.open !== "true";
+          setDueTodayAccordionOpen(nextOpen, { highlight: nextOpen, source: section });
+        });
+      }
+      listEl.innerHTML = "";
+      if (!entries.length) {
+        section.classList.add("hidden");
+        emptyEl.classList.remove("hidden");
+        accordion.classList.add("hidden");
+        accordion.dataset.open = "false";
+        summaryBtn.setAttribute("aria-expanded", "false");
+        summaryText.textContent = "0 ready • est —";
+        listEl.hidden = true;
+      } else {
+        section.classList.remove("hidden");
+        emptyEl.classList.add("hidden");
+        accordion.classList.remove("hidden");
+      }
+    });
 
     const pillRow = document.createElement("div");
     pillRow.className = "due-today-pills";
