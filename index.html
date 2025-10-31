@@ -11193,6 +11193,9 @@
     if (open && options.focusSummary) {
       summaryBtn.focus();
     }
+    if (open && !options.skipSync) {
+      setAllTasksAccordionOpen(false, { skipSync: true });
+    }
   }
 
   function computeWantScore(task) {
@@ -12249,7 +12252,7 @@
     const summaryBtn = $("allTasksSummary");
     const panel = $("allTasksPanel");
     if (!accordion || !summaryBtn || !panel) return;
-    const { skipPersist = false, highlight = false } = options;
+    const { skipPersist = false, highlight = false, skipSync = false } = options;
     accordion.dataset.open = open ? "true" : "false";
     summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
     panel.hidden = !open;
@@ -12257,6 +12260,9 @@
     if (open && highlight) {
       panel.classList.add("is-highlighted");
       window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
+    }
+    if (open && !skipSync) {
+      setDueTodayAccordionOpen(false, { skipSync: true });
     }
     if (!skipPersist) {
       localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, open ? "expanded" : "collapsed");
@@ -14097,40 +14103,9 @@ initializeStartFabQuickCapture();
 // === END: Quick Capture long-press feature ===
 
 
-// === START: Wire up existing Due Today / All Tasks accordions ===
-function initializeTaskAccordions() {
-  const dueSummary = document.getElementById("dueTodaySummary");
-  const dueList = document.getElementById("dueTodayList");
-  const allSummary = document.getElementById("allTasksSummary");
-  const allList = document.getElementById("allTasksList");
-
-  if (!dueSummary || !allSummary) return;
-
-  function toggleAccordion(summaryBtn, contentDiv) {
-    const isOpen = summaryBtn.getAttribute("aria-expanded") === "true";
-    summaryBtn.setAttribute("aria-expanded", !isOpen);
-    contentDiv.hidden = isOpen;
-    summaryBtn.querySelector("span[aria-hidden='true']").textContent = isOpen ? "▸" : "▾";
-  }
-
-  dueSummary.addEventListener("click", () => {
-    toggleAccordion(dueSummary, dueList);
-    // collapse All Tasks if open
-    allSummary.setAttribute("aria-expanded", false);
-    allList.hidden = true;
-    allSummary.querySelector("span[aria-hidden='true']").textContent = "▸";
-  });
-
-  allSummary.addEventListener("click", () => {
-    toggleAccordion(allSummary, allList);
-    // collapse Due Today if open
-    dueSummary.setAttribute("aria-expanded", false);
-    dueList.hidden = true;
-    dueSummary.querySelector("span[aria-hidden='true']").textContent = "▸";
-  });
-}
-
-initializeTaskAccordions();
+// === START: Accordions ===
+// Existing accordion wiring lives in renderDueTodayList and initializeAllTasksCardState.
+// Keep the two sections mutually exclusive by collapsing the other when one opens.
 // === END: Accordions ===
     
 initializeResourcesDrawer();
