@@ -1598,8 +1598,8 @@
       color: #8f9aa8;
       font-size: 0.85rem;
       margin-top: 0.35rem;
-      max-width: 600px;
-      text-align: center;
+      max-width: 100%;
+      text-align: left;
     }
     .chart-age, .urgency-hint {
       display: block;
@@ -1940,42 +1940,50 @@
         padding: 1rem;
       }
 
-      .subtask-row {
+      .focus-overlay__summary {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+
+      .focus-overlay__summary .task-counter {
+        text-align: left;
+      }
+
+      .subtask-row:not(.focus-overlay__task) {
         display: grid;
-        grid-template-columns: auto 1fr auto;
-        grid-template-areas:
-          "checkbox name actions"
-          ". timer timer";
+        grid-template-columns: auto 1fr;
         column-gap: 0.4rem;
         row-gap: 0.35rem;
         align-items: center;
       }
 
-      .subtask-row > input[type="checkbox"] {
-        grid-area: checkbox;
+      .subtask-row:not(.focus-overlay__task) > input[type="checkbox"] {
+        grid-column: 1;
+        grid-row: 1;
       }
 
-      .subtask-name {
-        grid-area: name;
+      .subtask-row:not(.focus-overlay__task) .subtask-name {
+        grid-column: 2;
+        grid-row: 1;
         margin-left: 0.15rem;
       }
 
-      .subtask-actions {
-        grid-area: actions;
-        justify-content: flex-end;
-        flex-wrap: nowrap;
-      }
-
-      .subtask-actions button {
-        padding: 0.28rem 0.45rem;
-      }
-
-      .timer-label {
-        grid-area: timer;
+      .subtask-row:not(.focus-overlay__task) .timer-label {
+        grid-column: 2;
+        grid-row: 2;
         margin-left: 0;
         justify-self: end;
         min-width: 0;
         font-size: 0.72rem;
+      }
+
+      #focus.focus-overlay .focus-overlay__task {
+        gap: 0.35rem;
+      }
+
+      #focus.focus-overlay .focus-overlay__task .task-actions {
+        justify-content: flex-start;
       }
 
       .distraction-tools {
@@ -3638,6 +3646,10 @@
       backdrop-filter: blur(10px);
       z-index: 140;
       pointer-events: none;
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+      margin: 0 auto;
     }
 
     body.focus-overlay-active #focus.focus-overlay {
@@ -3652,7 +3664,9 @@
 
     .focus-overlay__sheet {
       position: relative;
-      width: min(94vw, 580px);
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
       border-radius: 28px 28px 16px 16px;
       background: rgba(9, 16, 23, 0.98);
       border: 1px solid rgba(148, 163, 184, 0.22);
@@ -3660,17 +3674,19 @@
       padding: clamp(1.1rem, 4vw, 1.75rem);
       display: grid;
       gap: var(--space-3);
-      transform: translateY(0);
+      transform: scale(0.95);
+      transform-origin: top center;
       animation: focus-sheet-enter 240ms ease;
+      overflow-x: hidden;
     }
 
     @keyframes focus-sheet-enter {
       from {
-        transform: translateY(18px);
+        transform: scale(0.95) translateY(18px);
         opacity: 0;
       }
       to {
-        transform: translateY(0);
+        transform: scale(0.95) translateY(0);
         opacity: 1;
       }
     }
@@ -3696,16 +3712,87 @@
     }
 
     .focus-overlay__body {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: var(--space-3);
       max-height: clamp(360px, 70vh, 520px);
       overflow-y: auto;
       padding-right: 0.25rem;
+      padding-bottom: 6rem;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
     }
 
-    .focus-overlay__task {
+    .focus-overlay__summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .focus-overlay__summary .focus {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .focus-overlay__summary .task-counter {
+      text-align: right;
+      white-space: nowrap;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .focus-overlay__hint {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+    }
+
+    #focus.focus-overlay .focus-overlay__task {
       display: grid;
+      grid-template-areas:
+        "title counter"
+        "actions actions";
+      grid-template-columns: 1fr auto;
+      align-items: center;
       gap: 0.4rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #focus.focus-overlay .focus-overlay__task .task-title {
+      grid-area: title;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #focus.focus-overlay .focus-overlay__task .task-title input[type="checkbox"] {
+      margin: 0;
+    }
+
+    #focus.focus-overlay .focus-overlay__task .task-counter {
+      grid-area: counter;
+      text-align: right;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    #focus.focus-overlay .focus-overlay__task .timer-label {
+      margin-left: 0;
+      justify-self: end;
+      min-width: 0;
+    }
+
+    #focus.focus-overlay .focus-overlay__task .task-actions {
+      grid-area: actions;
+      display: flex;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .focus-overlay__actions {
@@ -6678,11 +6765,11 @@
         </div>
       </header>
       <div class="focus-overlay__body">
-        <div class="focus-overlay__task">
+        <div class="focus-overlay__summary" id="focusTaskSummary">
           <div class="focus" tabindex="0" aria-live="polite"></div>
-          <div class="score" id="scoreView"></div>
-          <div id="focusFitHint" aria-live="polite"></div>
+          <div class="score task-counter" id="scoreView"></div>
         </div>
+        <div id="focusFitHint" class="focus-overlay__hint" aria-live="polite"></div>
         <div id="subTaskView"></div>
         <div id="distractionTools" class="distraction-tools">
           <div class="distraction-tools__header">
@@ -11372,8 +11459,11 @@
     visibleSubs.forEach(sub => {
       const subIndex = task.subTasks.findIndex(entry => entry.id === sub.id);
       const row = document.createElement("div");
-      row.className = "subtask-row";
+      row.className = "subtask-row focus-overlay__task";
       if (sub.completed) row.classList.add("completed");
+
+      const titleWrapper = document.createElement("label");
+      titleWrapper.className = "task-title";
 
       const chk = document.createElement("input");
       chk.type = "checkbox";
@@ -11384,35 +11474,40 @@
       nameSpan.className = "subtask-name";
       nameSpan.textContent = sub.name;
 
+      titleWrapper.appendChild(chk);
+      titleWrapper.appendChild(nameSpan);
+
       const actions = document.createElement("div");
-      actions.className = "subtask-actions";
+      actions.className = "subtask-actions task-actions";
 
       const startBtn = document.createElement("button");
-      startBtn.textContent = sub.startTime ? "Restart" : "Start";
+      startBtn.textContent = sub.startTime ? "🔁" : "▶️";
       startBtn.title = "Start or restart timer";
+      startBtn.setAttribute("aria-label", sub.startTime ? "Restart timer" : "Start timer");
       startBtn.onclick = () => startSubTask(taskIndex, subIndex, { taskId: task.id, subId: sub.id });
       actions.appendChild(startBtn);
 
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️";
       editBtn.title = "Rename step";
+      editBtn.setAttribute("aria-label", "Rename step");
       editBtn.onclick = () => editSubTaskName(taskIndex, subIndex, { taskId: task.id, subId: sub.id });
       actions.appendChild(editBtn);
 
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
       deleteBtn.title = "Remove step";
+      deleteBtn.setAttribute("aria-label", "Remove step");
       deleteBtn.onclick = () => removeSubTask(taskIndex, subIndex, { taskId: task.id, subId: sub.id });
       actions.appendChild(deleteBtn);
 
       const timer = document.createElement("span");
-      timer.className = "timer-label";
+      timer.className = "timer-label task-counter";
       trackTimer(sub, timer);
 
-      row.appendChild(chk);
-      row.appendChild(nameSpan);
-      row.appendChild(actions);
+      row.appendChild(titleWrapper);
       row.appendChild(timer);
+      row.appendChild(actions);
       container.appendChild(row);
     });
 
