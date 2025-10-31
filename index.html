@@ -13578,6 +13578,13 @@
     });
   }
 
+  function setVisibility(el, open) {
+    if (!el) return;
+    el.hidden = !open;
+    el.setAttribute("aria-hidden", open ? "false" : "true");
+    el.style.display = open ? "" : "none";
+  }
+
   function getDueTodaySections() {
     return Array.from(document.querySelectorAll('[data-due-today-section]'))
       .map(section => {
@@ -13691,7 +13698,7 @@
         accordion.dataset.open = "false";
         summaryBtn.setAttribute("aria-expanded", "false");
         summaryText.textContent = "0 ready • est —";
-        listEl.hidden = true;
+        setVisibility(listEl, false);
       } else {
         section.classList.remove("hidden");
         emptyEl.classList.add("hidden");
@@ -13699,24 +13706,23 @@
       }
     });
 
-    const pillRow = document.createElement("div");
-    pillRow.className = "due-today-pills";
-    const sprintBtn = document.createElement("button");
-    sprintBtn.className = "pill pill-primary";
-    sprintBtn.type = "button";
-    sprintBtn.textContent = "Start 5m";
-    sprintBtn.addEventListener("click", () => startFiveMinuteSprint(entry.task.id));
-    pillRow.appendChild(sprintBtn);
+    if (!entries.length) return;
 
-    const fullBtn = document.createElement("button");
-    fullBtn.className = "pill";
-    fullBtn.type = "button";
-    fullBtn.textContent = "Start full";
-    fullBtn.addEventListener("click", () => startFocus(entry.task.id));
-    pillRow.appendChild(fullBtn);
+    const readyLabel = entries.length === 1 ? "1 ready" : `${entries.length} ready`;
+    const estimatedMinutes = entries.reduce((sum, entry) => {
+      const minutes = estimateTaskMinutes(entry.task);
+      return Number.isFinite(minutes) ? sum + minutes : sum;
+    }, 0);
+    const hasEstimate = Number.isFinite(estimatedMinutes) && estimatedMinutes > 0;
+    const estimateText = hasEstimate ? `est ${Math.max(1, Math.round(estimatedMinutes))} min` : "est —";
 
-    item.appendChild(pillRow);
-    return item;
+    instances.forEach(({ accordion, summaryBtn, summaryText, listEl }) => {
+      summaryText.textContent = `${readyLabel} • ${estimateText}`;
+      entries.forEach(entry => listEl.appendChild(createDueTodayItem(entry)));
+      const isOpen = accordion.dataset.open === "true";
+      summaryBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      setVisibility(listEl, isOpen);
+    });
   }
 
   function renderDueTodayList(entries) {
@@ -13732,7 +13738,7 @@
         accordion.dataset.open = "false";
         summaryBtn.setAttribute("aria-expanded", "false");
         summaryText.textContent = "0 ready • est —";
-        listEl.hidden = true;
+        setVisibility(listEl, false);
       } else {
         section.classList.remove("hidden");
         emptyEl.classList.add("hidden");
@@ -13740,9 +13746,7 @@
       }
     });
 
-    if (!entries.length) {
-      return;
-    }
+    if (!entries.length) return;
 
     const readyLabel = entries.length === 1 ? "1 ready" : `${entries.length} ready`;
     const estimatedMinutes = entries.reduce((sum, entry) => {
@@ -13754,12 +13758,10 @@
 
     instances.forEach(({ accordion, summaryBtn, summaryText, listEl }) => {
       summaryText.textContent = `${readyLabel} • ${estimateText}`;
-      entries.forEach(entry => {
-        listEl.appendChild(createDueTodayItem(entry));
-      });
+      entries.forEach(entry => listEl.appendChild(createDueTodayItem(entry)));
       const isOpen = accordion.dataset.open === "true";
       summaryBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      listEl.hidden = !isOpen;
+      setVisibility(listEl, isOpen);
     });
   }
 
@@ -13771,7 +13773,7 @@
       const nextState = open ? "true" : "false";
       accordion.dataset.open = nextState;
       summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      listEl.hidden = !open;
+      setVisibility(listEl, open);
       if (open && highlight !== false && (!source || source === section || source === accordion)) {
         window.requestAnimationFrame(() => {
           const firstCard = listEl.querySelector(".due-today-item");
@@ -14869,8 +14871,7 @@
     cards.forEach(({ accordion, summaryBtn, panel, card }) => {
       accordion.dataset.open = open ? "true" : "false";
       summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      panel.hidden = !open;
-      panel.setAttribute("aria-hidden", open ? "false" : "true");
+      setVisibility(panel, open);
       if (open && highlight && (!source || source === card || source === accordion || source === panel)) {
         panel.classList.add("is-highlighted");
         window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
