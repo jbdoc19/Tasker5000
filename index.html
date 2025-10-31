@@ -13385,10 +13385,12 @@
     sections.forEach(({ accordion, summaryBtn, listEl }) => {
       if (!accordion || !summaryBtn || !listEl) return;
 
+      // Set initial state to CLOSED
       accordion.dataset.open = "false";
       summaryBtn.setAttribute("aria-expanded", "false");
-      setVisibility(listEl, false);
+      listEl.hidden = true;
 
+      // Attach click listener once during initialization
       if (!summaryBtn.dataset.listenerBound) {
         summaryBtn.dataset.listenerBound = "true";
         summaryBtn.addEventListener("click", () => {
