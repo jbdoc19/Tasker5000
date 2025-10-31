@@ -14022,6 +14022,31 @@ initializeFocusFabLongPress();
     if (nextStepBtn) {
       nextStepBtn.addEventListener("click", completeCurrentMeltdownStep);
     }
+    function showToast(message, duration = 2000) {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  Object.assign(toast.style, {
+    position: "fixed",
+    bottom: "90px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "#00bfa5", // teal
+    color: "#fff",
+    padding: "10px 18px",
+    borderRadius: "20px",
+    fontSize: "14px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+    opacity: "0",
+    transition: "opacity 0.3s ease",
+    zIndex: "9999",
+  });
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => (toast.style.opacity = "1"));
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+    }
     restoreBriefModePreference();
     setupMomentumZones();
     setupNextBestObserver();
