@@ -1334,6 +1334,7 @@
       top: 0.75rem;
       z-index: 40;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.6rem;
       padding: 0.4rem 0.6rem;
@@ -1388,8 +1389,8 @@
       gap: 0.35rem;
     }
 
-    .stage-strip #categoryProgress {
-      flex: 1;
+    .starter-micro-header #categoryProgress {
+      margin-inline: 0.35rem;
     }
 
     .next-focus-head {
@@ -2302,26 +2303,116 @@
       background: #666;
     }
     .category-progress {
-      margin-top: 0.5rem;
-      width: 100%;
-      max-width: 600px;
+      position: relative;
+      display: grid;
+      gap: 0.45rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(8, 16, 24, 0.9);
+      box-shadow: 0 14px 28px rgba(2, 8, 18, 0.32);
+      flex: 1 0 100%;
+      min-height: 48px;
     }
-    .category-progress .line {
-      margin-bottom: 0.5rem;
-      font-size: 0.85rem;
+    .category-progress__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
     }
-    .category-progress .bar {
-      background: #333;
+    .category-progress__title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(236, 254, 255, 0.92);
+    }
+    .category-progress__label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .category-progress__meter {
+      position: relative;
       width: 100%;
-      height: 6px;
-      border-radius: 3px;
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.18);
       overflow: hidden;
     }
-    .category-progress .bar .fill {
-      background: #0a84ff;
-      height: 100%;
-      display: block;
+    .category-progress__fill {
+      position: absolute;
+      inset: 0;
       width: 0%;
+      background: linear-gradient(90deg, #0f766e, #14b8a6);
+      box-shadow: 0 0 0 rgba(45, 212, 195, 0);
+      transition: width 150ms ease-out, background 220ms ease, box-shadow 220ms ease;
+    }
+    .category-progress__fill.is-warm {
+      background: linear-gradient(90deg, #14b8a6, #5eead4);
+    }
+    .category-progress__fill.is-complete {
+      background: linear-gradient(90deg, #22d3ee, #a7f3d0);
+      box-shadow: 0 0 18px rgba(125, 231, 220, 0.55);
+    }
+    .category-progress__fill.progress-glow {
+      animation: chartGlowPulse 620ms ease-out;
+    }
+    .category-progress__fill.complete-pulse {
+      animation: chartCompletePulse 1.5s ease-out;
+    }
+    .category-progress__floating {
+      position: absolute;
+      top: -26px;
+      right: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      background: rgba(34, 197, 187, 0.18);
+      border: 1px solid rgba(125, 231, 220, 0.35);
+      color: rgba(203, 255, 250, 0.95);
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 160ms ease, transform 160ms ease;
+      pointer-events: none;
+    }
+    .category-progress__floating.is-visible {
+      opacity: 1;
+      transform: translateY(-12px);
+    }
+    @media (max-width: 400px) {
+      .category-progress {
+        min-height: 60px;
+      }
+      .category-progress__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+      }
+      .category-progress__label {
+        white-space: normal;
+      }
+    }
+    @keyframes chartGlowPulse {
+      0% {
+        box-shadow: 0 0 0 rgba(45, 212, 195, 0);
+      }
+      45% {
+        box-shadow: 0 0 18px rgba(45, 212, 195, 0.48);
+      }
+      100% {
+        box-shadow: 0 0 0 rgba(45, 212, 195, 0);
+      }
+    }
+    @keyframes chartCompletePulse {
+      0% {
+        box-shadow: 0 0 0 rgba(125, 231, 220, 0.35);
+      }
+      40% {
+        box-shadow: 0 0 22px rgba(125, 231, 220, 0.85);
+      }
+      100% {
+        box-shadow: 0 0 18px rgba(125, 231, 220, 0.55);
+      }
     }
     .subtask-row {
       display: flex;
@@ -5471,6 +5562,16 @@
             Start 5-min
             <span id="nextTaskActionHint" class="visually-hidden">Long-press for quick capture.</span>
           </button>
+          <div id="categoryProgress" class="category-progress" role="status" aria-live="polite">
+            <div class="category-progress__header">
+              <h3 class="category-progress__title">Chart Momentum</h3>
+              <span class="category-progress__label" data-chart-label>Chart: 0/0 complete</span>
+            </div>
+            <div class="category-progress__meter" aria-hidden="true">
+              <span class="category-progress__fill" data-chart-fill></span>
+              <span class="category-progress__floating" data-chart-floating>0% complete</span>
+            </div>
+          </div>
           <div id="nextTaskChips" class="starter-fit-chips" aria-live="polite"></div>
           <button
             id="rescueLaunchButton"
@@ -5612,7 +5713,6 @@
               ⏱️
             </button>
           </div>
-          <div id="categoryProgress" class="category-progress"></div>
         </div>
       </div>
 
@@ -12707,32 +12807,82 @@
     }
   }
 
-  // render progress per category
+  // render chart-specific momentum progress
   function renderCategoryProgress() {
     const cont = $("categoryProgress");
-    cont.innerHTML = "";
-    categories.forEach(cat => {
-      const total = tasks.filter(t => t.category === cat).length;
-      if (total === 0) return;
-      const done = tasks.filter(t => t.category === cat && isTaskCompleted(t)).length;
-      const percent = (done / total) * 100;
+    if (!cont) return;
 
-      const line = document.createElement("div");
-      line.className = "line";
-      const title = document.createElement("span");
-      title.textContent = `${cat}: ${done}/${total} complete`;
-      line.appendChild(title);
+    const labelEl = cont.querySelector('[data-chart-label]');
+    const fillEl = cont.querySelector('[data-chart-fill]');
+    const floatingEl = cont.querySelector('[data-chart-floating]');
+    if (!labelEl || !fillEl) return;
 
-      const bar = document.createElement("div");
-      bar.className = "bar";
-      const fill = document.createElement("span");
-      fill.className = "fill";
-      fill.style.width = percent + "%";
-      bar.appendChild(fill);
+    const chartTasks = tasks.filter(t => t.category === "Chart");
+    const total = chartTasks.length;
+    const done = chartTasks.filter(t => isTaskCompleted(t)).length;
+    const percent = total === 0 ? 0 : (done / total) * 100;
+    const clamped = Math.max(0, Math.min(100, percent));
 
-      line.appendChild(bar);
-      cont.appendChild(line);
-    });
+    labelEl.textContent = `Chart: ${done}/${total} complete`;
+
+    const previous = Number.parseFloat(cont.dataset.percent || "0");
+    const progressIncreased = clamped > (Number.isFinite(previous) ? previous : 0);
+
+    fillEl.style.width = `${clamped}%`;
+    fillEl.classList.remove("is-warm", "is-complete");
+    if (total > 0 && done === total) {
+      fillEl.classList.add("is-complete");
+    } else if (clamped > 50) {
+      fillEl.classList.add("is-warm");
+    }
+
+    if (!fillEl.dataset.listened) {
+      fillEl.addEventListener("animationend", event => {
+        if (event.animationName === "chartGlowPulse") {
+          fillEl.classList.remove("progress-glow");
+        }
+        if (event.animationName === "chartCompletePulse") {
+          fillEl.classList.remove("complete-pulse");
+        }
+      });
+      fillEl.dataset.listened = "true";
+    }
+
+    if (progressIncreased) {
+      fillEl.classList.remove("progress-glow");
+      void fillEl.offsetWidth;
+      fillEl.classList.add("progress-glow");
+      if (floatingEl) {
+        floatingEl.textContent = `${Math.round(clamped)}% complete`;
+        floatingEl.classList.add("is-visible");
+        if (cont._floatingTimer) {
+          clearTimeout(cont._floatingTimer);
+        }
+        cont._floatingTimer = setTimeout(() => {
+          floatingEl.classList.remove("is-visible");
+        }, 1200);
+      }
+    } else if (floatingEl) {
+      floatingEl.classList.remove("is-visible");
+    }
+
+    if (clamped >= 100 && (Number.isFinite(previous) ? previous : 0) < 100 && total > 0) {
+      fillEl.classList.remove("complete-pulse");
+      void fillEl.offsetWidth;
+      fillEl.classList.add("complete-pulse");
+      if (floatingEl) {
+        floatingEl.textContent = `100% complete`;
+        floatingEl.classList.add("is-visible");
+        if (cont._floatingTimer) {
+          clearTimeout(cont._floatingTimer);
+        }
+        cont._floatingTimer = setTimeout(() => {
+          floatingEl.classList.remove("is-visible");
+        }, 1500);
+      }
+    }
+
+    cont.dataset.percent = clamped;
   }
 
   function buildTaskDescriptors(task) {
