@@ -3300,6 +3300,7 @@
       max-width: 48ch;
     }
 
+    #nextTaskCard,
     .zone-body > .card {
       width: min(100%, 720px);
       margin: 0 auto;
@@ -4959,13 +4960,21 @@
     .next-best-results {
       position: relative;
       display: flex;
+      align-items: stretch;
+      flex-wrap: nowrap;
       gap: var(--space-2);
       overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
       padding-bottom: 0.35rem;
       margin: 0 -0.25rem;
       padding-left: 0.25rem;
       padding-right: clamp(1.25rem, 4vw, 2.5rem);
+    }
+
+    .next-best-results > * {
+      flex: 0 0 auto;
     }
 
     .next-best-results::after {
@@ -5780,8 +5789,27 @@
   </div>
 
   <div class="focus-actions">
-    <button class="hero-cta start-btn start-action" data-action="start-5">▶ Start 5-Min Sprint</button>
-    <button class="btn-quiet rescue-btn" data-action="rescue">🛟 Rescue Mode</button>
+    <button
+      id="nextTaskActionButton"
+      class="hero-cta start-btn start-action"
+      type="button"
+      data-action="start-5"
+      aria-describedby="nextTaskActionHint"
+    >
+      ▶ Start 5-Min Sprint
+      <span id="nextTaskActionHint" class="visually-hidden">Long-press for quick capture.</span>
+    </button>
+    <button
+      id="rescueLaunchButton"
+      class="btn-quiet rescue-btn"
+      type="button"
+      data-action="rescue"
+      aria-haspopup="dialog"
+      aria-controls="sosOverlay"
+      aria-expanded="false"
+    >
+      🛟 Rescue Mode
+    </button>
   </div>
 
   <footer class="focus-footer">
