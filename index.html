@@ -15202,15 +15202,13 @@
     let storedState = null;
     try {
       storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
-      if (!storedState) {
+      if (storedState !== "collapsed") {
         localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "collapsed");
-        storedState = "collapsed";
       }
     } catch (error) {
       console.warn("Unable to access stored All Tasks state", error);
     }
-    const shouldOpen = storedState === "expanded";
-    setAllTasksAccordionOpen(shouldOpen, { skipPersist: true });
+    setAllTasksAccordionOpen(false, { skipPersist: true });
   }
 
   function focusFirstEditableField() {
