@@ -1439,6 +1439,22 @@
     .task-list-header > * {
       min-width: 0;
     }
+    .ready-to-launch {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .task-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0.5rem 0 0.25rem;
+    }
+    .task-section-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
     .time-budget-control {
       display: flex;
       align-items: center;
@@ -1452,14 +1468,6 @@
       border: 1px solid #444;
       padding: 0.35rem 0.5rem;
       border-radius: 4px;
-    }
-    .show-all-toggle {
-      background: #2a2a2a;
-      color: #fff;
-      border: 1px solid #444;
-      padding: 0.35rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
     }
     .task-view-label {
       color: #a0a0a0;
@@ -1481,6 +1489,15 @@
       flex-direction: column;
       gap: 0.35rem;
       touch-action: pan-y;
+    }
+    .task-card--reveal {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .task-card--reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
     }
     .task-card.is-completed {
       background: #161616;
@@ -1590,6 +1607,33 @@
       background: #2a2a2a;
       font-size: 0.8rem;
       padding: 0.35rem 0.6rem;
+    }
+    .task-list-more-btn {
+      align-self: flex-start;
+      background: rgba(45, 212, 195, 0.12);
+      border: 1px solid rgba(45, 212, 195, 0.35);
+      color: var(--hero-teal);
+      font-weight: 600;
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: opacity 220ms ease, transform 220ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+    }
+    .task-list-more-btn.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .task-list-more-btn:hover {
+      background: rgba(45, 212, 195, 0.2);
+      color: #032422;
+    }
+    .task-list-more-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45);
     }
     .task-details {
       font-size: 0.8rem;
@@ -5974,9 +6018,14 @@
                 </select>
                 minutes
               </label>
-              <button id="showAllToggle" class="show-all-toggle hidden" type="button" onclick="toggleShowAllActive()">Show All</button>
             </div>
-            <div id="taskList"></div>
+            <div class="ready-to-launch">
+              <div class="task-section-head">
+                <h3 class="task-section-title" data-ready-to-launch-title>Ready to Launch</h3>
+              </div>
+              <div id="taskList"></div>
+              <button id="readyToLaunchMoreBtn" class="task-list-more-btn" type="button" aria-hidden="true">Show 5 more</button>
+            </div>
           </div>
         </div>
       </section>
@@ -7133,7 +7182,10 @@
   let activeCategory = "All";
   const TASK_LIST_MODES = { ACTIVE: "active", COMPLETED: "completed" };
   let taskListMode = TASK_LIST_MODES.ACTIVE;
-  let showAllActiveTasks = false;
+  const READY_TO_LAUNCH_INITIAL_COUNT = 3;
+  const READY_TO_LAUNCH_INCREMENT = 5;
+  let readyToLaunchVisibleCount = READY_TO_LAUNCH_INITIAL_COUNT;
+  let readyToLaunchRevealBaseline = READY_TO_LAUNCH_INITIAL_COUNT;
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
   const runningTimers = new Map();
@@ -16118,10 +16170,6 @@ initializeFocusFabLongPress();
       taskViewSelect.value = taskListMode;
     }
 
-    if (taskListMode !== TASK_LIST_MODES.ACTIVE) {
-      showAllActiveTasks = false;
-    }
-
     const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     const startBtn = $("startBtn");
@@ -16137,34 +16185,28 @@ initializeFocusFabLongPress();
       ? sortedRemaining.filter(task => estimateTaskMinutes(task) <= timeBudget)
       : sortedRemaining;
 
-    const toggleBtn = $("showAllToggle");
-    if (toggleBtn) {
-      if (taskListMode !== TASK_LIST_MODES.ACTIVE || budgetFilteredRemaining.length <= 3) {
-        toggleBtn.classList.add("hidden");
-        toggleBtn.textContent = "Show All";
-      } else {
-        toggleBtn.classList.remove("hidden");
-        toggleBtn.textContent = showAllActiveTasks ? "Show Top 3" : "Show All";
-      }
+    const allDisplayableTasks = taskListMode === TASK_LIST_MODES.COMPLETED
+      ? eligibleTasks
+          .filter(t => isTaskCompleted(t))
+          .sort((a, b) => {
+            const aDate = getCompletionTimestamp(a) ? new Date(getCompletionTimestamp(a)).getTime() : 0;
+            const bDate = getCompletionTimestamp(b) ? new Date(getCompletionTimestamp(b)).getTime() : 0;
+            return bDate - aDate;
+          })
+      : budgetFilteredRemaining;
+
+    const visibleCount = Math.min(readyToLaunchVisibleCount, allDisplayableTasks.length);
+    const displayTasks = visibleCount > 0 ? allDisplayableTasks.slice(0, visibleCount) : [];
+
+    const showMoreBtn = $("readyToLaunchMoreBtn");
+    if (showMoreBtn) {
+      const hasMore = visibleCount < allDisplayableTasks.length;
+      showMoreBtn.classList.toggle("is-visible", hasMore);
+      showMoreBtn.disabled = !hasMore;
+      showMoreBtn.setAttribute("aria-hidden", hasMore ? "false" : "true");
     }
 
-    let displayTasks = [];
-    if (taskListMode === TASK_LIST_MODES.COMPLETED) {
-      displayTasks = eligibleTasks
-        .filter(t => isTaskCompleted(t))
-        .sort((a, b) => {
-          const aDate = getCompletionTimestamp(a) ? new Date(getCompletionTimestamp(a)).getTime() : 0;
-          const bDate = getCompletionTimestamp(b) ? new Date(getCompletionTimestamp(b)).getTime() : 0;
-          return bDate - aDate;
-        });
-    } else {
-      const pool = budgetFilteredRemaining;
-      if (pool.length <= 3 || showAllActiveTasks) {
-        displayTasks = pool;
-      } else {
-        displayTasks = pool.slice(0, 3);
-      }
-    }
+    const revealBaseline = Math.min(readyToLaunchRevealBaseline, displayTasks.length);
 
     if (!displayTasks.length) {
       const empty = document.createElement("p");
@@ -16178,11 +16220,21 @@ initializeFocusFabLongPress();
       }
       taskList.appendChild(empty);
     } else {
-      displayTasks.forEach(task => {
+      displayTasks.forEach((task, index) => {
         const card = renderTaskListCard(task, taskListMode, hasTimeBudget ? timeBudget : null);
+        if (index >= revealBaseline) {
+          card.classList.add("task-card--reveal");
+        }
         taskList.appendChild(card);
+        if (index >= revealBaseline) {
+          requestAnimationFrame(() => {
+            card.classList.add("is-visible");
+          });
+        }
       });
     }
+
+    readyToLaunchRevealBaseline = displayTasks.length ? visibleCount : READY_TO_LAUNCH_INITIAL_COUNT;
 
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -16223,9 +16275,15 @@ initializeFocusFabLongPress();
     refreshTaskGestureTargets();
   }
 
-  function toggleShowAllActive() {
-    if (taskListMode !== TASK_LIST_MODES.ACTIVE) return;
-    showAllActiveTasks = !showAllActiveTasks;
+  function resetReadyToLaunchVisibility() {
+    readyToLaunchVisibleCount = READY_TO_LAUNCH_INITIAL_COUNT;
+    readyToLaunchRevealBaseline = READY_TO_LAUNCH_INITIAL_COUNT;
+  }
+
+  function showMoreReadyToLaunchTasks() {
+    const previousVisible = readyToLaunchVisibleCount;
+    readyToLaunchVisibleCount += READY_TO_LAUNCH_INCREMENT;
+    readyToLaunchRevealBaseline = previousVisible;
     updateUI();
   }
 
@@ -17039,7 +17097,7 @@ initializeFocusFabLongPress();
     modeSelect.addEventListener("change", event => {
       const value = String(event.target.value || TASK_LIST_MODES.ACTIVE).toLowerCase();
       taskListMode = value === TASK_LIST_MODES.COMPLETED ? TASK_LIST_MODES.COMPLETED : TASK_LIST_MODES.ACTIVE;
-      showAllActiveTasks = false;
+      resetReadyToLaunchVisibility();
       updateUI();
     });
   }
@@ -17048,6 +17106,7 @@ initializeFocusFabLongPress();
     const budgetSelect = $("timeBudget");
     if (!budgetSelect) return;
     budgetSelect.addEventListener("change", () => {
+      resetReadyToLaunchVisibility();
       updateUI();
     });
   }
@@ -17058,7 +17117,16 @@ initializeFocusFabLongPress();
     categorySelect.addEventListener("change", event => {
       const value = (event.target.value || "All").toString();
       activeCategory = categories.includes(value) || value === "All" ? value : "All";
+      resetReadyToLaunchVisibility();
       updateUI();
+    });
+  }
+
+  function registerReadyToLaunchControl() {
+    const showMoreBtn = $("readyToLaunchMoreBtn");
+    if (!showMoreBtn) return;
+    showMoreBtn.addEventListener("click", () => {
+      showMoreReadyToLaunchTasks();
     });
   }
 
@@ -17140,6 +17208,7 @@ initializeFocusFabLongPress();
     registerFieldListeners();
     registerTaskListModeControl();
     registerTimeBudgetControl();
+    registerReadyToLaunchControl();
     setDefaultFieldValues();
     updateHeaderSubtitle();
     updateBillingReminder();
