@@ -1474,11 +1474,11 @@
     .task-card {
       background: #1a1a1a;
       border-radius: 8px;
-      padding: 0.85rem;
-      margin-bottom: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.65rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.35rem;
       touch-action: pan-y;
     }
     .task-card.is-completed {
@@ -1511,13 +1511,31 @@
     }
     .task-card-actions {
       display: flex;
-      gap: 0.25rem;
-      flex-wrap: wrap;
-      justify-content: flex-start;
+      gap: 0.3rem;
+      flex-wrap: nowrap;
+      align-items: center;
     }
     .task-card-actions button {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.5rem;
+      font-size: 0.9rem;
+      padding: 0.2rem 0.4rem;
+      line-height: 1;
+      min-width: 0;
+      margin: 0;
+    }
+    .task-card-actions button:first-child {
+      order: 3;
+    }
+    .task-card-actions button:first-child:not(:last-child) {
+      margin-left: auto;
+    }
+    .task-card-actions button:nth-child(2) {
+      order: 4;
+    }
+    .task-card-actions button:nth-child(3) {
+      order: 1;
+    }
+    .task-card-actions button:nth-child(4) {
+      order: 2;
     }
     .task-descriptors {
       font-size: 0.8rem;
@@ -2989,8 +3007,8 @@
       }
 
       .task-card-actions button {
-        flex: 1 1 100%;
-        width: 100%;
+        flex: 0 0 auto;
+        width: auto;
       }
     }
 
@@ -12829,15 +12847,17 @@
     if (mode === TASK_LIST_MODES.ACTIVE) {
       const startNowBtn = document.createElement("button");
       startNowBtn.type = "button";
-      startNowBtn.textContent = "Start Now";
+      startNowBtn.textContent = "🚀";
       startNowBtn.title = "Focus on this task";
+      startNowBtn.setAttribute("aria-label", "Start task");
       startNowBtn.onclick = () => startFocus(task.id);
       actions.appendChild(startNowBtn);
 
       const completeBtn = document.createElement("button");
       completeBtn.type = "button";
-      completeBtn.textContent = "Mark Done";
+      completeBtn.textContent = "✅";
       completeBtn.title = "Complete task";
+      completeBtn.setAttribute("aria-label", "Complete task");
       completeBtn.onclick = () => markTaskDoneFromPeek(task.id);
       actions.appendChild(completeBtn);
 
