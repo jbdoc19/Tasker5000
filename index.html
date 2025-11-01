@@ -5632,55 +5632,57 @@
   margin: 0.25rem 0 0;
 }
     /* Task Focus Title Block */
-.task-header {
-  background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.8));
+/* --- TASK FOCUS HEADER --- */
+.app-header {
+  background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.85));
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 14px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   position: relative;
 }
 
-/* Title text */
-.task-header h1 {
-  font-size: 1.65rem;
+/* Main title */
+.app-header__title h1 {
+  font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #e8f5ff;
+  margin: 0 0 0.35rem;
   background: linear-gradient(90deg, #7bd88f, #2dd4c3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.35rem;
 }
 
-/* Date line (today + cutoff) */
-.task-header .date-line {
-  font-size: 0.95rem;
+/* Subtitle (optional) */
+.app-header__subtitle {
+  font-size: 1rem;
   color: #aeb7c8;
+  margin: 0.25rem 0 0;
 }
 
-/* Red cutoff badge restored */
-.task-header .cutoff-badge {
+/* Billing / cutoff date restored in red */
+.billing-reminder {
+  display: inline-block;
   background: rgba(255, 75, 75, 0.15);
   color: #ff6b6b;
   border: 1px solid rgba(255, 75, 75, 0.3);
   border-radius: 999px;
-  padding: 0.25rem 0.65rem;
+  padding: 0.3rem 0.75rem;
   font-weight: 600;
-  margin-left: 0.5rem;
+  margin-top: 0.65rem;
   animation: pulse-red 3s infinite ease-in-out;
 }
 
-/* Gentle pulsing animation */
+/* Gentle pulse to give it life */
 @keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.35); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.3); }
   50% { box-shadow: 0 0 8px 2px rgba(255, 107, 107, 0.45); }
 }
 
-/* Subtle underline “momentum loader” */
-.task-header::after {
+/* Gradient underline for “momentum” feel */
+.app-header::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -5689,6 +5691,7 @@
   width: 100%;
   background: linear-gradient(90deg, #2dd4c3, #7bd88f, #2dd4c3);
   opacity: 0.85;
+  background-size: 200% auto;
   animation: slide-glow 6s linear infinite;
   border-radius: 3px;
 }
@@ -17234,6 +17237,7 @@ initializeFocusFabLongPress();
     </script>
 </body>
 </html>
+
 
 
 
