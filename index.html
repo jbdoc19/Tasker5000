@@ -2000,7 +2000,15 @@
       #focus.focus-overlay .focus-overlay__task {
         gap: 0.35rem;
       }
+#focus.focus-overlay .focus-overlay__task {
+  gap: 0.35rem;
+}
 
+#focus.focus-overlay .focus-overlay__task .task-actions {
+  justify-content: flex-start;
+}
+
+/* INSERT OUR BLOCK RIGHT HERE */
       #focus.focus-overlay .focus-overlay__task .task-actions {
         justify-content: flex-start;
       }
@@ -5550,40 +5558,60 @@
         </div>
         <p class="billing-reminder" id="billingReminder"></p>
       </header>
+<!-- Legacy header block replaced by .focus-command-deck -->
+<!--
+<div class="starter-stack" id="starterStack">
+  <div class="starter-micro-header" role="banner">
+    <button
+      id="nextTaskActionButton"
+      class="btn hero-cta start-action next-task-start"
+      type="button"
+      aria-describedby="nextTaskActionHint"
+    >
+      Start 5-min
+      <span id="nextTaskActionHint" class="visually-hidden">Long-press for quick capture.</span>
+    </button>
+    <div id="nextTaskChips" class="starter-fit-chips" aria-live="polite"></div>
+    <button
+      id="rescueLaunchButton"
+      class="btn starter-rescue"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="sosOverlay"
+      aria-expanded="false"
+    >
+      🛟 Rescue
+    </button>
+  </div>
+</div>
+-->
 
-      <div class="starter-stack" id="starterStack">
-        <div class="starter-micro-header" role="banner">
-          <button
-            id="nextTaskActionButton"
-            class="btn hero-cta start-action next-task-start"
-            type="button"
-            aria-describedby="nextTaskActionHint"
-          >
-            Start 5-min
-            <span id="nextTaskActionHint" class="visually-hidden">Long-press for quick capture.</span>
-          </button>
-          <div id="categoryProgress" class="category-progress" role="status" aria-live="polite">
-            <div class="category-progress__header">
-              <h3 class="category-progress__title">Chart Momentum</h3>
-              <span class="category-progress__label" data-chart-label>Chart: 0/0 complete</span>
-            </div>
-            <div class="category-progress__meter" aria-hidden="true">
-              <span class="category-progress__fill" data-chart-fill></span>
-              <span class="category-progress__floating" data-chart-floating>0% complete</span>
-            </div>
-          </div>
-          <div id="nextTaskChips" class="starter-fit-chips" aria-live="polite"></div>
-          <button
-            id="rescueLaunchButton"
-            class="btn starter-rescue"
-            type="button"
-            aria-haspopup="dialog"
-            aria-controls="sosOverlay"
-            aria-expanded="false"
-          >
-            🛟 Rescue
-          </button>
-        </div>
+      <section class="focus-command-deck" aria-label="Focus Command Deck">
+  <header class="fcd-head">
+    <h1 class="fcd-title">Task Focus</h1>
+    <p class="cutoff">Eligibility cutoff <strong>Jul 28, 2025</strong></p>
+  </header>
+
+  <button class="start-btn hero-cta" data-action="start-5">Start 5-min</button>
+
+  <div class="status-chips" role="status" aria-live="polite">
+    <div class="chip" data-chip="eta">⏱ Est. <span class="eta-val">28</span> min</div>
+    <div class="chip" data-chip="energy">⚡ Energy: <span class="energy-val">Steady</span></div>
+  </div>
+
+  <div class="chart-momentum" aria-label="Chart Momentum">
+    <label class="cm-label">Chart Momentum</label>
+    <div class="progress-strip">
+      <span class="cm-fill" style="width:21%"></span>
+    </div>
+    <small class="cm-note">
+      <span class="cm-done">12</span> / <span class="cm-total">57</span> complete
+    </small>
+    <div class="cm-float" aria-hidden="true"></div>
+  </div>
+
+  <button class="rescue-btn" data-action="rescue">🛟 Rescue</button>
+      </section>
 
         <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
           <header class="card-head next-focus-head">
@@ -17012,5 +17040,58 @@ initializeFocusFabLongPress();
     updateDerivedFields();
   });
   </script>
+    <script>
+  (function () {
+    const root = document.querySelector('#focus.focus-overlay .focus-command-deck');
+    if (!root) return;
+
+    const fill = root.querySelector('.cm-fill');
+    const doneEl = root.querySelector('.cm-done');
+    const totalEl = root.querySelector('.cm-total');
+    const floatEl = root.querySelector('.cm-float');
+
+    function zone(pct) {
+      if (pct >= 1) return 'high';
+      if (pct >= 0.3) return 'mid';
+      return 'low';
+    }
+
+    function setFill(pct) {
+      const z = zone(pct);
+      fill.dataset.zone = z;
+      fill.style.width = (pct * 100).toFixed(0) + '%';
+    }
+
+    window.updateChartProgress = function (completed, total) {
+      const prev = parseFloat((fill.style.width || '0').replace('%', '')) / 100 || 0;
+      const pct = total > 0 ? completed / total : 0;
+
+      doneEl.textContent = completed;
+      totalEl.textContent = total;
+      setFill(pct);
+
+      floatEl.textContent = Math.round(pct * 100) + '% complete';
+      floatEl.style.opacity = '1';
+      floatEl.style.transform = 'translateY(-4px)';
+
+      setTimeout(() => {
+        floatEl.style.opacity = '0';
+        floatEl.style.transform = 'translateY(-10px)';
+      }, 700);
+
+      if (pct > prev || pct >= 1) {
+        fill.classList.remove('pulse');
+        void fill.offsetWidth; // force reflow
+        fill.classList.add('pulse');
+      }
+    };
+
+    // Optional: initialize from any existing DOM values
+    const initDone = parseInt(doneEl.textContent, 10) || 0;
+    const initTotal = parseInt(totalEl.textContent, 10) || 0;
+    setFill(initTotal ? initDone / initTotal : 0);
+  })();
+    </script>
 </body>
 </html>
+
