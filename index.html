@@ -4544,6 +4544,28 @@
       border-radius: 12px;
     }
 
+    .section-heading[data-all-tasks-heading] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-heading[data-all-tasks-heading]:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45);
+      border-radius: 12px;
+    }
+
+    .section-heading[data-all-tasks-heading] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-heading[data-all-tasks-heading]:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45);
+      border-radius: 12px;
+    }
+
     .section-heading__title {
       display: flex;
       align-items: center;
@@ -5453,8 +5475,7 @@
       font-size: 0.7rem;
     }
 
-    [data-all-tasks-card][data-collapsed="true"] [data-all-tasks-panel],
-    .all-tasks-card.is-collapsed [data-all-tasks-panel] {
+    [data-all-tasks-card][data-collapsed="true"] [data-all-tasks-panel] {
       display: none;
     }
 
@@ -6002,7 +6023,7 @@
       </section>
 
 
-      <section class="card all-tasks-card is-collapsed" aria-live="polite" data-all-tasks-card data-collapsed="true">
+      <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
         <div
           class="section-heading"
           data-all-tasks-heading
@@ -15181,11 +15202,6 @@
           setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen, source: card });
         });
       }
-      if (card) {
-        const collapsed = accordion.dataset.open === "true" ? "false" : "true";
-        card.dataset.collapsed = collapsed;
-        card.classList.toggle("is-collapsed", collapsed !== "false");
-      }
       if (heading) {
         if (panel?.id) {
           heading.setAttribute("aria-controls", panel.id);
@@ -15212,15 +15228,13 @@
     let storedState = null;
     try {
       storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
-      if (!storedState) {
+      if (storedState !== "collapsed") {
         localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "collapsed");
-        storedState = "collapsed";
       }
     } catch (error) {
       console.warn("Unable to access stored All Tasks state", error);
     }
-    const shouldOpen = storedState === "expanded";
-    setAllTasksAccordionOpen(shouldOpen, { skipPersist: true });
+    setAllTasksAccordionOpen(false, { skipPersist: true });
   }
 
   function focusFirstEditableField() {
@@ -15424,15 +15438,6 @@
       summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
       panel.hidden = !open;
       panel.setAttribute("aria-hidden", open ? "false" : "true");
-      if (open) {
-        panel.style.removeProperty("display");
-      } else {
-        panel.style.display = "none";
-      }
-      if (card) {
-        card.dataset.collapsed = open ? "false" : "true";
-        card.classList.toggle("is-collapsed", !open);
-      }
       if (heading) {
         if (panel?.id) {
           heading.setAttribute("aria-controls", panel.id);
