@@ -4533,6 +4533,17 @@
       flex-wrap: wrap;
     }
 
+    .section-heading[data-all-tasks-heading] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-heading[data-all-tasks-heading]:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45);
+      border-radius: 12px;
+    }
+
     .section-heading__title {
       display: flex;
       align-items: center;
@@ -5987,7 +5998,13 @@
 
 
       <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
-        <div class="section-heading">
+        <div
+          class="section-heading"
+          data-all-tasks-heading
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+        >
           <h2 data-all-tasks-title>All Tasks</h2>
           <span class="chip chip-muted section-chip hidden" data-all-tasks-summary-chip></span>
         </div>
@@ -15142,7 +15159,8 @@
         const summaryChip = card.querySelector('[data-all-tasks-summary-chip]');
         const panel = card.querySelector('[data-all-tasks-panel]');
         const title = card.querySelector('[data-all-tasks-title]');
-        return { card, accordion, summaryBtn, summaryText, summaryChip, panel, title };
+        const heading = card.querySelector('[data-all-tasks-heading]');
+        return { card, accordion, summaryBtn, summaryText, summaryChip, panel, title, heading };
       })
       .filter(instance => instance.card && instance.accordion && instance.summaryBtn && instance.summaryText && instance.panel);
   }
@@ -15150,7 +15168,7 @@
   function initializeAllTasksCardState() {
     const cards = getAllTasksCards();
     if (!cards.length) return;
-    cards.forEach(({ accordion, summaryBtn, card }) => {
+    cards.forEach(({ accordion, summaryBtn, card, heading, panel }) => {
       if (!summaryBtn.dataset.listenerBound) {
         summaryBtn.dataset.listenerBound = "true";
         summaryBtn.addEventListener("click", () => {
@@ -15158,17 +15176,41 @@
           setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen, source: card });
         });
       }
+      if (heading) {
+        if (panel?.id) {
+          heading.setAttribute("aria-controls", panel.id);
+        }
+        heading.setAttribute("aria-expanded", accordion.dataset.open === "true" ? "true" : "false");
+        if (!heading.dataset.listenerBound) {
+          heading.dataset.listenerBound = "true";
+          const toggleAccordion = () => {
+            const nextOpen = accordion.dataset.open !== "true";
+            setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen, source: heading });
+          };
+          heading.addEventListener("click", () => {
+            toggleAccordion();
+          });
+          heading.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              toggleAccordion();
+            }
+          });
+        }
+      }
     });
     let storedState = null;
     try {
       storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
-      if (storedState !== "collapsed") {
+      if (!storedState) {
         localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "collapsed");
+        storedState = "collapsed";
       }
     } catch (error) {
       console.warn("Unable to access stored All Tasks state", error);
     }
-    setAllTasksAccordionOpen(false, { skipPersist: true });
+    const shouldOpen = storedState === "expanded";
+    setAllTasksAccordionOpen(shouldOpen, { skipPersist: true });
   }
 
   function focusFirstEditableField() {
@@ -15361,12 +15403,24 @@
     const { skipPersist = false, highlight = false, skipSync = false, source = null } = options;
     const cards = getAllTasksCards();
     if (!cards.length) return;
-    cards.forEach(({ accordion, summaryBtn, panel, card }) => {
-      accordion.dataset.open = open ? "true" : "false";
+    let stateChanged = false;
+    cards.forEach(({ accordion, summaryBtn, panel, card, heading }) => {
+      const wasOpen = accordion.dataset.open === "true";
+      if (wasOpen !== open) {
+        stateChanged = true;
+      }
+      const nextState = open ? "true" : "false";
+      accordion.dataset.open = nextState;
       summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
       panel.hidden = !open;
       panel.setAttribute("aria-hidden", open ? "false" : "true");
-      if (open && highlight && (!source || source === card || source === accordion || source === panel)) {
+      if (heading) {
+        if (panel?.id) {
+          heading.setAttribute("aria-controls", panel.id);
+        }
+        heading.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+      if (open && highlight && (!source || source === card || source === accordion || source === panel || source === heading)) {
         panel.classList.add("is-highlighted");
         window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
       }
@@ -15376,6 +15430,15 @@
     }
     if (!skipPersist) {
       localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, open ? "expanded" : "collapsed");
+    }
+    if (stateChanged) {
+      if (open) {
+        readyToLaunchVisibleCount = READY_TO_LAUNCH_INITIAL_COUNT;
+        readyToLaunchRevealBaseline = 0;
+        updateUI();
+      } else {
+        resetReadyToLaunchVisibility();
+      }
     }
   }
 
@@ -16185,6 +16248,8 @@ initializeFocusFabLongPress();
       ? sortedRemaining.filter(task => estimateTaskMinutes(task) <= timeBudget)
       : sortedRemaining;
 
+    const isActiveMode = taskListMode === TASK_LIST_MODES.ACTIVE;
+
     const allDisplayableTasks = taskListMode === TASK_LIST_MODES.COMPLETED
       ? eligibleTasks
           .filter(t => isTaskCompleted(t))
@@ -16195,18 +16260,22 @@ initializeFocusFabLongPress();
           })
       : budgetFilteredRemaining;
 
-    const visibleCount = Math.min(readyToLaunchVisibleCount, allDisplayableTasks.length);
+    const visibleCount = isActiveMode
+      ? Math.min(readyToLaunchVisibleCount, allDisplayableTasks.length)
+      : allDisplayableTasks.length;
     const displayTasks = visibleCount > 0 ? allDisplayableTasks.slice(0, visibleCount) : [];
 
     const showMoreBtn = $("readyToLaunchMoreBtn");
     if (showMoreBtn) {
-      const hasMore = visibleCount < allDisplayableTasks.length;
+      const hasMore = isActiveMode && visibleCount < allDisplayableTasks.length;
       showMoreBtn.classList.toggle("is-visible", hasMore);
       showMoreBtn.disabled = !hasMore;
       showMoreBtn.setAttribute("aria-hidden", hasMore ? "false" : "true");
     }
 
-    const revealBaseline = Math.min(readyToLaunchRevealBaseline, displayTasks.length);
+    const revealBaseline = isActiveMode
+      ? Math.min(readyToLaunchRevealBaseline, displayTasks.length)
+      : displayTasks.length;
 
     if (!displayTasks.length) {
       const empty = document.createElement("p");
@@ -16222,11 +16291,11 @@ initializeFocusFabLongPress();
     } else {
       displayTasks.forEach((task, index) => {
         const card = renderTaskListCard(task, taskListMode, hasTimeBudget ? timeBudget : null);
-        if (index >= revealBaseline) {
+        if (isActiveMode && index >= revealBaseline) {
           card.classList.add("task-card--reveal");
         }
         taskList.appendChild(card);
-        if (index >= revealBaseline) {
+        if (isActiveMode && index >= revealBaseline) {
           requestAnimationFrame(() => {
             card.classList.add("is-visible");
           });
@@ -16234,7 +16303,9 @@ initializeFocusFabLongPress();
       });
     }
 
-    readyToLaunchRevealBaseline = displayTasks.length ? visibleCount : READY_TO_LAUNCH_INITIAL_COUNT;
+    if (isActiveMode) {
+      readyToLaunchRevealBaseline = displayTasks.length ? visibleCount : READY_TO_LAUNCH_INITIAL_COUNT;
+    }
 
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
