@@ -5528,6 +5528,90 @@
       border-color: transparent;
       box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 16px 40px rgba(45, 212, 195, 0.35);
     }
+    .focus-command-deck {
+  background: linear-gradient(145deg, rgba(15,18,26,0.98), rgba(12,22,20,0.9));
+  border: 1px solid rgba(147,160,170,0.22);
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: min(92vw, 600px);
+  margin: 1rem auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  display: grid;
+  gap: 1rem;
+  text-align: center;
+  color: #e6eef7;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.focus-header h2 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #7bd88f;
+}
+
+.focus-subtitle {
+  color: #93a0aa;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  color: #cdd5e0;
+}
+
+.progress-strip {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  margin: 0.4rem 0;
+}
+
+.cm-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #0a84ff, #7bd88f);
+  transition: width 200ms ease-out;
+}
+
+.hero-cta {
+  background: #2dd4c3;
+  color: #021b19;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(45,212,195,0.3);
+  transition: transform 120ms ease, box-shadow 200ms ease;
+}
+
+.hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(45,212,195,0.35);
+}
+
+.btn-quiet {
+  background: rgba(255,255,255,0.08);
+  color: #c4cad8;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0.6rem 1rem;
+}
+
+.focus-micro {
+  font-size: 0.8rem;
+  color: #8fa5ff;
+  margin: 0.25rem 0 0;
+}
   </style>
 </head>
 <body>
@@ -5558,6 +5642,7 @@
         </div>
         <p class="billing-reminder" id="billingReminder"></p>
       </header>
+  </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
 <!--
 <div class="starter-stack" id="starterStack">
@@ -5585,33 +5670,36 @@
   </div>
 </div>
 -->
-
-      <section class="focus-command-deck" aria-label="Focus Command Deck">
-  <header class="fcd-head">
-    <h1 class="fcd-title">Task Focus</h1>
-    <p class="cutoff">Eligibility cutoff <strong>Jul 28, 2025</strong></p>
+<section class="focus-command-deck" id="focus-command-deck" aria-label="Focus Command Deck">
+  <header class="focus-header">
+    <h2 class="focus-title">⚔️ Focus Command Deck</h2>
+    <p class="focus-subtitle">Small wins. Big dopamine.</p>
   </header>
 
-  <button class="start-btn hero-cta" data-action="start-5">Start 5-min</button>
-
-  <div class="status-chips" role="status" aria-live="polite">
-    <div class="chip" data-chip="eta">⏱ Est. <span class="eta-val">28</span> min</div>
-    <div class="chip" data-chip="energy">⚡ Energy: <span class="energy-val">Steady</span></div>
+  <div class="focus-status">
+    <div class="chip" data-chip="eta">⏱ <strong>Est.</strong> <span class="eta-val">28</span> min</div>
+    <div class="chip" data-chip="energy">⚡ <strong>Energy:</strong> <span class="energy-val">Steady</span></div>
   </div>
 
-  <div class="chart-momentum" aria-label="Chart Momentum">
-    <label class="cm-label">Chart Momentum</label>
+  <div class="focus-meter" aria-label="Momentum Meter">
+    <label class="meter-label">Momentum</label>
     <div class="progress-strip">
       <span class="cm-fill" style="width:21%"></span>
     </div>
-    <small class="cm-note">
+    <small class="meter-note">
       <span class="cm-done">12</span> / <span class="cm-total">57</span> complete
     </small>
-    <div class="cm-float" aria-hidden="true"></div>
   </div>
 
-  <button class="rescue-btn" data-action="rescue">🛟 Rescue</button>
-      </section>
+  <div class="focus-actions">
+    <button class="hero-cta start-btn start-action" data-action="start-5">▶ Start 5-Min Sprint</button>
+    <button class="btn-quiet rescue-btn" data-action="rescue">🛟 Rescue Mode</button>
+  </div>
+
+  <footer class="focus-footer">
+    <p class="focus-micro">💡 Tip: Five minutes is all you need to start momentum.</p>
+  </footer>
+</section>
 
         <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
           <header class="card-head next-focus-head">
@@ -17061,5 +17149,6 @@ initializeFocusFabLongPress();
     </script>
 </body>
 </html>
+
 
 
