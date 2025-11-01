@@ -16246,6 +16246,8 @@ initializeFocusFabLongPress();
       ? sortedRemaining.filter(task => estimateTaskMinutes(task) <= timeBudget)
       : sortedRemaining;
 
+    const isActiveMode = taskListMode === TASK_LIST_MODES.ACTIVE;
+
     const allDisplayableTasks = taskListMode === TASK_LIST_MODES.COMPLETED
       ? eligibleTasks
           .filter(t => isTaskCompleted(t))
@@ -16256,18 +16258,22 @@ initializeFocusFabLongPress();
           })
       : budgetFilteredRemaining;
 
-    const visibleCount = Math.min(readyToLaunchVisibleCount, allDisplayableTasks.length);
+    const visibleCount = isActiveMode
+      ? Math.min(readyToLaunchVisibleCount, allDisplayableTasks.length)
+      : allDisplayableTasks.length;
     const displayTasks = visibleCount > 0 ? allDisplayableTasks.slice(0, visibleCount) : [];
 
     const showMoreBtn = $("readyToLaunchMoreBtn");
     if (showMoreBtn) {
-      const hasMore = visibleCount < allDisplayableTasks.length;
+      const hasMore = isActiveMode && visibleCount < allDisplayableTasks.length;
       showMoreBtn.classList.toggle("is-visible", hasMore);
       showMoreBtn.disabled = !hasMore;
       showMoreBtn.setAttribute("aria-hidden", hasMore ? "false" : "true");
     }
 
-    const revealBaseline = Math.min(readyToLaunchRevealBaseline, displayTasks.length);
+    const revealBaseline = isActiveMode
+      ? Math.min(readyToLaunchRevealBaseline, displayTasks.length)
+      : displayTasks.length;
 
     if (!displayTasks.length) {
       const empty = document.createElement("p");
@@ -16283,11 +16289,11 @@ initializeFocusFabLongPress();
     } else {
       displayTasks.forEach((task, index) => {
         const card = renderTaskListCard(task, taskListMode, hasTimeBudget ? timeBudget : null);
-        if (index >= revealBaseline) {
+        if (isActiveMode && index >= revealBaseline) {
           card.classList.add("task-card--reveal");
         }
         taskList.appendChild(card);
-        if (index >= revealBaseline) {
+        if (isActiveMode && index >= revealBaseline) {
           requestAnimationFrame(() => {
             card.classList.add("is-visible");
           });
@@ -16295,7 +16301,9 @@ initializeFocusFabLongPress();
       });
     }
 
-    readyToLaunchRevealBaseline = displayTasks.length ? visibleCount : READY_TO_LAUNCH_INITIAL_COUNT;
+    if (isActiveMode) {
+      readyToLaunchRevealBaseline = displayTasks.length ? visibleCount : READY_TO_LAUNCH_INITIAL_COUNT;
+    }
 
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
