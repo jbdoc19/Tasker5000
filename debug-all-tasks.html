@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task List Debug</title>
+  <style>
+    /* Base layout */
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+
+    .all-tasks-section {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .task {
+      background: #f2f2f2;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border-radius: 4px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .task.hidden {
+      opacity: 0;
+      transform: translateY(10px);
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .collapsed .tasks-container {
+      display: none;
+    }
+
+    .show-more {
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .toggle-all-tasks {
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="toggle-all-tasks" aria-expanded="false">All Tasks ▸</button>
+
+  <div class="all-tasks-section collapsed" id="allTasks">
+    <div class="tasks-container" id="tasksContainer">
+      <!-- 10 hardcoded tasks -->
+      <div class="task">Task 1</div>
+      <div class="task">Task 2</div>
+      <div class="task">Task 3</div>
+      <div class="task">Task 4</div>
+      <div class="task">Task 5</div>
+      <div class="task">Task 6</div>
+      <div class="task">Task 7</div>
+      <div class="task">Task 8</div>
+      <div class="task">Task 9</div>
+      <div class="task">Task 10</div>
+    </div>
+
+    <button class="show-more">Show 5 More</button>
+  </div>
+
+  <script>
+    console.log("PAGE LOADED");
+
+    const allTasksSection = document.getElementById('allTasks');
+    const toggleButton = document.querySelector('.toggle-all-tasks');
+    const tasks = Array.from(document.querySelectorAll('.task'));
+    const showMoreButton = document.querySelector('.show-more');
+
+    let visibleCount = 0;
+    const BATCH_SIZE = 5;
+
+    // Initialize all tasks as hidden
+    tasks.forEach(task => task.classList.add('hidden'));
+
+    // Toggle collapse
+    toggleButton.addEventListener('click', () => {
+      const isCollapsed = allTasksSection.classList.toggle('collapsed');
+      toggleButton.setAttribute('aria-expanded', !isCollapsed);
+      toggleButton.innerText = isCollapsed ? 'All Tasks ▸' : 'All Tasks ▾';
+      console.log("CLICK: Toggle All Tasks | Now Collapsed:", isCollapsed);
+
+      if (!isCollapsed && visibleCount === 0) {
+        revealTasks(3); // Show 3 tasks on first expand
+      }
+    });
+
+    // Reveal tasks in batches
+    showMoreButton.addEventListener('click', () => {
+      console.log("CLICK: Show More");
+      revealTasks(BATCH_SIZE);
+    });
+
+    function revealTasks(count) {
+      const toReveal = tasks.slice(visibleCount, visibleCount + count);
+      toReveal.forEach(task => {
+        task.classList.remove('hidden');
+      });
+      visibleCount += toReveal.length;
+
+      console.log(`REVEAL: Showing ${visibleCount} of ${tasks.length}`);
+
+      if (visibleCount >= tasks.length) {
+        showMoreButton.style.display = 'none';
+        console.log("All tasks revealed. Hiding 'Show More' button.");
+      }
+    }
+  </script>
+</body>
+</html>
