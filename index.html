@@ -5742,6 +5742,80 @@
   color: #8fa5ff;
   margin: 0.25rem 0 0;
 }
+
+.quick-add-menu {
+  width: min(92vw, 600px);
+  margin: 0.5rem auto 1.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border-radius: 18px;
+  background: rgba(17, 23, 30, 0.82);
+  border: 1px solid rgba(147, 160, 170, 0.18);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quick-add-menu__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9fb7ff;
+  margin: 0;
+}
+
+.quick-add-menu__buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.quick-add-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 200ms ease, filter 140ms ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+  color: #0d1015;
+}
+
+.quick-add-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.quick-add-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45), 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.quick-add-button--cherry {
+  background: linear-gradient(135deg, #ff6b8a, #ff2156);
+}
+
+.quick-add-button--muscle {
+  background: linear-gradient(135deg, #ffd166, #ff8a00);
+}
+
+.quick-add-button--unicorn {
+  background: linear-gradient(135deg, #a06bff, #ff9dff);
+}
+
+.quick-add-button--home {
+  background: linear-gradient(135deg, #6bffb0, #1ad69b);
+}
+
+.quick-add-button--kiddo {
+  background: linear-gradient(135deg, #6ecbff, #1c8cff);
+}
     /* Tasker 5000 Title Block */
 /* --- TASK FOCUS HEADER --- */
 .app-header {
@@ -5918,6 +5992,17 @@
     <p class="focus-micro">💡 Tip: Five minutes is all you need to start momentum.</p>
   </footer>
 </section>
+
+<nav class="quick-add-menu" aria-label="Quick add templates">
+  <p class="quick-add-menu__label">Quick Add</p>
+  <div class="quick-add-menu__buttons" role="group" aria-label="Quick add buttons">
+    <button class="quick-add-button quick-add-button--cherry" type="button" aria-label="Quick add cherry template">🍒</button>
+    <button class="quick-add-button quick-add-button--muscle" type="button" aria-label="Quick add muscle template">💪</button>
+    <button class="quick-add-button quick-add-button--unicorn" type="button" aria-label="Quick add unicorn template">🦄</button>
+    <button class="quick-add-button quick-add-button--home" type="button" aria-label="Quick add home template">🏡</button>
+    <button class="quick-add-button quick-add-button--kiddo" type="button" aria-label="Quick add kiddo template">🧒</button>
+  </div>
+</nav>
 
         <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
           <header class="card-head next-focus-head">
