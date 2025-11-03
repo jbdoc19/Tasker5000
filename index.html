@@ -1423,7 +1423,7 @@
 
     .next-focus-head {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 0.75rem;
     }
@@ -1431,6 +1431,8 @@
     .next-focus-head__titles {
       display: grid;
       gap: 0.2rem;
+      text-align: center;
+      justify-items: center;
     }
 
     .next-focus-hint {
@@ -4346,6 +4348,22 @@
       border-bottom-right-radius: 14px;
     }
 
+    #addTaskOverlay[data-quick-task-mode="true"] .task-form-group__label,
+    #addTaskOverlay[data-quick-task-mode="true"] label[for="taskCategory"],
+    #addTaskOverlay[data-quick-task-mode="true"] .task-inline-actions,
+    #addTaskOverlay[data-quick-task-mode="true"] #taskDetails,
+    #addTaskOverlay[data-quick-task-mode="true"] .card-sticky-actions__secondary {
+      display: none;
+    }
+
+    #addTaskOverlay[data-quick-task-mode="true"] .card-sticky-actions__primary {
+      justify-content: center;
+    }
+
+    #addTaskOverlay[data-quick-task-mode="true"] .task-form-group {
+      padding-top: var(--space-2);
+    }
+
     .card-sticky-actions__primary,
     .card-sticky-actions__secondary {
       display: flex;
@@ -4656,6 +4674,16 @@
     }
 
     .section-heading__title .section-chip {
+      margin-left: 0;
+    }
+
+    .section-heading--centered {
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .section-heading--centered .section-chip {
       margin-left: 0;
     }
 
@@ -5530,6 +5558,104 @@
       font-size: 0.95rem;
     }
 
+    .quick-tasks-card {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .quick-tasks-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .quick-task-list {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .quick-task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .quick-task-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .quick-task-name {
+      flex: 1;
+      margin-right: 0.75rem;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .quick-task-checkbox {
+      width: 1.1rem;
+      height: 1.1rem;
+      cursor: pointer;
+    }
+
+    .quick-task-empty {
+      margin: 0;
+      color: var(--text-secondary);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    .quick-task-shortcut {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      font-weight: 500;
+    }
+
+    .quick-task-hint {
+      margin: 0 0 0.5rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .quick-tasks-card.is-highlighted {
+      box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.45);
+      border-radius: var(--card-radius);
+    }
+
+    .task-added-toast {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translate(-50%, -20px);
+      background: rgba(45, 212, 195, 0.9);
+      color: #022624;
+      padding: 0.65rem 1.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease, transform 200ms ease;
+      z-index: 2000;
+      box-shadow: 0 10px 30px rgba(45, 212, 195, 0.35);
+    }
+
+    .task-added-toast--visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
     .quick-pill {
       border: none;
       background: rgba(255, 255, 255, 0.08);
@@ -5733,10 +5859,12 @@
   font-family: "Inter", system-ui, sans-serif;
 }
 
-.focus-header h2 {
-  font-size: 1.4rem;
+.focus-title {
+  font-size: clamp(1.4rem, 2.3vw, 1.6rem);
   margin: 0;
   color: #7bd88f;
+  font-weight: 600;
+  text-align: center;
 }
 
 .focus-subtitle {
@@ -5878,6 +6006,11 @@
 
 .quick-add-button--kiddo {
   background: linear-gradient(135deg, #6ecbff, #1c8cff);
+}
+
+.quick-add-button--plus {
+  background: linear-gradient(135deg, #2dd4c3, #7bd88f);
+  color: #022624;
 }
     /* Tasker 5000 Title Block */
 /* --- TASK FOCUS HEADER --- */
@@ -6215,6 +6348,14 @@
     >
       🛟 Rescue Mode
     </button>
+    <button
+      id="quickTaskShortcut"
+      class="btn-quiet quick-task-shortcut"
+      type="button"
+      aria-controls="quickTasksCard"
+    >
+      ⏩ Quick Tasks
+    </button>
   </div>
 
   <footer class="focus-footer">
@@ -6225,6 +6366,7 @@
 <nav class="quick-add-menu" aria-label="Quick add templates">
   <p class="quick-add-menu__label">Quick Add</p>
   <div class="quick-add-menu__buttons" role="group" aria-label="Quick add buttons">
+    <button class="quick-add-button quick-add-button--plus" type="button" aria-label="Quick add new task">➕️</button>
     <button class="quick-add-button quick-add-button--cherry" type="button" aria-label="Quick add cherry template">🍒</button>
     <button class="quick-add-button quick-add-button--muscle" type="button" aria-label="Quick add muscle template">💪</button>
     <button class="quick-add-button quick-add-button--unicorn" type="button" aria-label="Quick add unicorn template">🦄</button>
@@ -6236,7 +6378,7 @@
         <section id="nextTaskCard" class="card next-task-card hidden" aria-live="polite">
           <header class="card-head next-focus-head">
             <div class="next-focus-head__titles">
-              <h2>Next focus</h2>
+              <h2 class="focus-title">Next focus</h2>
               <p class="next-focus-hint">
                 Next best: <span id="focusLaunchHint">Add a task to unlock focus.</span>
               </p>
@@ -6358,15 +6500,25 @@
       </section>
 
 
+      <section class="card quick-tasks-card hidden" aria-live="polite" data-quick-tasks-card id="quickTasksCard">
+        <span id="quickTasksAnchor" class="zone-anchor" aria-hidden="true"></span>
+        <header class="quick-tasks-header">
+          <h2 class="focus-title">Quick Tasks</h2>
+        </header>
+        <p class="quick-task-empty hidden" id="quickTaskEmpty">No quick tasks yet.</p>
+        <div class="quick-task-list" id="quickTaskList" role="list"></div>
+      </section>
+
+
       <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
         <div
-          class="section-heading"
+          class="section-heading section-heading--centered"
           data-all-tasks-heading
           role="button"
           tabindex="0"
           aria-expanded="false"
         >
-          <h2 data-all-tasks-title>All Tasks</h2>
+          <h2 class="focus-title" data-all-tasks-title>All Tasks</h2>
           <span class="chip chip-muted section-chip hidden" data-all-tasks-summary-chip></span>
         </div>
         <div class="due-today-accordion" data-open="false" data-accordion="allTasks">
@@ -6375,9 +6527,6 @@
             <span class="due-today-summary__icon" aria-hidden="true">▸</span>
           </button>
           <div class="all-tasks-panel" hidden data-accordion-panel data-all-tasks-panel>
-            <div class="task-panel-actions">
-              <button id="openAddTaskPanel" class="btn btn-primary" type="button">Add task</button>
-            </div>
             <div class="task-list-header" id="taskListHeader">
               <label class="task-view-label" for="taskViewMode">View</label>
               <select id="taskViewMode" class="task-view-select">
@@ -7043,6 +7192,7 @@
       <div class="card-body" id="addTaskCardBody" aria-hidden="false">
         <div class="task-form-group">
           <span class="task-form-group__label">New task</span>
+          <p id="quickTaskTemplateHint" class="quick-task-hint hidden">Quick task mode: name it and tap Add.</p>
           <label for="name">Task name
             <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" />
           </label>
@@ -7055,6 +7205,7 @@
               <option value="Calls">Calls</option>
               <option value="Teaching">Teaching</option>
               <option value="Personal">Personal</option>
+              <option value="Quick Task">Quick Task</option>
             </select>
           </label>
           <div class="task-inline-actions" aria-label="Task helpers">
@@ -7481,7 +7632,8 @@
   <script>
   const $ = id => document.getElementById(id);
 
-  const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal"];
+  const QUICK_TASK_CATEGORY = "Quick Task";
+  const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal", QUICK_TASK_CATEGORY];
   let activeCategory = "All";
   const TASK_LIST_MODES = { ACTIVE: "active", COMPLETED: "completed" };
   let taskListMode = TASK_LIST_MODES.ACTIVE;
@@ -9221,6 +9373,34 @@
     return toast;
   }
 
+  let taskAddedToastTimer = null;
+  let taskAddedToastRemoveTimer = null;
+
+  function showTaskAddedConfirmation(count = 1) {
+    let toast = document.querySelector(".task-added-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.className = "task-added-toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = count > 1 ? `${count} tasks added` : "Task added";
+    window.requestAnimationFrame(() => toast.classList.add("task-added-toast--visible"));
+    if (taskAddedToastTimer) {
+      window.clearTimeout(taskAddedToastTimer);
+    }
+    if (taskAddedToastRemoveTimer) {
+      window.clearTimeout(taskAddedToastRemoveTimer);
+    }
+    taskAddedToastTimer = window.setTimeout(() => {
+      toast.classList.remove("task-added-toast--visible");
+      taskAddedToastRemoveTimer = window.setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, 320);
+    }, 1800);
+  }
+
   function getDateKey(date = new Date()) {
     const dt = new Date(date);
     dt.setHours(0, 0, 0, 0);
@@ -10701,6 +10881,25 @@
     reminderIntervalId = setInterval(checkAllReminders, 60 * 1000);
   }
 
+  function setQuickTaskTemplateMode(enabled) {
+    const overlay = $("addTaskOverlay");
+    const hint = $("quickTaskTemplateHint");
+    const state = enabled ? "true" : "false";
+    if (overlay) {
+      if (enabled) {
+        overlay.setAttribute("data-quick-task-mode", state);
+      } else {
+        overlay.removeAttribute("data-quick-task-mode");
+      }
+    }
+    if (hint) {
+      hint.classList.toggle("hidden", !enabled);
+    }
+    if (enabled) {
+      setTaskDetailsCollapsed(true);
+    }
+  }
+
   function handleCategoryChange(value) {
     const resolvedCategory = (value ?? $("taskCategory")?.value ?? "").toString();
     populateScalesForCategory(resolvedCategory);
@@ -10709,6 +10908,7 @@
     } else {
       hideChartFields();
     }
+    setQuickTaskTemplateMode(isQuickTaskCategory(resolvedCategory));
     renderTemplates();
   }
 
@@ -10958,6 +11158,14 @@
 
   function isChartTask(task) {
     return task && String(task.category).toLowerCase() === "chart";
+  }
+
+  function isQuickTaskCategory(value) {
+    return String(value || "").toLowerCase() === QUICK_TASK_CATEGORY.toLowerCase();
+  }
+
+  function isQuickTask(task) {
+    return task && isQuickTaskCategory(task.category);
   }
 
   function buildChartSteps(authorType) {
@@ -12529,6 +12737,7 @@
     urgencyAuto = true;
     updateDerivedFields();
     handleCategoryChange($("taskCategory")?.value);
+    setQuickTaskTemplateMode(false);
   }
 
   let tasks = [];
@@ -12838,6 +13047,7 @@
 
   function computeTimeWeight(task) {
     if (!task) return 1;
+    if (isQuickTask(task)) return 1;
     const isChart = isChartTask(task);
     const parsedDays = Number(task.daysSinceVisit);
     const daysSince = Number.isFinite(parsedDays)
@@ -12877,6 +13087,9 @@
   }
 
   function computePriority(t) {
+    if (isQuickTask(t)) {
+      return 1;
+    }
     const weightedBase = computeRawPriorityScore(t) * computeTimeWeight(t);
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
@@ -12926,6 +13139,12 @@
     task.difficulty = clampScale(task.difficulty, 1);
     if (!Array.isArray(task.subTasks)) {
       task.subTasks = [];
+    }
+    if (isQuickTask(task)) {
+      task.subTasks = [];
+      task.firstThreeMode = false;
+      task.firstThreeSteps = [];
+      task.firstThreeUnlocked = true;
     }
     task.completedAt = task.completedAt || null;
     if (task.completed && !task.completedAt) {
@@ -12994,17 +13213,18 @@
     const name = nameField.value.trim();
     if (!name) return null;
     const category = $("taskCategory").value || "General";
+    const quickMode = isQuickTaskCategory(category);
     const authorField = $("authorType");
-    const authorType = authorField ? (authorField.value || "attending") : "attending";
+    const authorType = quickMode ? "attending" : (authorField ? (authorField.value || "attending") : "attending");
     const patientField = $("patientType");
-    const patientType = normalizePatientType(patientField ? patientField.value : "Non-Complex");
+    const patientType = quickMode ? "Non-Complex" : normalizePatientType(patientField ? patientField.value : "Non-Complex");
     const visitField = $("visitType");
-    const visitType = normalizeVisitType(visitField ? visitField.value : "Follow-Up");
+    const visitType = quickMode ? "Follow-Up" : normalizeVisitType(visitField ? visitField.value : "Follow-Up");
     const clinicField = $("clinicSite");
-    const clinicSite = normalizeClinicSite(clinicField ? clinicField.value : "General Clinic");
+    const clinicSite = quickMode ? "General Clinic" : normalizeClinicSite(clinicField ? clinicField.value : "General Clinic");
     const dateField = $("dateOfService");
-    const dateOfService = dateField && dateField.value ? dateField.value : null;
-    const daysSinceVisit = calculateDaysSince(dateOfService);
+    const dateOfService = quickMode ? null : (dateField && dateField.value ? dateField.value : null);
+    const daysSinceVisit = quickMode ? null : calculateDaysSince(dateOfService);
     const task = {
       id: Date.now().toString(),
       name,
@@ -13015,14 +13235,14 @@
       clinicSite,
       dateOfService,
       daysSinceVisit,
-      importance: clampScale($("importance").value, 1),
-      urgency: clampScale($("urgency").value, 3),
-      novelty: clampScale($("novelty").value, 1),
-      interest: clampScale($("interest").value, 1),
-      externalPressure: clampScale($("externalPressure").value, 1),
-      timeToStart: clampScale($("timeToStart").value, 1),
-      difficulty: clampScale($("difficulty").value, 1),
-      dueDate: $("dueDate").value || null,
+      importance: quickMode ? 1 : clampScale($("importance").value, 1),
+      urgency: quickMode ? 1 : clampScale($("urgency").value, 3),
+      novelty: quickMode ? 1 : clampScale($("novelty").value, 1),
+      interest: quickMode ? 1 : clampScale($("interest").value, 1),
+      externalPressure: quickMode ? 1 : clampScale($("externalPressure").value, 1),
+      timeToStart: quickMode ? 1 : clampScale($("timeToStart").value, 1),
+      difficulty: quickMode ? 1 : clampScale($("difficulty").value, 1),
+      dueDate: quickMode ? null : ($("dueDate").value || null),
       completed: false,
       completedAt: null,
       createdAt: new Date().toISOString(),
@@ -13073,6 +13293,7 @@
     task.priority = computePriority(task);
     updateChartDurationForTask(task);
     tasks.push(task);
+    showTaskAddedConfirmation();
     persist();
     clearFormFields();
     toggleEditMode(false);
@@ -13439,6 +13660,52 @@
     }
 
     cont.dataset.percent = clamped;
+  }
+
+  function renderQuickTasks() {
+    const card = document.querySelector("[data-quick-tasks-card]");
+    const list = $("quickTaskList");
+    const empty = $("quickTaskEmpty");
+    if (!card || !list || !empty) return;
+    list.innerHTML = "";
+    const quickTasks = tasks.filter(task => isQuickTask(task));
+    const activeQuick = quickTasks.filter(task => !isTaskCompleted(task));
+    const sorted = activeQuick.sort((a, b) => {
+      const aTime = new Date(a.createdAt || a.addedAt || 0).getTime();
+      const bTime = new Date(b.createdAt || b.addedAt || 0).getTime();
+      return aTime - bTime;
+    });
+    sorted.forEach(task => {
+      const item = document.createElement("div");
+      item.className = "quick-task-item";
+      item.setAttribute("role", "listitem");
+      const name = document.createElement("span");
+      name.className = "quick-task-name";
+      name.textContent = task.name;
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "quick-task-checkbox";
+      checkbox.setAttribute("aria-label", `Complete quick task: ${task.name}`);
+      checkbox.addEventListener("change", () => {
+        checkbox.disabled = true;
+        const completed = completeTaskById(task.id);
+        if (!completed) {
+          checkbox.checked = false;
+          checkbox.disabled = false;
+        }
+      });
+      item.appendChild(name);
+      item.appendChild(checkbox);
+      list.appendChild(item);
+    });
+    const emptyMessage = sorted.length === 0
+      ? (quickTasks.length
+          ? "All quick tasks are cleared. Add a new one when you're ready."
+          : "No quick tasks yet.")
+      : "No quick tasks yet.";
+    empty.textContent = emptyMessage;
+    empty.classList.toggle("hidden", sorted.length > 0);
+    card.classList.remove("hidden");
   }
 
   function buildTaskDescriptors(task) {
@@ -15966,20 +16233,20 @@
     const task = {
       id: Date.now().toString(),
       name,
-      category: "General",
+      category: QUICK_TASK_CATEGORY,
       authorType: "attending",
       patientType: "Non-Complex",
       visitType: "Follow-Up",
       clinicSite: "General Clinic",
       dateOfService: null,
       daysSinceVisit: null,
-      importance: 3,
-      urgency: 3,
-      novelty: 3,
-      interest: 3,
-      externalPressure: 2,
-      timeToStart: 3,
-      difficulty: 3,
+      importance: 1,
+      urgency: 1,
+      novelty: 1,
+      interest: 1,
+      externalPressure: 1,
+      timeToStart: 1,
+      difficulty: 1,
       dueDate: null,
       completed: false,
       completedAt: null,
@@ -15994,6 +16261,7 @@
     task.priority = computePriority(task);
     updateChartDurationForTask(task);
     tasks.push(task);
+    showTaskAddedConfirmation();
     persist();
     setTaskDetailsCollapsed(true);
     updateUI();
@@ -16603,6 +16871,52 @@
       nameInput.addEventListener("input", syncAddTaskActions);
     }
   }
+
+  function initializeQuickAddMenu() {
+    const plusBtn = document.querySelector(".quick-add-button--plus");
+    if (plusBtn) {
+      plusBtn.addEventListener("click", () => {
+        cancelEdit();
+        setAddTaskCardCollapsed(false);
+        syncAddTaskActions();
+      });
+    }
+    const quickTemplateBtn = document.querySelector(".quick-add-button--cherry");
+    if (quickTemplateBtn) {
+      quickTemplateBtn.addEventListener("click", () => {
+        cancelEdit();
+        const categoryField = $("taskCategory");
+        if (categoryField) {
+          categoryField.value = QUICK_TASK_CATEGORY;
+        }
+        handleCategoryChange(QUICK_TASK_CATEGORY);
+        setAddTaskCardCollapsed(false, { skipFocus: true });
+        const nameField = $("name");
+        if (nameField) {
+          nameField.value = "";
+          window.requestAnimationFrame(() => {
+            nameField.focus();
+            if (typeof nameField.select === "function") {
+              nameField.select();
+            }
+          });
+        }
+        syncAddTaskActions();
+      });
+    }
+  }
+
+  function initializeQuickTaskShortcut() {
+    const shortcut = $("quickTaskShortcut");
+    if (!shortcut) return;
+    shortcut.addEventListener("click", () => {
+      const card = document.querySelector("[data-quick-tasks-card]");
+      if (!card) return;
+      scrollCardHeaderIntoView(card);
+      card.classList.add("is-highlighted");
+      window.setTimeout(() => card.classList.remove("is-highlighted"), 650);
+    });
+  }
 // === START: Long-press Quick Capture from Focus button ===
 function initializeFocusFabLongPress() {
   const fab = document.getElementById("nextTaskActionButton");
@@ -16633,6 +16947,7 @@ initializeFocusFabLongPress();
     persist();
     renderCategoryFilter();
     renderCategoryProgress();
+    renderQuickTasks();
 
     const totalTasks = tasks.length;
     const activeTasksCount = tasks.filter(t => !isTaskCompleted(t)).length;
@@ -17458,6 +17773,7 @@ initializeFocusFabLongPress();
       return;
     }
     additions.forEach(task => tasks.push(task));
+    showTaskAddedConfirmation(additions.length);
     persist();
     updateUI();
     showToast("Block Batch", `Added ${additions.length} tasks.`);
@@ -17717,6 +18033,8 @@ initializeFocusFabLongPress();
     initializeSoundPreference();
     initializeFirstThreeWizard();
     initializeTaskForm();
+    initializeQuickAddMenu();
+    initializeQuickTaskShortcut();
     initializeBlockBatchModule();
     initializeAddTaskCardState();
     initializePreflightToggles();
