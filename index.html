@@ -2021,6 +2021,8 @@
       .focus-overlay__sheet {
         width: 100%;
         border-radius: 22px 22px 14px 14px;
+        height: clamp(320px, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - clamp(0.75rem, 5vw, 1.5rem)), 720px);
+        max-height: clamp(320px, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - clamp(0.75rem, 5vw, 1.5rem)), 720px);
       }
 
       .focus-overlay__body {
@@ -2071,20 +2073,12 @@
         font-size: 0.72rem;
       }
 
-      #focus.focus-overlay .focus-overlay__task {
+      .focus-overlay__task {
         gap: 0.35rem;
       }
-#focus.focus-overlay .focus-overlay__task {
-  gap: 0.35rem;
-}
 
-#focus.focus-overlay .focus-overlay__task .task-actions {
-  justify-content: flex-start;
-}
-
-/* INSERT OUR BLOCK RIGHT HERE */
-      #focus.focus-overlay .focus-overlay__task .task-actions {
-        justify-content: flex-start;
+      .focus-overlay__task .task-actions {
+        gap: 0.35rem;
       }
 
       .distraction-tools {
@@ -3895,9 +3889,9 @@
       position: fixed;
       inset: 0;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      padding: clamp(1.25rem, 5vw, 2.25rem);
+      padding: clamp(0.75rem, 4vw, 2rem);
       background: rgba(8, 12, 18, 0.7);
       backdrop-filter: blur(10px);
       z-index: 140;
@@ -3928,11 +3922,14 @@
       border: 1px solid rgba(148, 163, 184, 0.22);
       box-shadow: 0 -28px 64px rgba(0, 0, 0, 0.45);
       padding: clamp(1.1rem, 4vw, 1.75rem);
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: var(--space-3);
       transform: translateY(0);
       animation: focus-sheet-enter 240ms ease;
-      overflow-x: hidden;
+      overflow: hidden;
+      max-height: clamp(320px, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - clamp(1rem, 5vw, 2.5rem)), 760px);
+      height: clamp(320px, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - clamp(1rem, 5vw, 2.5rem)), 760px);
     }
 
     @keyframes focus-sheet-enter {
@@ -3970,11 +3967,11 @@
       display: flex;
       flex-direction: column;
       gap: clamp(0.65rem, 2vw, 1rem);
-      max-height: clamp(360px, 70vh, 520px);
+      flex: 1 1 auto;
       overflow-y: auto;
       padding-right: 0.2rem;
-      padding-bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
-      scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 3.5rem);
+      scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 3.5rem);
       width: 100%;
       max-width: 100vw;
       overflow-x: hidden;
@@ -3982,18 +3979,22 @@
 
     .focus-overlay__task {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "title timer"
+        "actions actions";
       align-items: center;
-      gap: 0.35rem 0.45rem;
-      padding: 0.45rem 0.65rem;
-      margin: 0.25rem 0;
+      gap: 0.4rem 0.65rem;
+      padding: 0.5rem 0.75rem;
+      margin: 0.3rem 0;
       border-radius: 14px;
     }
 
     .focus-overlay__task .task-title {
+      grid-area: title;
       display: inline-flex;
       align-items: flex-start;
-      gap: 0.35rem;
+      gap: 0.4rem;
       margin: 0;
     }
 
@@ -4007,38 +4008,51 @@
     }
 
     .focus-overlay__task .timer-label {
+      grid-area: timer;
       justify-self: end;
-      margin-left: auto;
-      font-size: 0.72rem;
+      margin-left: 0;
+      font-size: 0.78rem;
     }
 
     .focus-overlay__task .task-actions {
-      display: inline-flex;
-      gap: 0.3rem;
-      flex-wrap: wrap;
-      justify-self: end;
+      grid-area: actions;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      width: 100%;
     }
 
     .focus-overlay__task .task-actions button,
     .focus-overlay__task .task-actions .icon-button {
-      padding: 0.25rem 0.45rem;
+      flex: 1 1 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.35rem 0.5rem;
       border-radius: 10px;
-      font-size: 0.8rem;
+      font-size: 1rem;
       min-height: 0;
+      margin: 0;
     }
 
     .focus-overlay__actions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      display: flex;
       gap: 0.65rem;
+      flex-wrap: nowrap;
+      margin-top: auto;
       position: sticky;
-      bottom: calc(env(safe-area-inset-bottom) + 4.25rem);
-      background: rgba(9, 16, 23, 0.98);
-      padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(9, 16, 23, 0.7) 0%, rgba(9, 16, 23, 0.98) 60%);
+      padding-top: 0.75rem;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
       z-index: 2;
     }
 
     .focus-overlay__actions button {
+      flex: 1 1 0;
+      min-width: 0;
+      margin: 0;
       border-radius: 14px;
       padding: 0.6rem 0.9rem;
       font-weight: 600;
@@ -5679,10 +5693,70 @@
       font-size: 0.7rem;
     }
 
+    .all-tasks-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      justify-content: flex-start;
+      background: rgba(10, 16, 24, 0.55);
+      border: 1px solid rgba(147, 160, 170, 0.25);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      color: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .all-tasks-toggle:hover,
+    .all-tasks-toggle:focus-visible {
+      background: rgba(16, 24, 32, 0.65);
+      border-color: rgba(125, 216, 143, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .all-tasks-toggle.is-open {
+      background: rgba(16, 24, 32, 0.72);
+      border-color: rgba(125, 216, 143, 0.55);
+    }
+
+    .all-tasks-toggle:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(125, 216, 143, 0.35);
+    }
+
+    .all-tasks-toggle__title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .all-tasks-toggle__meta {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .all-tasks-toggle__chevron {
+      font-size: 1rem;
+      transition: transform 160ms ease;
+    }
+
+    .all-tasks-toggle[aria-expanded="true"] .all-tasks-toggle__chevron {
+      transform: rotate(90deg);
+    }
+
     .all-tasks-panel {
       padding: var(--space-3) var(--space-2);
       display: grid;
       gap: var(--space-3);
+      margin-top: 1rem;
     }
 
     .all-tasks-panel.is-highlighted {
@@ -5845,9 +5919,9 @@
   width: var(--focus-shell-width);
   margin: 1rem auto;
   box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-  display: grid;
-  gap: 1rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   color: #e6eef7;
   font-family: "Inter", system-ui, sans-serif;
 }
@@ -5857,13 +5931,40 @@
   margin: 0;
   color: #7bd88f;
   font-weight: 600;
-  text-align: center;
 }
 
-.focus-subtitle {
-  color: #93a0aa;
-  font-size: 0.9rem;
-  margin: 0.25rem 0 0.5rem;
+.focus-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.focus-meter {
+  width: 100%;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.focus-meter__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.meter-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cdd5e0;
+}
+
+.meter-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #8fa5ff;
 }
 
 .chip {
@@ -5878,12 +5979,12 @@
 }
 
 .progress-strip {
+  position: relative;
   width: 100%;
   height: 10px;
   border-radius: 999px;
   background: rgba(255,255,255,0.08);
   overflow: hidden;
-  margin: 0.4rem 0;
 }
 
 .cm-fill {
@@ -5891,6 +5992,52 @@
   height: 100%;
   background: linear-gradient(90deg, #0a84ff, #7bd88f);
   transition: width 200ms ease-out;
+}
+
+.cm-float {
+  position: absolute;
+  right: 0;
+  top: -1.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7bd88f;
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.focus-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.focus-actions button,
+.focus-actions .btn-quiet,
+.focus-actions .hero-cta {
+  margin: 0;
+  width: 100%;
+}
+
+.focus-footer {
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .focus-top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .focus-meter {
+    max-width: 260px;
+  }
+
+  .cm-float {
+    top: -1.5rem;
+  }
 }
 
 .hero-cta {
@@ -6299,24 +6446,20 @@
 </div>
 -->
 <section class="focus-command-deck" id="focus-command-deck" aria-label="Focus Command Deck">
-  <header class="focus-header">
+  <div class="focus-top">
     <h2 class="focus-title">⚔️ Focus Command Deck</h2>
-    <p class="focus-subtitle">Small wins. Big dopamine.</p>
-  </header>
-
-  <div class="focus-status">
-    <div class="chip" data-chip="eta">⏱ <strong>Est.</strong> <span class="eta-val">28</span> min</div>
-    <div class="chip" data-chip="energy">⚡ <strong>Energy:</strong> <span class="energy-val">Steady</span></div>
-  </div>
-
-  <div class="focus-meter" aria-label="Momentum Meter">
-    <label class="meter-label">Momentum</label>
-    <div class="progress-strip">
-      <span class="cm-fill" style="width:21%"></span>
+    <div class="focus-meter" aria-label="Momentum Meter">
+      <div class="focus-meter__header">
+        <span class="meter-label">Momentum</span>
+        <small class="meter-note">
+          <span class="cm-done">12</span> / <span class="cm-total">57</span> complete
+        </small>
+      </div>
+      <div class="progress-strip">
+        <span class="cm-fill" style="width:21%"></span>
+        <span class="cm-float" aria-live="polite">21% complete</span>
+      </div>
     </div>
-    <small class="meter-note">
-      <span class="cm-done">12</span> / <span class="cm-total">57</span> complete
-    </small>
   </div>
 
   <div class="focus-actions">
@@ -6513,15 +6656,22 @@
 
 
       <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
-        <header class="section-heading section-heading--centered all-tasks-header">
-          <h2 class="focus-title" data-all-tasks-title>All Tasks</h2>
-          <p class="all-tasks-header__meta">
+        <button
+          class="all-tasks-toggle"
+          type="button"
+          data-all-tasks-toggle
+          aria-expanded="false"
+          data-all-tasks-heading
+        >
+          <span class="all-tasks-toggle__title" data-all-tasks-title>All Tasks</span>
+          <span class="all-tasks-toggle__meta">
             <span data-all-tasks-category>All categories</span>
             <span class="all-tasks-header__divider" data-all-tasks-divider aria-hidden="true">•</span>
             <span data-all-tasks-summary-text>0 active</span>
-          </p>
-        </header>
-        <div class="all-tasks-panel" data-all-tasks-panel>
+          </span>
+          <span class="all-tasks-toggle__chevron" aria-hidden="true">▸</span>
+        </button>
+        <div class="all-tasks-panel" data-all-tasks-panel hidden aria-hidden="true">
             <div class="task-list-header" id="taskListHeader">
               <label class="task-view-label" for="taskViewMode">View</label>
               <select id="taskViewMode" class="task-view-select">
@@ -12441,7 +12591,7 @@
       pauseBtn.type = "button";
       const updatePauseButton = () => {
         const paused = Boolean(sub.isPaused);
-        pauseBtn.textContent = paused ? "Resume" : "Pause";
+        pauseBtn.textContent = paused ? "▶️" : "⏸️";
         pauseBtn.title = paused ? "Resume step timer" : "Pause step timer";
         pauseBtn.setAttribute("aria-label", paused ? "Resume step timer" : "Pause step timer");
         pauseBtn.setAttribute("aria-pressed", paused ? "true" : "false");
@@ -15701,32 +15851,35 @@
 
   function getAllTasksCards() {
     return Array.from(document.querySelectorAll('[data-all-tasks-card]')).map(card => {
-      const accordion = card.querySelector('[data-accordion="allTasks"]') || null;
-      const summaryBtn = accordion?.querySelector('[data-accordion-summary]') || null;
-      const summaryText = card.querySelector('[data-all-tasks-summary-text]') || null;
-      const categoryLabel = card.querySelector('[data-all-tasks-category]') || null;
-      const divider = card.querySelector('[data-all-tasks-divider]') || null;
       const panel = card.querySelector('[data-all-tasks-panel]') || null;
       const title = card.querySelector('[data-all-tasks-title]') || null;
+      const categoryLabel = card.querySelector('[data-all-tasks-category]') || null;
+      const divider = card.querySelector('[data-all-tasks-divider]') || null;
+      const summaryText = card.querySelector('[data-all-tasks-summary-text]') || null;
       const heading = card.querySelector('[data-all-tasks-heading]') || null;
-      return { card, accordion, summaryBtn, summaryText, categoryLabel, divider, panel, title, heading };
+      const toggle = card.querySelector('[data-all-tasks-toggle]') || heading || null;
+      return { card, panel, title, categoryLabel, divider, summaryText, heading, toggle };
     });
   }
 
   function initializeAllTasksCardState() {
     const cards = getAllTasksCards();
     if (!cards.length) return;
-    cards.forEach(({ panel }) => {
-      if (!panel) return;
-      panel.hidden = false;
-      panel.setAttribute("aria-hidden", "false");
+    cards.forEach(({ toggle, card }) => {
+      if (!toggle) return;
+      toggle.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        setAllTasksAccordionOpen(!expanded, { source: card });
+      });
     });
+    let storedState = null;
     try {
-      localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "expanded");
+      storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
     } catch (error) {
       console.warn("Unable to access stored All Tasks state", error);
     }
-    setAllTasksAccordionOpen(true, { skipPersist: true, skipSync: true });
+    const shouldOpen = storedState ? storedState === "expanded" : false;
+    setAllTasksAccordionOpen(shouldOpen, { skipPersist: true, skipSync: true });
   }
 
   function focusFirstEditableField() {
@@ -15923,26 +16076,34 @@
     if (!cards.length) return;
     const previousState = allTasksAccordionOpen;
     allTasksAccordionOpen = Boolean(open);
-    cards.forEach(({ panel, card }) => {
+    cards.forEach(({ panel, card, toggle }) => {
       if (panel) {
-        panel.hidden = false;
-        panel.setAttribute("aria-hidden", "false");
-        if (highlight && open && (!source || source === card || source === panel)) {
+        panel.hidden = !allTasksAccordionOpen;
+        panel.setAttribute("aria-hidden", allTasksAccordionOpen ? "false" : "true");
+        if (highlight && allTasksAccordionOpen && (!source || source === card || source === panel)) {
           panel.classList.add("is-highlighted");
           window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
         }
       }
-      if (card && highlight && open && (!source || source === card)) {
-        card.classList.add("is-highlighted");
-        window.setTimeout(() => card.classList.remove("is-highlighted"), 600);
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", allTasksAccordionOpen ? "true" : "false");
+        toggle.classList.toggle("is-open", allTasksAccordionOpen);
+      }
+      if (card) {
+        card.classList.toggle("is-collapsed", !allTasksAccordionOpen);
+        card.classList.toggle("is-open", allTasksAccordionOpen);
+        if (highlight && allTasksAccordionOpen && (!source || source === card)) {
+          card.classList.add("is-highlighted");
+          window.setTimeout(() => card.classList.remove("is-highlighted"), 600);
+        }
       }
     });
-    if (open && !skipSync) {
+    if (allTasksAccordionOpen && !skipSync) {
       setDueTodayAccordionOpen(false, { skipSync: true });
     }
     if (!skipPersist) {
       try {
-        localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, open ? "expanded" : "collapsed");
+        localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, allTasksAccordionOpen ? "expanded" : "collapsed");
       } catch (error) {
         console.warn("Unable to persist All Tasks state", error);
       }
@@ -17221,8 +17382,6 @@ initializeFocusFabLongPress();
         } else {
           pieces.push("Use the high energy to bank progress");
         }
-      } else if (ENERGY_LABELS && ENERGY_LABELS[energyLevel]) {
-        pieces.push(`Energy check: ${ENERGY_LABELS[energyLevel]}`);
       }
     }
     hintEl.textContent = pieces.length ? pieces.join(" • ") : "Working the highest-impact task next.";
