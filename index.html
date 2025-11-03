@@ -16,6 +16,8 @@
       --page-gutter: clamp(1rem, 4vw, 2.25rem);
       --page-padding-top: clamp(1.5rem, 4vw, 2.5rem);
       --page-padding-bottom: 120px;
+      --focus-shell-width: min(92vw, 600px);
+      --tasker-brand-gradient: linear-gradient(90deg, #7bd88f, #2dd4c3);
     }
 
     *,
@@ -333,8 +335,8 @@
     }
 
     .routine-grid-shell {
-      width: min(100%, 820px);
-      margin: 1.25rem auto 0;
+      width: min(92vw, 720px);
+      margin: 1.5rem auto 0;
       padding: clamp(0.9rem, 3vw, 1.4rem);
       border-radius: 26px;
       background: rgba(12, 20, 32, 0.45);
@@ -355,7 +357,7 @@
     .routine-feature-grid {
       display: grid;
       gap: 1.1rem;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
 
     .routine-feature-grid .routine-tile {
@@ -364,12 +366,6 @@
 
     .routine-feature-grid .routine-tile__surface {
       height: 100%;
-    }
-
-    @media (min-width: 900px) {
-      .routine-feature-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
     }
 
     .routine-preferences {
@@ -2909,6 +2905,64 @@
     .modal-card h3 {
       margin: 0 0 0.75rem;
     }
+
+    .templates-card {
+      max-width: min(520px, 92vw);
+      background: rgba(14, 20, 28, 0.94);
+      border: 1px solid rgba(147, 160, 170, 0.24);
+      border-radius: 18px;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .templates-overlay__body {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .templates-overlay__body .template-module__actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .templates-overlay__body #templateButtons {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .template-entry {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .template-entry button:first-child {
+      flex: 1;
+      justify-content: flex-start;
+    }
+
+    .conflict-card {
+      max-width: min(640px, 94vw);
+      background: rgba(10, 16, 24, 0.96);
+      border: 1px solid rgba(147, 160, 170, 0.26);
+      border-radius: 20px;
+      display: grid;
+      gap: 1rem;
+      padding: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .conflict-overlay__body {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .conflict-overlay__body .conflict-actions {
+      justify-content: flex-end;
+    }
     .wizard-steps {
       display: grid;
       gap: 0.5rem;
@@ -3376,11 +3430,17 @@
       max-width: 48ch;
     }
 
-    #nextTaskCard,
-    .zone-body > .card {
-      width: min(100%, 720px);
-      margin: 0 auto;
-    }
+#nextTaskCard,
+.zone-body > .card {
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+
+.next-task-card,
+.all-tasks-card {
+  width: var(--focus-shell-width);
+  margin: 1.25rem auto 0;
+}
 
     .focus-fab {
       position: fixed;
@@ -5663,7 +5723,7 @@
   border: 1px solid rgba(147,160,170,0.22);
   border-radius: 20px;
   padding: 1.5rem;
-  width: min(92vw, 600px);
+  width: var(--focus-shell-width);
   margin: 1rem auto;
   box-shadow: 0 20px 50px rgba(0,0,0,0.45);
   display: grid;
@@ -5744,7 +5804,7 @@
 }
 
 .quick-add-menu {
-  width: min(92vw, 600px);
+  width: var(--focus-shell-width);
   margin: 0.5rem auto 1.5rem;
   padding: 0.75rem 1rem 1rem;
   border-radius: 18px;
@@ -5758,11 +5818,14 @@
 }
 
 .quick-add-menu__label {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #9fb7ff;
   margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--tasker-brand-gradient);
+  color: #7bd88f;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .quick-add-menu__buttons {
@@ -5840,6 +5903,12 @@
       gap: 1rem;
     }
 
+    .app-header__actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .app-header__row--title {
       justify-content: center;
     }
@@ -5849,9 +5918,10 @@
       font-weight: 700;
       letter-spacing: 0.02em;
       margin: 0;
-      background: linear-gradient(90deg, #7bd88f, #2dd4c3);
+      background: var(--tasker-brand-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      color: #7bd88f;
     }
 
     .app-header__subtitle {
@@ -5870,21 +5940,125 @@
 
 /* Billing / cutoff date restored in red */
     .app-header__row--top .billing-reminder {
-      margin: 0 0 0 auto;
+      margin: 0;
       text-align: right;
     }
 
     .billing-reminder {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       background: rgba(255, 75, 75, 0.15);
       color: #ff6b6b;
       border: 1px solid rgba(255, 75, 75, 0.3);
       border-radius: 999px;
       padding: 0.3rem 0.75rem;
       font-weight: 600;
-      margin-top: 0.65rem;
+      margin: 0;
       animation: pulse-red 3s infinite ease-in-out;
       white-space: nowrap;
+    }
+
+    .billing-reminder:empty {
+      display: none;
+    }
+
+    .settings-trigger {
+      border: none;
+      background: rgba(148, 163, 184, 0.16);
+      border-radius: 999px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .settings-trigger:hover,
+    .settings-trigger:focus-visible {
+      background: rgba(148, 163, 184, 0.26);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .settings-menu {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 1.5rem;
+      width: min(240px, 80vw);
+      background: rgba(9, 14, 20, 0.96);
+      border: 1px solid rgba(147, 160, 170, 0.22);
+      border-radius: 16px;
+      padding: 0.75rem;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 105;
+    }
+
+    .settings-menu.is-open {
+      display: flex;
+    }
+
+    .settings-menu__section {
+      display: grid;
+      gap: 0.35rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid rgba(147, 160, 170, 0.18);
+    }
+
+    .settings-menu__toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: 12px;
+      background: rgba(12, 20, 30, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .settings-menu__toggle:hover,
+    .settings-menu__toggle:focus-visible {
+      background: rgba(18, 28, 40, 0.75);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .settings-menu__toggle input[type="checkbox"] {
+      width: 1.2rem;
+      height: 1.2rem;
+      accent-color: #38bdf8;
+    }
+
+    .settings-menu__item {
+      border: none;
+      background: rgba(15, 22, 30, 0.85);
+      color: var(--text-primary);
+      padding: 0.55rem 0.7rem;
+      border-radius: 12px;
+      text-align: left;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 160ms ease, transform 160ms ease, color 160ms ease;
+    }
+
+    .settings-menu__item:hover,
+    .settings-menu__item:focus-visible {
+      background: rgba(25, 34, 44, 0.95);
+      color: #f5f9ff;
+      transform: translateY(-1px);
+      outline: none;
     }
 
 /* Gentle pulse to give it life */
@@ -5938,7 +6112,32 @@
       <header class="app-header">
         <div class="app-header__row app-header__row--top">
           <p id="headerDate" class="app-header__date"></p>
-          <p class="billing-reminder" id="billingReminder"></p>
+          <div class="app-header__actions">
+            <p class="billing-reminder" id="billingReminder"></p>
+            <button
+              id="settingsToggle"
+              class="settings-trigger"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="settingsMenu"
+              title="Open settings"
+            >
+              ⚙️
+            </button>
+          </div>
+        </div>
+        <div id="settingsMenu" class="settings-menu" aria-hidden="true">
+          <div class="settings-menu__section">
+            <label class="settings-menu__toggle" for="routineHapticsToggle">
+              <span>Enable haptic nudges</span>
+              <input type="checkbox" id="routineHapticsToggle" />
+            </label>
+          </div>
+          <button type="button" class="settings-menu__item" id="settingsTemplates">
+            <span aria-hidden="true">🧩</span>
+            <span>Templates</span>
+          </button>
         </div>
         <p id="headerSubtitle" class="app-header__subtitle"></p>
         <div class="app-header__row app-header__row--title">
@@ -6222,15 +6421,8 @@
           <div class="zone-body">
             <span id="reset-zone" class="zone-anchor" aria-hidden="true"></span>
       <div class="routine-stack" id="routineTileStack">
-        <div class="routine-preferences" aria-label="Routine preferences">
-          <label class="routine-preferences__toggle" for="routineHapticsToggle">
-            <input type="checkbox" id="routineHapticsToggle" />
-            <span class="routine-preferences__label">Enable haptic nudges</span>
-          </label>
-        </div>
-
         <div class="routine-grid-shell">
-          <div class="routine-feature-grid">
+          <div class="routine-feature-grid recovery-routines-container">
             <article
               id="morningLaunchModule"
               class="routine-tile"
@@ -6542,126 +6734,6 @@
           </div>
         </div>
 
-        <article
-          id="templateModule"
-          class="routine-tile"
-          data-module-id="templateModule"
-          data-routine-id="templates"
-          role="group"
-          aria-label="Templates"
-        >
-          <div class="routine-tile__surface routine-theme--templates" data-routine-surface>
-            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
-              <span class="routine-accent" aria-hidden="true">
-                <span class="routine-accent__icon" data-accent-icon>🧩</span>
-              </span>
-              <div class="routine-tile__info">
-                <span class="routine-tile__title" data-routine-title>🧩 Templates</span>
-                <span class="routine-tile__prompt" data-routine-prompt>Quick launch your best blueprints.</span>
-              </div>
-              <div class="routine-tile__meta">
-                <span class="routine-info-dot" title="Pull in proven task blueprints without rewriting every field." aria-hidden="true">i</span>
-                <span class="routine-reminder" data-routine-reminder></span>
-                <span class="routine-tile__chevron" aria-hidden="true"></span>
-              </div>
-            </button>
-            <div class="routine-quick-overlay" data-routine-quick-overlay>
-              <div class="routine-quick-overlay__content">
-                <h3 class="routine-quick-overlay__title">Template Shortcut</h3>
-                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
-                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
-              </div>
-            </div>
-            <div class="routine-tile__body" data-routine-body hidden>
-              <div class="routine-tile__actions">
-                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
-                <div class="routine-quick-actions" role="group" aria-label="Template quick actions">
-                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
-                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
-                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
-                </div>
-              </div>
-              <div class="routine-tile__content">
-                <div class="module-body" data-routine-content>
-                  <div class="template-module__actions">
-                    <button id="blockBatchOpen" class="btn btn-secondary" type="button">Block Batch</button>
-                  </div>
-                  <div id="templateButtons"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <article
-          id="conflictResolverModule"
-          class="routine-tile"
-          data-module-id="conflictResolverModule"
-          data-routine-id="conflict"
-          role="group"
-          aria-label="3-v-3 Conflict Resolver"
-        >
-          <div class="routine-tile__surface routine-theme--conflict" data-routine-surface>
-            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
-              <span class="routine-accent" aria-hidden="true">
-                <span class="routine-accent__icon" data-accent-icon>🥊</span>
-              </span>
-              <div class="routine-tile__info">
-                <span class="routine-tile__title" data-routine-title>🥊 3-v-3 Conflict Resolver</span>
-                <span class="routine-tile__prompt" data-routine-prompt>Reframe your mind in 3x3 steps.</span>
-              </div>
-              <div class="routine-tile__meta">
-                <span class="routine-info-dot" title="Drag one should-do and one want-to into the arena to settle the debate." aria-hidden="true">i</span>
-                <span class="routine-reminder" data-routine-reminder></span>
-                <span class="routine-tile__chevron" aria-hidden="true"></span>
-              </div>
-            </button>
-            <div class="routine-quick-overlay" data-routine-quick-overlay>
-              <div class="routine-quick-overlay__content">
-                <h3 class="routine-quick-overlay__title">Conflict Resolver Preview</h3>
-                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
-                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
-              </div>
-            </div>
-            <div class="routine-tile__body" data-routine-body hidden>
-              <div class="routine-tile__actions">
-                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
-                <div class="routine-quick-actions" role="group" aria-label="Conflict resolver quick actions">
-                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
-                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
-                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
-                </div>
-              </div>
-              <div class="routine-tile__content">
-                <div class="module-body" data-routine-content>
-                  <div class="conflict-grid">
-                    <div class="conflict-column">
-                      <h3>Top 3 should-do</h3>
-                      <div id="conflictShouldList" class="conflict-list" aria-live="polite"></div>
-                    </div>
-                    <div class="conflict-column">
-                      <h3>Top 3 want-to</h3>
-                      <div id="conflictWantList" class="conflict-list" aria-live="polite"></div>
-                    </div>
-                  </div>
-                  <div
-                    id="conflictArena"
-                    class="conflict-arena"
-                    role="application"
-                    aria-live="polite"
-                    aria-label="Drag contenders here"
-                  >
-                    <div id="conflictArenaPrompt">Drag a contender from each side into the arena.</div>
-                  </div>
-                  <div class="conflict-actions">
-                    <button id="conflictReset" type="button" class="btn btn-ghost">Reset arena</button>
-                  </div>
-                  <div id="conflictResult" class="score" aria-live="polite"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
       </div>
       <div id="routineEditSheet" class="routine-sheet" role="dialog" aria-modal="true" aria-labelledby="routineEditTitle">
         <div class="routine-sheet__scrim" data-routine-sheet-dismiss></div>
@@ -6699,6 +6771,69 @@
     </div>
   </section>
       </div>
+
+  <div
+    id="templatesOverlay"
+    class="modal-overlay hidden templates-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="templatesOverlayTitle"
+  >
+    <div class="modal-card templates-card" role="document">
+      <div class="modal-card__header">
+        <h3 id="templatesOverlayTitle">🧩 Templates</h3>
+        <button id="templatesOverlayClose" class="modal__close" type="button" aria-label="Close templates">✕</button>
+      </div>
+      <div class="templates-overlay__body">
+        <div class="template-module__actions">
+          <button id="blockBatchOpen" class="btn btn-secondary" type="button">Block Batch</button>
+        </div>
+        <div id="templateButtons"></div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="conflictOverlay"
+    class="modal-overlay hidden conflict-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="conflictOverlayTitle"
+  >
+    <div class="modal-card conflict-card" role="document">
+      <div class="modal-card__header">
+        <h3 id="conflictOverlayTitle">🥊 3-v-3 Conflict Resolver</h3>
+        <button id="conflictOverlayClose" class="modal__close" type="button" aria-label="Close conflict resolver">✕</button>
+      </div>
+      <div class="conflict-overlay__body" id="conflictResolverModule">
+        <div class="conflict-grid">
+          <div class="conflict-column">
+            <h3>Top 3 should-do</h3>
+            <div id="conflictShouldList" class="conflict-list" aria-live="polite"></div>
+          </div>
+          <div class="conflict-column">
+            <h3>Top 3 want-to</h3>
+            <div id="conflictWantList" class="conflict-list" aria-live="polite"></div>
+          </div>
+        </div>
+        <div
+          id="conflictArena"
+          class="conflict-arena"
+          role="application"
+          aria-live="polite"
+          aria-label="Drag contenders here"
+        >
+          <div id="conflictArenaPrompt">Drag a contender from each side into the arena.</div>
+        </div>
+        <div class="conflict-actions">
+          <button id="conflictReset" type="button" class="btn btn-ghost">Reset arena</button>
+        </div>
+        <div id="conflictResult" class="score" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
 
   <div id="template-modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="templateModalTitle">
     <div class="modal__content">
@@ -7165,6 +7300,7 @@
           <p id="worstDayHint" class="sos-card__detail"></p>
         </div>
         <button id="sosDefuse" class="sos-card__action" type="button">🧘 DEFUSE Mode</button>
+        <button id="sosConflict" class="sos-card__action" type="button">🥊 3-v-3 Conflict Resolver</button>
         <button id="sosShield" class="sos-card__action" type="button">🛡️ Meltdown Shield</button>
       </div>
       <p class="sos-card__hint">Need a reset? These stay ready until you close them.</p>
@@ -8385,6 +8521,8 @@
   let taskGestureObserver = null;
   let lastDefuseOpener = null;
   let lastSosTrigger = null;
+  let lastTemplatesOpener = null;
+  let lastConflictOpener = null;
 
   function isElementMostlyInView(element, ratio = 0.3) {
     if (!element) return false;
@@ -16099,6 +16237,142 @@
     });
   }
 
+  function openTemplatesOverlay(trigger = null) {
+    const overlay = $("templatesOverlay");
+    if (!overlay) return;
+    lastTemplatesOpener = trigger || document.activeElement;
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    const closeBtn = $("templatesOverlayClose");
+    if (closeBtn) {
+      closeBtn.focus();
+    }
+  }
+
+  function closeTemplatesOverlay({ restoreFocus = true } = {}) {
+    const overlay = $("templatesOverlay");
+    if (!overlay) return;
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    if (restoreFocus && lastTemplatesOpener) {
+      const target = lastTemplatesOpener;
+      lastTemplatesOpener = null;
+      window.requestAnimationFrame(() => target?.focus?.());
+    } else {
+      lastTemplatesOpener = null;
+    }
+  }
+
+  function initializeTemplatesOverlay() {
+    const overlay = $("templatesOverlay");
+    if (!overlay) return;
+    const closeBtn = $("templatesOverlayClose");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => closeTemplatesOverlay());
+    }
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        closeTemplatesOverlay();
+      }
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !overlay.classList.contains("hidden")) {
+        closeTemplatesOverlay();
+      }
+    });
+  }
+
+  function openConflictOverlay(trigger = null) {
+    const overlay = $("conflictOverlay");
+    if (!overlay) return;
+    lastConflictOpener = trigger || document.activeElement;
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    const closeBtn = $("conflictOverlayClose");
+    if (closeBtn) {
+      closeBtn.focus();
+    }
+  }
+
+  function closeConflictOverlay({ restoreFocus = true } = {}) {
+    const overlay = $("conflictOverlay");
+    if (!overlay) return;
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    if (restoreFocus && lastConflictOpener) {
+      const target = lastConflictOpener;
+      lastConflictOpener = null;
+      window.requestAnimationFrame(() => target?.focus?.());
+    } else {
+      lastConflictOpener = null;
+    }
+  }
+
+  function initializeConflictOverlay() {
+    const overlay = $("conflictOverlay");
+    if (!overlay) return;
+    const closeBtn = $("conflictOverlayClose");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => closeConflictOverlay());
+    }
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        closeConflictOverlay();
+      }
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !overlay.classList.contains("hidden")) {
+        closeConflictOverlay();
+      }
+    });
+  }
+
+  function initializeSettingsMenu() {
+    const toggle = $("settingsToggle");
+    const menu = $("settingsMenu");
+    if (!toggle || !menu) return;
+
+    let open = false;
+
+    const setOpen = value => {
+      open = Boolean(value);
+      menu.classList.toggle("is-open", open);
+      menu.setAttribute("aria-hidden", open ? "false" : "true");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    setOpen(false);
+
+    const closeMenu = () => setOpen(false);
+
+    toggle.addEventListener("click", () => {
+      setOpen(!open);
+    });
+
+    document.addEventListener("click", event => {
+      if (!open) return;
+      if (event.target === toggle || toggle.contains(event.target)) return;
+      if (menu.contains(event.target)) return;
+      closeMenu();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && open) {
+        event.stopPropagation();
+        closeMenu();
+        toggle.focus();
+      }
+    });
+
+    const templatesBtn = $("settingsTemplates");
+    if (templatesBtn) {
+      templatesBtn.addEventListener("click", () => {
+        closeMenu();
+        openTemplatesOverlay(templatesBtn);
+      });
+    }
+  }
+
   function initializeResourcesDrawer() {
     const toggle = $("resourcesToggle");
     const drawer = $("resourcesDrawer");
@@ -16143,6 +16417,7 @@
     const closeBtn = $("sosOverlayClose");
     const shieldBtn = $("sosShield");
     const defuseBtn = $("sosDefuse");
+    const conflictBtn = $("sosConflict");
     const worstDayBtn = $("worstDayButton");
     const triggers = ["rescueLaunchButton", "meltdownSosButton"].map(id => $(id)).filter(Boolean);
     if (!triggers.length || !overlay) return;
@@ -16216,6 +16491,13 @@
         setSosOpen(false, { restoreFocus: false });
         lastDefuseOpener = activeTrigger || lastSosTrigger || triggers[0] || null;
         openDefuseOverlay();
+      });
+    }
+
+    if (conflictBtn) {
+      conflictBtn.addEventListener("click", () => {
+        setSosOpen(false, { restoreFocus: false });
+        openConflictOverlay(conflictBtn);
       });
     }
 
@@ -16762,6 +17044,7 @@ initializeFocusFabLongPress();
 
     matchingTemplates.forEach(({ template: t, index: templateIndex }) => {
       const wrapper = document.createElement("div");
+      wrapper.className = "template-entry";
       const useBtn = document.createElement("button");
       useBtn.textContent = `📋 ${t.name}`;
       useBtn.onclick = () => {
@@ -17441,12 +17724,15 @@ initializeFocusFabLongPress();
     initializeAllTasksCardState();
     initializeFocusLaunchSheet();
     initializeQuickCaptureModal();
+    initializeSettingsMenu();
+    initializeTemplatesOverlay();
+    initializeConflictOverlay();
 
 // === START: Accordions ===
 // Existing accordion wiring lives in renderDueTodayList and initializeAllTasksCardState.
 // Keep the two sections mutually exclusive by collapsing the other when one opens.
 // === END: Accordions ===
-    
+
     initializeResourcesDrawer();
     initializeSosPanel();
     initializeCommandBarAutohide();
@@ -17576,7 +17862,7 @@ initializeFocusFabLongPress();
       console.error(`Error: Expected 4 routine modules, found ${modules.length}.`);
     } else {
       console.info("Routine modules found:", modules);
-      const expectedTitles = ["Sleep toolkit", "AM Start", "Launch Pad", "Dopa-Me"];
+      const expectedTitles = ["🌅 AM Start", "🚀 Launch Pad", "😴 Sleep Toolkit", "🎵 Dopa-Me"];
 
       modules.forEach((module, index) => {
         const titleElement = module.querySelector(".routine-tile__title");
