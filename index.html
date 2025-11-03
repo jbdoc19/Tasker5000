@@ -5818,47 +5818,74 @@
 }
     /* Tasker 5000 Title Block */
 /* --- TASK FOCUS HEADER --- */
-.app-header {
-  background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.85));
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.25rem;
-  text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  position: relative;
-}
+    .app-header {
+      background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.85));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin: 0 auto 1.25rem;
+      width: min(92vw, 600px);
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      position: relative;
+      display: grid;
+      gap: 0.5rem;
+    }
 
-/* Main title */
-.app-header__title h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  margin: 0 0 0.35rem;
-  background: linear-gradient(90deg, #7bd88f, #2dd4c3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+    .app-header__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 1rem;
+    }
 
-/* Subtitle (optional) */
-.app-header__subtitle {
-  font-size: 1rem;
-  color: #aeb7c8;
-  margin: 0.25rem 0 0;
-}
+    .app-header__row--title {
+      justify-content: center;
+    }
+
+    .app-header__row--title h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin: 0;
+      background: linear-gradient(90deg, #7bd88f, #2dd4c3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .app-header__subtitle {
+      font-size: 1rem;
+      color: #aeb7c8;
+      margin: 0;
+      text-align: center;
+    }
+
+    .app-header__date {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e6eef7;
+      margin: 0;
+    }
 
 /* Billing / cutoff date restored in red */
-.billing-reminder {
-  display: inline-block;
-  background: rgba(255, 75, 75, 0.15);
-  color: #ff6b6b;
-  border: 1px solid rgba(255, 75, 75, 0.3);
-  border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-  font-weight: 600;
-  margin-top: 0.65rem;
-  animation: pulse-red 3s infinite ease-in-out;
-}
+    .app-header__row--top .billing-reminder {
+      margin: 0 0 0 auto;
+      text-align: right;
+    }
+
+    .billing-reminder {
+      display: inline-block;
+      background: rgba(255, 75, 75, 0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 75, 75, 0.3);
+      border-radius: 999px;
+      padding: 0.3rem 0.75rem;
+      font-weight: 600;
+      margin-top: 0.65rem;
+      animation: pulse-red 3s infinite ease-in-out;
+      white-space: nowrap;
+    }
 
 /* Gentle pulse to give it life */
 @keyframes pulse-red {
@@ -5909,11 +5936,14 @@
   <section id="capture">
     <div class="app-shell">
       <header class="app-header">
-        <div class="app-header__title">
-          <h1>Tasker 5000</h1>
-          <p id="headerSubtitle" class="app-header__subtitle"></p>
+        <div class="app-header__row app-header__row--top">
+          <p id="headerDate" class="app-header__date"></p>
+          <p class="billing-reminder" id="billingReminder"></p>
         </div>
-        <p class="billing-reminder" id="billingReminder"></p>
+        <p id="headerSubtitle" class="app-header__subtitle"></p>
+        <div class="app-header__row app-header__row--title">
+          <h1>Tasker 5000</h1>
+        </div>
       </header>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
@@ -17229,17 +17259,17 @@ initializeFocusFabLongPress();
   }
 
   function updateHeaderSubtitle() {
-    const subtitle = $("headerSubtitle");
-    if (!subtitle) return;
+    const dateEl = $("headerDate");
+    if (!dateEl) return;
     try {
       const formatted = new Date().toLocaleDateString(undefined, {
         weekday: "long",
         month: "short",
         day: "numeric"
       });
-      subtitle.textContent = formatted;
+      dateEl.textContent = formatted;
     } catch (error) {
-      subtitle.textContent = "";
+      dateEl.textContent = "";
     }
   }
 
