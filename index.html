@@ -4643,26 +4643,23 @@
       flex-wrap: wrap;
     }
 
-    .section-heading[data-all-tasks-heading] {
-      cursor: pointer;
-      user-select: none;
+    .all-tasks-header {
+      gap: 0.65rem;
     }
 
-    .section-heading[data-all-tasks-heading]:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45);
-      border-radius: 12px;
+    .all-tasks-header__meta {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
     }
 
-    .section-heading[data-all-tasks-heading] {
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .section-heading[data-all-tasks-heading]:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.45);
-      border-radius: 12px;
+    .all-tasks-header__divider.hidden,
+    [data-all-tasks-category].hidden {
+      display: none !important;
     }
 
     .section-heading__title {
@@ -5682,10 +5679,6 @@
       font-size: 0.7rem;
     }
 
-    [data-all-tasks-card][data-collapsed="true"] [data-all-tasks-panel] {
-      display: none;
-    }
-
     .all-tasks-panel {
       padding: var(--space-3) var(--space-2);
       display: grid;
@@ -6356,6 +6349,15 @@
     >
       ⏩ Quick Tasks
     </button>
+    <button
+      id="shredTopTaskButton"
+      class="btn-quiet shred-top-task"
+      type="button"
+      aria-disabled="true"
+      disabled
+    >
+      🔰 shred Top Task
+    </button>
   </div>
 
   <footer class="focus-footer">
@@ -6511,22 +6513,15 @@
 
 
       <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
-        <div
-          class="section-heading section-heading--centered"
-          data-all-tasks-heading
-          role="button"
-          tabindex="0"
-          aria-expanded="false"
-        >
+        <header class="section-heading section-heading--centered all-tasks-header">
           <h2 class="focus-title" data-all-tasks-title>All Tasks</h2>
-          <span class="chip chip-muted section-chip hidden" data-all-tasks-summary-chip></span>
-        </div>
-        <div class="due-today-accordion" data-open="false" data-accordion="allTasks">
-          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+          <p class="all-tasks-header__meta">
+            <span data-all-tasks-category>All categories</span>
+            <span class="all-tasks-header__divider" data-all-tasks-divider aria-hidden="true">•</span>
             <span data-all-tasks-summary-text>0 active</span>
-            <span class="due-today-summary__icon" aria-hidden="true">▸</span>
-          </button>
-          <div class="all-tasks-panel" hidden data-accordion-panel data-all-tasks-panel>
+          </p>
+        </header>
+        <div class="all-tasks-panel" data-all-tasks-panel>
             <div class="task-list-header" id="taskListHeader">
               <label class="task-view-label" for="taskViewMode">View</label>
               <select id="taskViewMode" class="task-view-select">
@@ -6552,7 +6547,6 @@
               </div>
               <div id="taskList"></div>
               <button id="readyToLaunchMoreBtn" class="task-list-more-btn" type="button" aria-hidden="true">Show 5 more</button>
-            </div>
           </div>
         </div>
       </section>
@@ -15706,64 +15700,33 @@
 
 
   function getAllTasksCards() {
-    return Array.from(document.querySelectorAll('[data-all-tasks-card]'))
-      .map(card => {
-        const accordion = card.querySelector('[data-accordion="allTasks"]');
-        const summaryBtn = accordion?.querySelector('[data-accordion-summary]');
-        const summaryText = card.querySelector('[data-all-tasks-summary-text]');
-        const summaryChip = card.querySelector('[data-all-tasks-summary-chip]');
-        const panel = card.querySelector('[data-all-tasks-panel]');
-        const title = card.querySelector('[data-all-tasks-title]');
-        const heading = card.querySelector('[data-all-tasks-heading]');
-        return { card, accordion, summaryBtn, summaryText, summaryChip, panel, title, heading };
-      })
-      .filter(instance => instance.card && instance.accordion && instance.summaryBtn && instance.summaryText && instance.panel);
+    return Array.from(document.querySelectorAll('[data-all-tasks-card]')).map(card => {
+      const accordion = card.querySelector('[data-accordion="allTasks"]') || null;
+      const summaryBtn = accordion?.querySelector('[data-accordion-summary]') || null;
+      const summaryText = card.querySelector('[data-all-tasks-summary-text]') || null;
+      const categoryLabel = card.querySelector('[data-all-tasks-category]') || null;
+      const divider = card.querySelector('[data-all-tasks-divider]') || null;
+      const panel = card.querySelector('[data-all-tasks-panel]') || null;
+      const title = card.querySelector('[data-all-tasks-title]') || null;
+      const heading = card.querySelector('[data-all-tasks-heading]') || null;
+      return { card, accordion, summaryBtn, summaryText, categoryLabel, divider, panel, title, heading };
+    });
   }
 
   function initializeAllTasksCardState() {
     const cards = getAllTasksCards();
     if (!cards.length) return;
-    cards.forEach(({ accordion, summaryBtn, card, heading, panel }) => {
-      if (!summaryBtn.dataset.listenerBound) {
-        summaryBtn.dataset.listenerBound = "true";
-        summaryBtn.addEventListener("click", () => {
-          const nextOpen = accordion.dataset.open !== "true";
-          setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen, source: card });
-        });
-      }
-      if (heading) {
-        if (panel?.id) {
-          heading.setAttribute("aria-controls", panel.id);
-        }
-        heading.setAttribute("aria-expanded", accordion.dataset.open === "true" ? "true" : "false");
-        if (!heading.dataset.listenerBound) {
-          heading.dataset.listenerBound = "true";
-          const toggleAccordion = () => {
-            const nextOpen = accordion.dataset.open !== "true";
-            setAllTasksAccordionOpen(nextOpen, { highlight: nextOpen, source: heading });
-          };
-          heading.addEventListener("click", () => {
-            toggleAccordion();
-          });
-          heading.addEventListener("keydown", event => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              toggleAccordion();
-            }
-          });
-        }
-      }
+    cards.forEach(({ panel }) => {
+      if (!panel) return;
+      panel.hidden = false;
+      panel.setAttribute("aria-hidden", "false");
     });
-    let storedState = null;
     try {
-      storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
-      if (storedState !== "collapsed") {
-        localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "collapsed");
-      }
+      localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, "expanded");
     } catch (error) {
       console.warn("Unable to access stored All Tasks state", error);
     }
-    setAllTasksAccordionOpen(false, { skipPersist: true });
+    setAllTasksAccordionOpen(true, { skipPersist: true, skipSync: true });
   }
 
   function focusFirstEditableField() {
@@ -15952,40 +15915,40 @@
   }
 
 
+  let allTasksAccordionOpen = true;
+
   function setAllTasksAccordionOpen(open, options = {}) {
     const { skipPersist = false, highlight = false, skipSync = false, source = null } = options;
     const cards = getAllTasksCards();
     if (!cards.length) return;
-    let stateChanged = false;
-    cards.forEach(({ accordion, summaryBtn, panel, card, heading }) => {
-      const wasOpen = accordion.dataset.open === "true";
-      if (wasOpen !== open) {
-        stateChanged = true;
-      }
-      const nextState = open ? "true" : "false";
-      accordion.dataset.open = nextState;
-      summaryBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      panel.hidden = !open;
-      panel.setAttribute("aria-hidden", open ? "false" : "true");
-      if (heading) {
-        if (panel?.id) {
-          heading.setAttribute("aria-controls", panel.id);
+    const previousState = allTasksAccordionOpen;
+    allTasksAccordionOpen = Boolean(open);
+    cards.forEach(({ panel, card }) => {
+      if (panel) {
+        panel.hidden = false;
+        panel.setAttribute("aria-hidden", "false");
+        if (highlight && open && (!source || source === card || source === panel)) {
+          panel.classList.add("is-highlighted");
+          window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
         }
-        heading.setAttribute("aria-expanded", open ? "true" : "false");
       }
-      if (open && highlight && (!source || source === card || source === accordion || source === panel || source === heading)) {
-        panel.classList.add("is-highlighted");
-        window.setTimeout(() => panel.classList.remove("is-highlighted"), 600);
+      if (card && highlight && open && (!source || source === card)) {
+        card.classList.add("is-highlighted");
+        window.setTimeout(() => card.classList.remove("is-highlighted"), 600);
       }
     });
     if (open && !skipSync) {
       setDueTodayAccordionOpen(false, { skipSync: true });
     }
     if (!skipPersist) {
-      localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, open ? "expanded" : "collapsed");
+      try {
+        localStorage.setItem(ALL_TASKS_CARD_STATE_KEY, open ? "expanded" : "collapsed");
+      } catch (error) {
+        console.warn("Unable to persist All Tasks state", error);
+      }
     }
-    if (stateChanged) {
-      if (open) {
+    if (previousState !== allTasksAccordionOpen) {
+      if (allTasksAccordionOpen) {
         readyToLaunchVisibleCount = READY_TO_LAUNCH_INITIAL_COUNT;
         readyToLaunchRevealBaseline = 0;
         updateUI();
@@ -16032,6 +15995,19 @@
       .map(task => ({ task, score: computeFocusScore(task, energyLevel, timeBudget) }))
       .sort((a, b) => (b.score || 0) - (a.score || 0));
     return scored.length ? scored[0].task : null;
+  }
+
+  function getHighestPriorityTask() {
+    const candidates = tasks.filter(task => !isTaskCompleted(task));
+    if (!candidates.length) return null;
+    return candidates.reduce((best, task) => {
+      const bestScore = Number(best?.priority) || 0;
+      const taskScore = Number(task?.priority) || 0;
+      if (!best || taskScore > bestScore) {
+        return task;
+      }
+      return best;
+    }, null);
   }
 
   function updateWorstDayBanner() {
@@ -16917,6 +16893,26 @@
       window.setTimeout(() => card.classList.remove("is-highlighted"), 650);
     });
   }
+
+  function initializeShredTopTaskButton() {
+    const button = $("shredTopTaskButton");
+    if (!button) return;
+    button.addEventListener("click", () => {
+      const topTask = getHighestPriorityTask();
+      if (!topTask) {
+        showToast("Shred Top Task", "No active tasks to shred right now.");
+        return;
+      }
+      startFocus(topTask.id);
+      window.setTimeout(() => {
+        const completeBtn = $("focusCompleteButton");
+        if (completeBtn) {
+          completeBtn.focus();
+        }
+      }, 260);
+      showToast("Shred Top Task", `Ready to complete: ${topTask.name}`);
+    });
+  }
 // === START: Long-press Quick Capture from Focus button ===
 function initializeFocusFabLongPress() {
   const fab = document.getElementById("nextTaskActionButton");
@@ -16951,22 +16947,33 @@ initializeFocusFabLongPress();
 
     const totalTasks = tasks.length;
     const activeTasksCount = tasks.filter(t => !isTaskCompleted(t)).length;
-    getAllTasksCards().forEach(({ title, summaryText, summaryChip }) => {
+    const shredButton = $("shredTopTaskButton");
+    if (shredButton) {
+      const hasActiveTasks = activeTasksCount > 0;
+      shredButton.disabled = !hasActiveTasks;
+      shredButton.setAttribute("aria-disabled", hasActiveTasks ? "false" : "true");
+    }
+    const categoryDisplay = activeCategory === "All" ? "All categories" : activeCategory;
+    const hasTasks = totalTasks > 0;
+    getAllTasksCards().forEach(({ title, summaryText, categoryLabel, divider }) => {
       if (title) {
         title.textContent = `All Tasks (${totalTasks})`;
       }
       if (summaryText) {
-        summaryText.textContent = totalTasks
+        summaryText.textContent = hasTasks
           ? `${activeTasksCount} active • ${totalTasks} total`
           : "No tasks yet";
       }
-      if (summaryChip) {
-        if (totalTasks) {
-          summaryChip.textContent = activeCategory === "All" ? "All categories" : activeCategory;
-          summaryChip.classList.remove("hidden");
+      if (categoryLabel) {
+        if (hasTasks) {
+          categoryLabel.textContent = categoryDisplay;
+          categoryLabel.classList.remove("hidden");
         } else {
-          summaryChip.classList.add("hidden");
+          categoryLabel.classList.add("hidden");
         }
+      }
+      if (divider) {
+        divider.classList.toggle("hidden", !hasTasks);
       }
     });
 
@@ -18035,6 +18042,7 @@ initializeFocusFabLongPress();
     initializeTaskForm();
     initializeQuickAddMenu();
     initializeQuickTaskShortcut();
+    initializeShredTopTaskButton();
     initializeBlockBatchModule();
     initializeAddTaskCardState();
     initializePreflightToggles();
