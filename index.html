@@ -17435,6 +17435,55 @@ initializeFocusFabLongPress();
     const initTotal = parseInt(totalEl.textContent, 10) || 0;
     setFill(initTotal ? initDone / initTotal : 0);
   })();
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Debugging script for the 2x2 recovery routines grid layout
+    const container = document.querySelector(".recovery-routines-container");
+    if (!container) {
+      console.error("Error: Rounded container for recovery routines is missing.");
+      return;
+    }
+
+    console.log("Recovery routines container found:", container);
+
+    const containerStyles = getComputedStyle(container);
+    if (containerStyles.display !== "grid") {
+      console.error(
+        "Error: Container is not using grid layout. Current display property:",
+        containerStyles.display
+      );
+    } else {
+      console.log("Container is using grid layout.");
+    }
+
+    const modules = container.querySelectorAll(".routine-tile");
+    if (modules.length !== 4) {
+      console.error(`Error: Expected 4 routine modules, found ${modules.length}.`);
+    } else {
+      console.info("Routine modules found:", modules);
+      const expectedTitles = ["Sleep toolkit", "AM Start", "Launch Pad", "Dopa-Me"];
+
+      modules.forEach((module, index) => {
+        const titleElement = module.querySelector(".routine-tile__title");
+        const title = titleElement ? titleElement.textContent.trim() : null;
+
+        if (title !== expectedTitles[index]) {
+          console.error(
+            `Error: Routine ${index + 1} has incorrect title. Expected: "${expectedTitles[index]}", Found: "${title}".`
+          );
+        } else {
+          console.info(`Routine ${index + 1} title is correct: "${title}".`);
+        }
+      });
+    }
+
+    const outline = containerStyles.border || containerStyles.boxShadow;
+    if (!outline || outline === "none") {
+      console.error("Error: No outline is applied to the container.");
+    } else {
+      console.log("Outline applied to the container:", outline);
+    }
+  });
     </script>
 </body>
 </html>
