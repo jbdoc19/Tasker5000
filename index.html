@@ -332,19 +332,42 @@
       z-index: 10;
     }
 
+    .routine-grid-shell {
+      width: min(100%, 820px);
+      margin: 1.25rem auto 0;
+      padding: clamp(0.9rem, 3vw, 1.4rem);
+      border-radius: 26px;
+      background: rgba(12, 20, 32, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 16px 40px rgba(2, 8, 18, 0.3);
+    }
+
     .routine-stack {
       display: grid;
       gap: 1.1rem;
-      width: min(100%, 780px);
-      margin-top: 1.25rem;
+      width: 100%;
+      margin: 0;
       position: relative;
       z-index: 12;
+      grid-template-columns: 1fr;
+    }
+
+    .routine-feature-grid {
+      display: grid;
+      gap: 1.1rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: stretch;
+    }
+    .routine-feature-grid .routine-tile,
+    .routine-feature-grid .routine-tile__surface {
+      height: 100%;
     }
 
     .routine-preferences {
       display: flex;
       justify-content: flex-end;
       padding: 0.25rem 0.5rem 0;
+      grid-column: 1 / -1;
     }
 
     .routine-preferences__toggle {
@@ -6082,275 +6105,328 @@
           </label>
         </div>
 
-        <article
-          id="morningLaunchModule"
-          class="routine-tile"
-          data-module-id="morningLaunchModule"
-          data-routine-id="morning"
-          role="group"
-          aria-label="Morning Launch Sequence"
-        >
-          <div class="routine-tile__surface routine-theme--morning" data-routine-surface>
-            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
-              <span class="routine-accent" aria-hidden="true">
-                <span class="routine-accent__icon" data-accent-icon>🌅</span>
-              </span>
-              <div class="routine-tile__info">
-                <span class="routine-tile__title" data-routine-title>🌅 Morning Launch Sequence</span>
-                <span class="routine-tile__prompt" data-routine-prompt>Ready for takeoff? Start your day ritual.</span>
-              </div>
-              <div class="routine-tile__meta">
-                <span class="routine-info-dot" title="Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day." aria-hidden="true">i</span>
-                <span class="routine-reminder" data-routine-reminder></span>
-                <span class="routine-tile__chevron" aria-hidden="true"></span>
-              </div>
-            </button>
-            <div class="routine-quick-overlay" data-routine-quick-overlay>
-              <div class="routine-quick-overlay__content">
-                <h3 class="routine-quick-overlay__title">Morning Launch Preview</h3>
-                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
-                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
-              </div>
-            </div>
-            <div class="routine-tile__body" data-routine-body hidden>
-              <div class="routine-tile__actions">
-                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
-                <div class="routine-quick-actions" role="group" aria-label="Morning Launch quick actions">
-                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
-                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
-                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+        <div class="routine-grid-shell">
+          <div class="routine-feature-grid">
+            <article
+              id="morningLaunchModule"
+              class="routine-tile"
+              data-module-id="morningLaunchModule"
+              data-routine-id="morning"
+              role="group"
+              aria-label="AM Start"
+            >
+              <div class="routine-tile__surface routine-theme--morning" data-routine-surface>
+                <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+                  <span class="routine-accent" aria-hidden="true">
+                    <span class="routine-accent__icon" data-accent-icon>🌅</span>
+                  </span>
+                  <div class="routine-tile__info">
+                    <span class="routine-tile__title" data-routine-title>🌅 AM Start</span>
+                    <span class="routine-tile__prompt" data-routine-prompt>Ready for takeoff? Start your day ritual.</span>
+                  </div>
+                  <div class="routine-tile__meta">
+                    <span class="routine-info-dot" title="Prime your brain for dopamine, cortisol, and clarity with a 60-minute guided ramp into the day." aria-hidden="true">i</span>
+                    <span class="routine-reminder" data-routine-reminder></span>
+                    <span class="routine-tile__chevron" aria-hidden="true"></span>
+                  </div>
+                </button>
+                <div class="routine-quick-overlay" data-routine-quick-overlay>
+                  <div class="routine-quick-overlay__content">
+                    <h3 class="routine-quick-overlay__title">AM Start Preview</h3>
+                    <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                    <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+                  </div>
+                </div>
+                <div class="routine-tile__body" data-routine-body hidden>
+                  <div class="routine-tile__actions">
+                    <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                    <div class="routine-quick-actions" role="group" aria-label="AM Start quick actions">
+                      <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                      <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                      <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+                    </div>
+                  </div>
+                  <div class="routine-tile__content">
+                    <div class="module-body" data-routine-content>
+                      <div class="module-toggle">
+                        <label for="morningLaunchToggle">Enable Morning Launch</label>
+                        <input type="checkbox" id="morningLaunchToggle" />
+                      </div>
+                      <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
+                      <div id="morningLaunchContent" class="hidden" aria-hidden="true">
+                        <div class="progress-strip" aria-hidden="true">
+                          <span id="morningLaunchProgress"></span>
+                        </div>
+                        <div id="morningLaunchStatus" class="score"></div>
+                        <div class="module-inline-actions">
+                          <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
+                          <button id="morningLaunchSkipBtn" type="button">Skip today</button>
+                        </div>
+                        <div class="morning-blocks">
+                          <article class="routine-block" data-block="move">
+                            <h3>MOVE — Light Aerobic + Sunlight</h3>
+                            <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
+                            <div class="countdown-display" id="moveCountdown">20:00</div>
+                            <div class="module-inline-actions">
+                              <button id="moveStartBtn" type="button">Start 20-min timer</button>
+                              <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
+                            </div>
+                          </article>
+                          <article class="routine-block" data-block="reflect">
+                            <h3>REFLECT — Cold Splash + Intention</h3>
+                            <small>Reset with a cold rinse, then name the tone for your day.</small>
+                            <div class="intention-buttons">
+                              <button type="button" data-intention="Calm &amp; steady">Calm &amp; steady</button>
+                              <button type="button" data-intention="Playful &amp; connected">Playful &amp; connected</button>
+                              <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
+                            </div>
+                            <label for="morningIntention" style="margin:0;">
+                              <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
+                            </label>
+                            <div class="module-inline-actions">
+                              <button id="reflectCompleteBtn" type="button">Save intention</button>
+                            </div>
+                          </article>
+                          <article class="routine-block" data-block="plan">
+                            <h3>PLAN — Process Anchors</h3>
+                            <small>Lock in process-based actions and block time before the day takes over.</small>
+                            <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
+                            <div class="module-inline-actions">
+                              <button id="planCompleteBtn" type="button">Plan locked in</button>
+                            </div>
+                          </article>
+                        </div>
+                        <div class="energy-rating">
+                          <label for="morningEnergy" style="margin:0;">Energy check-in</label>
+                          <input id="morningEnergy" data-field="energy-level" type="range" min="1" max="5" step="1" value="3" />
+                          <span id="morningEnergyLabel">--</span>
+                          <button id="morningEnergySave" type="button">Log energy</button>
+                        </div>
+                        <div class="morning-chart-wrapper">
+                          <canvas
+                            id="morningLaunchChart"
+                            class="chart-canvas"
+                            width="360"
+                            height="160"
+                            role="img"
+                            aria-label="Line chart of morning launch completion and energy trends"
+                          ></canvas>
+                          <div class="chart-legend" aria-hidden="true">
+                            <span><span class="legend-swatch completion"></span>Ready progress</span>
+                            <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
+                          </div>
+                          <div id="morningLaunchChartSummary" class="module-note"></div>
+                        </div>
+                        <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="routine-tile__content">
-                <div class="module-body" data-routine-content>
-                  <div class="module-toggle">
-                    <label for="morningLaunchToggle">Enable Morning Launch</label>
-                    <input type="checkbox" id="morningLaunchToggle" />
+            </article>
+
+            <article
+              id="launchPadModule"
+              class="routine-tile"
+              data-module-id="launchPadModule"
+              data-routine-id="environment"
+              role="group"
+              aria-label="Launch Pad"
+            >
+              <div class="routine-tile__surface routine-theme--environment" data-routine-surface>
+                <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+                  <span class="routine-accent" aria-hidden="true">
+                    <span class="routine-accent__icon" data-accent-icon>🚀</span>
+                  </span>
+                  <div class="routine-tile__info">
+                    <span class="routine-tile__title" data-routine-title>🚀 Launch Pad</span>
+                    <span class="routine-tile__prompt" data-routine-prompt>Tap to reset your surroundings.</span>
                   </div>
-                  <div class="routine-affirmation">No-phone pledge: leave your device in another room overnight and wake up with an analog alarm.</div>
-                  <div id="morningLaunchContent" class="hidden" aria-hidden="true">
-                    <div class="progress-strip" aria-hidden="true">
-                      <span id="morningLaunchProgress"></span>
+                  <div class="routine-tile__meta">
+                    <span class="routine-info-dot" title="Curate a nightly launch pad so tomorrow starts calm, stocked, and on time." aria-hidden="true">i</span>
+                    <span class="routine-reminder" data-routine-reminder></span>
+                    <span class="routine-tile__chevron" aria-hidden="true"></span>
+                  </div>
+                </button>
+                <div class="routine-quick-overlay" data-routine-quick-overlay>
+                  <div class="routine-quick-overlay__content">
+                    <h3 class="routine-quick-overlay__title">Launch Pad Preview</h3>
+                    <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                    <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+                  </div>
+                </div>
+                <div class="routine-tile__body" data-routine-body hidden>
+                  <div class="routine-tile__actions">
+                    <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                    <div class="routine-quick-actions" role="group" aria-label="Launch Pad quick actions">
+                      <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                      <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                      <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
                     </div>
-                    <div id="morningLaunchStatus" class="score"></div>
-                    <div class="module-inline-actions">
-                      <button id="morningLaunchResetBtn" type="button">Reset morning blocks</button>
-                      <button id="morningLaunchSkipBtn" type="button">Skip today</button>
-                    </div>
-                    <div class="morning-blocks">
-                      <article class="routine-block" data-block="move">
-                        <h3>MOVE — Light Aerobic + Sunlight</h3>
-                        <small>Take a brisk walk, 50 jumping jacks, and soak in 5 minutes of direct sunlight.</small>
-                        <div class="countdown-display" id="moveCountdown">20:00</div>
-                        <div class="module-inline-actions">
-                          <button id="moveStartBtn" type="button">Start 20-min timer</button>
-                          <button id="moveCompleteBtn" type="button">Mark MOVE complete</button>
-                        </div>
-                      </article>
-                      <article class="routine-block" data-block="reflect">
-                        <h3>REFLECT — Cold Splash + Intention</h3>
-                        <small>Reset with a cold rinse, then name the tone for your day.</small>
-                        <div class="intention-buttons">
-                          <button type="button" data-intention="Calm &amp; steady">Calm &amp; steady</button>
-                          <button type="button" data-intention="Playful &amp; connected">Playful &amp; connected</button>
-                          <button type="button" data-intention="Focused craftsmanship">Focused craftsmanship</button>
-                        </div>
-                        <label for="morningIntention" style="margin:0;">
-                          <textarea id="morningIntention" rows="2" placeholder="How do I want today to feel? What would make it meaningful?" style="margin-top:0.35rem;"></textarea>
+                  </div>
+                  <div class="routine-tile__content">
+                    <div class="module-body" data-routine-content>
+                      <div class="module-toggle">
+                        <label for="launchPadReminderTime">Reminder time</label>
+                        <input type="time" id="launchPadReminderTime" />
+                      </div>
+                      <div class="launch-pad-summary" id="launchPadSummary"></div>
+                      <div class="module-inline-actions">
+                        <button id="openLaunchPadModal" type="button">Evening checklist</button>
+                        <button id="launchPadMorningReview" type="button">Morning review</button>
+                      </div>
+                      <div class="launch-pad-settings">
+                        <label for="launchPadSiteSelect">Clinic / environment
+                          <select id="launchPadSiteSelect"></select>
                         </label>
                         <div class="module-inline-actions">
-                          <button id="reflectCompleteBtn" type="button">Save intention</button>
+                          <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
+                          <button id="launchPadAddItem" type="button">Add Item</button>
+                          <button id="launchPadLoadPreset" type="button">Reset to preset</button>
                         </div>
-                      </article>
-                      <article class="routine-block" data-block="plan">
-                        <h3>PLAN — Process Anchors</h3>
-                        <small>Lock in process-based actions and block time before the day takes over.</small>
-                        <textarea id="morningPlanNotes" rows="2" placeholder="Ex: Draft progress notes for 2 patients before noon."></textarea>
-                        <div class="module-inline-actions">
-                          <button id="planCompleteBtn" type="button">Plan locked in</button>
-                        </div>
-                      </article>
-                    </div>
-                    <div class="energy-rating">
-                      <label for="morningEnergy" style="margin:0;">Energy check-in</label>
-                      <input id="morningEnergy" data-field="energy-level" type="range" min="1" max="5" step="1" value="3" />
-                      <span id="morningEnergyLabel">--</span>
-                      <button id="morningEnergySave" type="button">Log energy</button>
-                    </div>
-                    <div class="morning-chart-wrapper">
-                      <canvas
-                        id="morningLaunchChart"
-                        class="chart-canvas"
-                        width="360"
-                        height="160"
-                        role="img"
-                        aria-label="Line chart of morning launch completion and energy trends"
-                      ></canvas>
-                      <div class="chart-legend" aria-hidden="true">
-                        <span><span class="legend-swatch completion"></span>Ready progress</span>
-                        <span><span class="legend-swatch energy"></span>Energy (1–5 scaled)</span>
+                        <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
                       </div>
-                      <div id="morningLaunchChartSummary" class="module-note"></div>
                     </div>
-                    <ul id="morningLaunchHistory" class="history-list" aria-live="polite"></ul>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </article>
+            </article>
 
-        <article
-          id="launchPadModule"
-          class="routine-tile"
-          data-module-id="launchPadModule"
-          data-routine-id="environment"
-          role="group"
-          aria-label="Environmental Reminders and Launch Pads"
-        >
-          <div class="routine-tile__surface routine-theme--environment" data-routine-surface>
-            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
-              <span class="routine-accent" aria-hidden="true">
-                <span class="routine-accent__icon" data-accent-icon>🚀</span>
-              </span>
-              <div class="routine-tile__info">
-                <span class="routine-tile__title" data-routine-title>🚀 Environmental Reminders &amp; Launch Pads</span>
-                <span class="routine-tile__prompt" data-routine-prompt>Tap to reset your surroundings.</span>
-              </div>
-              <div class="routine-tile__meta">
-                <span class="routine-info-dot" title="Curate a nightly launch pad so tomorrow starts calm, stocked, and on time." aria-hidden="true">i</span>
-                <span class="routine-reminder" data-routine-reminder></span>
-                <span class="routine-tile__chevron" aria-hidden="true"></span>
-              </div>
-            </button>
-            <div class="routine-quick-overlay" data-routine-quick-overlay>
-              <div class="routine-quick-overlay__content">
-                <h3 class="routine-quick-overlay__title">Environmental Reset Preview</h3>
-                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
-                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
-              </div>
-            </div>
-            <div class="routine-tile__body" data-routine-body hidden>
-              <div class="routine-tile__actions">
-                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
-                <div class="routine-quick-actions" role="group" aria-label="Environmental routine quick actions">
-                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
-                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
-                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
+            <article
+              id="sleepToolkitModule"
+              class="routine-tile"
+              data-module-id="sleepToolkitModule"
+              data-routine-id="sleep"
+              role="group"
+              aria-label="Sleep Toolkit"
+            >
+              <div class="routine-tile__surface routine-theme--sleep" data-routine-surface>
+                <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+                  <span class="routine-accent" aria-hidden="true">
+                    <span class="routine-accent__icon" data-accent-icon>😴</span>
+                  </span>
+                  <div class="routine-tile__info">
+                    <span class="routine-tile__title" data-routine-title>😴 Sleep Toolkit</span>
+                    <span class="routine-tile__prompt" data-routine-prompt>Wind down mode is ready.</span>
+                  </div>
+                  <div class="routine-tile__meta">
+                    <span class="routine-info-dot" title="Stabilize melatonin and cortisol rhythms with gentle wind-down and light cues." aria-hidden="true">i</span>
+                    <span class="routine-reminder" data-routine-reminder></span>
+                    <span class="routine-tile__chevron" aria-hidden="true"></span>
+                  </div>
+                </button>
+                <div class="routine-quick-overlay" data-routine-quick-overlay>
+                  <div class="routine-quick-overlay__content">
+                    <h3 class="routine-quick-overlay__title">Sleep Toolkit Preview</h3>
+                    <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                    <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+                  </div>
                 </div>
-              </div>
-              <div class="routine-tile__content">
-                <div class="module-body" data-routine-content>
-                  <div class="module-toggle">
-                    <label for="launchPadReminderTime">Reminder time</label>
-                    <input type="time" id="launchPadReminderTime" />
-                  </div>
-                  <div class="launch-pad-summary" id="launchPadSummary"></div>
-                  <div class="module-inline-actions">
-                    <button id="openLaunchPadModal" type="button">Evening checklist</button>
-                    <button id="launchPadMorningReview" type="button">Morning review</button>
-                  </div>
-                  <div class="launch-pad-settings">
-                    <label for="launchPadSiteSelect">Clinic / environment
-                      <select id="launchPadSiteSelect"></select>
-                    </label>
-                    <div class="module-inline-actions">
-                      <input type="text" id="launchPadNewItem" placeholder="Add launch pad item" />
-                      <button id="launchPadAddItem" type="button">Add Item</button>
-                      <button id="launchPadLoadPreset" type="button">Reset to preset</button>
+                <div class="routine-tile__body" data-routine-body hidden>
+                  <div class="routine-tile__actions">
+                    <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                    <div class="routine-quick-actions" role="group" aria-label="Sleep Toolkit quick actions">
+                      <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                      <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                      <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
                     </div>
-                    <div id="launchPadItemList" class="launch-pad-list" aria-live="polite"></div>
+                  </div>
+                  <div class="routine-tile__content">
+                    <div class="module-body" data-routine-content>
+                      <div class="module-toggle">
+                        <label for="sleepToolkitToggle">Enable toolkit</label>
+                        <input type="checkbox" id="sleepToolkitToggle" />
+                      </div>
+                      <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
+                        <div class="sleep-checklist" id="sleepChecklist"></div>
+                        <div id="sleepCompletionSummary" class="sleep-summary"></div>
+                        <div id="sleepMorningRating" class="energy-rating"></div>
+                        <div id="sleepCorrelationSummary" class="sleep-summary"></div>
+                        <div class="sleep-tips" id="sleepTips"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </article>
+            </article>
 
-        <article
-          id="sleepToolkitModule"
-          class="routine-tile"
-          data-module-id="sleepToolkitModule"
-          data-routine-id="sleep"
-          role="group"
-          aria-label="Sleep and Circadian Rhythm Toolkit"
-        >
-          <div class="routine-tile__surface routine-theme--sleep" data-routine-surface>
-            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
-              <span class="routine-accent" aria-hidden="true">
-                <span class="routine-accent__icon" data-accent-icon>😴</span>
-              </span>
-              <div class="routine-tile__info">
-                <span class="routine-tile__title" data-routine-title>😴 Sleep &amp; Circadian Rhythm Toolkit</span>
-                <span class="routine-tile__prompt" data-routine-prompt>Wind down mode is ready.</span>
-              </div>
-              <div class="routine-tile__meta">
-                <span class="routine-info-dot" title="Stabilize melatonin and cortisol rhythms with gentle wind-down and light cues." aria-hidden="true">i</span>
-                <span class="routine-reminder" data-routine-reminder></span>
-                <span class="routine-tile__chevron" aria-hidden="true"></span>
-              </div>
-            </button>
-            <div class="routine-quick-overlay" data-routine-quick-overlay>
-              <div class="routine-quick-overlay__content">
-                <h3 class="routine-quick-overlay__title">Sleep Toolkit Preview</h3>
-                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
-                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
-              </div>
-            </div>
-            <div class="routine-tile__body" data-routine-body hidden>
-              <div class="routine-tile__actions">
-                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
-                <div class="routine-quick-actions" role="group" aria-label="Sleep routine quick actions">
-                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
-                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
-                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
-                </div>
-              </div>
-              <div class="routine-tile__content">
-                <div class="module-body" data-routine-content>
-                  <div class="module-toggle">
-                    <label for="sleepToolkitToggle">Enable toolkit</label>
-                    <input type="checkbox" id="sleepToolkitToggle" />
+            <article
+              id="dopamineModule"
+              class="routine-tile"
+              data-module-id="dopamineModule"
+              data-routine-id="dopamine"
+              role="group"
+              aria-label="Dopa-Me"
+            >
+              <div class="routine-tile__surface routine-theme--dopamine" data-routine-surface>
+                <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
+                  <span class="routine-accent" aria-hidden="true">
+                    <span class="routine-accent__icon" data-accent-icon>🎵</span>
+                  </span>
+                  <div class="routine-tile__info">
+                    <span class="routine-tile__title" data-routine-title>🎵 Dopa-Me</span>
+                    <span class="routine-tile__prompt" data-routine-prompt>Train focus with a 5-min win.</span>
                   </div>
-                  <div id="sleepToolkitContent" class="hidden" aria-hidden="true">
-                    <div class="sleep-checklist" id="sleepChecklist"></div>
-                    <div id="sleepCompletionSummary" class="sleep-summary"></div>
-                    <div class="module-inline-actions">
-                      <label for="melatoninReminderToggle" style="flex:1;">
-                        <input type="checkbox" id="melatoninReminderToggle" /> Melatonin reminder
-                      </label>
-                      <label for="melatoninReminderTime" style="margin:0;">Time
-                        <input type="time" id="melatoninReminderTime" />
-                      </label>
+                  <div class="routine-tile__meta">
+                    <span class="routine-info-dot" title="Stretch reward intervals with a playlist of micro-celebrations." aria-hidden="true">i</span>
+                    <span class="routine-reminder" data-routine-reminder></span>
+                    <span class="routine-tile__chevron" aria-hidden="true"></span>
+                  </div>
+                </button>
+                <div class="routine-quick-overlay" data-routine-quick-overlay>
+                  <div class="routine-quick-overlay__content">
+                    <h3 class="routine-quick-overlay__title">Dopa-Me Preview</h3>
+                    <ol class="routine-quick-overlay__list" data-quick-preview></ol>
+                    <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
+                  </div>
+                </div>
+                <div class="routine-tile__body" data-routine-body hidden>
+                  <div class="routine-tile__actions">
+                    <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
+                    <div class="routine-quick-actions" role="group" aria-label="Dopa-Me quick actions">
+                      <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
+                      <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
+                      <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
                     </div>
-                    <div class="module-inline-actions">
-                      <label for="sunlightReminderToggle" style="flex:1;">
-                        <input type="checkbox" id="sunlightReminderToggle" /> Morning sunlight alert
-                      </label>
-                      <label for="sunlightReminderTime" style="margin:0;">Time
-                        <input type="time" id="sunlightReminderTime" />
-                      </label>
+                  </div>
+                  <div class="routine-tile__content">
+                    <div class="module-body" data-routine-content>
+                      <div class="dopamine-playlist">
+                        <label for="dopamineReward">Reward style
+                          <select id="dopamineReward">
+                            <option value="music">Music stinger</option>
+                            <option value="confetti">GIF confetti</option>
+                            <option value="coin">Coin sound</option>
+                            <option value="stretch">Stretch cue</option>
+                          </select>
+                        </label>
+                        <div class="dopamine-intervals" id="dopamineIntervals" aria-live="polite"></div>
+                        <div class="dopamine-progress" aria-hidden="true">
+                          <span id="dopamineProgressFill"></span>
+                        </div>
+                        <div class="conflict-actions">
+                          <button id="dopamineStart" type="button" class="btn btn-primary">Start playlist</button>
+                          <button id="dopamineStop" type="button" class="btn btn-ghost" disabled>Stop</button>
+                        </div>
+                        <div id="dopamineStatus" class="score" aria-live="polite"></div>
+                      </div>
                     </div>
-                    <div id="sunlightAlert" class="sunlight-alert hidden" aria-live="polite"></div>
-                    <div id="sleepMorningRating" class="energy-rating"></div>
-                    <div id="sleepCorrelationSummary" class="sleep-summary"></div>
-                    <div class="sleep-tips" id="sleepTips"></div>
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           </div>
-        </article>
+        </div>
 
         <article
           id="templateModule"
-          class="routine-tile routine-tile--utility"
+          class="routine-tile"
           data-module-id="templateModule"
           data-routine-id="templates"
           role="group"
           aria-label="Templates"
         >
-          <div class="routine-tile__surface routine-theme--utility" data-routine-surface>
+          <div class="routine-tile__surface routine-theme--templates" data-routine-surface>
             <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
               <span class="routine-accent" aria-hidden="true">
                 <span class="routine-accent__icon" data-accent-icon>🧩</span>
@@ -6462,73 +6538,8 @@
             </div>
           </div>
         </article>
-
-        <article
-          id="dopamineModule"
-          class="routine-tile"
-          data-module-id="dopamineModule"
-          data-routine-id="dopamine"
-          role="group"
-          aria-label="Dopamine Retrainer"
-        >
-          <div class="routine-tile__surface routine-theme--dopamine" data-routine-surface>
-            <button class="routine-tile__trigger" type="button" aria-expanded="false" role="button" data-routine-trigger>
-              <span class="routine-accent" aria-hidden="true">
-                <span class="routine-accent__icon" data-accent-icon>🎵</span>
-              </span>
-              <div class="routine-tile__info">
-                <span class="routine-tile__title" data-routine-title>🎵 Dopamine Retrainer</span>
-                <span class="routine-tile__prompt" data-routine-prompt>Train focus with a 5-min win.</span>
-              </div>
-              <div class="routine-tile__meta">
-                <span class="routine-info-dot" title="Stretch reward intervals with a playlist of micro-celebrations." aria-hidden="true">i</span>
-                <span class="routine-reminder" data-routine-reminder></span>
-                <span class="routine-tile__chevron" aria-hidden="true"></span>
-              </div>
-            </button>
-            <div class="routine-quick-overlay" data-routine-quick-overlay>
-              <div class="routine-quick-overlay__content">
-                <h3 class="routine-quick-overlay__title">Dopamine Retrainer Preview</h3>
-                <ol class="routine-quick-overlay__list" data-quick-preview></ol>
-                <button class="routine-quick-overlay__action" type="button" data-quick-launch>Quick Launch</button>
-              </div>
-            </div>
-            <div class="routine-tile__body" data-routine-body hidden>
-              <div class="routine-tile__actions">
-                <button class="routine-start-btn start-action" type="button" data-routine-start>Start Routine</button>
-                <div class="routine-quick-actions" role="group" aria-label="Dopamine retrainer quick actions">
-                  <button class="routine-chip" type="button" data-quick-action="refresh">Refresh</button>
-                  <button class="routine-chip" type="button" data-quick-action="adjust">Adjust</button>
-                  <button class="routine-chip" type="button" data-quick-action="stuck">I'm stuck</button>
-                </div>
-              </div>
-              <div class="routine-tile__content">
-                <div class="module-body" data-routine-content>
-                  <div class="dopamine-playlist">
-                    <label for="dopamineReward">Reward style
-                      <select id="dopamineReward">
-                        <option value="music">Music stinger</option>
-                        <option value="confetti">GIF confetti</option>
-                        <option value="coin">Coin sound</option>
-                        <option value="stretch">Stretch cue</option>
-                      </select>
-                    </label>
-                    <div class="dopamine-intervals" id="dopamineIntervals" aria-live="polite"></div>
-                    <div class="dopamine-progress" aria-hidden="true">
-                      <span id="dopamineProgressFill"></span>
-                    </div>
-                    <div class="conflict-actions">
-                      <button id="dopamineStart" type="button" class="btn btn-primary">Start playlist</button>
-                      <button id="dopamineStop" type="button" class="btn btn-ghost" disabled>Stop</button>
-                    </div>
-                    <div id="dopamineStatus" class="score" aria-live="polite"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>      <div id="routineEditSheet" class="routine-sheet" role="dialog" aria-modal="true" aria-labelledby="routineEditTitle">
+      </div>
+      <div id="routineEditSheet" class="routine-sheet" role="dialog" aria-modal="true" aria-labelledby="routineEditTitle">
         <div class="routine-sheet__scrim" data-routine-sheet-dismiss></div>
         <div class="routine-sheet__panel" role="document">
           <h3 id="routineEditTitle" class="routine-sheet__title">Edit routine</h3>
@@ -7238,7 +7249,7 @@
     {
       id: "morning",
       moduleId: "morningLaunchModule",
-      title: "Morning Launch Sequence",
+      title: "AM Start",
       emoji: "🌅",
       microPrompt: "Ready for takeoff? Start your day ritual.",
       defaultSteps: [
@@ -7258,7 +7269,7 @@
     {
       id: "environment",
       moduleId: "launchPadModule",
-      title: "Environmental Reminders & Launch Pads",
+      title: "Launch Pad",
       emoji: "🚀",
       microPrompt: "Tap to reset your surroundings.",
       defaultSteps: [
@@ -7278,7 +7289,7 @@
     {
       id: "sleep",
       moduleId: "sleepToolkitModule",
-      title: "Sleep & Circadian Rhythm Toolkit",
+      title: "Sleep Toolkit",
       emoji: "😴",
       microPrompt: "Wind down mode is ready.",
       defaultSteps: [
@@ -7318,7 +7329,7 @@
     {
       id: "dopamine",
       moduleId: "dopamineModule",
-      title: "Dopamine Retrainer",
+      title: "Dopa-Me",
       emoji: "🎵",
       microPrompt: "Train focus with a 5-min win.",
       defaultSteps: [
