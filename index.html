@@ -16509,29 +16509,43 @@ body.all-tasks-overlay-active {
   }
 
   function openAllTasksOverlay() {
-    const overlay = $("allTasksOverlay");
-    if (!overlay || !overlay.classList.contains("hidden")) return;
-    const sheet = overlay.querySelector(".all-tasks-overlay__sheet");
-    const trigger = $("openAllTasksButton");
-    lastFocusedBeforeAllTasksOverlay = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : trigger;
-    overlay.classList.remove("hidden");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("all-tasks-overlay-active");
-    if (trigger) {
-      trigger.setAttribute("aria-expanded", "true");
-      trigger.classList.add("is-active");
-      trigger.setAttribute("aria-current", "true");
-    }
-    setAllTasksAccordionOpen(true, { skipPersist: true, skipSync: true });
-    window.requestAnimationFrame(() => {
-      if (sheet && typeof sheet.focus === "function") {
-        sheet.focus();
-      }
-    });
-    document.addEventListener("keydown", handleAllTasksOverlayKeydown);
+  const overlay = document.getElementById("allTasksOverlay");
+  const trigger = document.getElementById("openAllTasksButton");
+
+  if (!overlay || !overlay.classList.contains("hidden")) return;
+
+  overlay.classList.remove("hidden");
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("all-tasks-overlay-active");
+
+  if (trigger) {
+    trigger.setAttribute("aria-expanded", "true");
+    trigger.classList.add("is-active");
   }
+
+  const sheet = overlay.querySelector(".all-tasks-overlay__sheet");
+  if (sheet && typeof sheet.focus === "function") sheet.focus();
+}
+
+function closeAllTasksOverlay() {
+  const overlay = document.getElementById("allTasksOverlay");
+  const trigger = document.getElementById("openAllTasksButton");
+
+  if (!overlay || overlay.classList.contains("hidden")) return;
+
+  overlay.classList.add("hidden");
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("all-tasks-overlay-active");
+
+  if (trigger) {
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.classList.remove("is-active");
+    trigger.focus();
+  }
+}
+
+document.getElementById("openAllTasksButton").addEventListener("click", openAllTasksOverlay);
+document.getElementById("closeAllTasksOverlay").addEventListener("click", closeAllTasksOverlay);
 
   function closeAllTasksOverlay({ restoreFocus = true } = {}) {
     const overlay = $("allTasksOverlay");
