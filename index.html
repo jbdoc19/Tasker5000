@@ -1457,7 +1457,7 @@
     .peek summary { cursor: pointer; }
     .task-list-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 0.75rem;
       flex-wrap: wrap;
@@ -1468,6 +1468,25 @@
 
     .task-list-header > * {
       min-width: 0;
+    }
+
+    .task-filter-field {
+      position: relative;
+      display: block;
+      flex: 1 1 clamp(160px, 30%, 220px);
+      min-width: 140px;
+    }
+
+    .task-filter-field__title {
+      position: absolute;
+      inset-inline-start: 0.75rem;
+      inset-block-start: 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--text-secondary);
+      pointer-events: none;
+      line-height: 1.1;
     }
     .ready-to-launch {
       display: grid;
@@ -1499,16 +1518,20 @@
       padding: 0.35rem 0.5rem;
       border-radius: 4px;
     }
-    .task-view-label {
-      color: #a0a0a0;
-      font-size: 0.85rem;
-    }
     .task-view-select {
-      background: #1a1a1a;
-      color: #eee;
-      border: 1px solid #444;
-      padding: 0.35rem 0.5rem;
-      border-radius: 4px;
+      width: 100%;
+      background: rgba(15, 21, 30, 0.92);
+      color: var(--text-primary);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      padding: 1.25rem 0.75rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+
+    .task-view-select:focus-visible {
+      outline: none;
+      border-color: rgba(45, 212, 195, 0.55);
+      box-shadow: 0 0 0 3px rgba(45, 212, 195, 0.25);
     }
     .task-card {
       background: #1a1a1a;
@@ -4063,9 +4086,10 @@
       position: fixed;
       inset: 0;
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
-      padding: clamp(0.75rem, 5vw, 2.75rem);
+      padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+        max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
       z-index: 130;
     }
 
@@ -4078,15 +4102,18 @@
 
     .all-tasks-overlay__sheet {
       position: relative;
-      width: min(96vw, 760px);
-      max-height: clamp(360px, 92vh, 840px);
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      min-width: 0;
+      min-height: 0;
       border-radius: 28px;
       border: 1px solid rgba(148, 163, 184, 0.28);
       background: rgba(13, 19, 27, 0.96);
       box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
       display: flex;
       flex-direction: column;
-      padding: clamp(1rem, 3vw, 1.5rem);
+      padding: clamp(1rem, 3vw, 1.6rem);
       overflow: hidden;
     }
 
@@ -7813,19 +7840,25 @@
           </button>
           <div class="all-tasks-panel" data-all-tasks-panel hidden aria-hidden="true">
             <div class="task-list-header" id="taskListHeader">
-              <label class="task-view-label" for="taskViewMode">View</label>
-              <select id="taskViewMode" class="task-view-select">
-                <option value="active" selected>Active Tasks</option>
-                <option value="completed">Completed Tasks</option>
-              </select>
-              <label class="task-view-label" for="taskCategoryFilter">Category</label>
-              <select id="taskCategoryFilter" class="task-view-select"></select>
-              <label class="task-view-label" for="taskSortMode">Sort</label>
-              <select id="taskSortMode" class="task-view-select">
-                <option value="priority" selected>Priority</option>
-                <option value="date-added-desc">Date added (newest)</option>
-                <option value="date-due-asc">Due date (soonest)</option>
-              </select>
+              <label class="task-filter-field">
+                <span class="task-filter-field__title">View</span>
+                <select id="taskViewMode" class="task-view-select">
+                  <option value="active" selected>Active Tasks</option>
+                  <option value="completed">Completed Tasks</option>
+                </select>
+              </label>
+              <label class="task-filter-field">
+                <span class="task-filter-field__title">Category</span>
+                <select id="taskCategoryFilter" class="task-view-select"></select>
+              </label>
+              <label class="task-filter-field">
+                <span class="task-filter-field__title">Sort</span>
+                <select id="taskSortMode" class="task-view-select">
+                  <option value="priority" selected>Priority</option>
+                  <option value="date-added-desc">Date added (newest)</option>
+                  <option value="date-due-asc">Due date (soonest)</option>
+                </select>
+              </label>
               <label class="time-budget-control" for="timeBudget">
                 I have
                 <select id="timeBudget" data-field="time-budget">
