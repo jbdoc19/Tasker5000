@@ -5891,10 +5891,17 @@
     }
 
     .all-tasks-panel {
-      padding: var(--space-3) var(--space-2);
-      display: grid;
-      gap: var(--space-3);
-      margin-top: 1rem;
+  padding: var(--space-3) var(--space-2);
+  display: grid;
+  gap: var(--space-3);
+  max-height: clamp(400px, 70vh, 600px);  /* Flexible but constrained */
+  overflow-y: auto;
+}
+
+/* Optional: Smooth scrolling */
+.all-tasks-panel {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;  /* For iOS momentum scrolling */
     }
 
     .all-tasks-panel.is-highlighted {
