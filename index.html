@@ -4059,7 +4059,82 @@
       font-size: 0.95rem;
     }
 
-    body.focus-overlay-active {
+    .all-tasks-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0.75rem, 5vw, 2.75rem);
+      z-index: 130;
+    }
+
+    .all-tasks-overlay__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 12, 18, 0.72);
+      backdrop-filter: blur(8px);
+    }
+
+    .all-tasks-overlay__sheet {
+      position: relative;
+      width: min(96vw, 760px);
+      max-height: clamp(360px, 92vh, 840px);
+      border-radius: 28px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(13, 19, 27, 0.96);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      padding: clamp(1rem, 3vw, 1.5rem);
+      overflow: hidden;
+    }
+
+    .all-tasks-overlay__body {
+      position: relative;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      margin: 0;
+      padding-top: clamp(0.5rem, 2vw, 0.75rem);
+      padding-bottom: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .all-tasks-overlay__close {
+      position: absolute;
+      top: clamp(0.65rem, 3vw, 1rem);
+      right: clamp(0.65rem, 3vw, 1rem);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(17, 24, 32, 0.85);
+      color: rgba(226, 232, 240, 0.9);
+      width: 2.25rem;
+      height: 2.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+      z-index: 2;
+    }
+
+    .all-tasks-overlay__close:hover,
+    .all-tasks-overlay__close:focus-visible {
+      background: rgba(31, 41, 55, 0.95);
+      color: #fff;
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    .all-tasks-overlay .card {
+      margin: 0;
+    }
+
+    .all-tasks-overlay .all-tasks-panel {
+      max-height: none;
+    }
+
+    body.focus-overlay-active,
+    body.all-tasks-overlay-active {
       overflow: hidden;
     }
 
@@ -6655,52 +6730,6 @@
       </section>
 
 
-      <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
-        <button
-          class="all-tasks-toggle"
-          type="button"
-          data-all-tasks-toggle
-          aria-expanded="false"
-          data-all-tasks-heading
-        >
-          <span class="all-tasks-toggle__title" data-all-tasks-title>All Tasks</span>
-          <span class="all-tasks-toggle__meta">
-            <span data-all-tasks-category>All categories</span>
-            <span class="all-tasks-header__divider" data-all-tasks-divider aria-hidden="true">•</span>
-            <span data-all-tasks-summary-text>0 active</span>
-          </span>
-          <span class="all-tasks-toggle__chevron" aria-hidden="true">▸</span>
-        </button>
-        <div class="all-tasks-panel" data-all-tasks-panel hidden aria-hidden="true">
-            <div class="task-list-header" id="taskListHeader">
-              <label class="task-view-label" for="taskViewMode">View</label>
-              <select id="taskViewMode" class="task-view-select">
-                <option value="active" selected>Active Tasks</option>
-                <option value="completed">Completed Tasks</option>
-              </select>
-              <label class="task-view-label" for="taskCategoryFilter">Category</label>
-              <select id="taskCategoryFilter" class="task-view-select"></select>
-              <label class="time-budget-control" for="timeBudget">
-                I have
-                <select id="timeBudget" data-field="time-budget">
-                  <option value="">--</option>
-                  <option value="15">15</option>
-                  <option value="30">30</option>
-                  <option value="60">60</option>
-                </select>
-                minutes
-              </label>
-            </div>
-            <div class="ready-to-launch">
-              <div class="task-section-head">
-                <h3 class="task-section-title" data-ready-to-launch-title>Ready to Launch</h3>
-              </div>
-              <div id="taskList"></div>
-              <button id="readyToLaunchMoreBtn" class="task-list-more-btn" type="button" aria-hidden="true">Show 5 more</button>
-          </div>
-        </div>
-      </section>
-
           </div>
         </section>
         <section id="recoveryZone" class="momentum-zone" data-zone="recovery">
@@ -7748,15 +7777,96 @@
     </div>
   </section>
 
+  <section
+    id="allTasksOverlay"
+    class="all-tasks-overlay hidden"
+    aria-hidden="true"
+    data-all-tasks-screen
+  >
+    <div class="all-tasks-overlay__backdrop" data-all-tasks-dismiss></div>
+    <div
+      class="all-tasks-overlay__sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="allTasksOverlayTitle"
+      tabindex="-1"
+    >
+      <button type="button" class="all-tasks-overlay__close" data-all-tasks-close aria-label="Close All Tasks">
+        ✕
+      </button>
+      <div class="all-tasks-overlay__body">
+        <section class="card all-tasks-card" aria-live="polite" data-all-tasks-card>
+          <button
+            class="all-tasks-toggle"
+            type="button"
+            data-all-tasks-toggle
+            aria-expanded="false"
+            data-all-tasks-heading
+          >
+            <span id="allTasksOverlayTitle" class="all-tasks-toggle__title" data-all-tasks-title>All Tasks</span>
+            <span class="all-tasks-toggle__meta">
+              <span data-all-tasks-category>All categories</span>
+              <span class="all-tasks-header__divider" data-all-tasks-divider aria-hidden="true">•</span>
+              <span data-all-tasks-summary-text>0 active</span>
+            </span>
+            <span class="all-tasks-toggle__chevron" aria-hidden="true">▸</span>
+          </button>
+          <div class="all-tasks-panel" data-all-tasks-panel hidden aria-hidden="true">
+            <div class="task-list-header" id="taskListHeader">
+              <label class="task-view-label" for="taskViewMode">View</label>
+              <select id="taskViewMode" class="task-view-select">
+                <option value="active" selected>Active Tasks</option>
+                <option value="completed">Completed Tasks</option>
+              </select>
+              <label class="task-view-label" for="taskCategoryFilter">Category</label>
+              <select id="taskCategoryFilter" class="task-view-select"></select>
+              <label class="task-view-label" for="taskSortMode">Sort</label>
+              <select id="taskSortMode" class="task-view-select">
+                <option value="priority" selected>Priority</option>
+                <option value="date-added-desc">Date added (newest)</option>
+                <option value="date-due-asc">Due date (soonest)</option>
+              </select>
+              <label class="time-budget-control" for="timeBudget">
+                I have
+                <select id="timeBudget" data-field="time-budget">
+                  <option value="">--</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="60">60</option>
+                </select>
+                minutes
+              </label>
+            </div>
+            <div class="ready-to-launch">
+              <div class="task-section-head">
+                <h3 class="task-section-title" data-ready-to-launch-title>Ready to Launch</h3>
+              </div>
+              <div id="taskList"></div>
+              <button id="readyToLaunchMoreBtn" class="task-list-more-btn" type="button" aria-hidden="true">Show 5 more</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
   <nav class="command-bar" aria-label="Momentum shortcuts">
     <a href="#focus-engine" class="command-link">
       <span class="command-link__icon" aria-hidden="true">⚡</span>
       <span>Focus</span>
     </a>
-    <a href="#tasks-zone" class="command-link">
+    <button
+      id="openAllTasksButton"
+      class="command-link"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="allTasksOverlay"
+      aria-expanded="false"
+      data-command-all-tasks="true"
+    >
       <span class="command-link__icon" aria-hidden="true">🩺</span>
       <span>Tasks</span>
-    </a>
+    </button>
     <button
       id="resourcesToggle"
       class="command-link command-link--drawer"
@@ -7780,6 +7890,12 @@
   const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal", QUICK_TASK_CATEGORY];
   let activeCategory = "All";
   const TASK_LIST_MODES = { ACTIVE: "active", COMPLETED: "completed" };
+  const TASK_SORT_MODES = {
+    PRIORITY: "priority",
+    DATE_ADDED_DESC: "date-added-desc",
+    DATE_DUE_ASC: "date-due-asc"
+  };
+  let taskSortMode = TASK_SORT_MODES.PRIORITY;
   let taskListMode = TASK_LIST_MODES.ACTIVE;
   const READY_TO_LAUNCH_INITIAL_COUNT = 3;
   const READY_TO_LAUNCH_INCREMENT = 5;
@@ -7792,6 +7908,7 @@
   let sprintEndTime = null;
   let nextTaskId = null;
   let lastFocusedBeforeTemplateModal = null;
+  let lastFocusedBeforeAllTasksOverlay = null;
   const MODULE_STATE_PREFIX = "moduleState_";
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
@@ -8081,6 +8198,8 @@
     tile.classList.add("routine-tile--open");
     if (trigger) {
       trigger.setAttribute("aria-expanded", "true");
+      trigger.classList.add("is-active");
+      trigger.setAttribute("aria-current", "true");
     }
     window.setTimeout(() => {
       if (tile.classList.contains("routine-tile--open")) {
@@ -8101,6 +8220,8 @@
     tile.classList.remove("routine-tile--open");
     if (trigger) {
       trigger.setAttribute("aria-expanded", "false");
+      trigger.classList.remove("is-active");
+      trigger.removeAttribute("aria-current");
     }
     const currentHeight = body.scrollHeight;
     body.style.maxHeight = `${currentHeight}px`;
@@ -8898,8 +9019,15 @@
   }
 
   function updateCommandLinkStates(activeZoneId) {
+    const overlayActive = document.body.classList.contains("all-tasks-overlay-active");
     const links = document.querySelectorAll(".command-bar .command-link");
     links.forEach(link => {
+      const isAllTasksTrigger = link.dataset.commandAllTasks === "true";
+      if (isAllTasksTrigger && overlayActive) {
+        link.classList.add("is-active");
+        link.setAttribute("aria-current", "true");
+        return;
+      }
       const hash = link.getAttribute("href") || "";
       const targetId = hash.startsWith("#") ? hash.slice(1) : null;
       const anchor = targetId ? document.getElementById(targetId) : null;
@@ -8910,6 +9038,9 @@
         link.setAttribute("aria-current", "true");
       } else {
         link.removeAttribute("aria-current");
+        if (isAllTasksTrigger) {
+          link.classList.remove("is-active");
+        }
       }
     });
   }
@@ -8967,6 +9098,12 @@
     const commandLinks = document.querySelectorAll(".command-bar .command-link");
     commandLinks.forEach(link => {
       link.addEventListener("click", event => {
+        if (link.dataset.commandAllTasks === "true") {
+          return;
+        }
+        if (document.body.classList.contains("all-tasks-overlay-active")) {
+          closeAllTasksOverlay({ restoreFocus: false });
+        }
         const hash = link.getAttribute("href") || "";
         if (!hash.startsWith("#")) return;
         event.preventDefault();
@@ -13925,6 +14062,54 @@
     return details;
   }
 
+  function getTaskCreatedTime(task) {
+    if (!task) return 0;
+    const createdValue = task.createdAt || task.addedAt || null;
+    if (!createdValue) return 0;
+    const createdDate = new Date(createdValue);
+    const timestamp = createdDate.getTime();
+    return Number.isFinite(timestamp) ? timestamp : 0;
+  }
+
+  function getTaskDueTimestamp(task) {
+    if (!task) return Number.POSITIVE_INFINITY;
+    if (task.dueDate) {
+      const dueDate = new Date(`${task.dueDate}T00:00:00`);
+      const dueTime = dueDate.getTime();
+      if (Number.isFinite(dueTime)) return dueTime;
+    }
+    if (task.dateOfService) {
+      const serviceDate = new Date(`${task.dateOfService}T00:00:00`);
+      const serviceTime = serviceDate.getTime();
+      if (Number.isFinite(serviceTime)) {
+        serviceDate.setDate(serviceDate.getDate() + 3);
+        const fallbackTime = serviceDate.getTime();
+        if (Number.isFinite(fallbackTime)) return fallbackTime;
+      }
+    }
+    return Number.POSITIVE_INFINITY;
+  }
+
+  function sortTasksByMode(list, mode) {
+    const items = Array.isArray(list) ? [...list] : [];
+    switch (mode) {
+      case TASK_SORT_MODES.DATE_ADDED_DESC:
+        return items.sort((a, b) => getTaskCreatedTime(b) - getTaskCreatedTime(a));
+      case TASK_SORT_MODES.DATE_DUE_ASC:
+        return items.sort((a, b) => {
+          const aDue = getTaskDueTimestamp(a);
+          const bDue = getTaskDueTimestamp(b);
+          if (aDue === bDue) {
+            return getTaskCreatedTime(b) - getTaskCreatedTime(a);
+          }
+          return aDue - bDue;
+        });
+      case TASK_SORT_MODES.PRIORITY:
+      default:
+        return items.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    }
+  }
+
   function renderTaskListCard(task, mode, timeBudgetMinutes = null) {
     const card = document.createElement("article");
     card.className = "task-card";
@@ -15865,6 +16050,7 @@
   function initializeAllTasksCardState() {
     const cards = getAllTasksCards();
     if (!cards.length) return;
+    const hasStandaloneScreen = cards.some(({ card }) => card?.closest('[data-all-tasks-screen]'));
     cards.forEach(({ toggle, card }) => {
       if (!toggle) return;
       toggle.addEventListener("click", () => {
@@ -15872,6 +16058,10 @@
         setAllTasksAccordionOpen(!expanded, { source: card });
       });
     });
+    if (hasStandaloneScreen) {
+      setAllTasksAccordionOpen(true, { skipPersist: true, skipSync: true });
+      return;
+    }
     let storedState = null;
     try {
       storedState = localStorage.getItem(ALL_TASKS_CARD_STATE_KEY);
@@ -16116,6 +16306,83 @@
       } else {
         resetReadyToLaunchVisibility();
       }
+    }
+  }
+
+  function handleAllTasksOverlayKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeAllTasksOverlay();
+    }
+  }
+
+  function openAllTasksOverlay() {
+    const overlay = $("allTasksOverlay");
+    if (!overlay || !overlay.classList.contains("hidden")) return;
+    const sheet = overlay.querySelector(".all-tasks-overlay__sheet");
+    const trigger = $("openAllTasksButton");
+    lastFocusedBeforeAllTasksOverlay = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : trigger;
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("all-tasks-overlay-active");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "true");
+      trigger.classList.add("is-active");
+      trigger.setAttribute("aria-current", "true");
+    }
+    setAllTasksAccordionOpen(true, { skipPersist: true, skipSync: true });
+    window.requestAnimationFrame(() => {
+      if (sheet && typeof sheet.focus === "function") {
+        sheet.focus();
+      }
+    });
+    document.addEventListener("keydown", handleAllTasksOverlayKeydown);
+  }
+
+  function closeAllTasksOverlay({ restoreFocus = true } = {}) {
+    const overlay = $("allTasksOverlay");
+    if (!overlay || overlay.classList.contains("hidden")) return;
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("all-tasks-overlay-active");
+    const trigger = $("openAllTasksButton");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.classList.remove("is-active");
+      trigger.removeAttribute("aria-current");
+    }
+    document.removeEventListener("keydown", handleAllTasksOverlayKeydown);
+    if (restoreFocus) {
+      const focusTarget = (lastFocusedBeforeAllTasksOverlay && typeof lastFocusedBeforeAllTasksOverlay.focus === "function")
+        ? lastFocusedBeforeAllTasksOverlay
+        : trigger;
+      if (focusTarget && typeof focusTarget.focus === "function") {
+        window.requestAnimationFrame(() => focusTarget.focus());
+      }
+    }
+    lastFocusedBeforeAllTasksOverlay = null;
+  }
+
+  function initializeAllTasksOverlay() {
+    const overlay = $("allTasksOverlay");
+    const trigger = $("openAllTasksButton");
+    if (!overlay || !trigger) return;
+    const closeButton = overlay.querySelector("[data-all-tasks-close]");
+    const backdrop = overlay.querySelector("[data-all-tasks-dismiss]");
+    trigger.addEventListener("click", () => {
+      if (overlay.classList.contains("hidden")) {
+        openAllTasksOverlay();
+      } else {
+        closeAllTasksOverlay();
+      }
+    });
+    if (closeButton) {
+      closeButton.addEventListener("click", () => closeAllTasksOverlay());
+    }
+    if (backdrop) {
+      backdrop.addEventListener("click", () => closeAllTasksOverlay());
     }
   }
 
@@ -17146,6 +17413,12 @@ initializeFocusFabLongPress();
       taskViewSelect.value = taskListMode;
     }
 
+    const sortSelect = $("taskSortMode");
+    if (sortSelect) {
+      const validSortValues = Object.values(TASK_SORT_MODES);
+      sortSelect.value = validSortValues.includes(taskSortMode) ? taskSortMode : TASK_SORT_MODES.PRIORITY;
+    }
+
     const eligibleTasks = tasks.filter(t => activeCategory === "All" || t.category === activeCategory);
     const remaining = eligibleTasks.filter(t => !isTaskCompleted(t));
     const startBtn = $("startBtn");
@@ -17156,22 +17429,28 @@ initializeFocusFabLongPress();
     const timeBudget = getTimeBudgetMinutes();
     const energyLevel = clampScale(getEnergyLevel(), 3);
     const hasTimeBudget = Number.isFinite(timeBudget);
-    const sortedRemaining = [...remaining].sort((a, b) => b.priority - a.priority);
+    const sortedRemaining = sortTasksByMode(remaining, taskSortMode);
     const budgetFilteredRemaining = hasTimeBudget
       ? sortedRemaining.filter(task => estimateTaskMinutes(task) <= timeBudget)
       : sortedRemaining;
 
     const isActiveMode = taskListMode === TASK_LIST_MODES.ACTIVE;
 
-    const allDisplayableTasks = taskListMode === TASK_LIST_MODES.COMPLETED
-      ? eligibleTasks
-          .filter(t => isTaskCompleted(t))
-          .sort((a, b) => {
-            const aDate = getCompletionTimestamp(a) ? new Date(getCompletionTimestamp(a)).getTime() : 0;
-            const bDate = getCompletionTimestamp(b) ? new Date(getCompletionTimestamp(b)).getTime() : 0;
-            return bDate - aDate;
-          })
-      : budgetFilteredRemaining;
+    let allDisplayableTasks;
+    if (taskListMode === TASK_LIST_MODES.COMPLETED) {
+      const completedTasks = eligibleTasks.filter(t => isTaskCompleted(t));
+      if (taskSortMode === TASK_SORT_MODES.PRIORITY) {
+        allDisplayableTasks = [...completedTasks].sort((a, b) => {
+          const aDate = getCompletionTimestamp(a) ? new Date(getCompletionTimestamp(a)).getTime() : 0;
+          const bDate = getCompletionTimestamp(b) ? new Date(getCompletionTimestamp(b)).getTime() : 0;
+          return bDate - aDate;
+        });
+      } else {
+        allDisplayableTasks = sortTasksByMode(completedTasks, taskSortMode);
+      }
+    } else {
+      allDisplayableTasks = budgetFilteredRemaining;
+    }
 
     const visibleCount = isActiveMode
       ? Math.min(readyToLaunchVisibleCount, allDisplayableTasks.length)
@@ -18106,6 +18385,18 @@ initializeFocusFabLongPress();
     });
   }
 
+  function registerTaskSortControl() {
+    const sortSelect = $("taskSortMode");
+    if (!sortSelect) return;
+    sortSelect.addEventListener("change", event => {
+      const value = String(event.target.value || TASK_SORT_MODES.PRIORITY);
+      const validValues = Object.values(TASK_SORT_MODES);
+      taskSortMode = validValues.includes(value) ? value : TASK_SORT_MODES.PRIORITY;
+      resetReadyToLaunchVisibility();
+      updateUI();
+    });
+  }
+
   function registerReadyToLaunchControl() {
     const showMoreBtn = $("readyToLaunchMoreBtn");
     if (!showMoreBtn) return;
@@ -18207,6 +18498,7 @@ initializeFocusFabLongPress();
     initializePreflightToggles();
     initializeDueTodayAccordionState();
     initializeAllTasksCardState();
+    initializeAllTasksOverlay();
     initializeFocusLaunchSheet();
     initializeQuickCaptureModal();
     initializeSettingsMenu();
@@ -18262,6 +18554,7 @@ initializeFocusFabLongPress();
       }));
     }
     registerCategoryFilterControl();
+    registerTaskSortControl();
     setupStartRewardObserver();
     startReminderLoop();
     renderTemplates();
