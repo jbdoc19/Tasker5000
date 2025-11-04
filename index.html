@@ -1466,7 +1466,34 @@
       width: 100%;
       min-width: 0;
     }
+/* ------------------------------
+ * Full-screen All Tasks overlay
+ * ------------------------------ */
+#focus.focus-overlay,
+.focus-overlay {
+  position: fixed;
+  inset: 8px;                 /* 8px safe area on all sides */
+  margin: 0;
+  width: auto;
+  height: auto;
+  max-width: none;            /* remove global caps */
+  max-height: none;
+  display: flex;
+  align-items: stretch;
+  z-index: 1000;
+  background: transparent;    /* sheet provides the surface */
+}
 
+/* Ensure the inner sheet actually fills the container */
+.focus-overlay__sheet {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 16px;        /* keep rounded floating-sheet style */
+  overflow: auto;
+  box-shadow: 0 0 24px rgba(0,0,0,0.5);
+}
     .task-list-header > * {
       min-width: 0;
     }
@@ -6496,6 +6523,15 @@
 *[class*="focus"], *[id*="focus"] {
   outline: 3px solid red !important;
   background-color: rgba(255, 0, 0, 0.05) !important;
+  /* ------------------------------
+ * Home screen: 8px horizontal margins
+ * ------------------------------ */
+@media (max-width: 540px) {
+  .starter-stack,
+  .routine-stack {
+    padding-inline: 8px;
+  }
+}
 }
   </style>
 </head>
