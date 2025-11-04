@@ -6457,6 +6457,12 @@
   from { background-position: 0 0; }
   to { background-position: 200% 0; }
 }
+    /* DEBUG: outline all overlay containers in red */
+*[class*="overlay"], *[id*="overlay"], 
+*[class*="focus"], *[id*="focus"] {
+  outline: 3px solid red !important;
+  background-color: rgba(255, 0, 0, 0.05) !important;
+}
   </style>
 </head>
 <body>
