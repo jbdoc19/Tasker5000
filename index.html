@@ -4088,8 +4088,7 @@
       display: flex;
       align-items: stretch;
       justify-content: center;
-      padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
-        max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+      padding: clamp(0.5rem, 4vw, 2.25rem);
       z-index: 130;
     }
 
@@ -4102,11 +4101,8 @@
 
     .all-tasks-overlay__sheet {
       position: relative;
-      width: 100%;
-      max-width: 100%;
-      max-height: 100%;
-      min-width: 0;
-      min-height: 0;
+      width: min(98vw, 840px);
+      max-height: clamp(420px, 96vh, 940px);
       border-radius: 28px;
       border: 1px solid rgba(148, 163, 184, 0.28);
       background: rgba(13, 19, 27, 0.96);
