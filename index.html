@@ -4116,7 +4116,11 @@
       display: flex;
       align-items: stretch;
       justify-content: center;
-      padding: clamp(0.5rem, 4vw, 2.25rem);
+      --overlay-gutter: 8px;
+      padding-block: calc(env(safe-area-inset-top, 0px) + var(--overlay-gutter))
+        calc(env(safe-area-inset-bottom, 0px) + var(--overlay-gutter));
+      padding-inline: calc(env(safe-area-inset-left, 0px) + var(--overlay-gutter))
+        calc(env(safe-area-inset-right, 0px) + var(--overlay-gutter));
       z-index: 130;
     }
 
@@ -4129,8 +4133,22 @@
 
     .all-tasks-overlay__sheet {
       position: relative;
-      width: min(98vw, 840px);
-      max-height: clamp(420px, 96vh, 940px);
+      width: min(
+        calc(
+          100vw - 2 * var(--overlay-gutter) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)
+        ),
+        840px
+      );
+      max-width: 100%;
+      height: calc(
+        100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+      );
+      min-height: calc(
+        100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+      );
+      max-height: calc(
+        100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+      );
       border-radius: 28px;
       border: 1px solid rgba(148, 163, 184, 0.28);
       background: rgba(13, 19, 27, 0.96);
@@ -4139,6 +4157,18 @@
       flex-direction: column;
       padding: clamp(1rem, 3vw, 1.6rem);
       overflow: hidden;
+    }
+
+    @media (min-width: 900px) {
+      .all-tasks-overlay {
+        --overlay-gutter: clamp(0.5rem, 4vw, 2.25rem);
+      }
+
+      .all-tasks-overlay__sheet {
+        height: auto;
+        min-height: auto;
+        max-height: clamp(420px, 96vh, 940px);
+      }
     }
 
     .all-tasks-overlay__body {
