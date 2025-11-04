@@ -6457,6 +6457,39 @@
   from { background-position: 0 0; }
   to { background-position: 200% 0; }
 }
+    /* === FULL-SCREEN ALL TASKS OVERLAY === */
+#focus.focus-overlay,
+.focus-overlay {
+  position: fixed;              /* make it span the viewport */
+  inset: 8px;                   /* 8px margin on all sides */
+  margin: 0;                    /* remove extra centering margins */
+  width: auto;
+  height: auto;
+  max-width: none;              /* remove width caps */
+  max-height: none;             /* remove height caps */
+  border-radius: 16px;          /* keep soft rounded corners */
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.5); /* preserve floating-sheet look */
+  background-color: var(--surface, rgba(20, 24, 32, 0.96)); /* same dark base */
+  overflow: auto;               /* scroll within overlay if needed */
+  z-index: 1000;                /* stay above page content */
+}
+
+/* === HOME SCREEN CARD SPACING === */
+.focus-command-deck,
+.quick-add,
+.quick-tasks,
+.title-card {
+  margin-inline: 8px;           /* left & right spacing */
+  border-radius: 16px;          /* preserve rounded corners */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); /* subtle depth */
+}
+
+/* (Optional) If your main container or grid cancels card margins: */
+.main-content,
+.home,
+.page-content {
+  padding-inline: 8px;
+}
     /* DEBUG: outline all overlay containers in red */
 *[class*="overlay"], *[id*="overlay"], 
 *[class*="focus"], *[id*="focus"] {
