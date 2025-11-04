@@ -6566,6 +6566,47 @@
 .focus-overlay__sheet {
   outline: 3px dashed red !important;
 }
+  #allTasksOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(8, 12, 18, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 180; /* just below routine-sheet (200) */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+#allTasksOverlay:not(.hidden) {
+  display: flex;
+}
+
+.all-tasks-overlay__sheet {
+  background: rgba(15, 23, 42, 0.96);
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: min(92vw, 720px);
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #e2e8f0;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.all-tasks-overlay__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body.all-tasks-overlay-active {
+  overflow: hidden; /* prevent scroll bleed */
+}
 }
   </style>
 </head>
@@ -7988,12 +8029,24 @@
       </div>
     </div>
   </section>
+<div id="allTasksOverlay" class="hidden" aria-hidden="true">
+  <div class="all-tasks-overlay__sheet" tabindex="-1">
+    <header class="all-tasks-overlay__header">
+      <h2>All Tasks</h2>
+      <button id="closeAllTasksOverlay" aria-label="Close All Tasks">✖</button>
+    </header>
 
+    <div class="all-tasks-overlay__body">
+      <!-- Your task list goes here -->
+    </div>
+  </div>
+</div>
   <nav class="command-bar" aria-label="Momentum shortcuts">
     <a href="#focus-engine" class="command-link">
       <span class="command-link__icon" aria-hidden="true">⚡</span>
       <span>Focus</span>
     </a>
+
     <button
       id="openAllTasksButton"
       class="command-link"
