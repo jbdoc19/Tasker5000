@@ -5889,13 +5889,21 @@
     .all-tasks-toggle[aria-expanded="true"] .all-tasks-toggle__chevron {
       transform: rotate(90deg);
     }
+  
+.all-tasks-card {
+  max-height: calc(100vh - 200px);  /* Adjust as needed */
+  display: flex;
+  flex-direction: column;
+}
 
-    .all-tasks-panel {
+.all-tasks-panel {
   padding: var(--space-3) var(--space-2);
   display: grid;
   gap: var(--space-3);
-  max-height: clamp(400px, 70vh, 600px);  /* Flexible but constrained */
   overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;  /* Takes remaining space */
+  min-height: 0;  /* Important for flex scrolling */
 }
 
 /* Optional: Smooth scrolling */
