@@ -6560,7 +6560,7 @@
 .focus-overlay__sheet {
   outline: 3px dashed red !important;
 }
-  #AllTasksOverlay {
+  #allTasksOverlay {
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -6574,7 +6574,7 @@
   overflow-y: auto;
 }
 
-#AllTasksOverlay:not(.hidden) {
+#allTasksOverlay:not(.hidden) {
   display: flex;
 }
 
