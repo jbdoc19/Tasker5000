@@ -21,7 +21,7 @@
   let sprintEndTime = null;
   let nextTaskId = null;
   let lastFocusedBeforeTemplateModal = null;
-  let lastFocusedBeforeallTaskOverlay = null;
+  let lastFocusedBeforeAllTasksOverlay = null;
   const MODULE_STATE_PREFIX = "moduleState_";
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
@@ -1215,7 +1215,7 @@
           return;
         }
         if (document.body.classList.contains("all-tasks-overlay-active")) {
-          closeallTaskOverlay({ restoreFocus: false });
+          closeAllTasksOverlay({ restoreFocus: false });
         }
         const hash = link.getAttribute("href") || "";
         if (!hash.startsWith("#")) return;
@@ -8422,15 +8422,15 @@
     }
   }
 
-  function handleallTasksOverlayKeydown(event) {
+  function handleAllTasksOverlayKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
-      closeallTasksOverlay();
+      closeAllTasksOverlay();
     }
   }
 
-  function openallTasksOverlay() {
-  const overlay = document.getElementById("allTasksOverlay");
+  function openAllTasksOverlay() {
+  const overlay = document.getElementById("AllTasksOverlay");
   const trigger = document.getElementById("openAllTasksButton");
 
   if (!overlay || !overlay.classList.contains("hidden")) return;
@@ -8448,8 +8448,8 @@
   if (sheet && typeof sheet.focus === "function") sheet.focus();
 }
 
-function closeallTasksOverlay() {
-  const overlay = document.getElementById("allTasksOverlay");
+function closeAllTasksOverlay() {
+  const overlay = document.getElementById("AllTasksOverlay");
   const trigger = document.getElementById("openAllTasksButton");
 
   if (!overlay || overlay.classList.contains("hidden")) return;
@@ -8465,11 +8465,11 @@ function closeallTasksOverlay() {
   }
 }
 
-document.getElementById("openAllTasksButton").addEventListener("click", openallTaskOverlay);
-document.getElementById("closeallTaskOverlay").addEventListener("click", closeallTaskOverlay);
+document.getElementById("openAllTasksButton").addEventListener("click", openAllTasksOverlay);
+document.getElementById("closeAllTasksOverlay").addEventListener("click", closeAllTasksOverlay);
 
-  function closeallTaskOverlay({ restoreFocus = true } = {}) {
-    const overlay = $("allTasksOverlay");
+  function closeAllTasksOverlay({ restoreFocus = true } = {}) {
+    const overlay = $("AllTasksOverlay");
     if (!overlay || overlay.classList.contains("hidden")) return;
     overlay.classList.add("hidden");
     overlay.setAttribute("aria-hidden", "true");
@@ -8480,36 +8480,36 @@ document.getElementById("closeallTaskOverlay").addEventListener("click", closeal
       trigger.classList.remove("is-active");
       trigger.removeAttribute("aria-current");
     }
-    document.removeEventListener("keydown", handleallTaskOverlayKeydown);
+    document.removeEventListener("keydown", handleAllTasksOverlayKeydown);
     if (restoreFocus) {
-      const focusTarget = (lastFocusedBeforeallTaskOverlay && typeof lastFocusedBeforeallTaskOverlay.focus === "function")
-        ? lastFocusedBeforeallTaskOverlay
+      const focusTarget = (lastFocusedBeforeAllTasksOverlay && typeof lastFocusedBeforeAllTasksOverlay.focus === "function")
+        ? lastFocusedBeforeAllTasksOverlay
         : trigger;
       if (focusTarget && typeof focusTarget.focus === "function") {
         window.requestAnimationFrame(() => focusTarget.focus());
       }
     }
-    lastFocusedBeforeallTaskOverlay = null;
+    lastFocusedBeforeAllTasksOverlay = null;
   }
 
-  function initializeallTaskOverlay() {
-    const overlay = $("allTasksOverlay");
+  function initializeAllTasksOverlay() {
+    const overlay = $("AllTasksOverlay");
     const trigger = $("openAllTasksButton");
     if (!overlay || !trigger) return;
     const closeButton = overlay.querySelector("[data-all-tasks-close]");
     const backdrop = overlay.querySelector("[data-all-tasks-dismiss]");
     trigger.addEventListener("click", () => {
       if (overlay.classList.contains("hidden")) {
-        openallTaskOverlay();
+        openAllTasksOverlay();
       } else {
-        closeallTaskOverlay();
+        closeAllTasksOverlay();
       }
     });
     if (closeButton) {
-      closeButton.addEventListener("click", () => closeallTaskOverlay());
+      closeButton.addEventListener("click", () => closeAllTasksOverlay());
     }
     if (backdrop) {
-      backdrop.addEventListener("click", () => closeallTaskOverlay());
+      backdrop.addEventListener("click", () => closeAllTasksOverlay());
     }
   }
 
@@ -10625,7 +10625,7 @@ initializeFocusFabLongPress();
     initializePreflightToggles();
     initializeDueTodayAccordionState();
     initializeAllTasksCardState();
-    initializeallTaskOverlay();
+    initializeAllTasksOverlay();
     initializeFocusLaunchSheet();
     initializeQuickCaptureModal();
     initializeSettingsMenu();
