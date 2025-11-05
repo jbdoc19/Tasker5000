@@ -21,7 +21,7 @@
   let sprintEndTime = null;
   let nextTaskId = null;
   let lastFocusedBeforeTemplateModal = null;
-  let lastFocusedBeforeAllTasksOverlay = null;
+  let lastFocusedBeforeallTaskOverlay = null;
   const MODULE_STATE_PREFIX = "moduleState_";
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
@@ -1215,7 +1215,7 @@
           return;
         }
         if (document.body.classList.contains("all-tasks-overlay-active")) {
-          closeAllTasksOverlay({ restoreFocus: false });
+          closeallTaskOverlay({ restoreFocus: false });
         }
         const hash = link.getAttribute("href") || "";
         if (!hash.startsWith("#")) return;
@@ -8422,14 +8422,14 @@
     }
   }
 
-  function handleAllTasksOverlayKeydown(event) {
+  function handleallTasksOverlayKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
-      closeAllTasksOverlay();
+      closeallTasksOverlay();
     }
   }
 
-  function openAllTasksOverlay() {
+  function openallTasksOverlay() {
   const overlay = document.getElementById("allTasksOverlay");
   const trigger = document.getElementById("openAllTasksButton");
 
@@ -8448,7 +8448,7 @@
   if (sheet && typeof sheet.focus === "function") sheet.focus();
 }
 
-function closeAllTasksOverlay() {
+function closeallTasksOverlay() {
   const overlay = document.getElementById("allTasksOverlay");
   const trigger = document.getElementById("openAllTasksButton");
 
@@ -8465,10 +8465,10 @@ function closeAllTasksOverlay() {
   }
 }
 
-document.getElementById("openAllTasksButton").addEventListener("click", openAllTasksOverlay);
-document.getElementById("closeAllTasksOverlay").addEventListener("click", closeAllTasksOverlay);
+document.getElementById("openAllTasksButton").addEventListener("click", openallTaskOverlay);
+document.getElementById("closeallTaskOverlay").addEventListener("click", closeallTaskOverlay);
 
-  function closeAllTasksOverlay({ restoreFocus = true } = {}) {
+  function closeallTaskOverlay({ restoreFocus = true } = {}) {
     const overlay = $("allTasksOverlay");
     if (!overlay || overlay.classList.contains("hidden")) return;
     overlay.classList.add("hidden");
@@ -8480,19 +8480,19 @@ document.getElementById("closeAllTasksOverlay").addEventListener("click", closeA
       trigger.classList.remove("is-active");
       trigger.removeAttribute("aria-current");
     }
-    document.removeEventListener("keydown", handleAllTasksOverlayKeydown);
+    document.removeEventListener("keydown", handleallTaskOverlayKeydown);
     if (restoreFocus) {
-      const focusTarget = (lastFocusedBeforeAllTasksOverlay && typeof lastFocusedBeforeAllTasksOverlay.focus === "function")
-        ? lastFocusedBeforeAllTasksOverlay
+      const focusTarget = (lastFocusedBeforeallTaskOverlay && typeof lastFocusedBeforeallTaskOverlay.focus === "function")
+        ? lastFocusedBeforeallTaskOverlay
         : trigger;
       if (focusTarget && typeof focusTarget.focus === "function") {
         window.requestAnimationFrame(() => focusTarget.focus());
       }
     }
-    lastFocusedBeforeAllTasksOverlay = null;
+    lastFocusedBeforeallTaskOverlay = null;
   }
 
-  function initializeAllTasksOverlay() {
+  function initializeallTaskOverlay() {
     const overlay = $("allTasksOverlay");
     const trigger = $("openAllTasksButton");
     if (!overlay || !trigger) return;
@@ -8500,16 +8500,16 @@ document.getElementById("closeAllTasksOverlay").addEventListener("click", closeA
     const backdrop = overlay.querySelector("[data-all-tasks-dismiss]");
     trigger.addEventListener("click", () => {
       if (overlay.classList.contains("hidden")) {
-        openAllTasksOverlay();
+        openallTaskOverlay();
       } else {
-        closeAllTasksOverlay();
+        closeallTaskOverlay();
       }
     });
     if (closeButton) {
-      closeButton.addEventListener("click", () => closeAllTasksOverlay());
+      closeButton.addEventListener("click", () => closeallTaskOverlay());
     }
     if (backdrop) {
-      backdrop.addEventListener("click", () => closeAllTasksOverlay());
+      backdrop.addEventListener("click", () => closeallTaskOverlay());
     }
   }
 
@@ -10625,7 +10625,7 @@ initializeFocusFabLongPress();
     initializePreflightToggles();
     initializeDueTodayAccordionState();
     initializeAllTasksCardState();
-    initializeAllTasksOverlay();
+    initializeallTaskOverlay();
     initializeFocusLaunchSheet();
     initializeQuickCaptureModal();
     initializeSettingsMenu();
