@@ -7896,7 +7896,7 @@
   </section>
 
   <section
-    id="allTasksOverlay"
+    id="AllTasksOverlay"
     class="all-tasks-overlay hidden"
     aria-hidden="true"
     data-all-tasks-screen
@@ -7906,7 +7906,7 @@
       class="all-tasks-overlay__sheet"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="allTasksOverlayTitle"
+      aria-labelledby="AllTasksOverlayTitle"
       tabindex="-1"
     >
       <button type="button" class="all-tasks-overlay__close" data-all-tasks-close aria-label="Close All Tasks">
@@ -7921,7 +7921,7 @@
             aria-expanded="false"
             data-all-tasks-heading
           >
-            <span id="allTasksOverlayTitle" class="all-tasks-toggle__title" data-all-tasks-title>All Tasks</span>
+            <span id="AllTasksOverlayTitle" class="all-tasks-toggle__title" data-all-tasks-title>All Tasks</span>
             <span class="all-tasks-toggle__meta">
               <span data-all-tasks-category>All categories</span>
               <span class="all-tasks-header__divider" data-all-tasks-divider aria-hidden="true">•</span>
@@ -7984,7 +7984,7 @@
       class="command-link"
       type="button"
       aria-haspopup="dialog"
-      aria-controls="allTasksOverlay"
+      aria-controls="AllTasksOverlay"
       aria-expanded="false"
       data-command-all-tasks="true"
     >
@@ -16441,7 +16441,7 @@
   }
 
   function openAllTasksOverlay() {
-    const overlay = $("allTasksOverlay");
+    const overlay = $("AllTasksOverlay");
     if (!overlay || !overlay.classList.contains("hidden")) return;
     const sheet = overlay.querySelector(".all-tasks-overlay__sheet");
     const trigger = $("openAllTasksButton");
@@ -16466,7 +16466,7 @@
   }
 
   function closeAllTasksOverlay({ restoreFocus = true } = {}) {
-    const overlay = $("allTasksOverlay");
+    const overlay = $("AllTasksOverlay");
     if (!overlay || overlay.classList.contains("hidden")) return;
     overlay.classList.add("hidden");
     overlay.setAttribute("aria-hidden", "true");
@@ -16490,7 +16490,7 @@
   }
 
   function initializeAllTasksOverlay() {
-    const overlay = $("allTasksOverlay");
+    const overlay = $("AllTasksOverlay");
     const trigger = $("openAllTasksButton");
     if (!overlay || !trigger) return;
     const closeButton = overlay.querySelector("[data-all-tasks-close]");
