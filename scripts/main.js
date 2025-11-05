@@ -1208,28 +1208,39 @@
       zones.forEach(zone => observer.observe(zone));
     }
 
-    const commandLinks = document.querySelectorAll(".command-bar .command-link");
-    commandLinks.forEach(link => {
-      link.addEventListener("click", event => {
-        if (link.dataset.commandAllTasks === "true") {
-          return;
-        }
-        if (document.body.classList.contains("all-tasks-overlay-active")) {
-          closeAllTasksOverlay({ restoreFocus: false });
-        }
-        const hash = link.getAttribute("href") || "";
-        if (!hash.startsWith("#")) return;
-        event.preventDefault();
-        const targetId = hash.slice(1);
-        if (!targetId) return;
-        scrollToZone(targetId);
-        const anchor = document.getElementById(targetId);
-        const zone = anchor ? anchor.closest(".momentum-zone") : null;
-        if (zone) {
-          handleActiveZoneChange(zone.id);
-        }
-      });
-    });
+   // Command bar link behavior
+const commandLinks = document.querySelectorAll(".command-bar .command-link");
+
+commandLinks.forEach(link => {
+  link.addEventListener("click", event => {
+    // Skip handling for the All Tasks (stethoscope) button entirely
+    if (link.dataset.commandAllTasks === "true") {
+      // Let the dedicated stethoscope handler control its own overlay
+      return;
+    }
+
+    // If the overlay is open and a different command link is clicked, close it
+    if (document.body.classList.contains("all-tasks-overlay-active")) {
+      closeAllTasksOverlay({ restoreFocus: false });
+    }
+
+    // Handle normal in-page hash navigation
+    const hash = link.getAttribute("href") || "";
+    if (!hash.startsWith("#")) return;
+
+    event.preventDefault();
+    const targetId = hash.slice(1);
+    if (!targetId) return;
+
+    // Scroll and update active zone
+    scrollToZone(targetId);
+    const anchor = document.getElementById(targetId);
+    const zone = anchor ? anchor.closest(".momentum-zone") : null;
+    if (zone) {
+      handleActiveZoneChange(zone.id);
+    }
+  });
+});
 
     const handleScrollEffects = () => {
       document.body.classList.add("is-scrolling");
