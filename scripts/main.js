@@ -8428,9 +8428,6 @@
       closeAllTasksOverlay();
     }
   }
-function openAllTasksOverlay() {
-  console.log("🎬 openAllTasksOverlay running");
-  const overlay = document.getElementById("allTasksOverlay");
 
   function openAllTasksOverlay() {
   const overlay = document.getElementById("AllTasksOverlay");
