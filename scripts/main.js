@@ -8430,7 +8430,7 @@
   }
 
   function openAllTasksOverlay() {
-  const overlay = document.getElementById("AllTasksOverlay");
+  const overlay = document.getElementById("allTasksOverlay");
   const trigger = document.getElementById("openAllTasksButton");
 
   if (!overlay || !overlay.classList.contains("hidden")) return;
@@ -8449,7 +8449,7 @@
 }
 
 function closeAllTasksOverlay() {
-  const overlay = document.getElementById("AllTasksOverlay");
+  const overlay = document.getElementById("allTasksOverlay");
   const trigger = document.getElementById("openAllTasksButton");
 
   if (!overlay || overlay.classList.contains("hidden")) return;
@@ -8469,7 +8469,7 @@ document.getElementById("openAllTasksButton").addEventListener("click", openAllT
 document.getElementById("closeAllTasksOverlay").addEventListener("click", closeAllTasksOverlay);
 
   function closeAllTasksOverlay({ restoreFocus = true } = {}) {
-    const overlay = $("AllTasksOverlay");
+    const overlay = $("allTasksOverlay");
     if (!overlay || overlay.classList.contains("hidden")) return;
     overlay.classList.add("hidden");
     overlay.setAttribute("aria-hidden", "true");
@@ -8493,7 +8493,7 @@ document.getElementById("closeAllTasksOverlay").addEventListener("click", closeA
   }
 
   function initializeAllTasksOverlay() {
-    const overlay = $("AllTasksOverlay");
+    const overlay = $("allTasksOverlay");
     const trigger = $("openAllTasksButton");
     if (!overlay || !trigger) return;
     const closeButton = overlay.querySelector("[data-all-tasks-close]");
