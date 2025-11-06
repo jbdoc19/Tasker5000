@@ -98,28 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmButton = card.querySelector("[data-day-overlay-confirm]");
   const closeButton = card.querySelector("[data-day-overlay-close]");
   const addPatientButton = card.querySelector("[data-day-overlay-add-patient]");
-  const weekOverlay = card.querySelector("[data-week-overlay]");
-  const weekOverlayGrid = card.querySelector("[data-week-overlay-grid]");
-  const weekOverlayOpen = card.querySelector("[data-week-overlay-open]");
-  const weekOverlayClose = card.querySelector("[data-week-overlay-close]");
 
-  if (
-    !grid ||
-    !overlay ||
-    !overlayTitle ||
-    !overlaySubtitle ||
-    !overlaySlots ||
-    !confirmButton ||
-    !closeButton ||
-    !weekOverlay ||
-    !weekOverlayGrid ||
-    !weekOverlayOpen ||
-    !weekOverlayClose
-  ) {
+  if (!grid || !overlay || !overlayTitle || !overlaySubtitle || !overlaySlots || !confirmButton || !closeButton) {
     return;
   }
 
-  let displayedDay = getDefaultDay();
+  const displayedDay = getDefaultDay();
 
   grid.setAttribute("aria-rowcount", String(SLOT_ORDER.length));
   grid.setAttribute("aria-colcount", "1");
@@ -129,8 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSlot = null;
   let lastTrigger = null;
   let lastWeekTrigger = null;
-
-  weekOverlay.setAttribute("aria-hidden", "true");
 
   const renderOverlaySlots = (day, slot, block, focusFirstToggle = false) => {
     overlaySlots.innerHTML = "";
@@ -227,60 +209,98 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const renderWeekOverlayGrid = () => {
-    weekOverlayGrid.innerHTML = "";
+  const closeOverlay = () => {
+    overlay.hidden = true;
+    overlay.setAttribute("aria-hidden", "true");
+    activeDay = null;
+    activeSlot = null;
+    if (addPatientButton) {
+      addPatientButton.disabled = true;
+    }
+    if (lastTrigger) {
+      lastTrigger.focus();
+      lastTrigger = null;
+    }
+  };
 
     const fragment = document.createDocumentFragment();
+    const day = displayedDay;
+    const schedule = scheduleState[day];
+    if (!schedule) {
+      return;
+    }
 
-    DAY_ORDER.forEach(day => {
-      const schedule = scheduleState[day];
-      SLOT_ORDER.forEach(slot => {
-        const block = schedule?.[slot] || {};
-        ensureBlockStructure(block);
+    SLOT_ORDER.forEach((slot, slotIndex) => {
+      const block = schedule[slot] || {};
+      ensureBlockStructure(block);
 
-        const cell = document.createElement("button");
-        cell.type = "button";
-        cell.className = "week-overlay__cell";
-        cell.dataset.day = day;
-        cell.dataset.slot = slot;
-        cell.setAttribute("role", "gridcell");
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "weekly-grid__cell";
+      cell.dataset.day = day;
+      cell.dataset.slot = slot;
+      cell.setAttribute("role", "gridcell");
+      cell.setAttribute("aria-colindex", "1");
+      cell.setAttribute("aria-rowindex", String(slotIndex + 1));
+      cell.setAttribute(
+        "aria-label",
+        `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`
+      );
+
+      cell.classList.add(slotIndex === 0 ? "weekly-grid__cell--am" : "weekly-grid__cell--pm");
+
+      const header = document.createElement("span");
+      header.className = "weekly-grid__header";
+      header.textContent = `${day} ${slot}`;
+
+      const clinicWrapper = document.createElement("div");
+      clinicWrapper.className = "weekly-grid__clinic-wrapper";
+
+      const clinicSelect = document.createElement("select");
+      clinicSelect.className = "weekly-grid__clinic-select";
+      const defaultLabel = block.label || "Clinic TBD";
+      const optionSet = new Set(CLINIC_OPTIONS);
+      if (block.label && !optionSet.has(block.label)) {
+        optionSet.add(block.label);
+      }
+      optionSet.forEach(label => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        clinicSelect.append(option);
+      });
+      clinicSelect.value = defaultLabel;
+
+      clinicSelect.addEventListener("change", event => {
+        const nextLabel = event.target.value;
+        const targetBlock = scheduleState[day]?.[slot];
+        if (!targetBlock) return;
+        targetBlock.label = nextLabel;
         cell.setAttribute(
           "aria-label",
-          `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`
+          `${day} ${slot}: ${nextLabel || "Unassigned"} ${formatTimeRange(targetBlock)}`
         );
-
-        if (day === displayedDay) {
-          cell.setAttribute("aria-current", "true");
+        if (activeDay === day && activeSlot === slot) {
+          overlaySubtitle.textContent = `${slot} block · ${nextLabel || "Clinic"}`;
         }
-
-        const dayLabel = document.createElement("span");
-        dayLabel.className = "week-overlay__day";
-        dayLabel.textContent = day;
-
-        const slotLabel = document.createElement("span");
-        slotLabel.className = "week-overlay__slot";
-        slotLabel.textContent = `${slot}: ${block.label || "Clinic TBD"}`;
-
-        const time = document.createElement("span");
-        time.className = "week-overlay__time";
-        time.textContent = formatTimeRange(block);
-
-        cell.append(dayLabel, slotLabel, time);
-
-        cell.addEventListener("click", () => {
-          displayedDay = day;
-          renderDailyGrid();
-          closeWeekOverlay();
-          const targetCell = grid.querySelector(
-            `.weekly-grid__cell[data-day="${day}"][data-slot="${slot}"]`
-          );
-          if (targetCell) {
-            targetCell.focus();
-          }
-        });
-
-        fragment.append(cell);
       });
+
+      clinicWrapper.append(clinicSelect);
+
+      const time = document.createElement("span");
+      time.className = "weekly-grid__time";
+      time.textContent = formatTimeRange(block);
+
+      const indicator = document.createElement("span");
+      indicator.className = "weekly-grid__indicator";
+      indicator.textContent = "🧑‍⚕️";
+      if (block.residentRequired) {
+        indicator.classList.add("weekly-grid__indicator--visible");
+      }
+
+      cell.append(header, clinicWrapper, time, indicator);
+      cell.addEventListener("click", () => openOverlay(day, slot, cell));
+      fragment.append(cell);
     });
 
     weekOverlayGrid.append(fragment);

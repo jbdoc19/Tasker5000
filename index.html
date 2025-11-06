@@ -322,7 +322,6 @@
     }
 
     .schedule-card__header {
-      position: relative;
       padding-inline: 1rem;
       box-sizing: border-box;
       display: flex;
@@ -342,33 +341,6 @@
       letter-spacing: -0.01em;
       color: #7bd88f;
       text-align: center;
-    }
-
-    .schedule-card__calendar-button {
-      position: absolute;
-      top: 50%;
-      right: 0.5rem;
-      transform: translateY(-50%);
-      display: inline-grid;
-      place-items: center;
-      width: 2.4rem;
-      height: 2.4rem;
-      border-radius: 50%;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(15, 23, 42, 0.82);
-      color: rgba(226, 232, 240, 0.95);
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: border-color 150ms ease, background 150ms ease, color 150ms ease,
-        transform 150ms ease;
-    }
-
-    .schedule-card__calendar-button:hover,
-    .schedule-card__calendar-button:focus-visible {
-      border-color: rgba(45, 212, 195, 0.6);
-      background: rgba(21, 32, 44, 0.9);
-      color: #f8fafc;
-      outline: none;
     }
 
     .schedule-card__grid-wrapper {
@@ -462,13 +434,11 @@
       letter-spacing: 0.01em;
       padding: 0.6rem 2.25rem 0.6rem 0.9rem;
       text-align: center;
-      text-align-last: center;
       text-transform: uppercase;
       min-width: 220px;
       max-width: 100%;
       cursor: pointer;
       transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
-      margin-inline: auto;
     }
 
     .weekly-grid__clinic-select:hover,
@@ -520,7 +490,6 @@
       .weekly-grid__clinic-select {
         font-size: 0.85rem;
         min-width: 0;
-        width: 100%;
       }
 
       .weekly-grid__time {
@@ -8030,15 +7999,6 @@ body.all-tasks-overlay-active {
         <section class="card schedule-card" id="weeklyScheduleCard" aria-label="Weekly clinic schedule">
           <div class="schedule-card__header">
             <h2 class="schedule-card__title">Care I will Provide Today</h2>
-            <button
-              type="button"
-              class="schedule-card__calendar-button"
-              data-week-overlay-open
-              aria-label="Open weekly clinic schedule"
-              aria-haspopup="dialog"
-            >
-              📆
-            </button>
           </div>
           <div class="schedule-card__grid-wrapper">
             <div
@@ -8078,35 +8038,6 @@ body.all-tasks-overlay-active {
                 <button type="button" class="day-overlay__confirm" data-day-overlay-confirm>
                   Confirm Patients
                 </button>
-              </div>
-            </div>
-          </div>
-          <div
-            class="week-overlay"
-            data-week-overlay
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="weekOverlayTitle"
-            tabindex="-1"
-            hidden
-          >
-            <div class="week-overlay__dialog" role="document">
-              <button
-                type="button"
-                class="week-overlay__close"
-                data-week-overlay-close
-                aria-label="Close weekly schedule"
-              >
-                &times;
-              </button>
-              <h3 id="weekOverlayTitle" class="week-overlay__title">Weekly Clinic Schedule</h3>
-              <div class="week-overlay__grid-wrapper">
-                <div
-                  class="week-overlay__grid"
-                  data-week-overlay-grid
-                  role="grid"
-                  aria-label="Weekly clinic schedule overview"
-                ></div>
               </div>
             </div>
           </div>
