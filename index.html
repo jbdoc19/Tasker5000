@@ -645,8 +645,19 @@
       }
 
       .schedule-card__grid-wrapper {
-        width: calc(100% + (var(--schedule-card-inline) * 2));
-        margin-inline: calc(-1 * var(--schedule-card-inline));
+  padding-inline: 1rem;       /* side spacing */
+  box-sizing: border-box;     /* keep padding inside width */
+  width: 100%;
+  max-width: 960px;           /* optional desktop limit */
+  margin: 0 auto;
+}
+
+/* Mobile */
+@media (max-width: 560px) {
+  .schedule-card__grid-wrapper {
+    padding-inline: 0.75rem;
+  }
+}
       }
 
       .weekly-grid {
