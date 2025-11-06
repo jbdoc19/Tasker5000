@@ -178,31 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderGrid = () => {
     grid.innerHTML = "";
-    const fragment = document.createDocumentFragment();
-
-    const corner = document.createElement("span");
-    corner.className = "weekly-grid__corner";
-    corner.setAttribute("aria-hidden", "true");
-    fragment.append(corner);
-
-    DAY_ORDER.forEach((day, columnIndex) => {
-      const header = document.createElement("span");
-      header.className = "weekly-grid__day-header";
-      header.textContent = day;
-      header.setAttribute("role", "columnheader");
-      header.setAttribute("aria-colindex", String(columnIndex + 1));
-      fragment.append(header);
-    });
-
-    SLOT_ORDER.forEach((slot, rowIndex) => {
-      const rowHeader = document.createElement("span");
-      rowHeader.className = "weekly-grid__row-header";
-      rowHeader.textContent = slot;
-      rowHeader.setAttribute("role", "rowheader");
-      rowHeader.setAttribute("aria-rowindex", String(rowIndex + 1));
-      fragment.append(rowHeader);
-
-      DAY_ORDER.forEach((day, colIndex) => {
+    SLOT_ORDER.forEach(slot => {
+      DAY_ORDER.forEach(day => {
         const schedule = scheduleState[day];
         if (!schedule) return;
 
@@ -215,16 +192,22 @@ document.addEventListener("DOMContentLoaded", () => {
         cell.dataset.day = day;
         cell.dataset.slot = slot;
         cell.setAttribute("role", "gridcell");
-        cell.setAttribute("aria-colindex", String(colIndex + 1));
-        cell.setAttribute("aria-rowindex", String(rowIndex + 1));
+        const colIndex = DAY_ORDER.indexOf(day) + 1;
+        const rowIndex = SLOT_ORDER.indexOf(slot) + 1;
+        cell.setAttribute("aria-colindex", String(colIndex));
+        cell.setAttribute("aria-rowindex", String(rowIndex));
         cell.setAttribute(
           "aria-label",
           `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`
         );
 
-        const slotBadge = document.createElement("span");
-        slotBadge.className = "weekly-grid__slot";
-        slotBadge.textContent = slot;
+        const dayLabel = document.createElement("span");
+        dayLabel.className = "weekly-grid__day";
+        dayLabel.textContent = day;
+
+        const session = document.createElement("span");
+        session.className = "weekly-grid__session";
+        session.textContent = `${slot} block`;
 
         const clinic = document.createElement("span");
         clinic.className = "weekly-grid__clinic";
@@ -234,17 +217,16 @@ document.addEventListener("DOMContentLoaded", () => {
         time.className = "weekly-grid__time";
         time.textContent = formatTimeRange(block);
 
-        const resident = document.createElement("span");
-        resident.className = "weekly-grid__resident";
-        resident.textContent = "🧑‍⚕️";
-        resident.setAttribute("aria-hidden", "true");
+        const indicator = document.createElement("span");
+        indicator.className = "weekly-grid__indicator";
+        indicator.textContent = "🧑‍⚕️";
         if (block.residentRequired) {
-          resident.classList.add("weekly-grid__resident--visible");
+          indicator.classList.add("weekly-grid__indicator--visible");
         }
 
-        cell.append(slotBadge, clinic, time, resident);
+        cell.append(dayLabel, session, clinic, time, indicator);
         cell.addEventListener("click", () => openOverlay(day, slot, cell));
-        fragment.append(cell);
+        grid.append(cell);
       });
     });
 
