@@ -1,9 +1,4 @@
 import { WEEK_SCHEDULE } from "./scheduleModel.js";
-import {
-  setDay,
-  replaceResidentMap,
-  setResidentPresence,
-} from "./dayState.js";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const SLOT_ORDER = ["AM", "PM"];
@@ -16,22 +11,6 @@ const cloneSchedule = source => {
 };
 
 const scheduleState = cloneSchedule(WEEK_SCHEDULE);
-
-const buildResidentMapFromSchedule = schedule => {
-  const map = {};
-  DAY_ORDER.forEach(day => {
-    const daySchedule = schedule[day];
-    if (!daySchedule) return;
-    SLOT_ORDER.forEach(slot => {
-      const block = daySchedule[slot];
-      if (!block || !Array.isArray(block.patients)) return;
-      block.patients.forEach((patient, index) => {
-        map[`${day}|${slot}|${index}`] = Boolean(patient?.residentPresent);
-      });
-    });
-  });
-  return map;
-};
 
 const getDefaultDay = () => {
   try {
@@ -104,12 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const cellMap = new Map();
   const dayCellMap = new Map();
   let activeDay = getDefaultDay();
-  let activeBlock = "AM";
-
-  const syncDayState = (day, block) => {
-    const clinicType = scheduleState[day]?.[block]?.label || null;
-    setDay(day, block, clinicType);
-  };
 
   const handleDaySelection = day => {
     if (!DAY_ORDER.includes(day) || !scheduleState[day]) {
@@ -124,15 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
     renderDayView(day);
-  };
-
-  const handleCellSelection = (day, slot) => {
-    if (!DAY_ORDER.includes(day) || !scheduleState[day]) {
-      return;
-    }
-    activeBlock = slot;
-    syncDayState(day, slot);
-    handleDaySelection(day);
   };
 
   const updateDaySummary = day => {
@@ -256,7 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const current = blockRef.patients[index];
             if (!current) return;
             current.residentPresent = !current.residentPresent;
-            setResidentPresence(day, slot, index, current.residentPresent);
             updateResidentToggle(toggle, current.residentPresent);
             updateGridResidentIndicator(day, slot);
             updateDaySummary(day);
@@ -326,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cell.append(residentWrap);
 
         cell.addEventListener("click", () => {
-          handleCellSelection(day, slot);
+          handleDaySelection(day);
         });
 
         grid.append(cell);
@@ -341,14 +304,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   renderGrid();
-  replaceResidentMap(buildResidentMapFromSchedule(scheduleState));
-  handleCellSelection(activeDay, activeBlock);
+  handleDaySelection(activeDay);
 
   if (todayButton) {
     todayButton.addEventListener("click", () => {
       const targetDay = getDefaultDay();
       if (DAY_ORDER.includes(targetDay)) {
-        handleCellSelection(targetDay, "AM");
+        handleDaySelection(targetDay);
         const focusCell = grid.querySelector(`[data-day="${targetDay}"][data-slot="AM"]`);
         if (focusCell) {
           focusCell.focus();
