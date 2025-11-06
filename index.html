@@ -6611,6 +6611,23 @@
   font-weight: 600;
 }
 
+.focus-title__link {
+  margin-left: 0.65rem;
+  text-decoration: none;
+  font-size: 1.15em;
+  line-height: 1;
+  transition: transform 160ms ease, color 160ms ease;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+}
+
+.focus-title__link:hover,
+.focus-title__link:focus-visible {
+  color: #a8f5c0;
+  transform: translateY(-1px);
+}
+
 .focus-top {
   display: flex;
   flex-direction: column;
@@ -7426,7 +7443,18 @@ body.all-tasks-overlay-active {
 -->
 <section class="focus-command-deck" id="focus-command-deck" aria-label="Focus Command Deck">
   <div class="focus-top">
-    <h2 class="focus-title">⚔️ Focus Command Deck</h2>
+    <h2 class="focus-title">
+      ⚔️ Focus Command Deck
+      <a
+        class="focus-title__link"
+        href="https://docs.google.com/spreadsheets/d/1-kG9S5w_DX5TUFU9_MquWThrCBs1DnE-DKCzL_7Bx3I/edit?usp=drivesdk"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open the Focus Command Deck schedule"
+      >
+        📅
+      </a>
+    </h2>
     <div class="focus-meter" aria-label="Momentum Meter">
       <div class="focus-meter__header">
         <span class="meter-label">Momentum</span>
@@ -8502,58 +8530,7 @@ body.all-tasks-overlay-active {
       <h2 id="resourcesTitle">Quick Access Partners</h2>
       <button id="resourcesClose" class="resources-drawer__close" type="button" aria-label="Close resources">✕</button>
     </header>
-    <div class="resources-drawer__body">
-      <a
-        class="resource-button resource-button--planning"
-        href="https://chatgpt.com/g/g-p-68feee841e7081919a28fe9b3083e9f0-karl/project"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <small>planning ally</small>
-        <strong>Chat with Karl</strong>
-        <span>ADHD-tailored task partner ready to map out your day.</span>
-      </a>
-      <a
-        class="resource-button resource-button--strategies"
-        href="https://chatgpt.com/g/g-p-6836a5682d0481918484506cbc1f3082-epic-companion/project"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <small>strategies</small>
-        <strong>EPIC Companion</strong>
-        <span>Brainstorm workflows to move faster inside the EHR.</span>
-      </a>
-      <a
-        class="resource-button resource-button--digest"
-        href="https://notebooklm.google.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <small>digest</small>
-        <strong>NotebookLM</strong>
-        <span>Summarize research and notes in a focused workspace.</span>
-      </a>
-      <a
-        class="resource-button resource-button--vault"
-        href="https://www.notion.so/Assessments-and-Plans-28131b26f81f803088bad074ee0e00fb?source=copy_link"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <small>vault</small>
-        <strong>Assessments &amp; Plans</strong>
-        <span>Review ready-made assessment and plan examples.</span>
-      </a>
-      <a
-        class="resource-button resource-button--vault"
-        href="https://chatgpt.com/g/g-p-68feff1f73ac819189dcf556e573c912-assessments-plans/project"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <small>document builder</small>
-        <strong>Create Assessments &amp; Plans</strong>
-        <span>Draft new assessments from your history and physical notes.</span>
-      </a>
-    </div>
+    <div class="resources-drawer__body" data-resources-list></div>
   </aside>
 
   <div
@@ -8997,7 +8974,87 @@ body.all-tasks-overlay-active {
       stuckMessage: "Pick the template that covers 80% and tweak only the edges."
     }
   ];
+  const RESOURCE_LINKS = [
+    {
+      href: "https://chatgpt.com/g/g-p-68feee841e7081919a28fe9b3083e9f0-karl/project",
+      label: "planning ally",
+      title: "Chat with Karl",
+      description: "ADHD-tailored task partner ready to map out your day.",
+      theme: "planning"
+    },
+    {
+      href: "https://chatgpt.com/g/g-p-6836a5682d0481918484506cbc1f3082-epic-companion/project",
+      label: "strategies",
+      title: "EPIC Companion",
+      description: "Brainstorm workflows to move faster inside the EHR.",
+      theme: "strategies"
+    },
+    {
+      href: "https://notebooklm.google.com/",
+      label: "digest",
+      title: "NotebookLM",
+      description: "Summarize research and notes in a focused workspace.",
+      theme: "digest"
+    },
+    {
+      href: "https://www.notion.so/Assessments-and-Plans-28131b26f81f803088bad074ee0e00fb?source=copy_link",
+      label: "vault",
+      title: "Assessments & Plans",
+      description: "Review ready-made assessment and plan examples.",
+      theme: "vault"
+    },
+    {
+      href: "https://chatgpt.com/g/g-p-68feff1f73ac819189dcf556e573c912-assessments-plans/project",
+      label: "document builder",
+      title: "Create Assessments & Plans",
+      description: "Draft new assessments from your history and physical notes.",
+      theme: "vault"
+    }
+  ];
   let routineState = {};
+  function addResourceLink(resource, target = document.querySelector("[data-resources-list]")) {
+    if (!target || !resource) return null;
+    const { href, title, label, description, theme, ariaLabel } = resource;
+    if (!href || !title) return null;
+
+    const link = document.createElement("a");
+    const themeClass = typeof theme === "string" && theme.trim() ? `resource-button--${theme.trim()}` : "resource-button--custom";
+    link.className = ["resource-button", themeClass].filter(Boolean).join(" ");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    if (ariaLabel) {
+      link.setAttribute("aria-label", ariaLabel);
+    }
+
+    if (label) {
+      const labelEl = document.createElement("small");
+      labelEl.textContent = label;
+      link.appendChild(labelEl);
+    }
+
+    const titleEl = document.createElement("strong");
+    titleEl.textContent = title;
+    link.appendChild(titleEl);
+
+    if (description) {
+      const descriptionEl = document.createElement("span");
+      descriptionEl.textContent = description;
+      link.appendChild(descriptionEl);
+    }
+
+    target.appendChild(link);
+    return link;
+  }
+
+  function renderResourceLinks(resources = RESOURCE_LINKS) {
+    const list = document.querySelector("[data-resources-list]");
+    if (!list) return;
+    list.innerHTML = "";
+    resources.forEach(resource => {
+      addResourceLink(resource, list);
+    });
+  }
   let routineHapticsEnabled = true;
   const routineTiles = new Map();
   let openRoutineId = null;
@@ -19588,6 +19645,7 @@ initializeFocusFabLongPress();
 // Keep the two sections mutually exclusive by collapsing the other when one opens.
 // === END: Accordions ===
 
+    renderResourceLinks();
     initializeResourcesDrawer();
     initializeSosPanel();
     initializeCommandBarAutohide();
