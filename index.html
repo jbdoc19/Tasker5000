@@ -1584,6 +1584,16 @@
       background: #161616;
       border: 1px solid #2a2a2a;
     }
+    .task-card.is-completed .task-card-actions {
+      justify-content: flex-end;
+    }
+    .task-card.is-completed .task-card-actions button:first-child {
+      order: 1;
+      margin-left: 0;
+    }
+    .task-card.is-completed .task-card-actions button:nth-child(2) {
+      order: 2;
+    }
     .task-card-header {
       display: block;
       margin-bottom: 0.15rem;
@@ -6299,36 +6309,79 @@
       background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.85));
       border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 14px;
-      padding: 1.25rem 1.5rem;
+      padding: 1.5rem 1.75rem;
       margin: 0 auto 1.25rem;
-      width: min(92vw, 600px);
-      text-align: center;
+      width: min(92vw, 640px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       position: relative;
-      display: grid;
-      gap: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
-    .app-header__row {
+    .app-header__top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      width: 100%;
       gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .app-header__date-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      min-width: 0;
+    }
+
+    .app-header__meta-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(230, 238, 247, 0.7);
+    }
+
+    .app-header__date {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #e6eef7;
+      margin: 0;
     }
 
     .app-header__actions {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      margin-left: auto;
+      text-align: right;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
-    .app-header__row--title {
-      justify-content: center;
+    .app-header__main {
+      display: grid;
+      gap: 0.4rem;
+      text-align: left;
     }
 
-    .app-header__row--title h1 {
-      font-size: 1.75rem;
+    .app-header__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(45, 212, 195, 0.12);
+      border: 1px solid rgba(125, 216, 143, 0.35);
+      color: var(--text-primary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    .app-header__title {
+      font-size: clamp(1.8rem, 4vw, 2.25rem);
       font-weight: 700;
       letter-spacing: 0.02em;
       margin: 0;
@@ -6342,20 +6395,11 @@
       font-size: 1rem;
       color: #aeb7c8;
       margin: 0;
-      text-align: center;
+      max-width: 40ch;
     }
 
-    .app-header__date {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #e6eef7;
+    .billing-reminder {
       margin: 0;
-    }
-
-/* Billing / cutoff date restored in red */
-    .app-header__row--top .billing-reminder {
-      margin: 0;
-      text-align: right;
     }
 
     .billing-reminder {
@@ -6706,8 +6750,11 @@ body.all-tasks-overlay-active {
   <section id="capture">
     <div class="app-shell">
       <header class="app-header">
-        <div class="app-header__row app-header__row--top">
-          <p id="headerDate" class="app-header__date"></p>
+        <div class="app-header__top">
+          <div class="app-header__date-block">
+            <span class="app-header__meta-label">Today</span>
+            <p id="headerDate" class="app-header__date"></p>
+          </div>
           <div class="app-header__actions">
             <p class="billing-reminder" id="billingReminder"></p>
             <button
@@ -6723,6 +6770,11 @@ body.all-tasks-overlay-active {
             </button>
           </div>
         </div>
+        <div class="app-header__main">
+          <span class="app-header__badge">Mission Control</span>
+          <h1 class="app-header__title">Tasker 5000</h1>
+          <p id="headerSubtitle" class="app-header__subtitle"></p>
+        </div>
         <div id="settingsMenu" class="settings-menu" aria-hidden="true">
           <div class="settings-menu__section">
             <label class="settings-menu__toggle" for="routineHapticsToggle">
@@ -6734,10 +6786,6 @@ body.all-tasks-overlay-active {
             <span aria-hidden="true">🧩</span>
             <span>Templates</span>
           </button>
-        </div>
-        <p id="headerSubtitle" class="app-header__subtitle"></p>
-        <div class="app-header__row app-header__row--title">
-          <h1>Tasker 5000</h1>
         </div>
       </header>
   </section>
@@ -14447,6 +14495,15 @@ body.all-tasks-overlay-active {
         updateUI();
       }
     };
+    if (mode === TASK_LIST_MODES.COMPLETED) {
+      const restoreBtn = document.createElement("button");
+      restoreBtn.type = "button";
+      restoreBtn.textContent = "♻️";
+      restoreBtn.title = "Move back to active tasks";
+      restoreBtn.setAttribute("aria-label", "Restore task to active list");
+      restoreBtn.onclick = () => restoreTaskById(task.id);
+      actions.appendChild(restoreBtn);
+    }
     actions.appendChild(deleteBtn);
 
     card.appendChild(header);
@@ -18035,6 +18092,21 @@ initializeFocusFabLongPress();
     if (!options.skipUI) {
       updateUI();
     }
+    return true;
+  }
+
+  function restoreTaskById(taskId) {
+    const idx = tasks.findIndex(t => t.id === taskId);
+    if (idx === -1) return false;
+    const task = tasks[idx];
+    if (!task.completed) return false;
+    task.completed = false;
+    task.completedAt = null;
+    if (Object.prototype.hasOwnProperty.call(task, "completionTime")) {
+      task.completionTime = null;
+    }
+    persist();
+    updateUI();
     return true;
   }
 
