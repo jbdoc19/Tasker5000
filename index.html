@@ -4111,14 +4111,14 @@
     }
 
     .all-tasks-overlay {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      --overlay-gutter: clamp(0.5rem, 4vw, 2.25rem);
-      padding: var(--overlay-gutter);
-      z-index: 130;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  --overlay-gutter: clamp(0.5rem, 4vw, 2.25rem);
+  padding: 0 !important;   /* no gap around viewport */
+  z-index: 130;
     }
 
     .all-tasks-overlay__backdrop {
@@ -4129,19 +4129,13 @@
     }
 
     .all-tasks-overlay__sheet {
-      position: relative;
-      width: calc(100vw - 2 * var(--overlay-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right));
-      max-width: calc(100vw - 2 * var(--overlay-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right));
-      min-height: calc(100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      max-height: calc(100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      border-radius: 28px;
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      background: rgba(13, 19, 27, 0.96);
-      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
-      display: flex;
-      flex-direction: column;
-      padding: clamp(1rem, 3vw, 1.6rem);
-      overflow: hidden;
+  /* keep existing position/background/border styles */
+  margin: var(--overlay-gutter) auto;
+  width: calc(100vw - 2 * var(--overlay-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right));
+  max-width: calc(100vw - 2 * var(--overlay-gutter) - env(safe-area-inset-left) - env(safe-area-inset-right));
+  min-height: calc(100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 2 * var(--overlay-gutter) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: hidden;
     }
 
     @media (min-width: 900px) {
@@ -6530,55 +6524,43 @@
 .page-content {
   padding-inline: 8px;
 }
-    /* DEBUG: outline all overlay containers in red */
-*[class*="overlay"], *[id*="overlay"], 
-*[class*="focus"], *[id*="focus"] {
-  outline: 3px solid red !important;
-  background-color: rgba(255, 0, 0, 0.05) !important;
-  /* ------------------------------
- * Home screen: 8px horizontal margins
- * ------------------------------ */
-@media (max-width: 540px) {
-  .starter-stack,
-  .routine-stack {
-    padding-inline: 8px;
-  }
-  /* DEBUG — force overlay boundaries visible */
-#AllTasksOverlay {
-  outline: 3px solid lime !important;
-  background: rgba(0, 255, 0, 0.05) !important;
-}
-.AllTasksOverlay__sheet {
-  outline: 3px dashed red !important;
-}
-  /* === DEBUG OVERLAYS (fixed + minimal) === */
+    /* === CLEAN DEBUG — AllTasksOverlay viewport fit === */
+
+/* 1. Generic overlay/focus outlines (light red background) */
 *[class*="overlay"], *[id*="overlay"],
 *[class*="focus"],   *[id*="focus"] {
   outline: 3px solid red !important;
   background-color: rgba(255,0,0,.05) !important;
 }
 
-/* Your overlay container (solid red) */
+/* 2. Specific layers */
 #AllTasksOverlay {
   outline: 3px solid red !important;
-  outline-offset: 6px !important;  /* keep outside children */
+  outline-offset: 6px !important;     /* outer frame */
 }
-
-/* Backdrop (optional dashed red so you can see the layer) */
 .all-tasks-overlay__backdrop {
   outline: 3px dashed red !important;
-  outline-offset: -3px !important; /* draw inside the parent line */
+  outline-offset: -3px !important;    /* sits just inside parent */
 }
-
-/* Sheet (lime) */
 .all-tasks-overlay__sheet {
   outline: 3px solid lime !important;
-  outline-offset: 8px !important;
+  outline-offset: 8px !important;     /* clear separation from parent */
 }
 
-/* keep unrelated rule separate (no nesting!) */
+/* 3. Show true viewport edge */
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  outline: 2px solid magenta;
+  pointer-events: none;
+  z-index: 2147483647;
+}
+
+/* 4. Keep your mobile padding rule separate */
 @media (max-width: 540px) {
-  .starter-stack, .routine-stack { padding-inline: 8px; }
+  .starter-stack,
+  .routine-stack { padding-inline: 8px; }
 }
   </style>
 </head>
