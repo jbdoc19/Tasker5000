@@ -13133,7 +13133,11 @@
     const dueDateField = $("dueDate");
     if (dueDateField) dueDateField.value = "";
     const subField = $("initialSubTasks");
-    if (subField) subField.value = "";
+    if (subField) {
+      subField.value = "";
+      delete subField.dataset.quickPreset;
+      delete subField.dataset.allowChartTemplate;
+    }
     const dateField = $("dateOfService");
     if (dateField) {
       dateField.value = formatDateForInput(new Date());
@@ -13658,12 +13662,14 @@
       firstThreeSteps: []
     };
     const basePriority = computePriority({ ...task, subTasks: [] });
-    const subLines = $("initialSubTasks").value.split('\n')
+    const subField = $("initialSubTasks");
+    const subLines = (subField ? subField.value : "").split('\n')
       .map(line => line.trim())
       .filter(Boolean);
     const hasCustomSubTasks = subLines.length > 0;
     if (isChartTask(task)) {
-      task.useChartTemplate = !hasCustomSubTasks;
+      const allowChartTemplate = subField?.dataset.allowChartTemplate === "true";
+      task.useChartTemplate = allowChartTemplate ? true : !hasCustomSubTasks;
     }
     return { task, basePriority, subLines };
   }
@@ -17398,6 +17404,64 @@
     if (nameInput) {
       nameInput.addEventListener("input", syncAddTaskActions);
     }
+    const subField = $("initialSubTasks");
+    if (subField) {
+      subField.addEventListener("input", () => {
+        delete subField.dataset.quickPreset;
+        delete subField.dataset.allowChartTemplate;
+      });
+    }
+  }
+
+  function applyQuickAddBlockBatchPreset(batchId, options = {}) {
+    const definition = getBlockBatchDefinition(batchId);
+    if (!definition) return false;
+    loadBlockBatchProfiles();
+    const profile = getBlockBatchProfile(batchId);
+    if (!profile) return false;
+    const template = {
+      name: options.nameOverride || `${definition.label} Note`,
+      category: profile.category,
+      authorType: profile.authorType,
+      patientType: profile.patientType,
+      visitType: profile.visitType,
+      clinicSite: profile.clinicSite,
+      importance: profile.importance,
+      urgency: profile.urgency,
+      novelty: profile.novelty,
+      interest: profile.interest,
+      externalPressure: profile.externalPressure,
+      timeToStart: profile.timeToStart,
+      difficulty: profile.difficulty
+    };
+
+    cancelEdit();
+    fillTaskFormFromTemplate(template, { keepCurrentCategory: false });
+    const today = new Date();
+    const serviceDateField = $("dateOfService");
+    if (serviceDateField) {
+      serviceDateField.value = formatDateForInput(today);
+    }
+    const dueDateField = $("dueDate");
+    if (dueDateField) {
+      dueDateField.value = formatDateForInput(addDays(today, 3));
+    }
+    const subField = $("initialSubTasks");
+    if (subField) {
+      subField.value = Array.isArray(profile.subTasks) ? profile.subTasks.join("\n") : "";
+      if (profile.useChartTemplate !== false) {
+        subField.dataset.allowChartTemplate = "true";
+      } else {
+        delete subField.dataset.allowChartTemplate;
+      }
+      subField.dataset.quickPreset = batchId;
+    }
+    setTaskDetailsCollapsed(false);
+    setAddTaskCardCollapsed(false);
+    setQuickTaskTemplateMode(false);
+    syncAddTaskActions();
+    showToast("Template ready", `${definition.label} defaults loaded.`, { timeout: 2600 });
+    return true;
   }
 
   function initializeQuickAddMenu() {
@@ -17432,6 +17496,39 @@
         syncAddTaskActions();
       });
     }
+    const bulkOrderBtn = document.querySelector(".quick-add-button--muscle");
+    if (bulkOrderBtn) {
+      bulkOrderBtn.addEventListener("click", () => {
+        cancelEdit();
+        if (typeof openBlockBatchModal === "function") {
+          openBlockBatchModal();
+        }
+      });
+    }
+    const quickPresets = [
+      {
+        selector: ".quick-add-button--unicorn",
+        batchId: "complex-care",
+        nameOverride: "Complex Care Follow-Up"
+      },
+      {
+        selector: ".quick-add-button--home",
+        batchId: "st-pjs",
+        nameOverride: "St. PJ’s Shelter Note"
+      },
+      {
+        selector: ".quick-add-button--kiddo",
+        batchId: "craniofacial",
+        nameOverride: "Craniofacial Clinic Update"
+      }
+    ];
+    quickPresets.forEach(({ selector, batchId, nameOverride }) => {
+      const button = document.querySelector(selector);
+      if (!button) return;
+      button.addEventListener("click", () => {
+        applyQuickAddBlockBatchPreset(batchId, { nameOverride });
+      });
+    });
   }
 
   function initializeQuickTaskShortcut() {
