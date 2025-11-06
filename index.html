@@ -6546,6 +6546,13 @@
   outline: 3px solid lime !important;
   outline-offset: 8px !important;     /* clear separation from parent */
 }
+  /* === SAFE AREA FIX for viewport fit on mobile === */
+.all-tasks-overlay {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
 /* 3. Show true viewport edge */
 html::before {
@@ -6585,6 +6592,12 @@ html, body { overflow-x: hidden; }
   max-height: calc(100dvh - 2 * var(--overlay-gutter)) !important;
   overflow: auto;            /* inner scroll when content exceeds cap */
   -webkit-overflow-scrolling: touch;
+}
+  .all-tasks-overlay__sheet {
+  max-height: calc(
+    100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  ) !important;
+  }
 /* === fix "I have ___ minutes" layout === */
 .all-tasks-overlay .all-tasks-filter-time {
   display: flex;
