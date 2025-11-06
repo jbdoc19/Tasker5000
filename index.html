@@ -7199,56 +7199,7 @@ body.all-tasks-overlay-active {
           </button>
         </div>
       </header>
-      <section class="card schedule-card" id="weeklyScheduleCard" aria-label="Weekly clinic schedule">
-        <div class="schedule-card__header">
-          <div>
-            <span class="schedule-card__meta">Clinic map</span>
-            <h2 class="schedule-card__title">Daily Schedule</h2>
-          </div>
-          <button class="schedule-card__today" type="button" data-schedule-today>
-            Jump to today
-          </button>
-        </div>
-        <div class="schedule-card__grid-wrapper">
-          <div
-            class="weekly-grid"
-            id="weeklyScheduleGrid"
-            data-weekly-grid
-            role="grid"
-            aria-label="Weekday clinic schedule"
-          ></div>
-        </div>
-        <p class="schedule-card__grid-hint" aria-hidden="true">
-          Tap any slot to edit the clinic details.
-        </p>
-        <div
-          class="day-overlay"
-          data-day-overlay
-          role="dialog"
-          aria-modal="true"
-          tabindex="-1"
-          hidden
-        >
-          <div class="day-overlay__dialog" role="document">
-            <button
-              type="button"
-              class="day-overlay__close"
-              data-day-overlay-close
-              aria-label="Close day overlay"
-            >
-              &times;
-            </button>
-            <header class="day-overlay__header">
-              <h3 class="day-overlay__title" data-day-overlay-title></h3>
-              <p class="day-overlay__subtitle" data-day-overlay-subtitle></p>
-            </header>
-            <div class="day-overlay__slots" data-day-overlay-slots></div>
-            <button type="button" class="day-overlay__confirm" data-day-overlay-confirm>
-              Confirm Patients
-            </button>
-          </div>
-        </div>
-      </section>
+    </div>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
 <!--
@@ -7849,6 +7800,56 @@ body.all-tasks-overlay-active {
       </div>
     </div>
   </section>
+        <section class="card schedule-card" id="weeklyScheduleCard" aria-label="Weekly clinic schedule">
+          <div class="schedule-card__header">
+            <div>
+              <span class="schedule-card__meta">Clinic map</span>
+              <h2 class="schedule-card__title">Daily Schedule</h2>
+            </div>
+            <button class="schedule-card__today" type="button" data-schedule-today>
+              Jump to today
+            </button>
+          </div>
+          <div class="schedule-card__grid-wrapper">
+            <div
+              class="weekly-grid"
+              id="weeklyScheduleGrid"
+              data-weekly-grid
+              role="grid"
+              aria-label="Weekday clinic schedule"
+            ></div>
+          </div>
+          <p class="schedule-card__grid-hint" aria-hidden="true">
+            Tap any slot to edit the clinic details.
+          </p>
+          <div
+            class="day-overlay"
+            data-day-overlay
+            role="dialog"
+            aria-modal="true"
+            tabindex="-1"
+            hidden
+          >
+            <div class="day-overlay__dialog" role="document">
+              <button
+                type="button"
+                class="day-overlay__close"
+                data-day-overlay-close
+                aria-label="Close day overlay"
+              >
+                &times;
+              </button>
+              <header class="day-overlay__header">
+                <h3 class="day-overlay__title" data-day-overlay-title></h3>
+                <p class="day-overlay__subtitle" data-day-overlay-subtitle></p>
+              </header>
+              <div class="day-overlay__slots" data-day-overlay-slots></div>
+              <button type="button" class="day-overlay__confirm" data-day-overlay-confirm>
+                Confirm Patients
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
 
   <div
