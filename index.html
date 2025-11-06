@@ -329,6 +329,13 @@
       align-items: center;
     }
 
+    .schedule-card__header [data-open-today],
+    .schedule-card__header [data-open-week] {
+      margin-left: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.6rem;
+    }
+
     @media (max-width: 560px) {
       .schedule-card__header {
         padding-inline: 0.75rem;
@@ -469,8 +476,9 @@
     }
 
     .weekly-grid--single-day {
-      --weekly-grid-columns: 1;
-      grid-template-rows: repeat(2, minmax(120px, 1fr));
+      --weekly-grid-columns: 2;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: minmax(120px, 1fr);
     }
 
     .weekly-grid--single-day .weekly-grid__cell {
@@ -479,6 +487,10 @@
 
     .weekly-grid--single-day .weekly-grid__cell:first-child {
       border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .weekly-grid.weekly-grid--single-day .weekly-grid__cell {
+      min-height: 120px;
     }
 
     @media (max-width: 600px) {
@@ -3428,6 +3440,12 @@
       color: #f5f5f5;
       min-width: 220px;
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .toast {
+      border-radius: 10px;
+      background: #2dd4c3;
+      color: #022624;
     }
         .toast strong {
       display: block;
@@ -19758,6 +19776,137 @@ closeBtn.addEventListener('click', () => {
 });
   });
     </script>
+  <script>
+    (function () {
+      const CLINIC_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const SLOT_TIMES = {
+        AM: ["08:00", "09:00", "10:00", "11:00"],
+        PM: ["13:00", "14:00", "15:00", "16:00"]
+      };
+
+      function getTodayClinicDay() {
+        const name = new Date().toLocaleDateString("en-US", { weekday: "long" });
+        return CLINIC_DAYS.includes(name) ? name : CLINIC_DAYS[0];
+      }
+
+      function ensureScheduleFallback() {
+        const grid = document.getElementById("weeklyScheduleGrid");
+        if (!grid || grid.children.length > 0) {
+          return;
+        }
+
+        grid.classList.add("weekly-grid--single-day");
+
+        const overlay = document.querySelector("#weeklyScheduleCard [data-day-overlay]");
+        const title = overlay?.querySelector("[data-day-overlay-title]") || null;
+        const subtitle = overlay?.querySelector("[data-day-overlay-subtitle]") || null;
+        const slotsHost = overlay?.querySelector("[data-day-overlay-slots]") || null;
+        const closeBtn = overlay?.querySelector("[data-day-overlay-close]") || null;
+        const confirmBtn = overlay?.querySelector("[data-day-overlay-confirm]") || null;
+
+        const day = getTodayClinicDay();
+        const blocks = ["AM", "PM"];
+        let currentSlots = [];
+
+        function renderOverlay(block) {
+          if (!overlay || !title || !subtitle || !slotsHost) {
+            return;
+          }
+
+          const times = SLOT_TIMES[block] || [];
+          currentSlots = times.map(time => ({ time, resident: false }));
+
+          title.textContent = `${day} — ${block}`;
+          subtitle.textContent = "Tap 👩‍⚕️ to include a resident.";
+          slotsHost.innerHTML = "";
+
+          times.forEach((time, index) => {
+            const row = document.createElement("div");
+            row.className = "day-overlay__slot";
+
+            const info = document.createElement("div");
+            info.className = "day-overlay__slot-info";
+
+            const timeEl = document.createElement("div");
+            timeEl.className = "day-overlay__slot-time";
+            timeEl.textContent = time;
+
+            const labelEl = document.createElement("div");
+            labelEl.className = "day-overlay__slot-label";
+            labelEl.textContent = "Slot";
+
+            info.append(timeEl, labelEl);
+
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "resident-toggle";
+            toggle.textContent = "🧑‍⚕️";
+            toggle.setAttribute("aria-pressed", "false");
+
+            toggle.addEventListener("click", () => {
+              const pressed = toggle.getAttribute("aria-pressed") === "true";
+              const next = !pressed;
+              toggle.setAttribute("aria-pressed", next ? "true" : "false");
+              currentSlots[index].resident = next;
+            });
+
+            row.append(info, toggle);
+            slotsHost.appendChild(row);
+          });
+
+          overlay.removeAttribute("hidden");
+        }
+
+        blocks.forEach(block => {
+          const cell = document.createElement("button");
+          cell.type = "button";
+          cell.className = "weekly-grid__cell";
+          cell.dataset.day = day;
+          cell.dataset.block = block;
+          cell.textContent = `${day} ${block}`;
+          cell.addEventListener("click", () => renderOverlay(block));
+          grid.appendChild(cell);
+        });
+
+        if (closeBtn) {
+          closeBtn.addEventListener("click", () => overlay?.setAttribute("hidden", ""));
+        }
+
+        if (confirmBtn) {
+          confirmBtn.addEventListener("click", () => {
+            if (!overlay || !currentSlots.length) {
+              return;
+            }
+
+            const plan = [
+              { time: "07:30", type: "task", label: "Morning Launch", source: "ritual" }
+            ].concat(
+              currentSlots.map(slot => ({
+                time: slot.time,
+                type: "patient",
+                label: `Visit (${slot.resident ? "with" : "no"} resident)`,
+                source: "schedule"
+              }))
+            );
+
+            document.dispatchEvent(new CustomEvent("planReady", { detail: plan }));
+            overlay.setAttribute("hidden", "");
+            currentSlots = [];
+          });
+        }
+      }
+
+      function runFallback() {
+        window.setTimeout(ensureScheduleFallback, 0);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", runFallback);
+      } else {
+        runFallback();
+      }
+    })();
+  </script>
 </body>
 </html>
 
