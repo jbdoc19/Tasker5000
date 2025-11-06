@@ -178,8 +178,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderGrid = () => {
     grid.innerHTML = "";
-    SLOT_ORDER.forEach(slot => {
-      DAY_ORDER.forEach(day => {
+
+    const fragment = document.createDocumentFragment();
+
+    SLOT_ORDER.forEach((slot, slotIndex) => {
+      DAY_ORDER.forEach((day, dayIndex) => {
         const schedule = scheduleState[day];
         if (!schedule) return;
 
@@ -192,22 +195,26 @@ document.addEventListener("DOMContentLoaded", () => {
         cell.dataset.day = day;
         cell.dataset.slot = slot;
         cell.setAttribute("role", "gridcell");
-        const colIndex = DAY_ORDER.indexOf(day) + 1;
-        const rowIndex = SLOT_ORDER.indexOf(slot) + 1;
-        cell.setAttribute("aria-colindex", String(colIndex));
-        cell.setAttribute("aria-rowindex", String(rowIndex));
+        cell.setAttribute("aria-colindex", String(dayIndex + 1));
+        cell.setAttribute("aria-rowindex", String(slotIndex + 1));
         cell.setAttribute(
           "aria-label",
           `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`
         );
 
-        const dayLabel = document.createElement("span");
-        dayLabel.className = "weekly-grid__day";
-        dayLabel.textContent = day;
+        if (slotIndex === 0) {
+          cell.classList.add("weekly-grid__cell--am");
+          const dayLabel = document.createElement("span");
+          dayLabel.className = "weekly-grid__day";
+          dayLabel.textContent = day;
+          cell.append(dayLabel);
+        } else {
+          cell.classList.add("weekly-grid__cell--pm");
+        }
 
         const session = document.createElement("span");
         session.className = "weekly-grid__session";
-        session.textContent = `${slot} block`;
+        session.textContent = slot;
 
         const clinic = document.createElement("span");
         clinic.className = "weekly-grid__clinic";
@@ -224,9 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
           indicator.classList.add("weekly-grid__indicator--visible");
         }
 
-        cell.append(dayLabel, session, clinic, time, indicator);
+        cell.append(session, clinic, time, indicator);
         cell.addEventListener("click", () => openOverlay(day, slot, cell));
-        grid.append(cell);
+        fragment.append(cell);
       });
     });
 
