@@ -329,6 +329,13 @@
       align-items: center;
     }
 
+    .schedule-card__header [data-open-today],
+    .schedule-card__header [data-open-week] {
+      margin-left: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.6rem;
+    }
+
     @media (max-width: 560px) {
       .schedule-card__header {
         padding-inline: 0.75rem;
@@ -479,6 +486,10 @@
 
     .weekly-grid--single-day .weekly-grid__cell:first-child {
       border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .weekly-grid.weekly-grid--single-day .weekly-grid__cell {
+      min-height: 120px;
     }
 
     @media (max-width: 600px) {
@@ -3428,6 +3439,12 @@
       color: #f5f5f5;
       min-width: 220px;
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .toast {
+      border-radius: 10px;
+      background: #2dd4c3;
+      color: #022624;
     }
         .toast strong {
       display: block;
