@@ -315,7 +315,8 @@
     }
 
     .schedule-card {
-      padding: 1.35rem;
+      --schedule-card-inline: 1.35rem;
+      padding: 1.35rem var(--schedule-card-inline);
       display: grid;
       gap: 1.1rem;
     }
@@ -633,11 +634,24 @@
 
     @media (max-width: 560px) {
       .schedule-card {
-        padding: 1.15rem;
+        --schedule-card-inline: var(--page-gutter);
+        padding: 1.15rem var(--schedule-card-inline);
+        margin-inline: calc(-1 * var(--page-gutter));
+        width: calc(100% + (var(--page-gutter) * 2));
+        max-width: none;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+
+      .schedule-card__grid-wrapper {
+        width: calc(100% + (var(--schedule-card-inline) * 2));
+        margin-inline: calc(-1 * var(--schedule-card-inline));
       }
 
       .weekly-grid {
         grid-template-columns: minmax(0, 1fr);
+        border-radius: 0;
       }
 
       .weekly-grid__cell {
@@ -7819,9 +7833,6 @@ body.all-tasks-overlay-active {
               aria-label="Weekday clinic schedule"
             ></div>
           </div>
-          <p class="schedule-card__grid-hint" aria-hidden="true">
-            Tap any slot to edit the clinic details.
-          </p>
           <div
             class="day-overlay"
             data-day-overlay
