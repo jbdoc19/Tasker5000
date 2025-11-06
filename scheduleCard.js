@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeDay = null;
   let activeSlot = null;
   let lastTrigger = null;
+  let lastWeekTrigger = null;
 
   const renderOverlaySlots = (day, slot, block, focusFirstToggle = false) => {
     overlaySlots.innerHTML = "";
@@ -208,7 +209,104 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const renderGrid = () => {
+  const closeOverlay = () => {
+    overlay.hidden = true;
+    overlay.setAttribute("aria-hidden", "true");
+    activeDay = null;
+    activeSlot = null;
+    if (addPatientButton) {
+      addPatientButton.disabled = true;
+    }
+    if (lastTrigger) {
+      lastTrigger.focus();
+      lastTrigger = null;
+    }
+  };
+
+    const fragment = document.createDocumentFragment();
+    const day = displayedDay;
+    const schedule = scheduleState[day];
+    if (!schedule) {
+      return;
+    }
+
+    SLOT_ORDER.forEach((slot, slotIndex) => {
+      const block = schedule[slot] || {};
+      ensureBlockStructure(block);
+
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "weekly-grid__cell";
+      cell.dataset.day = day;
+      cell.dataset.slot = slot;
+      cell.setAttribute("role", "gridcell");
+      cell.setAttribute("aria-colindex", "1");
+      cell.setAttribute("aria-rowindex", String(slotIndex + 1));
+      cell.setAttribute(
+        "aria-label",
+        `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`
+      );
+
+      cell.classList.add(slotIndex === 0 ? "weekly-grid__cell--am" : "weekly-grid__cell--pm");
+
+      const header = document.createElement("span");
+      header.className = "weekly-grid__header";
+      header.textContent = `${day} ${slot}`;
+
+      const clinicWrapper = document.createElement("div");
+      clinicWrapper.className = "weekly-grid__clinic-wrapper";
+
+      const clinicSelect = document.createElement("select");
+      clinicSelect.className = "weekly-grid__clinic-select";
+      const defaultLabel = block.label || "Clinic TBD";
+      const optionSet = new Set(CLINIC_OPTIONS);
+      if (block.label && !optionSet.has(block.label)) {
+        optionSet.add(block.label);
+      }
+      optionSet.forEach(label => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        clinicSelect.append(option);
+      });
+      clinicSelect.value = defaultLabel;
+
+      clinicSelect.addEventListener("change", event => {
+        const nextLabel = event.target.value;
+        const targetBlock = scheduleState[day]?.[slot];
+        if (!targetBlock) return;
+        targetBlock.label = nextLabel;
+        cell.setAttribute(
+          "aria-label",
+          `${day} ${slot}: ${nextLabel || "Unassigned"} ${formatTimeRange(targetBlock)}`
+        );
+        if (activeDay === day && activeSlot === slot) {
+          overlaySubtitle.textContent = `${slot} block · ${nextLabel || "Clinic"}`;
+        }
+      });
+
+      clinicWrapper.append(clinicSelect);
+
+      const time = document.createElement("span");
+      time.className = "weekly-grid__time";
+      time.textContent = formatTimeRange(block);
+
+      const indicator = document.createElement("span");
+      indicator.className = "weekly-grid__indicator";
+      indicator.textContent = "🧑‍⚕️";
+      if (block.residentRequired) {
+        indicator.classList.add("weekly-grid__indicator--visible");
+      }
+
+      cell.append(header, clinicWrapper, time, indicator);
+      cell.addEventListener("click", () => openOverlay(day, slot, cell));
+      fragment.append(cell);
+    });
+
+    weekOverlayGrid.append(fragment);
+  };
+
+  const renderDailyGrid = () => {
     grid.innerHTML = "";
 
     const fragment = document.createDocumentFragment();
@@ -292,9 +390,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     grid.append(fragment);
+    renderWeekOverlayGrid();
   };
 
-  renderGrid();
+  renderDailyGrid();
 
   if (addPatientButton) {
     addPatientButton.disabled = true;
@@ -333,6 +432,45 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.key === "Escape") {
       event.preventDefault();
       closeOverlay();
+    }
+  });
+
+  const openWeekOverlay = trigger => {
+    lastWeekTrigger = trigger || null;
+    renderWeekOverlayGrid();
+    weekOverlay.hidden = false;
+    weekOverlay.removeAttribute("aria-hidden");
+    const firstCell = weekOverlay.querySelector(".week-overlay__cell");
+    if (firstCell) {
+      firstCell.focus();
+    }
+  };
+
+  const closeWeekOverlay = () => {
+    weekOverlay.hidden = true;
+    weekOverlay.setAttribute("aria-hidden", "true");
+    if (lastWeekTrigger) {
+      lastWeekTrigger.focus();
+      lastWeekTrigger = null;
+    }
+  };
+
+  weekOverlayOpen.addEventListener("click", () => openWeekOverlay(weekOverlayOpen));
+
+  weekOverlayClose.addEventListener("click", () => {
+    closeWeekOverlay();
+  });
+
+  weekOverlay.addEventListener("click", event => {
+    if (event.target === weekOverlay) {
+      closeWeekOverlay();
+    }
+  });
+
+  weekOverlay.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeWeekOverlay();
     }
   });
 });

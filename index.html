@@ -497,6 +497,119 @@
       }
     }
 
+    .week-overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: rgba(4, 7, 12, 0.72);
+      backdrop-filter: blur(18px);
+      z-index: 2100;
+    }
+
+    .week-overlay[hidden] {
+      display: none;
+    }
+
+    .week-overlay__dialog {
+      position: relative;
+      width: min(900px, 94vw);
+      border-radius: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(9, 14, 22, 0.94);
+      box-shadow: 0 30px 70px rgba(2, 8, 23, 0.65);
+      padding: 1.5rem;
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .week-overlay__close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.82);
+      color: var(--text-secondary);
+      border-radius: 999px;
+      width: 2.2rem;
+      height: 2.2rem;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .week-overlay__close:hover,
+    .week-overlay__close:focus-visible {
+      border-color: rgba(45, 212, 195, 0.6);
+      background: rgba(21, 32, 44, 0.92);
+      outline: none;
+    }
+
+    .week-overlay__title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #e2e8f0;
+      text-align: center;
+    }
+
+    .week-overlay__grid-wrapper {
+      width: 100%;
+    }
+
+    .week-overlay__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-auto-rows: minmax(120px, 1fr);
+      gap: 0.75rem;
+    }
+
+    .week-overlay__cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 21, 30, 0.92);
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .week-overlay__cell:hover,
+    .week-overlay__cell:focus-visible {
+      border-color: rgba(45, 212, 195, 0.6);
+      background: rgba(23, 33, 46, 0.95);
+      outline: none;
+    }
+
+    .week-overlay__day {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(203, 213, 225, 0.82);
+    }
+
+    .week-overlay__slot {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(226, 232, 240, 0.96);
+    }
+
+    .week-overlay__time {
+      font-size: 0.75rem;
+      color: rgba(148, 163, 184, 0.8);
+    }
+
+    .week-overlay__cell[aria-current="true"] {
+      border-color: rgba(45, 212, 195, 0.6);
+      box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35);
+    }
+
     .day-overlay {
       position: fixed;
       inset: 0;
@@ -7893,7 +8006,7 @@ body.all-tasks-overlay-active {
               id="weeklyScheduleGrid"
               data-weekly-grid
               role="grid"
-              aria-label="Weekday clinic schedule"
+              aria-label="Clinic schedule for selected day"
             ></div>
           </div>
           <div
