@@ -6551,6 +6551,34 @@
 .AllTasksOverlay__sheet {
   outline: 3px dashed red !important;
 }
+  /* === DEBUG OVERLAYS (fixed + minimal) === */
+*[class*="overlay"], *[id*="overlay"],
+*[class*="focus"],   *[id*="focus"] {
+  outline: 3px solid red !important;
+  background-color: rgba(255,0,0,.05) !important;
+}
+
+/* Your overlay container (solid red) */
+#AllTasksOverlay {
+  outline: 3px solid red !important;
+  outline-offset: 6px !important;  /* keep outside children */
+}
+
+/* Backdrop (optional dashed red so you can see the layer) */
+.all-tasks-overlay__backdrop {
+  outline: 3px dashed red !important;
+  outline-offset: -3px !important; /* draw inside the parent line */
+}
+
+/* Sheet (lime) */
+.all-tasks-overlay__sheet {
+  outline: 3px solid lime !important;
+  outline-offset: 8px !important;
+}
+
+/* keep unrelated rule separate (no nesting!) */
+@media (max-width: 540px) {
+  .starter-stack, .routine-stack { padding-inline: 8px; }
 }
   </style>
 </head>
