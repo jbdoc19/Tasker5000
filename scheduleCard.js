@@ -1,9 +1,20 @@
+import {
+  setDay,
+  setClinicSelection,
+  getClinicSelection,
+  setResidentPresence,
+  getResidentPresence,
+  setBlockResidentPresence,
+  getBlockResidentPresence,
+} from "./dayState.js";
+
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const SLOT_BLOCKS = ["AM", "PM"];
 const SLOT_TIMES = {
   AM: ["08:00", "09:00", "10:00", "11:00"],
   PM: ["13:00", "14:00", "15:00", "16:00"]
 };
+const CLINIC_OPTIONS = ["Faculty", "Continuity", "St. PJs", "Admin Time", "Academics"];
 
 let grid = null;
 let overlay = null;
@@ -14,6 +25,9 @@ let closeButton = null;
 let confirmButton = null;
 let toastHost = null;
 let overlaySlotsState = [];
+let activeCell = null;
+let activeCellDay = null;
+let activeCellBlock = null;
 
 function todayName() {
   const name = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -47,28 +61,112 @@ function renderSchedule(mode) {
   }
 
   cells.forEach(({ day, block }) => {
-    const cell = document.createElement("button");
-    cell.type = "button";
+    const cell = document.createElement("div");
     cell.className = "weekly-grid__cell";
     cell.dataset.day = day;
     cell.dataset.block = block;
-    cell.textContent = `${day} ${block}`;
-    cell.addEventListener("click", () => openDayOverlay(day, block));
+    cell.setAttribute("role", "button");
+    cell.tabIndex = 0;
+
+    const dayLabel = document.createElement("div");
+    dayLabel.className = "weekly-grid__day";
+    dayLabel.textContent = day;
+
+    const clinicWrapper = document.createElement("div");
+    clinicWrapper.className = "weekly-grid__clinic-wrapper";
+
+    const select = document.createElement("select");
+    select.className = "weekly-grid__clinic-select";
+    const storedClinic = getClinicSelection(day, block) ?? CLINIC_OPTIONS[0];
+    if (!getClinicSelection(day, block)) {
+      setClinicSelection(day, block, storedClinic);
+    }
+    CLINIC_OPTIONS.forEach(option => {
+      const optionEl = document.createElement("option");
+      optionEl.value = option;
+      optionEl.textContent = option;
+      select.appendChild(optionEl);
+    });
+    select.value = storedClinic;
+    select.addEventListener("change", () => {
+      setClinicSelection(day, block, select.value);
+      if (day === activeCellDay && block === activeCellBlock) {
+        setDay(day, block, select.value);
+      }
+    });
+    select.addEventListener("click", event => {
+      event.stopPropagation();
+    });
+
+    const residentIcon = document.createElement("span");
+    residentIcon.className = "weekly-grid__resident-icon";
+    residentIcon.textContent = "👥";
+    residentIcon.setAttribute("aria-hidden", "true");
+
+    clinicWrapper.append(select, residentIcon);
+
+    const blockLabel = document.createElement("div");
+    blockLabel.className = "weekly-grid__time";
+    blockLabel.textContent = block;
+
+    const hasStoredResidents = resolveResidentPresence(day, block);
+    updateResidentIcon(residentIcon, hasStoredResidents);
+
+    const handleCellClick = event => {
+      if (event.target instanceof HTMLElement && event.target.closest(".weekly-grid__clinic-select")) {
+        return;
+      }
+      openDayOverlay(day, block, cell);
+    };
+
+    cell.addEventListener("click", handleCellClick);
+    cell.addEventListener("keydown", event => {
+      if ((event.key === "Enter" || event.key === " ") && event.target === cell) {
+        event.preventDefault();
+        openDayOverlay(day, block, cell);
+      }
+    });
+
+    cell.append(dayLabel, clinicWrapper, blockLabel);
     grid.appendChild(cell);
   });
 }
 
-function openDayOverlay(day, block) {
+function resolveResidentPresence(day, block) {
+  const storedBlockPresence = getBlockResidentPresence(day, block);
+  if (typeof storedBlockPresence === "boolean") {
+    return storedBlockPresence;
+  }
+  const times = SLOT_TIMES[block] || [];
+  return times.some((_, index) => getResidentPresence(day, block, index));
+}
+
+function updateResidentIcon(iconEl, hasResident) {
+  if (!iconEl) return;
+  iconEl.classList.toggle("weekly-grid__resident-icon--visible", Boolean(hasResident));
+  iconEl.setAttribute("aria-hidden", hasResident ? "false" : "true");
+}
+
+function openDayOverlay(day, block, cell) {
   if (!overlay || !overlayTitle || !overlaySubtitle || !overlaySlots) {
     return;
   }
+
+  const clinicSelection = getClinicSelection(day, block) ?? CLINIC_OPTIONS[0];
+  setDay(day, block, clinicSelection);
+  activeCell = cell || null;
+  activeCellDay = day;
+  activeCellBlock = block;
 
   overlayTitle.textContent = `${day} — ${block}`;
   overlaySubtitle.textContent = "Tap 👩‍⚕️ to include a resident.";
   overlaySlots.innerHTML = "";
 
   const times = SLOT_TIMES[block] || [];
-  overlaySlotsState = times.map(time => ({ time, resident: false }));
+  overlaySlotsState = times.map((time, index) => ({
+    time,
+    resident: Boolean(getResidentPresence(day, block, index)),
+  }));
 
   times.forEach((time, index) => {
     const slotRow = document.createElement("div");
@@ -91,7 +189,8 @@ function openDayOverlay(day, block) {
     toggle.type = "button";
     toggle.className = "resident-toggle";
     toggle.textContent = "🧑‍⚕️";
-    toggle.setAttribute("aria-pressed", "false");
+    const initiallyPresent = overlaySlotsState[index].resident;
+    toggle.setAttribute("aria-pressed", initiallyPresent ? "true" : "false");
 
     toggle.addEventListener("click", () => {
       const pressed = toggle.getAttribute("aria-pressed") === "true";
@@ -111,6 +210,9 @@ function hideOverlay() {
   if (!overlay) return;
   overlay.setAttribute("hidden", "");
   overlaySlotsState = [];
+  activeCell = null;
+  activeCellDay = null;
+  activeCellBlock = null;
 }
 
 function injectHeaderToggles() {
@@ -160,7 +262,24 @@ function attachOverlayControls() {
     }));
     const plan = basePlan.concat(patientSlots);
     document.dispatchEvent(new CustomEvent("planReady", { detail: plan }));
+
+    if (activeCellDay && activeCellBlock) {
+      overlaySlotsState.forEach((slot, index) => {
+        setResidentPresence(activeCellDay, activeCellBlock, index, slot.resident);
+      });
+      const hasResident = overlaySlotsState.some(slot => slot.resident);
+      setBlockResidentPresence(activeCellDay, activeCellBlock, hasResident);
+      const iconEl = activeCell?.querySelector(".weekly-grid__resident-icon");
+      if (iconEl) {
+        updateResidentIcon(iconEl, hasResident);
+      }
+    }
+
+    const focusTarget = activeCell;
     hideOverlay();
+    if (focusTarget) {
+      focusTarget.focus();
+    }
   });
 }
 
