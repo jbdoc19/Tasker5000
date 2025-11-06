@@ -6561,6 +6561,43 @@ html::before {
 @media (max-width: 540px) {
   .starter-stack,
   .routine-stack { padding-inline: 8px; }
+  /* No sideways scroll anywhere */
+html, body { overflow-x: hidden; }
+
+/* Overlay must not allow x-scroll either */
+.all-tasks-overlay { overflow-x: hidden; }
+
+/* Use % instead of vw so it can’t exceed the viewport */
+.all-tasks-overlay__sheet {
+  /* width from container (%), not 100vw */
+  width: min(840px, calc(100% - 2 * var(--overlay-gutter))) !important;
+  max-width: min(840px, calc(100% - 2 * var(--overlay-gutter))) !important;
+}
+  /* Let the overlay scroll if the sheet is taller than the screen */
+.all-tasks-overlay {
+  align-items: start;        /* start at top so scroll feels natural */
+  overflow-y: auto;          /* overlay becomes the scroll container */
+}
+
+/* Sheet should be height-auto with only a max-height cap */
+.all-tasks-overlay__sheet {
+  height: auto !important;   /* remove fixed height */
+  max-height: calc(100dvh - 2 * var(--overlay-gutter)) !important;
+  overflow: auto;            /* inner scroll when content exceeds cap */
+  -webkit-overflow-scrolling: touch;
+/* === fix "I have ___ minutes" layout === */
+.all-tasks-overlay .all-tasks-filter-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* center horizontally */
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 0.25rem;            /* small space between label/select/span */
+}
+
+.all-tasks-overlay .all-tasks-filter-time select {
+  width: 80px;             /* keep narrow so centered nicely */
+  text-align: center;
 }
   </style>
 </head>
