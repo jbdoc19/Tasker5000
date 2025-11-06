@@ -427,6 +427,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 0.75rem;
       width: 100%;
     }
 
@@ -446,6 +447,18 @@
       max-width: 100%;
       cursor: pointer;
       transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .weekly-grid__resident-icon {
+      font-size: 1.15rem;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .weekly-grid__resident-icon--visible {
+      opacity: 1;
+      transform: scale(1);
     }
 
     .weekly-grid__clinic-select:hover,
@@ -19837,6 +19850,13 @@ closeBtn.addEventListener('click', () => {
   <script>
     (function () {
       const CLINIC_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const CLINIC_OPTIONS = [
+        "Faculty",
+        "Continuity",
+        "St. PJs",
+        "Admin Time",
+        "Academics"
+      ];
       const SLOT_TIMES = {
         AM: ["08:00", "09:00", "10:00", "11:00"],
         PM: ["13:00", "14:00", "15:00", "16:00"]
@@ -19865,12 +19885,14 @@ closeBtn.addEventListener('click', () => {
         const day = getTodayClinicDay();
         const blocks = ["AM", "PM"];
         let currentSlots = [];
+        let activeCell = null;
 
-        function renderOverlay(block) {
+        function renderOverlay(block, cell) {
           if (!overlay || !title || !subtitle || !slotsHost) {
             return;
           }
 
+          activeCell = cell || null;
           const times = SLOT_TIMES[block] || [];
           currentSlots = times.map(time => ({ time, resident: false }));
 
@@ -19916,18 +19938,60 @@ closeBtn.addEventListener('click', () => {
         }
 
         blocks.forEach(block => {
-          const cell = document.createElement("button");
-          cell.type = "button";
+          const cell = document.createElement("div");
           cell.className = "weekly-grid__cell";
           cell.dataset.day = day;
           cell.dataset.block = block;
-          cell.textContent = `${day} ${block}`;
-          cell.addEventListener("click", () => renderOverlay(block));
+          cell.setAttribute("role", "button");
+          cell.tabIndex = 0;
+
+          const dayLabel = document.createElement("div");
+          dayLabel.className = "weekly-grid__day";
+          dayLabel.textContent = day;
+
+          const clinicWrapper = document.createElement("div");
+          clinicWrapper.className = "weekly-grid__clinic-wrapper";
+
+          const select = document.createElement("select");
+          select.className = "weekly-grid__clinic-select";
+          CLINIC_OPTIONS.forEach(option => {
+            const optionEl = document.createElement("option");
+            optionEl.value = option;
+            optionEl.textContent = option;
+            select.appendChild(optionEl);
+          });
+
+          const residentIcon = document.createElement("span");
+          residentIcon.className = "weekly-grid__resident-icon";
+          residentIcon.textContent = "👥";
+          residentIcon.setAttribute("aria-hidden", "true");
+
+          clinicWrapper.append(select, residentIcon);
+
+          const blockLabel = document.createElement("div");
+          blockLabel.className = "weekly-grid__time";
+          blockLabel.textContent = block;
+
+          cell.addEventListener("click", event => {
+            renderOverlay(block, cell);
+          });
+          cell.addEventListener("keydown", event => {
+            if ((event.key === "Enter" || event.key === " ") && event.target === cell) {
+              event.preventDefault();
+              renderOverlay(block, cell);
+            }
+          });
+
+          cell.append(dayLabel, clinicWrapper, blockLabel);
           grid.appendChild(cell);
         });
 
         if (closeBtn) {
-          closeBtn.addEventListener("click", () => overlay?.setAttribute("hidden", ""));
+          closeBtn.addEventListener("click", () => {
+            overlay?.setAttribute("hidden", "");
+            activeCell = null;
+            currentSlots = [];
+          });
         }
 
         if (confirmBtn) {
@@ -19949,7 +20013,17 @@ closeBtn.addEventListener('click', () => {
 
             document.dispatchEvent(new CustomEvent("planReady", { detail: plan }));
             overlay.setAttribute("hidden", "");
+            if (activeCell) {
+              const iconEl = activeCell.querySelector(".weekly-grid__resident-icon");
+              if (iconEl) {
+                const hasResident = currentSlots.some(slot => slot.resident);
+                iconEl.classList.toggle("weekly-grid__resident-icon--visible", hasResident);
+                iconEl.setAttribute("aria-hidden", hasResident ? "false" : "true");
+              }
+              activeCell.focus();
+            }
             currentSlots = [];
+            activeCell = null;
           });
         }
       }
