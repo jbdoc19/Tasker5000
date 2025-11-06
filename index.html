@@ -6612,6 +6612,24 @@ html, body { overflow-x: hidden; }
   width: 80px;             /* keep narrow so centered nicely */
   text-align: center;
 }
+  /* === ensure overlay container fills the viewport === */
+.all-tasks-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  min-height: 100dvh;   /* fills the viewport vertically */
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* content starts at top, container still full height */
+  overflow-y: auto;
+  background-color: rgba(0,0,0,0); /* transparent; keeps backdrop visible */
+}
+  html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* prevent body scroll when overlay open */
+  }
   </style>
 </head>
 <body>
