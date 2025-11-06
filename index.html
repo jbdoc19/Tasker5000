@@ -19492,31 +19492,17 @@ initializeFocusFabLongPress();
       console.log("Outline applied to the container:", outline);
     }
     // Select elements
-const overlay = document.querySelector('.all-tasks-overlay');
-const openBtn = document.querySelector('#openAllTasksButton'); // your "All Tasks" button
-const closeBtn = document.querySelector('.all-tasks-overlay__close');
+    const overlay = document.querySelector('.all-tasks-overlay');
+    const openBtn = document.querySelector('#openAllTasksButton');
+    const closeBtn = document.querySelector('.all-tasks-overlay__close');
 
-if (!openBtn) {
-  console.warn('All Tasks trigger button not found; overlay will remain hidden.');
-} else if (!overlay) {
-  console.warn('All Tasks overlay element not found; cannot bind overlay interactions.');
-} else {
-  // Open overlay
-  openBtn.addEventListener('click', () => {
-    overlay.removeAttribute('hidden'); // make it visible
-    document.body.classList.add('all-tasks-overlay-active'); // lock background scroll
-  });
-
-  // Close overlay
-  if (!closeBtn) {
-    console.warn('All Tasks overlay close button not found; overlay cannot be dismissed.');
-  } else {
-    closeBtn.addEventListener('click', () => {
-      overlay.setAttribute('hidden', ''); // hide overlay
-      document.body.classList.remove('all-tasks-overlay-active'); // restore scroll
-    });
-  }
-}
+    if (!openBtn) {
+      console.warn('All Tasks trigger button not found; overlay will remain hidden.');
+    } else if (!overlay) {
+      console.warn('All Tasks overlay element not found; cannot bind overlay interactions.');
+    } else if (!closeBtn) {
+      console.warn('All Tasks overlay close button not found; overlay cannot be dismissed.');
+    }
   });
     </script>
 </body>
