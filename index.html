@@ -7332,28 +7332,6 @@
 .page-content {
   padding-inline: 8px;
 }
-    /* === CLEAN DEBUG — AllTasksOverlay viewport fit === */
-
-/* 1. Generic overlay/focus outlines (light red background) */
-*[class*="overlay"], *[id*="overlay"],
-*[class*="focus"],   *[id*="focus"] {
-  outline: 3px solid red !important;
-  background-color: rgba(255,0,0,.05) !important;
-}
-
-/* 2. Specific layers */
-#AllTasksOverlay {
-  outline: 3px solid red !important;
-  outline-offset: 6px !important;     /* outer frame */
-}
-.all-tasks-overlay__backdrop {
-  outline: 3px dashed red !important;
-  outline-offset: -3px !important;    /* sits just inside parent */
-}
-.all-tasks-overlay__sheet {
-  outline: 3px solid lime !important;
-  outline-offset: 8px !important;     /* clear separation from parent */
-}
   /* === SAFE AREA FIX for viewport fit on mobile === */
 .all-tasks-overlay {
   padding-bottom: env(safe-area-inset-bottom);
@@ -8968,7 +8946,7 @@ body.all-tasks-overlay-active {
       aria-haspopup="dialog"
       aria-controls="resourcesDrawer"
     >
-      <span class="command-link__icon" aria-hidden="true">📁</span>
+      <span class="command-link__icon" aria-hidden="true">📘</span>
       <span>Resources</span>
     </button>
     <a href="#reset-zone" class="command-link">
@@ -8980,6 +8958,9 @@ body.all-tasks-overlay-active {
   <script type="module" src="./scheduleCard.js"></script>
   <script>
   const $ = id => document.getElementById(id);
+
+  let openResourcesDrawer = () => {};
+  let closeResourcesDrawer = () => {};
 
   const QUICK_TASK_CATEGORY = "Quick Task";
   const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal", QUICK_TASK_CATEGORY];
@@ -9342,6 +9323,7 @@ body.all-tasks-overlay-active {
       if (result) {
         form.reset();
         setMessage("Link added to Resources.", "success");
+        closeResourcesDrawer();
       } else {
         setMessage("Please provide a title and a valid https:// link.", "error");
       }
@@ -18384,10 +18366,11 @@ body.all-tasks-overlay-active {
     if (!toggle || !drawer || !backdrop) return;
 
     let drawerOpen = false;
-    const setDrawerOpen = open => {
+    const setDrawerOpen = (open, { focusToggle = true } = {}) => {
       drawerOpen = Boolean(open);
       drawer.classList.toggle("is-open", drawerOpen);
       drawer.setAttribute("aria-hidden", drawerOpen ? "false" : "true");
+      toggle.setAttribute("aria-expanded", drawerOpen ? "true" : "false");
       if (drawerOpen) {
         backdrop.hidden = false;
         requestAnimationFrame(() => backdrop.classList.add("is-visible"));
@@ -18399,18 +18382,25 @@ body.all-tasks-overlay-active {
             backdrop.hidden = true;
           }
         }, 200);
-        toggle.focus();
+        if (focusToggle) {
+          toggle.focus();
+        }
       }
     };
 
-    toggle.addEventListener("click", () => setDrawerOpen(true));
+    openResourcesDrawer = () => setDrawerOpen(true);
+    closeResourcesDrawer = () => setDrawerOpen(false);
+
+    setDrawerOpen(false, { focusToggle: false });
+
+    toggle.addEventListener("click", openResourcesDrawer);
     if (closeBtn) {
-      closeBtn.addEventListener("click", () => setDrawerOpen(false));
+      closeBtn.addEventListener("click", closeResourcesDrawer);
     }
-    backdrop.addEventListener("click", () => setDrawerOpen(false));
+    backdrop.addEventListener("click", closeResourcesDrawer);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && drawerOpen) {
-        setDrawerOpen(false);
+        closeResourcesDrawer();
       }
     });
   }
