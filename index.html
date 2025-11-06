@@ -643,19 +643,19 @@
         border-left: none;
         border-right: none;
       }
-
-      .schedule-card__grid-wrapper {
-  padding-inline: 1rem;       /* side spacing */
-  box-sizing: border-box;     /* keep padding inside width */
+/* For desktop / default */
+.schedule-card__grid-wrapper {
   width: 100%;
-  max-width: 960px;           /* optional desktop limit */
-  margin: 0 auto;
+  box-sizing: border-box;
+  padding-inline: 1rem;      /* adds side padding */
+  max-width: 960px;          /* optional: limit on huge screens */
+  margin: 0 auto;            /* center within section */
 }
 
-/* Mobile */
+/* For mobile screens */
 @media (max-width: 560px) {
   .schedule-card__grid-wrapper {
-    padding-inline: 0.75rem;
+    padding-inline: 0.75rem; /* slightly narrower gutters */
   }
 }
       }
