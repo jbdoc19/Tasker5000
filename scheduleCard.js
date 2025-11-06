@@ -229,6 +229,8 @@ document.addEventListener("DOMContentLoaded", () => {
         grid.append(cell);
       });
     });
+
+    grid.append(fragment);
   };
 
   renderGrid();
