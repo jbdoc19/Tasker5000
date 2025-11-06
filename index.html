@@ -6640,8 +6640,25 @@ html, body { overflow-x: hidden; }
   html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* prevent body scroll when overlay open */
-  }
+  overflow: auto; /* Default: page scrolls normally */
+}
+
+/* When overlay is open, lock scroll */
+body.all-tasks-overlay-active {
+  overflow: hidden;
+}
+
+/* Fullscreen overlay stays fixed above page */
+.all-tasks-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  z-index: 130;
+}
   /* === FINAL CANONICAL SHEET STYLE (ACTIVE) === */
 .all-tasks-overlay__sheet {
   position: fixed;
