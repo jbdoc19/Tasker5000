@@ -1,4 +1,4 @@
-export const BUCKET_TEMPLATE = [
+export const bucketTemplate = [
   { type: "Cosign Charts", count: 6, avgTime: 4 },
   { type: "My Charts", count: 6, avgTime: 4 },
   { type: "Labs", count: 6, avgTime: 4 },

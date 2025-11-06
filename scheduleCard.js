@@ -1,12 +1,4 @@
 import { WEEK_SCHEDULE } from "./scheduleModel.js";
-import { BUCKET_TEMPLATE } from "./bucketModel.js";
-import { buildAdaptiveDayPlan } from "./adaptivePlanner.js";
-import {
-  dayState,
-  setDay,
-  replaceResidentMap,
-  setResidentPresence,
-} from "./dayState.js";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const SLOT_ORDER = ["AM", "PM"];
@@ -19,22 +11,6 @@ const cloneSchedule = source => {
 };
 
 const scheduleState = cloneSchedule(WEEK_SCHEDULE);
-
-const buildResidentMapFromSchedule = schedule => {
-  const map = {};
-  DAY_ORDER.forEach(day => {
-    const daySchedule = schedule[day];
-    if (!daySchedule) return;
-    SLOT_ORDER.forEach(slot => {
-      const block = daySchedule[slot];
-      if (!block || !Array.isArray(block.patients)) return;
-      block.patients.forEach((patient, index) => {
-        map[`${day}|${slot}|${index}`] = Boolean(patient?.residentPresent);
-      });
-    });
-  });
-  return map;
-};
 
 const getDefaultDay = () => {
   try {
@@ -107,24 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const cellMap = new Map();
   const dayCellMap = new Map();
   let activeDay = getDefaultDay();
-  let activeBlock = "AM";
-
-  const triggerPlanBuild = () => {
-    if (!dayState.currentDay || !dayState.currentBlock) {
-      console.warn("[ScheduleCard] Cannot build plan without a day and block", dayState);
-      return;
-    }
-    console.info(
-      `[ScheduleCard] Building adaptive plan for ${dayState.currentDay} ${dayState.currentBlock}`
-    );
-    const plan = buildAdaptiveDayPlan(dayState, WEEK_SCHEDULE, BUCKET_TEMPLATE);
-    console.log("Adaptive plan built:", plan);
-  };
-
-  const syncDayState = (day, block) => {
-    const clinicType = scheduleState[day]?.[block]?.label || null;
-    setDay(day, block, clinicType);
-  };
 
   const handleDaySelection = day => {
     if (!DAY_ORDER.includes(day) || !scheduleState[day]) {
@@ -139,15 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
     renderDayView(day);
-  };
-
-  const handleCellSelection = (day, slot) => {
-    if (!DAY_ORDER.includes(day) || !scheduleState[day]) {
-      return;
-    }
-    activeBlock = slot;
-    syncDayState(day, slot);
-    handleDaySelection(day);
   };
 
   const updateDaySummary = day => {
@@ -202,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dayTitle.textContent = day;
     dayBlocks.innerHTML = "";
-    const toggleEntries = [];
 
     SLOT_ORDER.forEach(slot => {
       const block = schedule[slot] || {};
@@ -272,13 +220,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const current = blockRef.patients[index];
             if (!current) return;
             current.residentPresent = !current.residentPresent;
-            setResidentPresence(day, slot, index, current.residentPresent);
             updateResidentToggle(toggle, current.residentPresent);
             updateGridResidentIndicator(day, slot);
             updateDaySummary(day);
           });
 
-          toggleEntries.push({ slot, index, toggle });
           item.append(details, toggle);
           list.append(item);
         });
@@ -287,53 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       dayBlocks.append(blockEl);
     });
-
-    const actions = document.createElement("div");
-    actions.className = "schedule-day-view__actions";
-
-    const confirmBtn = document.createElement("button");
-    confirmBtn.type = "button";
-    confirmBtn.className = "schedule-day-view__action";
-    confirmBtn.textContent = "Confirm Patients";
-    confirmBtn.addEventListener("click", () => {
-      console.info("[ScheduleCard] Confirm Patients clicked");
-      triggerPlanBuild();
-    });
-
-    const toggleAllBtn = document.createElement("button");
-    toggleAllBtn.type = "button";
-    toggleAllBtn.className = "schedule-day-view__action";
-    toggleAllBtn.textContent = "Toggle Residents (All Slots)";
-    toggleAllBtn.addEventListener("click", () => {
-      if (toggleEntries.length === 0) {
-        console.warn("[ScheduleCard] No resident slots to toggle for", day);
-        return;
-      }
-      const enableAll = !toggleEntries.every(entry => {
-        const blockRef = scheduleState[day]?.[entry.slot];
-        return Boolean(blockRef?.patients?.[entry.index]?.residentPresent);
-      });
-      const touchedSlots = new Set();
-      toggleEntries.forEach(entry => {
-        const blockRef = scheduleState[day]?.[entry.slot];
-        if (!blockRef || !Array.isArray(blockRef.patients)) return;
-        const patientRef = blockRef.patients[entry.index];
-        if (!patientRef) return;
-        patientRef.residentPresent = enableAll;
-        setResidentPresence(day, entry.slot, entry.index, enableAll);
-        updateResidentToggle(entry.toggle, enableAll);
-        touchedSlots.add(entry.slot);
-      });
-      touchedSlots.forEach(slotKey => updateGridResidentIndicator(day, slotKey));
-      updateDaySummary(day);
-      console.info(
-        `[ScheduleCard] Resident presence set to ${enableAll ? "present" : "not present"} for ${day}`
-      );
-      triggerPlanBuild();
-    });
-
-    actions.append(confirmBtn, toggleAllBtn);
-    dayBlocks.append(actions);
 
     dayView.hidden = false;
     updateDaySummary(day);
@@ -390,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cell.append(residentWrap);
 
         cell.addEventListener("click", () => {
-          handleCellSelection(day, slot);
+          handleDaySelection(day);
         });
 
         grid.append(cell);
@@ -405,14 +304,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   renderGrid();
-  replaceResidentMap(buildResidentMapFromSchedule(scheduleState));
-  handleCellSelection(activeDay, activeBlock);
+  handleDaySelection(activeDay);
 
   if (todayButton) {
     todayButton.addEventListener("click", () => {
       const targetDay = getDefaultDay();
       if (DAY_ORDER.includes(targetDay)) {
-        handleCellSelection(targetDay, "AM");
+        handleDaySelection(targetDay);
         const focusCell = grid.querySelector(`[data-day="${targetDay}"][data-slot="AM"]`);
         if (focusCell) {
           focusCell.focus();
@@ -420,34 +318,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-});
-
-document.addEventListener("planReady", e => {
-  const { currentDay, currentBlock } = dayState;
-  const toast = document.createElement("div");
-  toast.id = "toast";
-  toast.textContent = `✅ Plan built for ${currentDay || "Day"}, ${
-    currentBlock || "Block"
-  } — View adaptive checklist`;
-  Object.assign(toast.style, {
-    position: "fixed",
-    top: "1rem",
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "#2dd4c3",
-    color: "#022624",
-    padding: "0.75rem 1.25rem",
-    borderRadius: "12px",
-    fontWeight: "600",
-    zIndex: "2000",
-    transition: "opacity 0.5s ease",
-  });
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = "0";
-  }, 3000);
-  setTimeout(() => {
-    toast.remove();
-  }, 3500);
-  console.log("Plan data:", e.detail);
 });
