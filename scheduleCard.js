@@ -1,4 +1,7 @@
 import { WEEK_SCHEDULE } from "./scheduleModel.js";
+import { dayState, setDay, setResidentPresence } from "./dayState.js";
+import { bucketTemplate as BUCKET_TEMPLATE } from "./bucketModel.js";
+import { buildAdaptiveDayPlan } from "./adaptivePlanner.js";
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const SLOT_ORDER = ["AM", "PM"];
@@ -12,6 +15,18 @@ const cloneSchedule = source => {
 
 const scheduleState = cloneSchedule(WEEK_SCHEDULE);
 
+const createEmptyPatient = () => ({ time: "", id: null, residentPresent: false });
+
+const ensureBlockStructure = block => {
+  if (!block) return;
+  if (!Array.isArray(block.patients)) {
+    block.patients = [];
+  }
+  while (block.patients.length < 4) {
+    block.patients.push(createEmptyPatient());
+  }
+};
+
 const getDefaultDay = () => {
   try {
     const today = new Date();
@@ -21,7 +36,7 @@ const getDefaultDay = () => {
       return dayName;
     }
   } catch (error) {
-    // Fallback to Monday if Intl is unavailable.
+    // Ignore Intl errors and fall back to Monday.
   }
   return DAY_ORDER[0];
 };
@@ -33,289 +48,223 @@ const formatTimeRange = block => {
   return `${block.start} – ${block.end}`;
 };
 
-const hasResidentCoverage = block => {
-  if (!block || !Array.isArray(block.patients)) {
-    return false;
-  }
-  return block.patients.some(patient => Boolean(patient && patient.residentPresent));
-};
-
-const createResidentBadge = present => {
-  const badge = document.createElement("span");
-  badge.className = "schedule-grid__resident-badge";
-  if (present) {
-    badge.classList.add("schedule-grid__resident-badge--present");
-    badge.textContent = "🧑‍⚕️";
-  } else {
-    badge.textContent = "—";
-  }
-  return badge;
-};
-
-const updateResidentBadge = (badge, present) => {
-  if (!badge) return;
-  badge.classList.toggle("schedule-grid__resident-badge--present", present);
-  badge.textContent = present ? "🧑‍⚕️" : "—";
-};
-
-const updateResidentToggle = (toggle, present) => {
+const setToggleState = (toggle, present) => {
   if (!toggle) return;
   toggle.setAttribute("aria-pressed", present ? "true" : "false");
   toggle.setAttribute("aria-label", present ? "Resident present" : "Resident not present");
-  toggle.textContent = present ? "🧑‍⚕️" : "—";
+  toggle.textContent = "🧑‍⚕️";
+};
+
+const formatSlotLabel = (patient, index) => {
+  if (patient && patient.id) {
+    return `Patient ${patient.id}`;
+  }
+  return `Awaiting assignment #${index + 1}`;
+};
+
+const formatSlotTime = (patient, index) => {
+  if (patient && patient.time) {
+    return patient.time;
+  }
+  return `Slot ${index + 1}`;
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   const card = document.getElementById("weeklyScheduleCard");
   if (!card) return;
 
-  const grid = card.querySelector("[data-schedule-grid]");
-  const dayView = card.querySelector("[data-schedule-day-view]");
-  const dayTitle = card.querySelector("[data-schedule-day-title]");
-  const daySummary = card.querySelector("[data-schedule-day-summary]");
-  const dayBlocks = card.querySelector("[data-schedule-day-blocks]");
+  const grid = card.querySelector("[data-weekly-grid]");
+  const overlay = card.querySelector("[data-day-overlay]");
+  const overlayTitle = card.querySelector("[data-day-overlay-title]");
+  const overlaySubtitle = card.querySelector("[data-day-overlay-subtitle]");
+  const overlaySlots = card.querySelector("[data-day-overlay-slots]");
+  const confirmButton = card.querySelector("[data-day-overlay-confirm]");
+  const closeButton = card.querySelector("[data-day-overlay-close]");
   const todayButton = card.querySelector("[data-schedule-today]");
 
-  if (!grid || !dayView || !dayTitle || !daySummary || !dayBlocks) {
+  if (!grid || !overlay || !overlayTitle || !overlaySubtitle || !overlaySlots || !confirmButton || !closeButton) {
     return;
   }
 
-  const cellMap = new Map();
-  const dayCellMap = new Map();
-  let activeDay = getDefaultDay();
+  grid.setAttribute("aria-rowcount", String(SLOT_ORDER.length));
+  grid.setAttribute("aria-colcount", String(DAY_ORDER.length));
 
-  const handleDaySelection = day => {
-    if (!DAY_ORDER.includes(day) || !scheduleState[day]) {
-      return;
-    }
-    activeDay = day;
-    dayCellMap.forEach((cells, dayName) => {
-      const isActive = dayName === day;
-      cells.forEach(cell => {
-        cell.classList.toggle("schedule-grid__cell--active", isActive);
-        cell.setAttribute("aria-pressed", isActive ? "true" : "false");
-      });
-    });
-    renderDayView(day);
-  };
+  let activeDay = null;
+  let activeSlot = null;
+  let lastTrigger = null;
 
-  const updateDaySummary = day => {
-    const schedule = scheduleState[day];
-    if (!schedule || !daySummary) return;
-
-    let totalSlots = 0;
-    let residentSlots = 0;
-    SLOT_ORDER.forEach(slot => {
-      const block = schedule[slot];
-      if (!block || !Array.isArray(block.patients)) {
-        return;
-      }
-      block.patients.forEach(patient => {
-        if (!patient) return;
-        totalSlots += 1;
-        if (patient.residentPresent) {
-          residentSlots += 1;
-        }
-      });
-    });
-
-    if (totalSlots === 0) {
-      daySummary.textContent = "No scheduled patients for this day.";
-      return;
-    }
-
-    const slotLabel = totalSlots === 1 ? "slot" : "slots";
-    if (residentSlots === 0) {
-      daySummary.textContent = `${totalSlots} patient ${slotLabel} · No resident coverage`;
-    } else {
-      const residentLabel = residentSlots === 1 ? "slot" : "slots";
-      daySummary.textContent = `${totalSlots} patient ${slotLabel} · ${residentSlots} resident ${residentLabel}`;
+  const closeOverlay = () => {
+    overlay.hidden = true;
+    overlay.setAttribute("aria-hidden", "true");
+    activeDay = null;
+    activeSlot = null;
+    if (lastTrigger) {
+      lastTrigger.focus();
+      lastTrigger = null;
     }
   };
 
-  const updateGridResidentIndicator = (day, slot) => {
-    const key = `${day}-${slot}`;
-    const entry = cellMap.get(key);
-    if (!entry) return;
-    const block = scheduleState[day]?.[slot];
-    const present = hasResidentCoverage(block);
-    updateResidentBadge(entry.badge, present);
-    if (entry.srLabel) {
-      entry.srLabel.textContent = present ? "Resident present" : "No resident";
-    }
-  };
-
-  const renderDayView = day => {
+  const openOverlay = (day, slot, trigger) => {
     const schedule = scheduleState[day];
     if (!schedule) return;
+    const block = schedule[slot];
+    if (!block) return;
 
-    dayTitle.textContent = day;
-    dayBlocks.innerHTML = "";
+    ensureBlockStructure(block);
 
-    SLOT_ORDER.forEach(slot => {
-      const block = schedule[slot] || {};
-      const blockEl = document.createElement("article");
-      blockEl.className = "schedule-day-view__block";
-      blockEl.dataset.slot = slot;
+    activeDay = day;
+    activeSlot = slot;
+    lastTrigger = trigger || null;
+    setDay(day, slot, block.label || null);
 
-      const head = document.createElement("div");
-      head.className = "schedule-day-view__block-head";
+    overlay.hidden = false;
+    overlay.removeAttribute("aria-hidden");
+    if (typeof overlay.focus === "function") {
+      overlay.focus({ preventScroll: true });
+    }
+    overlayTitle.textContent = day;
+    overlaySubtitle.textContent = `${slot} block · ${block.label || "Clinic"}`;
 
-      const title = document.createElement("h4");
-      title.className = "schedule-day-view__block-title";
-      title.textContent = block.label || `${slot} block`;
+    overlaySlots.innerHTML = "";
+
+    block.patients.forEach((patient, index) => {
+      const slotRow = document.createElement("div");
+      slotRow.className = "day-overlay__slot";
+
+      const info = document.createElement("div");
+      info.className = "day-overlay__slot-info";
 
       const time = document.createElement("span");
-      time.className = "schedule-day-view__block-time";
-      time.textContent = formatTimeRange(block);
+      time.className = "day-overlay__slot-time";
+      time.textContent = formatSlotTime(patient, index);
 
-      head.append(title, time);
-      blockEl.append(head);
+      const label = document.createElement("span");
+      label.className = "day-overlay__slot-label";
+      label.textContent = formatSlotLabel(patient, index);
 
-      if (block.locationLabel) {
-        const location = document.createElement("span");
-        location.className = "schedule-day-view__location";
-        location.textContent = block.locationLabel;
-        blockEl.append(location);
-      }
+      info.append(time, label);
 
-      if (!Array.isArray(block.patients) || block.patients.length === 0) {
-        const empty = document.createElement("p");
-        empty.className = "schedule-day-view__empty";
-        empty.textContent = "No scheduled patients in this block.";
-        blockEl.append(empty);
-      } else {
-        const list = document.createElement("ul");
-        list.className = "schedule-day-view__patients";
-        block.patients.forEach((patient, index) => {
-          const item = document.createElement("li");
-          item.className = "schedule-day-view__patient";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "resident-toggle";
+      toggle.dataset.day = day;
+      toggle.dataset.slot = slot;
+      toggle.dataset.index = String(index);
 
-          const details = document.createElement("div");
-          details.className = "schedule-day-view__patient-details";
+      const present = Boolean(patient && patient.residentPresent);
+      setToggleState(toggle, present);
+      setResidentPresence(day, slot, index, present);
 
-          const timeEl = document.createElement("span");
-          timeEl.className = "schedule-day-view__patient-time";
-          timeEl.textContent = patient?.time || "—";
+      toggle.addEventListener("click", () => {
+        const targetBlock = scheduleState[day]?.[slot];
+        if (!targetBlock) return;
+        ensureBlockStructure(targetBlock);
+        const current = targetBlock.patients[index] || createEmptyPatient();
+        current.residentPresent = !current.residentPresent;
+        targetBlock.patients[index] = current;
+        setToggleState(toggle, current.residentPresent);
+        setResidentPresence(day, slot, index, current.residentPresent);
+      });
 
-          const idEl = document.createElement("span");
-          idEl.className = "schedule-day-view__patient-id";
-          idEl.textContent = patient?.id ? String(patient.id) : "Unassigned slot";
-
-          details.append(timeEl, idEl);
-
-          const toggle = document.createElement("button");
-          toggle.type = "button";
-          toggle.className = "schedule-resident-toggle";
-          toggle.dataset.day = day;
-          toggle.dataset.slot = slot;
-          toggle.dataset.index = String(index);
-          updateResidentToggle(toggle, Boolean(patient?.residentPresent));
-
-          toggle.addEventListener("click", () => {
-            const blockRef = scheduleState[day]?.[slot];
-            if (!blockRef || !Array.isArray(blockRef.patients)) {
-              return;
-            }
-            const current = blockRef.patients[index];
-            if (!current) return;
-            current.residentPresent = !current.residentPresent;
-            updateResidentToggle(toggle, current.residentPresent);
-            updateGridResidentIndicator(day, slot);
-            updateDaySummary(day);
-          });
-
-          item.append(details, toggle);
-          list.append(item);
-        });
-        blockEl.append(list);
-      }
-
-      dayBlocks.append(blockEl);
+      slotRow.append(info, toggle);
+      overlaySlots.append(slotRow);
     });
 
-    dayView.hidden = false;
-    updateDaySummary(day);
+    const firstToggle = overlaySlots.querySelector(".resident-toggle");
+    if (firstToggle) {
+      firstToggle.focus();
+    }
   };
 
   const renderGrid = () => {
     grid.innerHTML = "";
-    DAY_ORDER.forEach(day => {
-      const schedule = scheduleState[day];
-      if (!schedule) return;
+    SLOT_ORDER.forEach(slot => {
+      DAY_ORDER.forEach(day => {
+        const schedule = scheduleState[day];
+        if (!schedule) return;
 
-      SLOT_ORDER.forEach(slot => {
         const block = schedule[slot] || {};
+        ensureBlockStructure(block);
+
         const cell = document.createElement("button");
         cell.type = "button";
-        cell.className = "schedule-grid__cell";
+        cell.className = "weekly-grid__cell";
         cell.dataset.day = day;
         cell.dataset.slot = slot;
-        cell.setAttribute("aria-pressed", "false");
-        cell.setAttribute("aria-label", `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`);
+        cell.setAttribute("role", "gridcell");
+        const colIndex = DAY_ORDER.indexOf(day) + 1;
+        const rowIndex = SLOT_ORDER.indexOf(slot) + 1;
+        cell.setAttribute("aria-colindex", String(colIndex));
+        cell.setAttribute("aria-rowindex", String(rowIndex));
+        cell.setAttribute(
+          "aria-label",
+          `${day} ${slot}: ${block.label || "Unassigned"} ${formatTimeRange(block)}`
+        );
 
-        if (slot === "AM") {
-          const dayName = document.createElement("span");
-          dayName.className = "schedule-grid__dayname";
-          dayName.textContent = day;
-          cell.append(dayName);
-        }
+        const dayLabel = document.createElement("span");
+        dayLabel.className = "weekly-grid__day";
+        dayLabel.textContent = day;
 
-        const slotLabel = document.createElement("span");
-        slotLabel.className = "schedule-grid__slot-label";
-        slotLabel.textContent = slot;
-        cell.append(slotLabel);
+        const session = document.createElement("span");
+        session.className = "weekly-grid__session";
+        session.textContent = `${slot} block`;
 
-        const label = document.createElement("span");
-        label.className = "schedule-grid__label";
-        label.textContent = block.label || "—";
-        cell.append(label);
+        const clinic = document.createElement("span");
+        clinic.className = "weekly-grid__clinic";
+        clinic.textContent = block.label || "Clinic TBD";
 
         const time = document.createElement("span");
-        time.className = "schedule-grid__time";
+        time.className = "weekly-grid__time";
         time.textContent = formatTimeRange(block);
-        cell.append(time);
 
-        const residentWrap = document.createElement("span");
-        residentWrap.className = "schedule-grid__resident";
-        const badge = createResidentBadge(hasResidentCoverage(block));
-        residentWrap.append(badge);
-
-        const srLabel = document.createElement("span");
-        srLabel.className = "visually-hidden";
-        srLabel.textContent = hasResidentCoverage(block) ? "Resident present" : "No resident";
-        residentWrap.append(srLabel);
-
-        cell.append(residentWrap);
-
-        cell.addEventListener("click", () => {
-          handleDaySelection(day);
-        });
-
-        grid.append(cell);
-
-        if (!dayCellMap.has(day)) {
-          dayCellMap.set(day, []);
+        const indicator = document.createElement("span");
+        indicator.className = "weekly-grid__indicator";
+        indicator.textContent = "🧑‍⚕️";
+        if (block.residentRequired) {
+          indicator.classList.add("weekly-grid__indicator--visible");
         }
-        dayCellMap.get(day).push(cell);
-        cellMap.set(`${day}-${slot}`, { cell, badge, srLabel });
+
+        cell.append(dayLabel, session, clinic, time, indicator);
+        cell.addEventListener("click", () => openOverlay(day, slot, cell));
+        grid.append(cell);
       });
     });
   };
 
   renderGrid();
-  handleDaySelection(activeDay);
 
   if (todayButton) {
     todayButton.addEventListener("click", () => {
       const targetDay = getDefaultDay();
-      if (DAY_ORDER.includes(targetDay)) {
-        handleDaySelection(targetDay);
-        const focusCell = grid.querySelector(`[data-day="${targetDay}"][data-slot="AM"]`);
-        if (focusCell) {
-          focusCell.focus();
-        }
+      const focusCell = grid.querySelector(`[data-day="${targetDay}"][data-slot="AM"]`);
+      if (focusCell) {
+        focusCell.focus();
+        focusCell.click();
       }
     });
   }
+
+  confirmButton.addEventListener("click", () => {
+    if (activeDay && activeSlot) {
+      buildAdaptiveDayPlan(dayState, WEEK_SCHEDULE, BUCKET_TEMPLATE);
+    }
+    closeOverlay();
+  });
+
+  closeButton.addEventListener("click", () => {
+    closeOverlay();
+  });
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) {
+      closeOverlay();
+    }
+  });
+
+  overlay.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeOverlay();
+    }
+  });
 });
