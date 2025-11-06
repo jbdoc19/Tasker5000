@@ -4127,7 +4127,15 @@
       background: rgba(8, 12, 18, 0.72);
       backdrop-filter: blur(8px);
     }
+/* ============================================================
+   LEGACY: .all-tasks-overlay__sheet (DEPRECATED 2025-11-06)
+   Purpose: Old modal sizing rules retained for reference.
+   Wrapped in .retired so they no longer affect layout.
+   ============================================================ */
 
+.retired {
+
+  /* --- Legacy Version A: lines 4139–4165---*/
     .all-tasks-overlay__sheet {
   /* keep existing position/background/border styles */
   margin: var(--overlay-gutter) auto;
@@ -4155,7 +4163,8 @@
       padding-top: clamp(0.5rem, 2vw, 0.75rem);
       padding-bottom: clamp(1rem, 3vw, 1.5rem);
     }
-
+}
+/*============================================================ */
     .all-tasks-overlay__close {
       position: absolute;
       top: clamp(0.65rem, 3vw, 1rem);
@@ -6573,13 +6582,16 @@ html, body { overflow-x: hidden; }
 
 /* Overlay must not allow x-scroll either */
 .all-tasks-overlay { overflow-x: hidden; }
-
-/* Use % instead of vw so it can’t exceed the viewport */
+/* --- Legacy Version B: lines 6578–6600 --- */
+  .retired{
 .all-tasks-overlay__sheet {
   /* width from container (%), not 100vw */
-  width: min(840px, calc(100% - 2 * var(--overlay-gutter))) !important;
-  max-width: min(840px, calc(100% - 2 * var(--overlay-gutter))) !important;
+  width: min(840px, calc(100% - 2 * var(--overlay-gutter)));
+  max-width: min(840px, calc(100% - 2 * var(--overlay-gutter)));
 }
+  }
+/* ============================================================ */
+
   /* Let the overlay scroll if the sheet is taller than the screen */
 .all-tasks-overlay {
   align-items: start;        /* start at top so scroll feels natural */
@@ -6630,6 +6642,26 @@ html, body { overflow-x: hidden; }
   margin: 0;
   overflow: hidden; /* prevent body scroll when overlay open */
   }
+  /* === FINAL CANONICAL SHEET STYLE (ACTIVE) === */
+.all-tasks-overlay__sheet {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  overflow: hidden; /* only body scrolls */
+  background: #0e0f12;
+}
+
+.all-tasks-overlay__body {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
   </style>
 </head>
 <body>
