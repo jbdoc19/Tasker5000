@@ -4278,7 +4278,14 @@
       font-size: 1.1rem;
     }
 
-    .resources-drawer__close {
+    .resources-drawer__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .resources-drawer__close,
+    .resources-drawer__toggle {
       border: none;
       background: rgba(148, 163, 184, 0.16);
       border-radius: 999px;
@@ -4286,6 +4293,27 @@
       width: 32px;
       height: 32px;
       cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      transition: background 150ms ease, color 150ms ease;
+    }
+
+    .resources-drawer__toggle {
+      font-size: 1.15rem;
+    }
+
+    .resources-drawer__toggle--form {
+      background: rgba(248, 113, 113, 0.18);
+      color: #fca5a5;
+    }
+
+    .resources-drawer__close:hover,
+    .resources-drawer__close:focus-visible,
+    .resources-drawer__toggle:hover,
+    .resources-drawer__toggle:focus-visible {
+      background: rgba(148, 163, 184, 0.28);
+      outline: none;
     }
 
     .resources-drawer__body {
@@ -4298,11 +4326,27 @@
     .resources-drawer__form {
       margin: 0 0.25rem 1.75rem;
       padding: 1rem 1.1rem 1.25rem;
-      display: grid;
+      display: none;
       gap: 0.85rem;
       background: rgba(14, 21, 30, 0.72);
       border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: 14px;
+    }
+
+    .resources-drawer[data-view="form"] .resources-drawer__body {
+      display: none;
+    }
+
+    .resources-drawer[data-view="form"] .resources-drawer__form {
+      display: grid;
+    }
+
+    .resources-drawer[data-view="form"] .resources-drawer__toggle {
+      font-size: 1.25rem;
+    }
+
+    .resources-drawer[data-view="list"] .resources-drawer__toggle {
+      background: rgba(45, 212, 195, 0.18);
     }
 
     .resources-drawer__form legend {
@@ -8633,11 +8677,20 @@ body.all-tasks-overlay-active {
     class="resources-drawer"
     aria-hidden="true"
     aria-labelledby="resourcesTitle"
+    data-view="list"
     tabindex="-1"
   >
     <header class="resources-drawer__header">
       <h2 id="resourcesTitle">Quick Access Partners</h2>
-      <button id="resourcesClose" class="resources-drawer__close" type="button" aria-label="Close resources">✕</button>
+      <div class="resources-drawer__actions">
+        <button id="resourcesClose" class="resources-drawer__close" type="button" aria-label="Close resources">✕</button>
+        <button
+          id="resourcesViewToggle"
+          class="resources-drawer__toggle"
+          type="button"
+          aria-label="Add a resource"
+        >📘</button>
+      </div>
     </header>
     <div class="resources-drawer__body" data-resources-list></div>
     <form id="addResourceForm" class="resources-drawer__form" autocomplete="off">
@@ -8667,7 +8720,7 @@ body.all-tasks-overlay-active {
       </fieldset>
       <p class="resources-drawer__form-message" data-resource-form-message aria-live="polite"></p>
       <div class="resources-drawer__form-actions">
-        <button type="submit">Add link</button>
+        <button type="submit">Add item</button>
       </div>
     </form>
   </aside>
@@ -9203,6 +9256,7 @@ body.all-tasks-overlay-active {
   }
 
   let customResourceLinks = loadCustomResources();
+  let setResourcesDrawerView = () => {};
 
   function getAllResourceLinks() {
     return [...RESOURCE_LINKS, ...customResourceLinks];
@@ -9308,6 +9362,12 @@ body.all-tasks-overlay-active {
       messageEl.textContent = text || "";
       messageEl.dataset.status = status;
     };
+    const focusFirstField = () => {
+      const first = form.querySelector("input, textarea, select");
+      if (first) {
+        first.focus();
+      }
+    };
 
     form.addEventListener("submit", event => {
       event.preventDefault();
@@ -9322,8 +9382,9 @@ body.all-tasks-overlay-active {
 
       if (result) {
         form.reset();
-        setMessage("Link added to Resources.", "success");
-        closeResourcesDrawer();
+        setResourcesDrawerView("form");
+        setMessage("Resource added to Quick Access.", "success");
+        window.requestAnimationFrame(() => focusFirstField());
       } else {
         setMessage("Please provide a title and a valid https:// link.", "error");
       }
@@ -18363,7 +18424,53 @@ body.all-tasks-overlay-active {
     const drawer = $("resourcesDrawer");
     const closeBtn = $("resourcesClose");
     const backdrop = $("resourcesBackdrop");
+    const viewToggle = document.getElementById("resourcesViewToggle");
+    const form = document.getElementById("addResourceForm");
+    const messageEl = form?.querySelector("[data-resource-form-message]");
     if (!toggle || !drawer || !backdrop) return;
+
+    let currentView = drawer.dataset.view === "form" ? "form" : "list";
+    const clearFormMessage = () => {
+      if (!messageEl) return;
+      messageEl.textContent = "";
+      messageEl.dataset.status = "neutral";
+    };
+    const focusFirstField = () => {
+      if (!form) return;
+      const first = form.querySelector("input, textarea, select");
+      if (first) {
+        first.focus();
+      }
+    };
+
+    const setDrawerView = (view, { focusField = false } = {}) => {
+      currentView = view === "form" ? "form" : "list";
+      drawer.dataset.view = currentView;
+      if (viewToggle) {
+        if (currentView === "form") {
+          viewToggle.textContent = "✕";
+          viewToggle.setAttribute("aria-label", "Back to resource list");
+          viewToggle.classList.add("resources-drawer__toggle--form");
+          if (focusField) {
+            window.requestAnimationFrame(() => focusFirstField());
+          }
+        } else {
+          viewToggle.textContent = "📘";
+          viewToggle.setAttribute("aria-label", "Add a resource");
+          viewToggle.classList.remove("resources-drawer__toggle--form");
+          if (focusField) {
+            window.requestAnimationFrame(() => viewToggle.focus());
+          }
+        }
+      }
+      if (currentView === "list") {
+        clearFormMessage();
+      }
+    };
+
+    setResourcesDrawerView = (view, options = {}) => {
+      setDrawerView(view, options);
+    };
 
     let drawerOpen = false;
     const setDrawerOpen = (open, { focusToggle = true } = {}) => {
@@ -18375,6 +18482,7 @@ body.all-tasks-overlay-active {
         backdrop.hidden = false;
         requestAnimationFrame(() => backdrop.classList.add("is-visible"));
         drawer.focus();
+        setDrawerView("list");
       } else {
         backdrop.classList.remove("is-visible");
         window.setTimeout(() => {
@@ -18385,6 +18493,7 @@ body.all-tasks-overlay-active {
         if (focusToggle) {
           toggle.focus();
         }
+        setDrawerView("list");
       }
     };
 
@@ -18397,9 +18506,19 @@ body.all-tasks-overlay-active {
     if (closeBtn) {
       closeBtn.addEventListener("click", closeResourcesDrawer);
     }
+    if (viewToggle) {
+      viewToggle.addEventListener("click", () => {
+        if (currentView === "form") {
+          setDrawerView("list", { focusField: true });
+        } else {
+          setDrawerView("form", { focusField: true });
+        }
+      });
+    }
     backdrop.addEventListener("click", closeResourcesDrawer);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && drawerOpen) {
+        event.preventDefault();
         closeResourcesDrawer();
       }
     });
