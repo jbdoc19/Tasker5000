@@ -680,15 +680,16 @@
     }
 
     .weekly-grid__cell {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: stretch;
       gap: 0.65rem;
-      padding: 0.9rem 0.7rem 0.75rem;
+      padding: 0.9rem 0.7rem 2.2rem;
       background: rgba(15, 21, 30, 0.92);
       color: inherit;
       text-align: left;
-      cursor: pointer;
+      cursor: default;
       border-right: 1px solid rgba(148, 163, 184, 0.22);
       border-bottom: 1px solid rgba(148, 163, 184, 0.18);
       transition: background 150ms ease, color 150ms ease;
@@ -781,6 +782,38 @@
       outline: none;
     }
 
+    .weekly-grid__manage {
+      position: absolute;
+      right: 0.7rem;
+      bottom: 0.75rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(23, 32, 44, 0.88);
+      color: rgba(226, 232, 240, 0.96);
+      font-size: 1.05rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease,
+        transform 120ms ease;
+    }
+
+    .weekly-grid__manage:hover,
+    .weekly-grid__manage:focus-visible {
+      border-color: rgba(45, 212, 195, 0.6);
+      background: rgba(31, 45, 62, 0.95);
+      color: #e2e8f0;
+      outline: none;
+    }
+
+    .weekly-grid__manage:active {
+      transform: scale(0.96);
+    }
+
     .weekly-grid__time {
       font-size: 0.75rem;
       color: rgba(148, 163, 184, 0.8);
@@ -822,7 +855,7 @@
     @media (max-width: 600px) {
       .weekly-grid__cell {
         min-height: 92px;
-        padding: 0.75rem 0.6rem 0.65rem;
+        padding: 0.75rem 0.6rem 1.95rem;
       }
 
       .weekly-grid__clinic-select {
@@ -832,6 +865,14 @@
 
       .weekly-grid__time {
         font-size: 0.7rem;
+      }
+
+      .weekly-grid__manage {
+        width: 2rem;
+        height: 2rem;
+        right: 0.55rem;
+        bottom: 0.55rem;
+        font-size: 1rem;
       }
     }
 
@@ -21538,8 +21579,8 @@ closeBtn.addEventListener('click', () => {
           cell.className = "weekly-grid__cell";
           cell.dataset.day = day;
           cell.dataset.block = block;
-          cell.setAttribute("role", "button");
-          cell.tabIndex = 0;
+          cell.setAttribute("role", "group");
+          cell.tabIndex = -1;
 
           const dayLabel = document.createElement("div");
           dayLabel.className = "weekly-grid__day";
@@ -21596,7 +21637,7 @@ closeBtn.addEventListener('click', () => {
             }
           });
 
-          cell.append(dayLabel, clinicWrapper, blockLabel);
+          cell.append(dayLabel, clinicWrapper, blockLabel, manageBtn);
           grid.appendChild(cell);
         });
 
@@ -21623,10 +21664,12 @@ closeBtn.addEventListener('click', () => {
 
         if (closeBtn) {
           closeBtn.addEventListener("click", () => {
+            const focusTarget = activeTrigger || activeCell;
             overlay?.setAttribute("hidden", "");
             activeCell = null;
             activeBlock = null;
             currentSlots = [];
+            focusTarget?.focus();
           });
         }
 
@@ -21651,6 +21694,7 @@ closeBtn.addEventListener('click', () => {
             );
 
             document.dispatchEvent(new CustomEvent("planReady", { detail: plan }));
+            const focusTarget = activeTrigger || activeCell;
             overlay.setAttribute("hidden", "");
             if (activeCell) {
               activeCell.focus();

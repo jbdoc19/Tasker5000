@@ -146,7 +146,12 @@ export function setClinicSelection(day, block, clinicType) {
   if (clinicType == null) {
     delete dayState.clinicSelections[key];
   } else {
-    dayState.clinicSelections[key] = clinicType;
+    const normalized = normalizeClinicOption(clinicType);
+    if (normalized) {
+      dayState.clinicSelections[key] = normalized;
+    } else {
+      delete dayState.clinicSelections[key];
+    }
   }
   persistState();
 }

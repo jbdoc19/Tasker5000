@@ -33,6 +33,7 @@ let addPatientButton = null;
 let toastHost = null;
 let overlaySlotsState = [];
 let activeCell = null;
+let activeTrigger = null;
 let activeCellDay = null;
 let activeCellBlock = null;
 let scheduleSummaryEl = null;
@@ -68,6 +69,45 @@ function cloneClinicBasketSnapshot() {
     values: { ...clinicBasketState.values },
     updatedAt: clinicBasketState.updatedAt,
   };
+}
+
+function parseTimeValue(timeString) {
+  if (typeof timeString !== "string") {
+    return Number.POSITIVE_INFINITY;
+  }
+  const match = timeString.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const hours = Number.parseInt(match[1], 10);
+  const minutes = Number.parseInt(match[2], 10);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return Number.POSITIVE_INFINITY;
+  }
+  return hours * 60 + minutes;
+}
+
+function sortSlots(slots) {
+  if (!Array.isArray(slots)) {
+    return [];
+  }
+  return slots
+    .map((slot, index) => ({
+      slot: { ...slot },
+      index,
+      minutes: parseTimeValue(slot?.time),
+    }))
+    .sort((a, b) => {
+      if (a.minutes === b.minutes) {
+        return a.index - b.index;
+      }
+      return a.minutes - b.minutes;
+    })
+    .map(entry => entry.slot);
+}
+
+function sortOverlaySlotsState() {
+  overlaySlotsState = sortSlots(overlaySlotsState);
 }
 
 function emitScheduleStateUpdate(reason) {
@@ -295,8 +335,8 @@ function renderSchedule(mode) {
     cell.className = "weekly-grid__cell";
     cell.dataset.day = day;
     cell.dataset.block = block;
-    cell.setAttribute("role", "button");
-    cell.tabIndex = 0;
+    cell.setAttribute("role", "group");
+    cell.tabIndex = -1;
 
     const dayLabel = document.createElement("div");
     dayLabel.className = "weekly-grid__day";
@@ -343,22 +383,17 @@ function renderSchedule(mode) {
     const hasStoredResidents = resolveResidentPresence(day, block);
     updateResidentIcon(residentIcon, hasStoredResidents);
 
-    const handleCellClick = event => {
-      if (event.target instanceof HTMLElement && event.target.closest(".weekly-grid__clinic-select")) {
-        return;
-      }
-      openDayOverlay(day, block, cell);
-    };
-
-    cell.addEventListener("click", handleCellClick);
-    cell.addEventListener("keydown", event => {
-      if ((event.key === "Enter" || event.key === " ") && event.target === cell) {
-        event.preventDefault();
-        openDayOverlay(day, block, cell);
-      }
+    const manageButton = document.createElement("button");
+    manageButton.type = "button";
+    manageButton.className = "weekly-grid__manage";
+    manageButton.textContent = "⚙️";
+    manageButton.setAttribute("aria-label", `Open ${day} ${block} confirmation`);
+    manageButton.title = `Open ${day} ${block} confirmation`;
+    manageButton.addEventListener("click", () => {
+      openDayOverlay(day, block, cell, manageButton);
     });
 
-    cell.append(dayLabel, clinicWrapper, blockLabel);
+    cell.append(dayLabel, clinicWrapper, blockLabel, manageButton);
     grid.appendChild(cell);
   });
 }
@@ -541,13 +576,16 @@ function openDayOverlay(day, block, cell) {
   overlay.removeAttribute("hidden");
 }
 
-function hideOverlay() {
+function hideOverlay({ restoreFocus = false } = {}) {
   if (!overlay) return;
+  const focusTarget = restoreFocus ? activeTrigger || activeCell : null;
   overlay.setAttribute("hidden", "");
   overlaySlotsState = [];
   activeCell = null;
+  activeTrigger = null;
   activeCellDay = null;
   activeCellBlock = null;
+  focusTarget?.focus();
 }
 
 function injectHeaderToggles() {
@@ -583,7 +621,11 @@ function injectHeaderToggles() {
 function attachOverlayControls() {
   if (!overlay) return;
 
-  closeButton?.addEventListener("click", hideOverlay);
+  closeButton?.addEventListener("click", () => hideOverlay({ restoreFocus: true }));
+
+  addPatientButton?.addEventListener("click", () => {
+    handleAddPatientSlot();
+  });
 
   addPatientButton?.addEventListener("click", () => {
     handleAddPatientSlot();
