@@ -322,6 +322,136 @@
       gap: 1.5rem;
     }
 
+    .neuro-checklist-card {
+      width: min(960px, calc(100% - var(--page-gutter) * 2));
+      margin: 1.5rem auto 0;
+      padding: clamp(1.25rem, 3vw, 1.75rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1rem, 2.5vw, 1.5rem);
+    }
+
+    .neuro-checklist__header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .neuro-checklist__title {
+      margin: 0;
+      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    }
+
+    .neuro-checklist__subtitle {
+      margin: 0.15rem 0 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .neuro-checklist__status {
+      background: rgba(45, 212, 195, 0.08);
+      border: 1px solid rgba(45, 212, 195, 0.2);
+      border-radius: 12px;
+      padding: 0.6rem 0.9rem;
+      min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      color: var(--hero-teal);
+      font-weight: 600;
+    }
+
+    .neuro-checklist__status small {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .neuro-checklist__body {
+      display: grid;
+      gap: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    @media (min-width: 900px) {
+      .neuro-checklist__body {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .neuro-checklist__section:nth-child(1) {
+        grid-column: span 2;
+      }
+
+      .neuro-checklist__section:nth-child(3) {
+        grid-column: span 3;
+      }
+    }
+
+    .neuro-checklist__section {
+      background: rgba(11, 17, 23, 0.55);
+      border: 1px solid rgba(147, 160, 170, 0.16);
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .neuro-checklist__section-title {
+      font-size: 1rem;
+      margin: 0;
+      color: #f5f9ff;
+    }
+
+    .neuro-checklist__list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .neuro-checklist__list--ordered {
+      counter-reset: neuro-focus-counter;
+    }
+
+    .neuro-checklist__list--ordered li {
+      counter-increment: neuro-focus-counter;
+      padding-left: 2rem;
+      position: relative;
+    }
+
+    .neuro-checklist__list--ordered li::before {
+      content: counter(neuro-focus-counter) ".";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--hero-teal);
+      font-weight: 700;
+    }
+
+    .neuro-checklist__item-label {
+      display: block;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .neuro-checklist__item-meta {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    .neuro-checklist__empty {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .neuro-checklist__list--ordered li.neuro-checklist__empty::before {
+      display: none;
+    }
+
     .schedule-card__header {
       padding-inline: 1rem;
       box-sizing: border-box;
@@ -7748,6 +7878,38 @@ body.all-tasks-overlay-active {
           </button>
         </div>
       </header>
+      <section class="card neuro-checklist-card" id="neuroChecklist" aria-live="polite">
+        <header class="neuro-checklist__header">
+          <div>
+            <h2 class="neuro-checklist__title">🧠 Dynamic Neuroadaptive Daily Checklist</h2>
+            <p class="neuro-checklist__subtitle" data-checklist-subtitle>Calibrating tomorrow’s forecast…</p>
+          </div>
+          <div class="neuro-checklist__status">
+            <span data-checklist-workload>—</span>
+            <small data-checklist-basket-updated>Clinic basket —</small>
+          </div>
+        </header>
+        <div class="neuro-checklist__body">
+          <section class="neuro-checklist__section">
+            <h3 class="neuro-checklist__section-title">Clinic forecast</h3>
+            <ul class="neuro-checklist__list" data-checklist-clinic>
+              <li class="neuro-checklist__empty">Loading schedule…</li>
+            </ul>
+          </section>
+          <section class="neuro-checklist__section">
+            <h3 class="neuro-checklist__section-title">Task load radar</h3>
+            <ul class="neuro-checklist__list" data-checklist-worklist>
+              <li class="neuro-checklist__empty">Loading backlog…</li>
+            </ul>
+          </section>
+          <section class="neuro-checklist__section">
+            <h3 class="neuro-checklist__section-title">Focus targets</h3>
+            <ol class="neuro-checklist__list neuro-checklist__list--ordered" data-checklist-focus>
+              <li class="neuro-checklist__empty">Awaiting priority scan…</li>
+            </ol>
+          </section>
+        </div>
+      </section>
     </div>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
@@ -9346,6 +9508,7 @@ body.all-tasks-overlay-active {
   </nav>
 
   <script type="module" src="./scheduleCard.js"></script>
+  <script type="module" src="./scheduleBridge.js"></script>
   <script>
   const $ = id => document.getElementById(id);
 
@@ -15691,6 +15854,424 @@ body.all-tasks-overlay-active {
     card.classList.remove("hidden");
   }
 
+  const CLINIC_BASKET_STORAGE_KEY = "clinicBasketState";
+  const NEURO_CLINIC_LABEL_MAP = {
+    Faculty: "Faculty Clinic",
+    Continuity: "Continuity Clinic",
+    "St. PJs": "St. PJ’s Foster Clinic",
+    "Admin Time": "Administrative Time",
+    Academics: "Didactics / Academics",
+  };
+
+  const NEURO_FALLBACK_BASKET_ITEMS = [
+    { id: "patientCalls", label: "Patient Calls" },
+    { id: "resultsFollowUp", label: "Results Follow up" },
+    { id: "results", label: "Results" },
+    { id: "chartCompletion", label: "Chart Completion" },
+    { id: "patientAdvice", label: "Patient Advice" },
+    { id: "pendingOrders", label: "Pending Orders" },
+    { id: "hospitalAdmits", label: "Hospital Admits" },
+    { id: "ccdCharts", label: "CC'd charts" },
+    { id: "staffMessages", label: "Staff Messages" },
+  ];
+
+  function getClinicBasketItemsFromBridge() {
+    const api = window.TaskerSchedule;
+    if (api && typeof api.getClinicBasketItems === "function") {
+      const items = api.getClinicBasketItems();
+      if (Array.isArray(items) && items.length) {
+        return items;
+      }
+    }
+    return NEURO_FALLBACK_BASKET_ITEMS;
+  }
+
+  function getSlotBlocksFromBridge() {
+    const api = window.TaskerSchedule;
+    if (api && typeof api.getSlotBlocks === "function") {
+      const blocks = api.getSlotBlocks();
+      if (Array.isArray(blocks) && blocks.length) {
+        return blocks;
+      }
+    }
+    return ["AM", "PM"];
+  }
+
+  function getWeekScheduleFromBridge() {
+    const api = window.TaskerSchedule;
+    if (api && typeof api.getWeekSchedule === "function") {
+      return api.getWeekSchedule();
+    }
+    return null;
+  }
+
+  function sanitizeClinicBasket(detail) {
+    const values = {};
+    if (detail && typeof detail === "object" && detail.values && typeof detail.values === "object") {
+      Object.entries(detail.values).forEach(([key, value]) => {
+        const parsed = Number.parseInt(value, 10);
+        values[key] = Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+      });
+    }
+    const updatedAt = typeof detail?.updatedAt === "string" ? detail.updatedAt : null;
+    return { values, updatedAt };
+  }
+
+  function sanitizeDayStateSnapshot(detail) {
+    if (!detail || typeof detail !== "object") {
+      return {
+        currentDay: null,
+        currentBlock: null,
+        clinicType: null,
+        clinicSelections: {},
+        blockResidentPresence: {},
+        residentMap: {},
+      };
+    }
+    return {
+      currentDay: detail.currentDay || null,
+      currentBlock: detail.currentBlock || null,
+      clinicType: detail.clinicType || null,
+      clinicSelections: { ...(detail.clinicSelections || {}) },
+      blockResidentPresence: { ...(detail.blockResidentPresence || {}) },
+      residentMap: { ...(detail.residentMap || {}) },
+    };
+  }
+
+  function loadClinicBasketStateFromStorage() {
+    try {
+      const raw = localStorage.getItem(CLINIC_BASKET_STORAGE_KEY);
+      if (!raw) {
+        return sanitizeClinicBasket(null);
+      }
+      const parsed = JSON.parse(raw);
+      return sanitizeClinicBasket(parsed);
+    } catch (error) {
+      return sanitizeClinicBasket(null);
+    }
+  }
+
+  let neuroScheduleSnapshot = {
+    clinicBasket: loadClinicBasketStateFromStorage(),
+    dayState: sanitizeDayStateSnapshot(window.TaskerSchedule?.getDayState?.()),
+  };
+
+  function updateNeuroDayState(detail) {
+    neuroScheduleSnapshot.dayState = sanitizeDayStateSnapshot(detail);
+  }
+
+  function updateNeuroClinicBasket(detail) {
+    neuroScheduleSnapshot.clinicBasket = sanitizeClinicBasket(detail);
+  }
+
+  function mapClinicLabel(selection, fallback) {
+    if (selection && NEURO_CLINIC_LABEL_MAP[selection]) {
+      return NEURO_CLINIC_LABEL_MAP[selection];
+    }
+    if (selection) {
+      return selection;
+    }
+    return fallback || "Clinic block";
+  }
+
+  function formatClinicBasketTimestamp(timestamp) {
+    if (!timestamp) {
+      return "Clinic basket —";
+    }
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) {
+      return "Clinic basket —";
+    }
+    const datePart = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const timePart = date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    return `Clinic basket • ${datePart} ${timePart}`;
+  }
+
+  function getNextClinicDate(weekSchedule) {
+    if (!weekSchedule) {
+      return { date: null, dayName: null };
+    }
+    const today = new Date();
+    for (let offset = 1; offset <= 7; offset += 1) {
+      const candidate = new Date(today);
+      candidate.setDate(today.getDate() + offset);
+      const dayName = candidate.toLocaleDateString("en-US", { weekday: "long" });
+      if (weekSchedule[dayName]) {
+        return { date: candidate, dayName };
+      }
+    }
+    return { date: null, dayName: null };
+  }
+
+  function isTaskDueOnDate(task, targetDate) {
+    if (!task || !targetDate || !task.dueDate) {
+      return false;
+    }
+    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+    if (Number.isNaN(dueDate.getTime())) {
+      return false;
+    }
+    return isSameLocalDay(dueDate, targetDate);
+  }
+
+  function formatIsoDateLabel(value) {
+    if (!value) return null;
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function buildClinicFocusHint(info, backlog) {
+    if (!info) return "";
+    if (info.isAdmin) {
+      return backlog
+        ? `Focus: Design backlog sprint on ${backlog.label}.`
+        : "Focus: Protect deep-work admin window.";
+    }
+    if (info.patientCount === 0) {
+      return "Focus: Use block for recovery or strategy planning.";
+    }
+    if (info.hasResident) {
+      return backlog
+        ? `Focus: Pair resident downtime with ${backlog.label}.`
+        : "Focus: Pair resident downtime with quick backlog batches.";
+    }
+    return "Focus: Close visit notes before block transition.";
+  }
+
+  function createChecklistEntry(label, metaLines = []) {
+    const li = document.createElement("li");
+    const labelEl = document.createElement("span");
+    labelEl.className = "neuro-checklist__item-label";
+    labelEl.textContent = label;
+    li.appendChild(labelEl);
+    metaLines.filter(Boolean).forEach(text => {
+      const meta = document.createElement("span");
+      meta.className = "neuro-checklist__item-meta";
+      meta.textContent = text;
+      li.appendChild(meta);
+    });
+    return li;
+  }
+
+  function renderNeuroChecklist() {
+    const card = document.getElementById("neuroChecklist");
+    if (!card) return;
+    const subtitleEl = card.querySelector("[data-checklist-subtitle]");
+    const workloadEl = card.querySelector("[data-checklist-workload]");
+    const basketUpdatedEl = card.querySelector("[data-checklist-basket-updated]");
+    const clinicList = card.querySelector("[data-checklist-clinic]");
+    const workList = card.querySelector("[data-checklist-worklist]");
+    const focusList = card.querySelector("[data-checklist-focus]");
+    if (!subtitleEl || !workloadEl || !clinicList || !workList || !focusList || !basketUpdatedEl) {
+      return;
+    }
+
+    const weekSchedule = getWeekScheduleFromBridge();
+    const { date: clinicDate, dayName } = getNextClinicDate(weekSchedule || {});
+    if (clinicDate) {
+      const formatted = clinicDate.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      });
+      subtitleEl.textContent = `Tomorrow • ${formatted}`;
+    } else {
+      subtitleEl.textContent = "Tomorrow forecast unavailable";
+    }
+
+    basketUpdatedEl.textContent = formatClinicBasketTimestamp(neuroScheduleSnapshot.clinicBasket.updatedAt);
+
+    const activeTasks = tasks.filter(task => !isTaskCompleted(task));
+    const quickActive = activeTasks.filter(task => isQuickTask(task));
+    const coreActive = activeTasks.length - quickActive.length;
+
+    if (activeTasks.length) {
+      workloadEl.textContent = `${activeTasks.length} active • ${quickActive.length} quick • ${tasks.length} total`;
+    } else {
+      workloadEl.textContent = `${tasks.length} total tasks`;
+    }
+
+    const basketItems = getClinicBasketItemsFromBridge();
+    const basketValues = neuroScheduleSnapshot.clinicBasket.values || {};
+    const basketSummaries = basketItems
+      .map(item => ({
+        id: item.id,
+        label: item.label,
+        count: Number.parseInt(basketValues[item.id], 10) || 0,
+      }))
+      .filter(item => Number.isFinite(item.count) && item.count > 0)
+      .sort((a, b) => b.count - a.count);
+    const primaryBacklog = basketSummaries[0] || null;
+
+    clinicList.innerHTML = "";
+    if (dayName && weekSchedule && weekSchedule[dayName]) {
+      const scheduleForDay = weekSchedule[dayName];
+      const blocks = getSlotBlocksFromBridge();
+      let hasEntry = false;
+      blocks.forEach(blockName => {
+        const block = scheduleForDay[blockName];
+        if (!block) return;
+        hasEntry = true;
+        const blockKey = `${dayName}|${blockName}`;
+        const selection = neuroScheduleSnapshot.dayState.clinicSelections?.[blockKey] || null;
+        const label = mapClinicLabel(selection, block?.label);
+        const patientCount = Array.isArray(block?.patients) ? block.patients.length : 0;
+        const blockPresence = neuroScheduleSnapshot.dayState.blockResidentPresence || {};
+        const hasResident = typeof blockPresence[blockKey] === "boolean"
+          ? blockPresence[blockKey]
+          : Boolean(block?.residentRequired);
+        const isAdmin = selection === "Admin Time"
+          || /admin|didactic/i.test(label || "")
+          || patientCount === 0;
+        const metaParts = [];
+        if (patientCount > 0) {
+          metaParts.push(`${patientCount} patient${patientCount === 1 ? "" : "s"}`);
+        }
+        if (hasResident && patientCount > 0) {
+          metaParts.push("Resident co-pilot");
+        }
+        if (isAdmin) {
+          metaParts.push("Admin window");
+        }
+        if (!metaParts.length) {
+          metaParts.push("No visits scheduled");
+        }
+        const focusHint = buildClinicFocusHint({
+          blockName,
+          label,
+          isAdmin,
+          patientCount,
+          hasResident,
+        }, primaryBacklog);
+        const entry = createChecklistEntry(`${blockName} • ${label}`, focusHint ? [...metaParts, focusHint] : metaParts);
+        clinicList.appendChild(entry);
+      });
+      if (!hasEntry) {
+        const empty = document.createElement("li");
+        empty.className = "neuro-checklist__empty";
+        empty.textContent = "No clinic blocks scheduled.";
+        clinicList.appendChild(empty);
+      }
+    } else {
+      const empty = document.createElement("li");
+      empty.className = "neuro-checklist__empty";
+      empty.textContent = "No clinic blocks scheduled.";
+      clinicList.appendChild(empty);
+    }
+
+    workList.innerHTML = "";
+    const workEntries = [];
+    workEntries.push({
+      label: "Active backlog",
+      meta: activeTasks.length
+        ? `${activeTasks.length} tasks • ${coreActive} core • ${quickActive.length} quick`
+        : "No active tasks",
+    });
+    if (clinicDate) {
+      const dueTomorrow = activeTasks.filter(task => isTaskDueOnDate(task, clinicDate)).length;
+      if (dueTomorrow > 0) {
+        workEntries.push({
+          label: "Due tomorrow",
+          meta: `${dueTomorrow} task${dueTomorrow === 1 ? "" : "s"} aligned with ${dayName}`,
+        });
+      }
+    }
+    if (quickActive.length) {
+      const quickNames = quickActive
+        .slice(0, 3)
+        .map(task => task.name)
+        .filter(Boolean);
+      if (quickNames.length) {
+        workEntries.push({
+          label: "Quick wins queued",
+          meta: quickNames.join(", "),
+        });
+      }
+    }
+    basketSummaries.slice(0, 3).forEach(item => {
+      workEntries.push({
+        label: item.label,
+        meta: `${item.count} pending`,
+      });
+    });
+    if (!basketSummaries.length) {
+      workEntries.push({
+        label: "Clinic basket",
+        meta: "No outstanding items recorded",
+      });
+    }
+    if (!workEntries.length) {
+      const empty = document.createElement("li");
+      empty.className = "neuro-checklist__empty";
+      empty.textContent = "Backlog clear.";
+      workList.appendChild(empty);
+    } else {
+      workEntries.forEach(entry => {
+        workList.appendChild(createChecklistEntry(entry.label, [entry.meta]));
+      });
+    }
+
+    focusList.innerHTML = "";
+    const focusCandidates = sortTasksByMode(
+      activeTasks.filter(task => !isQuickTask(task)),
+      TASK_SORT_MODES.PRIORITY,
+    ).slice(0, 3);
+
+    if (!focusCandidates.length) {
+      const empty = document.createElement("li");
+      empty.className = "neuro-checklist__empty";
+      empty.textContent = "All core tasks cleared for now.";
+      focusList.appendChild(empty);
+    } else {
+      focusCandidates.forEach(task => {
+        const label = task.name || "Task";
+        const descriptors = buildTaskDescriptors(task);
+        const descriptorText = descriptors.join(" • ");
+        const estimate = estimateTaskMinutes(task);
+        const metaParts = [];
+        if (descriptorText) {
+          metaParts.push(descriptorText);
+        }
+        if (Number.isFinite(estimate) && estimate > 0) {
+          metaParts.push(`~${Math.round(estimate)} min`);
+        }
+        if (task.dueDate) {
+          const dueLabel = formatIsoDateLabel(task.dueDate);
+          if (dueLabel) {
+            metaParts.push(`Due ${dueLabel}`);
+          }
+        }
+        focusList.appendChild(createChecklistEntry(label, metaParts));
+      });
+    }
+  }
+
+  window.addEventListener("scheduleBridgeReady", event => {
+    if (event?.detail?.dayState) {
+      updateNeuroDayState(event.detail.dayState);
+    }
+    renderNeuroChecklist();
+  });
+
+  window.addEventListener("scheduleStateUpdated", event => {
+    if (!event?.detail) return;
+    if (event.detail.dayState) {
+      updateNeuroDayState(event.detail.dayState);
+    }
+    if (event.detail.clinicBasket) {
+      updateNeuroClinicBasket(event.detail.clinicBasket);
+    }
+    renderNeuroChecklist();
+  });
+
+  window.addEventListener("storage", event => {
+    if (event.key === CLINIC_BASKET_STORAGE_KEY) {
+      updateNeuroClinicBasket(loadClinicBasketStateFromStorage());
+      renderNeuroChecklist();
+    }
+  });
+
   function buildTaskDescriptors(task) {
     const descriptors = [];
     if (task.patientType) descriptors.push(`Patient: ${task.patientType}`);
@@ -19240,6 +19821,7 @@ initializeFocusFabLongPress();
     renderCategoryFilter();
     renderCategoryProgress();
     renderQuickTasks();
+    renderNeuroChecklist();
 
     const totalTasks = tasks.length;
     const activeTasksCount = tasks.filter(t => !isTaskCompleted(t)).length;
