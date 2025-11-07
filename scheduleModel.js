@@ -1,10 +1,10 @@
 export const WEEK_SCHEDULE = {
   Monday: {
     AM: {
-      label: "Faculty Clinic (Medically Complex)",
+      label: "Faculty Clinic",
       start: "08:00",
       end: "12:00",
-      locationLabel: "Main Campus – Complex Care Suite",
+      locationLabel: "Main Campus – Faculty Clinic",
       residentRequired: false,
       patients: [
         { time: "08:00", id: null, residentPresent: false },
@@ -14,10 +14,10 @@ export const WEEK_SCHEDULE = {
       ]
     },
     PM: {
-      label: "Continuity Clinic (+ Residents)",
+      label: "Continuity Clinic (Resident Precepting)",
       start: "13:00",
       end: "17:00",
-      locationLabel: "Main Campus – Team A Pods",
+      locationLabel: "Main Campus – Continuity Clinic",
       residentRequired: true,
       patients: [
         { time: "13:00", id: null, residentPresent: true },
@@ -29,16 +29,16 @@ export const WEEK_SCHEDULE = {
   },
   Tuesday: {
     AM: {
-      label: "St. PJ’s Foster Clinic (+ Resident)",
+      label: "St. PJ’s Foster Clinic",
       start: "08:00",
       end: "12:00",
       locationLabel: "St. PJ’s Shelter",
-      residentRequired: true,
+      residentRequired: false,
       patients: [
-        { time: "08:00", id: null, residentPresent: true },
-        { time: "09:00", id: null, residentPresent: true },
-        { time: "10:00", id: null, residentPresent: true },
-        { time: "11:00", id: null, residentPresent: true }
+        { time: "08:00", id: null, residentPresent: false },
+        { time: "09:00", id: null, residentPresent: false },
+        { time: "10:00", id: null, residentPresent: false },
+        { time: "11:00", id: null, residentPresent: false }
       ]
     },
     PM: {
@@ -52,27 +52,27 @@ export const WEEK_SCHEDULE = {
   },
   Wednesday: {
     AM: {
-      label: "Craniofacial Clinic Team Block",
+      label: "Faculty Clinic",
       start: "08:00",
       end: "12:00",
-      locationLabel: "Craniofacial Center",
-      residentRequired: true,
+      locationLabel: "Main Campus – Faculty Clinic",
+      residentRequired: false,
       patients: [
-        { time: "08:00", id: null, residentPresent: true },
-        { time: "09:30", id: null, residentPresent: true },
-        { time: "10:30", id: null, residentPresent: false },
-        { time: "11:15", id: null, residentPresent: false }
+        { time: "08:00", id: null, residentPresent: false },
+        { time: "09:00", id: null, residentPresent: false },
+        { time: "10:00", id: null, residentPresent: false },
+        { time: "11:00", id: null, residentPresent: false }
       ]
     },
     PM: {
-      label: "Craniofacial Follow-ups",
+      label: "Faculty Clinic",
       start: "13:00",
       end: "17:00",
-      locationLabel: "Craniofacial Center",
-      residentRequired: true,
+      locationLabel: "Main Campus – Faculty Clinic",
+      residentRequired: false,
       patients: [
-        { time: "13:00", id: null, residentPresent: true },
-        { time: "14:00", id: null, residentPresent: true },
+        { time: "13:00", id: null, residentPresent: false },
+        { time: "14:00", id: null, residentPresent: false },
         { time: "15:00", id: null, residentPresent: false },
         { time: "16:00", id: null, residentPresent: false }
       ]
@@ -80,44 +80,34 @@ export const WEEK_SCHEDULE = {
   },
   Thursday: {
     AM: {
-      label: "Faculty Clinic (Hybrid Telehealth)",
+      label: "Didactics / Academics",
       start: "08:00",
       end: "12:00",
-      locationLabel: "Hybrid Pods",
-      residentRequired: true,
-      patients: [
-        { time: "08:00", id: null, residentPresent: false },
-        { time: "09:00", id: null, residentPresent: false },
-        { time: "10:00", id: null, residentPresent: true },
-        { time: "11:00", id: null, residentPresent: true }
-      ]
+      locationLabel: "Academic Conference Center",
+      residentRequired: false,
+      patients: []
     },
     PM: {
-      label: "Resident Continuity Precepting",
+      label: "Administrative Time",
       start: "13:00",
       end: "17:00",
-      locationLabel: "Main Campus – Precepting Suite",
-      residentRequired: true,
-      patients: [
-        { time: "13:00", id: null, residentPresent: true },
-        { time: "14:00", id: null, residentPresent: true },
-        { time: "15:00", id: null, residentPresent: true },
-        { time: "16:00", id: null, residentPresent: true }
-      ]
+      locationLabel: "Mission Control HQ",
+      residentRequired: false,
+      patients: []
     }
   },
   Friday: {
     AM: {
-      label: "St. PJ’s Shelter Rounds (+ Resident)",
+      label: "St. PJ’s Foster Clinic",
       start: "08:00",
       end: "12:00",
       locationLabel: "St. PJ’s Shelter",
-      residentRequired: true,
+      residentRequired: false,
       patients: [
-        { time: "08:00", id: null, residentPresent: true },
-        { time: "09:00", id: null, residentPresent: true },
-        { time: "10:00", id: null, residentPresent: true },
-        { time: "11:00", id: null, residentPresent: true }
+        { time: "08:00", id: null, residentPresent: false },
+        { time: "09:00", id: null, residentPresent: false },
+        { time: "10:00", id: null, residentPresent: false },
+        { time: "11:00", id: null, residentPresent: false }
       ]
     },
     PM: {
