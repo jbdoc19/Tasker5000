@@ -8,7 +8,7 @@ import {
   SLOT_TIMES,
 } from "./scheduleData.js";
 
-function clonePatientSlots() {
+export function clonePatientSlots() {
   const source = dayState.patientSlots || {};
   return Object.fromEntries(
     Object.entries(source).map(([key, slots]) => [
@@ -18,7 +18,7 @@ function clonePatientSlots() {
   );
 }
 
-function cloneDayState() {
+export function cloneDayState() {
   return {
     currentDay: dayState.currentDay,
     currentBlock: dayState.currentBlock,
@@ -30,11 +30,11 @@ function cloneDayState() {
   };
 }
 
-function cloneBasketItems() {
+export function cloneBasketItems() {
   return CLINIC_BASKET_ITEMS.map(item => ({ ...item }));
 }
 
-function cloneSlotTimes() {
+export function cloneSlotTimes() {
   return Object.fromEntries(
     Object.entries(SLOT_TIMES).map(([block, times]) => [block, [...times]]),
   );
