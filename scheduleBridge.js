@@ -8,6 +8,16 @@ import {
   SLOT_TIMES,
 } from "./scheduleData.js";
 
+function clonePatientSlots() {
+  const source = dayState.patientSlots || {};
+  return Object.fromEntries(
+    Object.entries(source).map(([key, slots]) => [
+      key,
+      Array.isArray(slots) ? slots.map(slot => ({ ...slot })) : [],
+    ]),
+  );
+}
+
 function cloneDayState() {
   return {
     currentDay: dayState.currentDay,
@@ -16,6 +26,7 @@ function cloneDayState() {
     clinicSelections: { ...dayState.clinicSelections },
     blockResidentPresence: { ...dayState.blockResidentPresence },
     residentMap: { ...dayState.residentMap },
+    patientSlots: clonePatientSlots(),
   };
 }
 
@@ -33,6 +44,7 @@ if (typeof window !== "undefined") {
   window.TaskerSchedule = Object.assign(window.TaskerSchedule || {}, {
     getWeekSchedule: () => WEEK_SCHEDULE,
     getDayState: () => cloneDayState(),
+    getPatientSlots: () => clonePatientSlots(),
     getClinicBasketItems: () => cloneBasketItems(),
     getClinicDays: () => [...CLINIC_DAYS],
     getSlotBlocks: () => [...SLOT_BLOCKS],
