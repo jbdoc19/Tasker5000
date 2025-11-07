@@ -1,8 +1,10 @@
-npm init -y
-
 {
+  "name": "tasker5000",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo 'No tests yet'",
+    "test": "node --test",
+    "verify:resilience": "node --test",
     "lint": "echo 'No linting yet'"
   }
 }
