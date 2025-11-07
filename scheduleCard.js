@@ -16,6 +16,24 @@ const SLOT_TIMES = {
 };
 const CLINIC_OPTIONS = ["Faculty", "Continuity", "St. PJs", "Admin Time", "Academics"];
 
+const CLINIC_BASKET_ITEMS = [
+  { id: "patientCalls", label: "Patient Calls" },
+  { id: "resultsFollowUp", label: "Results Follow up" },
+  { id: "results", label: "Results" },
+  { id: "chartCompletion", label: "Chart Completion" },
+  { id: "patientAdvice", label: "Patient Advice" },
+  { id: "pendingOrders", label: "Pending Orders" },
+  { id: "hospitalAdmits", label: "Hospital Admits" },
+  { id: "ccdCharts", label: "CC'd charts" },
+  { id: "staffMessages", label: "Staff Messages" }
+];
+
+const CLINIC_BASKET_STORAGE_KEY = "clinicBasketState";
+const DEFAULT_BASKET_VALUES = CLINIC_BASKET_ITEMS.reduce((acc, item) => {
+  acc[item.id] = 0;
+  return acc;
+}, {});
+
 let grid = null;
 let overlay = null;
 let overlayTitle = null;
@@ -28,6 +46,11 @@ let overlaySlotsState = [];
 let activeCell = null;
 let activeCellDay = null;
 let activeCellBlock = null;
+let scheduleSummaryEl = null;
+let clinicBasketForm = null;
+let clinicBasketUpdatedEl = null;
+let clinicBasketState = createDefaultBasketState();
+let clinicBasketHighlightTimeout = null;
 
 function todayName() {
   const name = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -41,11 +64,185 @@ function clampToClinicDay(name) {
   return DAYS[0];
 }
 
+function createDefaultBasketState() {
+  return {
+    values: { ...DEFAULT_BASKET_VALUES },
+    updatedAt: null
+  };
+}
+
+function loadClinicBasketState() {
+  try {
+    const raw = localStorage.getItem(CLINIC_BASKET_STORAGE_KEY);
+    if (!raw) {
+      return createDefaultBasketState();
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || typeof parsed.values !== "object") {
+      return createDefaultBasketState();
+    }
+    const nextState = createDefaultBasketState();
+    CLINIC_BASKET_ITEMS.forEach(item => {
+      const storedValue = Number.parseInt(parsed.values[item.id], 10);
+      nextState.values[item.id] = Number.isFinite(storedValue) && storedValue >= 0 ? storedValue : 0;
+    });
+    if (typeof parsed.updatedAt === "string") {
+      nextState.updatedAt = parsed.updatedAt;
+    }
+    return nextState;
+  } catch (error) {
+    console.warn("Unable to load clinic basket state:", error);
+    return createDefaultBasketState();
+  }
+}
+
+function persistClinicBasketState() {
+  try {
+    localStorage.setItem(CLINIC_BASKET_STORAGE_KEY, JSON.stringify(clinicBasketState));
+  } catch (error) {
+    console.warn("Unable to save clinic basket state:", error);
+  }
+}
+
+function sanitizeBasketValue(value) {
+  const numeric = Number.parseInt(value, 10);
+  if (!Number.isFinite(numeric) || numeric < 0) {
+    return 0;
+  }
+  return numeric;
+}
+
+function formatLastUpdatedLabel(dateString) {
+  if (!dateString) {
+    return "last updated —";
+  }
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return "last updated —";
+  }
+  const datePart = date.toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "2-digit"
+  });
+  const timePart = date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+  return `last updated ${datePart} ${timePart}`;
+}
+
+function updateClinicBasketTimestamp(dateString) {
+  if (!clinicBasketUpdatedEl) return;
+  clinicBasketUpdatedEl.textContent = formatLastUpdatedLabel(dateString);
+  if (dateString) {
+    const parsed = new Date(dateString);
+    if (!Number.isNaN(parsed.getTime())) {
+      clinicBasketUpdatedEl.setAttribute("datetime", parsed.toISOString());
+      return;
+    }
+  }
+  clinicBasketUpdatedEl.removeAttribute("datetime");
+}
+
+function animateClinicBasketTimestamp() {
+  if (!clinicBasketUpdatedEl) return;
+  clinicBasketUpdatedEl.classList.remove("clinic-basket__updated-highlight");
+  // Force reflow so the animation retriggers even if the class is already applied.
+  // eslint-disable-next-line no-unused-expressions
+  clinicBasketUpdatedEl.offsetWidth;
+  clinicBasketUpdatedEl.classList.add("clinic-basket__updated-highlight");
+  if (clinicBasketHighlightTimeout) {
+    clearTimeout(clinicBasketHighlightTimeout);
+  }
+  clinicBasketHighlightTimeout = setTimeout(() => {
+    clinicBasketUpdatedEl?.classList.remove("clinic-basket__updated-highlight");
+  }, 600);
+}
+
+function commitClinicBasketValue(input, { enforceDisplay = false } = {}) {
+  if (!(input instanceof HTMLInputElement)) return;
+  const key = input.dataset.basketInput;
+  if (!key) return;
+
+  const sanitized = sanitizeBasketValue(input.value);
+  const previous = clinicBasketState.values[key];
+  clinicBasketState.values[key] = sanitized;
+
+  if (enforceDisplay) {
+    input.value = String(sanitized);
+  }
+
+  if (previous !== sanitized || clinicBasketState.updatedAt == null) {
+    const now = new Date().toISOString();
+    clinicBasketState.updatedAt = now;
+    updateClinicBasketTimestamp(now);
+    animateClinicBasketTimestamp();
+  } else {
+    updateClinicBasketTimestamp(clinicBasketState.updatedAt);
+  }
+
+  persistClinicBasketState();
+}
+
+function handleClinicBasketInput(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || !target.dataset.basketInput) {
+    return;
+  }
+  commitClinicBasketValue(target);
+}
+
+function handleClinicBasketBlur(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || !target.dataset.basketInput) {
+    return;
+  }
+  commitClinicBasketValue(target, { enforceDisplay: true });
+}
+
+function initializeClinicBasket() {
+  clinicBasketForm = document.querySelector("#weeklyScheduleCard [data-clinic-basket-form]");
+  clinicBasketUpdatedEl = document.querySelector("#weeklyScheduleCard [data-clinic-basket-updated]");
+  clinicBasketState = loadClinicBasketState();
+
+  if (clinicBasketForm) {
+    CLINIC_BASKET_ITEMS.forEach(item => {
+      const input = clinicBasketForm.querySelector(`[data-basket-input="${item.id}"]`);
+      if (input instanceof HTMLInputElement) {
+        input.value = String(clinicBasketState.values[item.id] ?? 0);
+      }
+    });
+    clinicBasketForm.addEventListener("input", handleClinicBasketInput);
+    clinicBasketForm.addEventListener("blur", handleClinicBasketBlur, true);
+  }
+
+  updateClinicBasketTimestamp(clinicBasketState.updatedAt);
+}
+
+function updateScheduleSummary(mode) {
+  if (!scheduleSummaryEl) return;
+  if (mode === "week") {
+    scheduleSummaryEl.textContent = "Week overview";
+    return;
+  }
+  const now = new Date();
+  const day = clampToClinicDay(todayName());
+  const datePart = now.toLocaleDateString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric"
+  });
+  scheduleSummaryEl.textContent = `${day} — ${datePart}`;
+}
+
 export function setScheduleMode(mode = "today") {
   if (!grid) return;
   const resolvedMode = mode === "week" ? "week" : "today";
   grid.innerHTML = "";
   grid.classList.toggle("weekly-grid--single-day", resolvedMode === "today");
+  updateScheduleSummary(resolvedMode);
   renderSchedule(resolvedMode);
 }
 
@@ -323,6 +520,9 @@ document.addEventListener("DOMContentLoaded", () => {
   closeButton = overlay?.querySelector("[data-day-overlay-close]") || null;
   confirmButton = overlay?.querySelector("[data-day-overlay-confirm]") || null;
   toastHost = document.getElementById("toastContainer");
+  scheduleSummaryEl = document.querySelector("#weeklyScheduleCard [data-schedule-summary]");
+
+  initializeClinicBasket();
 
   if (!grid) {
     return;
