@@ -1,4 +1,5 @@
 import {
+  dayState,
   setDay,
   setClinicSelection,
   getClinicSelection,
@@ -7,26 +8,13 @@ import {
   setBlockResidentPresence,
   getBlockResidentPresence,
 } from "./dayState.js";
-
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const SLOT_BLOCKS = ["AM", "PM"];
-const SLOT_TIMES = {
-  AM: ["08:00", "09:00", "10:00", "11:00"],
-  PM: ["13:00", "14:00", "15:00", "16:00"]
-};
-const CLINIC_OPTIONS = ["Faculty", "Continuity", "St. PJs", "Admin Time", "Academics"];
-
-const CLINIC_BASKET_ITEMS = [
-  { id: "patientCalls", label: "Patient Calls" },
-  { id: "resultsFollowUp", label: "Results Follow up" },
-  { id: "results", label: "Results" },
-  { id: "chartCompletion", label: "Chart Completion" },
-  { id: "patientAdvice", label: "Patient Advice" },
-  { id: "pendingOrders", label: "Pending Orders" },
-  { id: "hospitalAdmits", label: "Hospital Admits" },
-  { id: "ccdCharts", label: "CC'd charts" },
-  { id: "staffMessages", label: "Staff Messages" }
-];
+import {
+  CLINIC_BASKET_ITEMS,
+  CLINIC_DAYS as DAYS,
+  CLINIC_OPTIONS,
+  SLOT_BLOCKS,
+  SLOT_TIMES,
+} from "./scheduleData.js";
 
 const CLINIC_BASKET_STORAGE_KEY = "clinicBasketState";
 const DEFAULT_BASKET_VALUES = CLINIC_BASKET_ITEMS.reduce((acc, item) => {
@@ -51,6 +39,37 @@ let clinicBasketForm = null;
 let clinicBasketUpdatedEl = null;
 let clinicBasketState = createDefaultBasketState();
 let clinicBasketHighlightTimeout = null;
+
+function cloneDayStateSnapshot() {
+  return {
+    currentDay: dayState.currentDay,
+    currentBlock: dayState.currentBlock,
+    clinicType: dayState.clinicType,
+    clinicSelections: { ...dayState.clinicSelections },
+    blockResidentPresence: { ...dayState.blockResidentPresence },
+    residentMap: { ...dayState.residentMap },
+  };
+}
+
+function cloneClinicBasketSnapshot() {
+  return {
+    values: { ...clinicBasketState.values },
+    updatedAt: clinicBasketState.updatedAt,
+  };
+}
+
+function emitScheduleStateUpdate(reason) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent("scheduleStateUpdated", {
+      detail: {
+        reason,
+        dayState: cloneDayStateSnapshot(),
+        clinicBasket: cloneClinicBasketSnapshot(),
+      },
+    }),
+  );
+}
 
 function todayName() {
   const name = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -184,6 +203,7 @@ function commitClinicBasketValue(input, { enforceDisplay = false } = {}) {
   }
 
   persistClinicBasketState();
+  emitScheduleStateUpdate("clinic-basket:update");
 }
 
 function handleClinicBasketInput(event) {
@@ -219,6 +239,7 @@ function initializeClinicBasket() {
   }
 
   updateClinicBasketTimestamp(clinicBasketState.updatedAt);
+  emitScheduleStateUpdate("clinic-basket:init");
 }
 
 function updateScheduleSummary(mode) {
@@ -287,6 +308,7 @@ function renderSchedule(mode) {
     select.value = storedClinic;
     select.addEventListener("change", () => {
       setClinicSelection(day, block, select.value);
+      emitScheduleStateUpdate("clinic-selection");
       if (day === activeCellDay && block === activeCellBlock) {
         setDay(day, block, select.value);
       }
@@ -470,6 +492,7 @@ function attachOverlayControls() {
       if (iconEl) {
         updateResidentIcon(iconEl, hasResident);
       }
+      emitScheduleStateUpdate("clinic-residents");
     }
 
     const focusTarget = activeCell;
