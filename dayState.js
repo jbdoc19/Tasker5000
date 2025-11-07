@@ -1,25 +1,9 @@
-import { CLINIC_OPTIONS } from "./scheduleData.js";
-
 const STORAGE_KEY = "taskerScheduleState";
 
 const hasStorage = () => typeof window !== "undefined" && window.localStorage;
 
 function sanitizeBoolean(value) {
   return value === true;
-}
-
-function normalizeClinicOption(value) {
-  if (typeof value !== "string") {
-    return null;
-  }
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return null;
-  }
-  if (CLINIC_OPTIONS.includes(trimmed)) {
-    return trimmed;
-  }
-  return CLINIC_OPTIONS[0] ?? trimmed;
 }
 
 function sanitizePatientSlot(slot, index) {
@@ -81,16 +65,12 @@ function loadStateFromStorage() {
     if (typeof parsed.currentBlock === "string") {
       base.currentBlock = parsed.currentBlock;
     }
-    const normalizedClinicType = normalizeClinicOption(parsed.clinicType);
-    if (normalizedClinicType) {
-      base.clinicType = normalizedClinicType;
+    if (typeof parsed.clinicType === "string") {
+      base.clinicType = parsed.clinicType;
     }
     if (parsed.clinicSelections && typeof parsed.clinicSelections === "object") {
       base.clinicSelections = Object.fromEntries(
-        Object.entries(parsed.clinicSelections).flatMap(([key, value]) => {
-          const normalized = normalizeClinicOption(value);
-          return normalized ? [[key, normalized]] : [];
-        }),
+        Object.entries(parsed.clinicSelections).map(([key, value]) => [key, typeof value === "string" ? value : ""]),
       );
     }
     if (parsed.blockResidentPresence && typeof parsed.blockResidentPresence === "object") {
@@ -138,8 +118,7 @@ export const dayState = initialState;
 export function setDay(day, block, clinicType) {
   dayState.currentDay = day ?? null;
   dayState.currentBlock = block ?? null;
-  const normalizedClinic = normalizeClinicOption(clinicType);
-  dayState.clinicType = normalizedClinic ?? null;
+  dayState.clinicType = clinicType ?? null;
   persistState();
 }
 

@@ -21404,73 +21404,34 @@ closeBtn.addEventListener('click', () => {
         const blocks = ["AM", "PM"];
         let currentSlots = [];
         let activeCell = null;
-        let activeTrigger = null;
         let activeBlock = null;
-
-        const parseTimeValue = timeString => {
-          if (typeof timeString !== "string") {
-            return Number.POSITIVE_INFINITY;
-          }
-          const match = timeString.match(/^(\d{1,2}):(\d{2})$/);
-          if (!match) {
-            return Number.POSITIVE_INFINITY;
-          }
-          const hours = Number.parseInt(match[1], 10);
-          const minutes = Number.parseInt(match[2], 10);
-          if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
-            return Number.POSITIVE_INFINITY;
-          }
-          return hours * 60 + minutes;
-        };
-
-        const sortSlots = slots => {
-          if (!Array.isArray(slots)) return [];
-          return slots
-            .map((slot, index) => ({
-              slot: { ...slot },
-              index,
-              minutes: parseTimeValue(slot?.time),
-            }))
-            .sort((a, b) => {
-              if (a.minutes === b.minutes) {
-                return a.index - b.index;
-              }
-              return a.minutes - b.minutes;
-            })
-            .map(entry => entry.slot);
-        };
 
         const getSlotsForBlock = (dayValue, blockValue) => {
           const key = blockKeyFor(dayValue, blockValue);
           const stored = scheduleState.patientSlots?.[key];
           if (Array.isArray(stored) && stored.length > 0) {
-            return sortSlots(
-              stored.map((slot, index) => ({
-                id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
-                time: typeof slot.time === "string" ? slot.time : "",
-                label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
-                resident: slot.resident === true,
-                isCustom: slot.isCustom === true,
-              })),
-            );
+            return stored.map((slot, index) => ({
+              id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
+              time: typeof slot.time === "string" ? slot.time : "",
+              label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
+              resident: slot.resident === true,
+              isCustom: slot.isCustom === true,
+            }));
           }
           const times = SLOT_TIMES[blockValue] || [];
-          return sortSlots(
-            times.map((time, index) => ({
-              id: `default-${blockValue}-${index}`,
-              time,
-              label: "Visit",
-              resident: scheduleState.residentMap?.[`${key}|${index}`] === true,
-              isCustom: false,
-            })),
-          );
+          return times.map((time, index) => ({
+            id: `default-${blockValue}-${index}`,
+            time,
+            label: "Visit",
+            resident: scheduleState.residentMap?.[`${key}|${index}`] === true,
+            isCustom: false,
+          }));
         };
 
         const persistSlotsForBlock = (dayValue, blockValue, slots) => {
           const key = blockKeyFor(dayValue, blockValue);
-          const sortedSlots = sortSlots(slots);
           if (!scheduleState.patientSlots) scheduleState.patientSlots = {};
-          scheduleState.patientSlots[key] = sortedSlots.map((slot, index) => ({
+          scheduleState.patientSlots[key] = slots.map((slot, index) => ({
             id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
             time: typeof slot.time === "string" ? slot.time : "",
             label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
@@ -21527,17 +21488,7 @@ closeBtn.addEventListener('click', () => {
             timeInput.value = slot.time || "";
             timeInput.addEventListener("input", () => {
               currentSlots[index].time = timeInput.value;
-            });
-            timeInput.addEventListener("change", () => {
-              currentSlots[index].time = timeInput.value;
-              const slotId = slot.id;
               currentSlots = persistSlotsForBlock(day, activeBlock, currentSlots);
-              renderSlots();
-              updateActiveResidentIcon();
-              const nextInput = slotsHost?.querySelector(
-                `[data-slot-id="${slotId}"] .day-overlay__custom-time`,
-              );
-              nextInput?.focus();
             });
 
             const labelInput = document.createElement("input");
@@ -21601,13 +21552,12 @@ closeBtn.addEventListener('click', () => {
           return row;
         };
 
-        const renderOverlay = (block, cell, trigger) => {
+        const renderOverlay = (block, cell) => {
           if (!overlay || !title || !subtitle || !slotsHost) {
             return;
           }
 
           activeCell = cell || null;
-          activeTrigger = trigger || cell || null;
           activeBlock = block;
           const key = blockKeyFor(day, block);
           scheduleState.currentDay = day;
@@ -21677,14 +21627,14 @@ closeBtn.addEventListener('click', () => {
           blockLabel.className = "weekly-grid__time";
           blockLabel.textContent = block;
 
-          const manageBtn = document.createElement("button");
-          manageBtn.type = "button";
-          manageBtn.className = "weekly-grid__manage";
-          manageBtn.textContent = "⚙️";
-          manageBtn.setAttribute("aria-label", `Open ${day} ${block} confirmation`);
-          manageBtn.title = `Open ${day} ${block} confirmation`;
-          manageBtn.addEventListener("click", () => {
-            renderOverlay(block, cell, manageBtn);
+          cell.addEventListener("click", () => {
+            renderOverlay(block, cell);
+          });
+          cell.addEventListener("keydown", event => {
+            if ((event.key === "Enter" || event.key === " ") && event.target === cell) {
+              event.preventDefault();
+              renderOverlay(block, cell);
+            }
           });
 
           cell.append(dayLabel, clinicWrapper, blockLabel, manageBtn);
@@ -21695,9 +21645,8 @@ closeBtn.addEventListener('click', () => {
           addBtn.addEventListener("click", () => {
             if (!activeBlock) return;
             const customCount = currentSlots.filter(slot => slot.isCustom).length + 1;
-            const newSlotId = `custom-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
             currentSlots.push({
-              id: newSlotId,
+              id: `custom-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
               time: "",
               label: `Added patient ${customCount}`,
               resident: false,
@@ -21707,7 +21656,7 @@ closeBtn.addEventListener('click', () => {
             renderSlots();
             updateActiveResidentIcon();
             const latestInput = slotsHost?.querySelector(
-              `[data-slot-id="${newSlotId}"] .day-overlay__custom-time`,
+              ".day-overlay__slot:last-of-type .day-overlay__custom-time",
             );
             latestInput?.focus();
           });
@@ -21718,7 +21667,6 @@ closeBtn.addEventListener('click', () => {
             const focusTarget = activeTrigger || activeCell;
             overlay?.setAttribute("hidden", "");
             activeCell = null;
-            activeTrigger = null;
             activeBlock = null;
             currentSlots = [];
             focusTarget?.focus();
@@ -21748,10 +21696,11 @@ closeBtn.addEventListener('click', () => {
             document.dispatchEvent(new CustomEvent("planReady", { detail: plan }));
             const focusTarget = activeTrigger || activeCell;
             overlay.setAttribute("hidden", "");
-            focusTarget?.focus();
+            if (activeCell) {
+              activeCell.focus();
+            }
             currentSlots = [];
             activeCell = null;
-            activeTrigger = null;
             activeBlock = null;
           });
         }

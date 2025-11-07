@@ -426,18 +426,16 @@ function createDefaultSlot(day, block, time, index) {
 function loadOverlaySlots(day, block) {
   const stored = getPatientSlots(day, block);
   if (Array.isArray(stored) && stored.length > 0) {
-    return sortSlots(
-      stored.map((slot, index) => ({
-        id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
-        time: typeof slot.time === "string" ? slot.time : "",
-        label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
-        resident: Boolean(slot.resident),
-        isCustom: Boolean(slot.isCustom),
-      })),
-    );
+    return stored.map((slot, index) => ({
+      id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
+      time: typeof slot.time === "string" ? slot.time : "",
+      label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
+      resident: Boolean(slot.resident),
+      isCustom: Boolean(slot.isCustom),
+    }));
   }
   const times = SLOT_TIMES[block] || [];
-  return sortSlots(times.map((time, index) => createDefaultSlot(day, block, time, index)));
+  return times.map((time, index) => createDefaultSlot(day, block, time, index));
 }
 
 function buildOverlaySlotRow(slot, index) {
@@ -455,16 +453,7 @@ function buildOverlaySlotRow(slot, index) {
     timeInput.value = slot.time || "";
     timeInput.addEventListener("input", () => {
       overlaySlotsState[index].time = timeInput.value;
-    });
-    timeInput.addEventListener("change", () => {
-      overlaySlotsState[index].time = timeInput.value;
-      const slotId = slot.id;
       persistOverlayState("patient-slot:time");
-      renderOverlaySlots();
-      const nextInput = overlaySlots?.querySelector(
-        `[data-slot-id="${slotId}"] .day-overlay__custom-time`,
-      );
-      nextInput?.focus();
     });
 
     const labelInput = document.createElement("input");
@@ -538,7 +527,6 @@ function persistOverlayState(reason) {
   if (!activeCellDay || !activeCellBlock) {
     return;
   }
-  sortOverlaySlotsState();
   setPatientSlots(activeCellDay, activeCellBlock, overlaySlotsState);
   overlaySlotsState = getPatientSlots(activeCellDay, activeCellBlock);
   const hasResident = overlaySlotsState.some(slot => slot.resident);
@@ -554,9 +542,8 @@ function handleAddPatientSlot() {
     return;
   }
   const customCount = overlaySlotsState.filter(slot => slot.isCustom).length + 1;
-  const newSlotId = `custom-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
   overlaySlotsState.push({
-    id: newSlotId,
+    id: `custom-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
     time: "",
     label: `Added patient ${customCount}`,
     resident: false,
@@ -564,13 +551,13 @@ function handleAddPatientSlot() {
   });
   persistOverlayState("patient-slot:add");
   renderOverlaySlots();
-  const newTimeInput = overlaySlots?.querySelector(
-    `[data-slot-id="${newSlotId}"] .day-overlay__custom-time`,
+  const latestRow = overlaySlots?.querySelector(
+    ".day-overlay__slot:last-of-type .day-overlay__custom-time",
   );
-  newTimeInput?.focus();
+  latestRow?.focus();
 }
 
-function openDayOverlay(day, block, cell, trigger) {
+function openDayOverlay(day, block, cell) {
   if (!overlay || !overlayTitle || !overlaySubtitle || !overlaySlots) {
     return;
   }
@@ -578,14 +565,12 @@ function openDayOverlay(day, block, cell, trigger) {
   const clinicSelection = getClinicSelection(day, block) ?? CLINIC_OPTIONS[0];
   setDay(day, block, clinicSelection);
   activeCell = cell || null;
-  activeTrigger = trigger || cell || null;
   activeCellDay = day;
   activeCellBlock = block;
 
   overlayTitle.textContent = `${day} — ${block}`;
   overlaySubtitle.textContent = "Tap 👩‍⚕️ to include a resident.";
   overlaySlotsState = loadOverlaySlots(day, block);
-  sortOverlaySlotsState();
   renderOverlaySlots();
 
   overlay.removeAttribute("hidden");
@@ -642,6 +627,10 @@ function attachOverlayControls() {
     handleAddPatientSlot();
   });
 
+  addPatientButton?.addEventListener("click", () => {
+    handleAddPatientSlot();
+  });
+
   confirmButton?.addEventListener("click", () => {
     persistOverlayState("patient-slot:confirm");
     const basePlan = [
@@ -655,7 +644,12 @@ function attachOverlayControls() {
     }));
     const plan = basePlan.concat(patientSlots);
     document.dispatchEvent(new CustomEvent("planReady", { detail: plan }));
-    hideOverlay({ restoreFocus: true });
+
+    const focusTarget = activeCell;
+    hideOverlay();
+    if (focusTarget) {
+      focusTarget.focus();
+    }
   });
 }
 
