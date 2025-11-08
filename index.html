@@ -8624,7 +8624,58 @@ body.all-tasks-overlay-active {
         </div>
         <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
       </section>
+<section id="winLogHUD" class="winlog-hud hidden" role="dialog" aria-modal="true" aria-labelledby="winLogTitle">
 
+<div class="winlog-card">
+
+<h3 id="winLogTitle">Quick reflection</h3>
+
+<p class="winlog-sub">What helped you restart?</p>
+
+<div class="winlog-actions">
+
+<button data-log="timer">Timer</button>
+
+<button data-log="buddy">Buddy</button>
+
+<button data-log="ritual">Ritual</button>
+
+<button data-log="music">Music</button>
+
+<button data-log="other">Other</button>
+
+</div>
+
+<input id="winLogNote" type="text" placeholder="Optional note…" />
+
+<div class="winlog-footer">
+
+<button id="winLogSave">Save</button>
+
+<button id="winLogDismiss" class="secondary">Dismiss</button>
+document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
+  label.addEventListener("click",()=>{
+    const duration=parseInt(label.textContent.match(/\d+/)?.[0]||25,10);
+    openOverlay("focusOverlay");        // existing helper
+    startFocusSprint(duration);
+  });
+});
+</div>
+
+</div>
+
+</section>
+<!-- === Phase 5 – Weekly Insights Overlay === -->
+<section id="insightOverlay" class="insight-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="insightTitle">
+  <div class="insight-card">
+    <h3 id="insightTitle">Weekly Insights</h3>
+    <canvas id="insightChart" width="360" height="180"></canvas>
+    <div id="insightStats" class="insight-stats"></div>
+    <div class="insight-footer">
+      <button id="closeInsights">Close</button>
+    </div>
+  </div>
+</section>
 
       <section class="card quick-tasks-card hidden" aria-live="polite" data-quick-tasks-card id="quickTasksCard">
         <span id="quickTasksAnchor" class="zone-anchor" aria-hidden="true"></span>
@@ -8634,7 +8685,6 @@ body.all-tasks-overlay-active {
         <p class="quick-task-empty hidden" id="quickTaskEmpty">No quick tasks yet.</p>
         <div class="quick-task-list" id="quickTaskList" role="list"></div>
       </section>
-
 
           </div>
         </section>
@@ -23511,61 +23561,11 @@ if($("humorizeName")?.checked){ task.name = playfulName(task.name); }
 
 function playfulName(s){ return s?.replace(/chart/i,"Chart Dragon") || s; }
     })();
+   
+
   </script>
   <!-- === Phase 4 – Win Log HUD === -->
-
-<section id="winLogHUD" class="winlog-hud hidden" role="dialog" aria-modal="true" aria-labelledby="winLogTitle">
-
-<div class="winlog-card">
-
-<h3 id="winLogTitle">Quick reflection</h3>
-
-<p class="winlog-sub">What helped you restart?</p>
-
-<div class="winlog-actions">
-
-<button data-log="timer">Timer</button>
-
-<button data-log="buddy">Buddy</button>
-
-<button data-log="ritual">Ritual</button>
-
-<button data-log="music">Music</button>
-
-<button data-log="other">Other</button>
-
-</div>
-
-<input id="winLogNote" type="text" placeholder="Optional note…" />
-
-<div class="winlog-footer">
-
-<button id="winLogSave">Save</button>
-
-<button id="winLogDismiss" class="secondary">Dismiss</button>
-document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
-  label.addEventListener("click",()=>{
-    const duration=parseInt(label.textContent.match(/\d+/)?.[0]||25,10);
-    openOverlay("focusOverlay");        // existing helper
-    startFocusSprint(duration);
-  });
-});
-</div>
-
-</div>
-
-</section>
-<!-- === Phase 5 – Weekly Insights Overlay === -->
-<section id="insightOverlay" class="insight-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="insightTitle">
-  <div class="insight-card">
-    <h3 id="insightTitle">Weekly Insights</h3>
-    <canvas id="insightChart" width="360" height="180"></canvas>
-    <div id="insightStats" class="insight-stats"></div>
-    <div class="insight-footer">
-      <button id="closeInsights">Close</button>
-    </div>
-  </div>
-</section>
+   <script src="./recover-tasks.js"></script>
 </body>
 </html>
 
