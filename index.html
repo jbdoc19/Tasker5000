@@ -4637,6 +4637,33 @@
       font-size: 0.95rem;
       max-width: 48ch;
     }
+  
+  .focus-buddy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  color: var(--text-primary);
+}
+.focus-buddy__timer {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--hero-teal);
+}
+.focus-buddy__controls button {
+  margin: 0 0.25rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(45,212,195,0.15);
+  color: var(--text-primary);
+}
+.focus-buddy__controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 #nextTaskCard,
 .zone-body > .card {
@@ -22788,6 +22815,55 @@ function closeCapacitySheet() {
     document.removeEventListener('keydown', capacitySheetEscapeHandler);
     capacitySheetEscapeHandler = null;
   }
+  let focusTimer = null;
+let focusSeconds = 0;
+let focusRunning = false;
+
+function startFocusSprint(minutes = 25) {
+  focusSeconds = minutes * 60;
+  focusRunning = true;
+  updateFocusTimer();
+  clearInterval(focusTimer);
+  focusTimer = setInterval(tickFocusTimer, 1000);
+  $("focusStartBtn").disabled = true;
+  $("focusPauseBtn").disabled = false;
+  $("focusEndBtn").disabled = false;
+  speakBuddy(`Starting a ${minutes}-minute sprint. You’ve got this.`);
+}
+
+function tickFocusTimer() {
+  if (!focusRunning) return;
+  focusSeconds--;
+  updateFocusTimer();
+  if (focusSeconds <= 0) endFocusSprint(true);
+}
+
+function updateFocusTimer() {
+  const m = Math.floor(focusSeconds / 60).toString().padStart(2, "0");
+  const s = (focusSeconds % 60).toString().padStart(2, "0");
+  $("focusTimerDisplay").textContent = `${m}:${s}`;
+}
+
+function pauseFocusSprint() { focusRunning = !focusRunning; }
+function endFocusSprint(auto = false) {
+  clearInterval(focusTimer);
+  $("focusStartBtn").disabled = false;
+  $("focusPauseBtn").disabled = true;
+  $("focusEndBtn").disabled = true;
+  if (auto) triggerDopamineFeedback();
+}
+
+function speakBuddy(text) {
+  if ("speechSynthesis" in window) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.05;
+    speechSynthesis.speak(u);
+  }
+}
+
+$("focusStartBtn").onclick = () => startFocusSprint(Number($("sprintModeSelect").value));
+$("focusPauseBtn").onclick = pauseFocusSprint;
+$("focusEndBtn").onclick = () => endFocusSprint(false);
 }
     })();
   </script>
