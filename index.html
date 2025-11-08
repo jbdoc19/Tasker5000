@@ -16436,6 +16436,17 @@ body.all-tasks-overlay-active {
       meta.textContent = text;
       li.appendChild(meta);
     });
+    /* === Phase 2 – Step 2 : Progress-bar + click animation === */
+  const bar = document.createElement("div");
+  bar.className = "progress-bar-fill";
+  li.appendChild(bar);
+
+  li.addEventListener("click", () => {
+    // animate bar fill and pulse
+    bar.style.width = "100%";
+    li.classList.add("dopamine-check");
+    playPositiveCue();
+  });
     return li;
   }
 
@@ -22881,6 +22892,20 @@ function speakBuddy(text) {
 $("focusStartBtn").onclick = () => startFocusSprint(Number($("sprintModeSelect").value));
 $("focusPauseBtn").onclick = pauseFocusSprint;
 $("focusEndBtn").onclick = () => endFocusSprint(false);
+}
+      /* === Phase 2 – Step 2 : Sound + haptic cue === */
+function playPositiveCue() {
+  try {
+    if ("vibrate" in navigator) navigator.vibrate(40);
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.frequency.value = 440;            // gentle tone
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+  } catch (e) {
+    console.warn("Cue error", e);
+  }
 }
     })();
   </script>
