@@ -9938,6 +9938,7 @@ body.all-tasks-overlay-active {
   <script type="module" src="./scheduleCard.js"></script>
   <script type="module" src="./scheduleBridge.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="./taskStorage.js"></script>
   <script type="module">
     import generateAdaptiveItinerary from "./timeBlockEngine.js";
 
@@ -22464,21 +22465,44 @@ function wireInsights() {
     initializeWorstDayMode();
     const saved = localStorage.getItem("tasks");
     if (saved) {
-      tasks = JSON.parse(saved).map(task => {
-        const normalizedTask = {
-          ...task,
-          authorType: task.authorType || "attending",
-          patientType: normalizePatientType(task.patientType),
-          visitType: normalizeVisitType(task.visitType),
-          clinicSite: normalizeClinicSite(task.clinicSite),
-          dateOfService: task.dateOfService || null,
-          createdAt: task.createdAt || task.addedAt || new Date().toISOString()
-        };
-        if (normalizedTask.dateOfService) {
-          normalizedTask.daysSinceVisit = calculateDaysSince(normalizedTask.dateOfService);
+      const parser = window.TaskerStorage?.parseStoredTasks;
+      const parseResult = typeof parser === "function"
+        ? parser(saved)
+        : { tasks: [], discarded: 0, error: null };
+
+      if (parseResult.error) {
+        console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+      }
+
+      if (parseResult.discarded > 0) {
+        const label = parseResult.discarded === 1 ? "entry" : "entries";
+        console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
+      }
+
+      const restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
+      const normalizedTasks = [];
+
+      restoredTasks.forEach((task, index) => {
+        try {
+          const normalizedTask = {
+            ...task,
+            authorType: task.authorType || "attending",
+            patientType: normalizePatientType(task.patientType),
+            visitType: normalizeVisitType(task.visitType),
+            clinicSite: normalizeClinicSite(task.clinicSite),
+            dateOfService: task.dateOfService || null,
+            createdAt: task.createdAt || task.addedAt || new Date().toISOString()
+          };
+          if (normalizedTask.dateOfService) {
+            normalizedTask.daysSinceVisit = calculateDaysSince(normalizedTask.dateOfService);
+          }
+          normalizedTasks.push(recalcTaskPriority(normalizedTask));
+        } catch (error) {
+          console.warn(`Unable to normalize stored task at index ${index}; skipping.`, error);
         }
-        return recalcTaskPriority(normalizedTask);
       });
+
+      tasks = normalizedTasks;
     }
     const savedTemplates = localStorage.getItem("templates");
     if (savedTemplates) {
