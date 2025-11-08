@@ -15468,6 +15468,7 @@ body.all-tasks-overlay-active {
     panel.classList.remove("hidden");
     panel.setAttribute("aria-hidden", "false");
     document.body.classlist.add("calm backdrop")
+    recordEvent("meltdown_start");
     resetMeltdownShieldProgress();
     const nextBtn = $("meltdownShieldNext");
     if (nextBtn) {
@@ -15481,6 +15482,7 @@ body.all-tasks-overlay-active {
     panel.classList.add("hidden");
     panel.setAttribute("aria-hidden", "true");
     document.body.classlist.add("calm backdrop")
+    recordEvent("meltdown_end");
     resetMeltdownShieldProgress();
     const focusTarget =
       lastSosTrigger ||
@@ -22268,6 +22270,7 @@ const hud = $("winLogHUD");
 if (!hud) return;
 
 document.body.classList.add("win-flash");
+recordEvent("reflection_open");
 
 setTimeout(()=>document.body.classList.remove("win-flash"), 900);
 
@@ -22300,6 +22303,7 @@ note: payload.note || ""
 existing.push(entry);
 
 localStorage.setItem(storeKey, JSON.stringify(existing));
+recordEvent("reflection_save", entry);
 
 }
 
@@ -23106,6 +23110,7 @@ function startFocusSprint(minutes = 25) {
   $("focusPauseBtn").disabled = false;
   $("focusEndBtn").disabled = false;
   speakBuddy(`Starting a ${minutes}-minute sprint. You’ve got this.`);
+  recordEvent("sprint_start", { duration: minutes });
 }
 
 function tickFocusTimer() {
@@ -23128,6 +23133,7 @@ function endFocusSprint(auto = false) {
   $("focusPauseBtn").disabled = true;
   $("focusEndBtn").disabled = true;
   if (auto) triggerDopamineFeedback();
+  recordEvent("sprint_end", { auto });
 }
 
 function speakBuddy(text) {
@@ -23154,6 +23160,25 @@ function playPositiveCue() {
     osc.stop(ctx.currentTime + 0.1);
   } catch (e) {
     console.warn("Cue error", e);
+  }
+}
+
+/* === Phase 5 – Event Logger === */
+function recordEvent(type, payload = {}) {
+  try {
+    const key = "taskerMetrics";
+    const log = JSON.parse(localStorage.getItem(key) || "[]");
+    const entry = {
+      t: Date.now(),
+      type,
+      ...payload
+    };
+    log.push(entry);
+    // cap log at 2000 entries to avoid unbounded growth
+    if (log.length > 2000) log.splice(0, log.length - 2000);
+    localStorage.setItem(key, JSON.stringify(log));
+  } catch (err) {
+    console.warn("recordEvent error", err);
   }
 }
       // Edit: JS – Jumpback capture + restore
