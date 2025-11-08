@@ -600,7 +600,92 @@
       width: 100%;
       background: var(--hero-teal);
     }
+/* === Phase 4 – Timeline cards + backdrop tones === */
 
+.itinerary-card {
+
+display:grid; grid-template-columns: 86px 1fr; gap:0.75rem;
+
+background: rgba(15,23,42,0.5); border:1px solid rgba(148,163,184,0.22);
+
+border-radius:12px; padding:0.75rem; align-items:flex-start;
+
+}
+
+.itinerary-card .t-time { font-weight:700; opacity:0.9; }
+
+.itinerary-card .t-main { display:grid; gap:0.35rem; }
+
+.itinerary-card .t-title { font-weight:700; }
+
+.itinerary-card .t-meta { font-size:0.85rem; opacity:0.9; }
+
+.itinerary-card .t-rationale { font-size:0.85rem; opacity:0.8; }
+
+.itinerary-card .t-source { font-size:0.8rem; opacity:0.7; }
+
+
+
+.itinerary-card .t-controls { display:flex; gap:0.35rem; align-items:center; }
+
+.itinerary-card .t-controls button {
+
+border:none; background:rgba(45,212,195,0.12); color:var(--hero-teal);
+
+padding:0.25rem 0.5rem; border-radius:8px; cursor:pointer; font-weight:600;
+
+}
+
+.itinerary-card .t-progress { height:6px; background:rgba(148,163,184,0.25);
+
+border-radius:999px; overflow:hidden; }
+
+.itinerary-card .t-progress .fill { height:100%; width:0%; background:var(--hero-teal); transition:width 240ms ease; }
+
+
+
+body.calm-backdrop { background-image: none; }
+
+body.win-flash { animation: winFlash 800ms ease; }
+    body.calm backdrop{background-image:none;}
+
+@keyframes winFlash {
+
+0%{box-shadow: inset 0 0 0 0 rgba(45,212,195,0)}
+
+30%{box-shadow: inset 0 0 0 100vmax rgba(45,212,195,0.08)}
+
+100%{box-shadow: inset 0 0 0 0 rgba(45,212,195,0)}
+
+}
+    /* HUD / Win Log */
+
+.winlog-hud { position:fixed; inset:0; display:grid; place-items:center;
+
+background: rgba(2,6,23,0.55); backdrop-filter: blur(2px); z-index:1300; }
+
+.winlog-hud.hidden { display:none; }
+
+.winlog-card { width:min(420px,92vw); background:#fff; color:#0f172a; border-radius:14px;
+
+padding:1rem; box-shadow:0 18px 40px rgba(15,23,42,0.25); }
+
+.winlog-card h3 { margin:0 0 0.35rem; }
+
+.winlog-sub { margin:0 0 0.5rem; opacity:0.8; }
+
+.winlog-actions { display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:0.5rem; }
+
+.winlog-actions button { border:none; background:#eef2ff; padding:0.35rem 0.6rem; border-radius:8px; cursor:pointer; }
+
+.winlog-card input { width:100%; margin:0.25rem 0 0.5rem; padding:0.45rem 0.6rem; border-radius:8px; border:1px solid #cbd5e1; }
+
+.winlog-footer { display:flex; gap:0.5rem; justify-content:flex-end; }
+
+.winlog-footer .secondary { 
+  background:transparent; color:#0f172a; 
+    }
+    
     .neuro-checklist__list--ordered {
       counter-reset: neuro-focus-counter;
     }
@@ -14076,6 +14161,7 @@ body.all-tasks-overlay-active {
       timerEl.textContent = "✅ Sprint complete";
       setFocusProgress(100);
       triggerFocusPing();
+      openWinLogPrompt();
       return;
     }
     const minutes = Math.floor(elapsedMs / 60000);
@@ -15381,6 +15467,7 @@ body.all-tasks-overlay-active {
     if (!panel) return;
     panel.classList.remove("hidden");
     panel.setAttribute("aria-hidden", "false");
+    document.body.classlist.add("calm backdrop")
     resetMeltdownShieldProgress();
     const nextBtn = $("meltdownShieldNext");
     if (nextBtn) {
@@ -15393,6 +15480,7 @@ body.all-tasks-overlay-active {
     if (!panel) return;
     panel.classList.add("hidden");
     panel.setAttribute("aria-hidden", "true");
+    document.body.classlist.add("calm backdrop")
     resetMeltdownShieldProgress();
     const focusTarget =
       lastSosTrigger ||
@@ -16487,6 +16575,74 @@ body.all-tasks-overlay-active {
     const collection = Array.isArray(blocks) ? blocks : [];
     if (!collection.length) {
       return;
+
+      /* === Phase 4 – richer timeline cards with controls === */
+
+function renderTimeline(host, blocks) {
+
+if (!host) return;
+
+host.innerHTML = "";
+
+(blocks || []).forEach(block => {
+
+const row = document.createElement("div");
+
+row.className = "itinerary-card";
+const time = document.createElement("div");
+time.className = "t-time";
+time.textContent = `${block.start}–${block.end}`;
+const main = document.createElement("div");
+main.className = "t-main";
+const title = document.createElement("div");
+title.className = "t-title";
+title.textContent = block.label || "Focused work";
+const meta = document.createElement("div");
+meta.className = "t-meta";
+meta.textContent = block.goal ? `Goal: ${block.goal}` : "";
+const rationale = document.createElement("div");
+
+rationale.className = "t-rationale";
+
+if (block.rationale) rationale.textContent = block.rationale;
+const source = document.createElement("div");
+source.className = "t-source";
+if (block.source) source.textContent = `Source: ${block.source}`;
+const controls = document.createElement("div");
+controls.className = "t-controls";
+controls.innerHTML = `
+<button type="button" data-sprint="25">▶ 25</button>
+<button type="button" data-sprint="50">▶ 50</button>
+<button type="button" data-sprint="stop">■ Stop</button>
+`;
+const progress = document.createElement("div");
+progress.className = "t-progress";
+const fill = document.createElement("div");
+fill.className = "fill";
+progress.appendChild(fill);
+controls.addEventListener("click", (e) => {
+const btn = e.target.closest("button[data-sprint]");
+if (!btn) return;
+const mode = btn.dataset.sprint;
+if (mode === "stop") {
+stopFocusTimer(true);
+return;
+}
+sprintDurationMinutes = Number(mode);
+setSprintVisualState(true);
+startFocusTimer();
+});
+main.appendChild(title);
+if (meta.textContent) main.appendChild(meta);
+if (rationale.textContent) main.appendChild(rationale);
+if (source.textContent) main.appendChild(source);
+main.appendChild(controls);
+main.appendChild(progress);
+row.appendChild(time);
+row.appendChild(main);
+host.appendChild(row);
+});
+}
     }
     const wrap = document.createElement("div");
     wrap.className = "itinerary-timeline";
@@ -22103,7 +22259,81 @@ initializeFocusFabLongPress();
     });
     observer.observe(document.body, { childList: true, subtree: true });
   }
+/* === Phase 4 – Win Log logic === */
 
+function openWinLogPrompt() {
+
+const hud = $("winLogHUD");
+
+if (!hud) return;
+
+document.body.classList.add("win-flash");
+
+setTimeout(()=>document.body.classList.remove("win-flash"), 900);
+
+hud.classList.remove("hidden");
+
+const note = $("winLogNote");
+
+if (note) note.value = "";
+
+}
+
+
+
+function saveWinLogEntry(payload = {}) {
+
+const storeKey = "winLog";
+
+const existing = JSON.parse(localStorage.getItem(storeKey) || "[]");
+
+const entry = {
+
+t: Date.now(),
+
+tag: payload.tag || "other",
+
+note: payload.note || ""
+
+};
+
+existing.push(entry);
+
+localStorage.setItem(storeKey, JSON.stringify(existing));
+
+}
+
+
+
+function wireWinLogHUD() {
+
+const hud = $("winLogHUD"); if (!hud) return;
+
+let chosen = null;
+
+hud.querySelectorAll("[data-log]").forEach(btn=>{
+
+btn.addEventListener("click", ()=>{ chosen = btn.dataset.log; });
+
+});
+
+const save = $("winLogSave");
+
+const dismiss = $("winLogDismiss");
+
+save.addEventListener("click", ()=>{
+
+const note = ($("winLogNote") || {}).value || "";
+
+saveWinLogEntry({ tag: chosen || "other", note });
+
+hud.classList.add("hidden");
+
+});
+
+dismiss.addEventListener("click", ()=> hud.classList.add("hidden"));
+
+}
   window.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
@@ -22187,6 +22417,7 @@ initializeFocusFabLongPress();
     initializeConflictResolverModule();
     initializeDefuseMode();
     initializeDopamineModule();
+    wireWinLogHUD();
     initializeDistractionTools();
     initializeGanttSnapshot();
     initializeWorstDayMode();
@@ -22949,6 +23180,43 @@ if($("humorizeName")?.checked){ task.name = playfulName(task.name); }
 function playfulName(s){ return s?.replace(/chart/i,"Chart Dragon") || s; }
     })();
   </script>
+  <!-- === Phase 4 – Win Log HUD === -->
+
+<section id="winLogHUD" class="winlog-hud hidden" role="dialog" aria-modal="true" aria-labelledby="winLogTitle">
+
+<div class="winlog-card">
+
+<h3 id="winLogTitle">Quick reflection</h3>
+
+<p class="winlog-sub">What helped you restart?</p>
+
+<div class="winlog-actions">
+
+<button data-log="timer">Timer</button>
+
+<button data-log="buddy">Buddy</button>
+
+<button data-log="ritual">Ritual</button>
+
+<button data-log="music">Music</button>
+
+<button data-log="other">Other</button>
+
+</div>
+
+<input id="winLogNote" type="text" placeholder="Optional note…" />
+
+<div class="winlog-footer">
+
+<button id="winLogSave">Save</button>
+
+<button id="winLogDismiss" class="secondary">Dismiss</button>
+
+</div>
+
+</div>
+
+</section>
 </body>
 </html>
 
