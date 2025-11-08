@@ -22479,21 +22479,7 @@ function wireInsights() {
         console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
       }
 
-      let restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
-
-      if (!restoredTasks.length && !parseResult.error) {
-        try {
-          const legacyParsed = JSON.parse(saved);
-          if (Array.isArray(legacyParsed)) {
-            restoredTasks = legacyParsed;
-          } else if (legacyParsed && typeof legacyParsed === "object" && Array.isArray(legacyParsed.tasks)) {
-            restoredTasks = legacyParsed.tasks;
-          }
-        } catch (legacyError) {
-          console.warn("Legacy task parse failed; skipping fallback restore.", legacyError);
-        }
-      }
-
+      const restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
       const normalizedTasks = [];
 
       restoredTasks.forEach((task, index) => {

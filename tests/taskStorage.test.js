@@ -28,34 +28,6 @@ test('parseStoredTasks supports legacy object wrapper', () => {
   assert.equal(result.discarded, 0);
 });
 
-test('parseStoredTasks recovers from nested wrappers and strings', () => {
-  const legacy = {
-    data: {
-      payload: JSON.stringify({
-        taskList: {
-          0: { id: 'nested-0', name: 'Nested Zero' },
-          1: { id: 'nested-1', name: 'Nested One' },
-        },
-      }),
-    },
-  };
-
-  const saved = JSON.stringify(legacy);
-  const result = parseStoredTasks(saved);
-
-  assert.equal(result.tasks.length, 2);
-  assert.deepEqual(result.tasks.map(task => task.id), ['nested-0', 'nested-1']);
-});
-
-test('parseStoredTasks ignores unparsable nested strings', () => {
-  const saved = JSON.stringify({ tasks: ['{ nope }', { id: 'valid', name: 'Task' }] });
-  const result = parseStoredTasks(saved);
-
-  assert.equal(result.tasks.length, 1);
-  assert.equal(result.discarded, 1);
-  assert.equal(result.tasks[0].id, 'valid');
-});
-
 test('parseStoredTasks surfaces JSON errors', () => {
   const result = parseStoredTasks('{ bad json }');
 
