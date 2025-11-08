@@ -71,6 +71,56 @@
       background: #222; color: #eee; border: 1px solid #555;
       padding: 0.5rem; width: 100%;
     }
+    .task-recovery-panel {
+      background: rgba(17, 24, 31, 0.92);
+      border: 1px solid rgba(125, 138, 150, 0.35);
+      border-radius: 18px;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      color: var(--text-primary);
+      margin: 1.5rem auto;
+      max-width: min(720px, 92vw);
+      padding: 1.5rem;
+    }
+    .task-recovery-panel h2 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+    }
+    .task-recovery-panel p {
+      margin: 0.5rem 0;
+    }
+    .task-recovery-panel__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .task-recovery-panel button,
+    .task-recovery-panel .btn,
+    .task-recovery-panel .link-button {
+      margin: 0;
+    }
+    .task-recovery-panel details {
+      background: rgba(9, 13, 18, 0.88);
+      border-radius: 12px;
+      border: 1px solid rgba(125, 138, 150, 0.25);
+      margin-top: 1rem;
+      padding: 1rem;
+    }
+    .task-recovery-panel details[open] {
+      border-color: rgba(45, 212, 195, 0.4);
+    }
+    .task-recovery-panel pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 240px;
+      overflow: auto;
+      margin: 0.75rem 0 0;
+      padding: 0.75rem;
+      background: rgba(12, 18, 24, 0.9);
+      border-radius: 10px;
+      border: 1px solid rgba(125, 138, 150, 0.2);
+    }
     textarea { resize: vertical; }
     button,
     .btn,
@@ -9984,6 +10034,108 @@ body.all-tasks-overlay-active {
   const ROUTINE_HAPTIC_KEY = "ui.routines.haptics";
   const ROUTINE_REMINDER_TIMERS = new Map();
   const ROUTINE_CONTEXT_RECENT_MS = 2 * 60 * 60 * 1000;
+
+  function attachTaskRecoveryActions(panel, raw, diagnostics) {
+    const status = panel.querySelector('[data-status]');
+    const setStatus = message => {
+      if (status) {
+        status.textContent = message;
+      }
+    };
+
+    const downloadButton = panel.querySelector('[data-download]');
+    if (downloadButton) {
+      downloadButton.addEventListener('click', () => {
+        const downloader = window.TaskerStorage?.downloadTaskBackup;
+        const ok = typeof downloader === 'function' ? downloader(raw) : false;
+        if (!ok) {
+          setStatus('Unable to trigger a download automatically. Long-press the copied data below to save it.');
+        } else {
+          setStatus('Backup download triggered — check your downloads folder.');
+        }
+      });
+    }
+
+    const copyButton = panel.querySelector('[data-copy]');
+    if (copyButton) {
+      copyButton.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(raw);
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = raw;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+          }
+          setStatus('Raw task data copied to your clipboard. Paste it into a safe note for backup.');
+        } catch (error) {
+          console.warn('Unable to copy task data to clipboard.', error);
+          setStatus('Copy failed — long-press the text in the diagnostics block to select it manually.');
+        }
+      });
+    }
+
+    const logButton = panel.querySelector('[data-log]');
+    if (logButton) {
+      logButton.addEventListener('click', () => {
+        console.groupCollapsed('Tasker 5000 › Task recovery diagnostics');
+        console.log('Raw length', raw.length);
+        console.log('Raw preview', raw.slice(0, 180));
+        console.log('Diagnostics', diagnostics);
+        console.groupEnd();
+        setStatus('Diagnostics logged to the console. Attach them when you reach out for help.');
+      });
+    }
+
+    const diagPre = panel.querySelector('[data-diag]');
+    if (diagPre) {
+      const summary = diagnostics ? JSON.stringify(diagnostics, null, 2) : 'No diagnostics available.';
+      diagPre.textContent = summary;
+    }
+  }
+
+  function showTaskRecoveryPanel(raw, diagnostics) {
+    if (!raw) return;
+    const existing = document.querySelector('.task-recovery-panel');
+    if (existing) {
+      existing.remove();
+    }
+
+    const panel = document.createElement('section');
+    panel.className = 'task-recovery-panel';
+    const truncatedPreview = raw.length > 320 ? `${raw.slice(0, 320)}…` : raw;
+    const escapePreview = value =>
+      value.replace(/[<&]/g, char => (char === '<' ? '&lt;' : '&amp;'));
+    panel.innerHTML = `
+      <h2>We found saved tasks, but something blocked the restore.</h2>
+      <p>Your browser still has a copy of the tasks entry in local storage. Use the options below to back it up and capture diagnostics we can review together.</p>
+      <div class="task-recovery-panel__actions">
+        <button type="button" class="btn" data-download>Download backup</button>
+        <button type="button" class="btn" data-copy>Copy raw data</button>
+        <button type="button" class="link-button" data-log>Log details to console</button>
+      </div>
+      <p data-status role="status" aria-live="polite"></p>
+      <details>
+        <summary>Show technical diagnostics</summary>
+        <p>
+          Share this block if you need help from a developer. You can also run
+          <code>window.TaskerStorage.collectTaskDiagnostics()</code> in the console for the latest snapshot.
+        </p>
+        <p><strong>Raw preview:</strong> ${truncatedPreview ? `<code>${escapePreview(truncatedPreview)}</code>` : 'No data detected.'}</p>
+        <pre data-diag></pre>
+      </details>
+    `;
+
+    document.body.insertBefore(panel, document.body.firstChild);
+    attachTaskRecoveryActions(panel, raw, diagnostics);
+  }
+
   const ROUTINE_DEFINITIONS = [
     {
       id: "morning",
