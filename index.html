@@ -23211,7 +23211,13 @@ function playfulName(s){ return s?.replace(/chart/i,"Chart Dragon") || s; }
 <button id="winLogSave">Save</button>
 
 <button id="winLogDismiss" class="secondary">Dismiss</button>
-
+document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
+  label.addEventListener("click",()=>{
+    const duration=parseInt(label.textContent.match(/\d+/)?.[0]||25,10);
+    openOverlay("focusOverlay");        // existing helper
+    startFocusSprint(duration);
+  });
+});
 </div>
 
 </div>
