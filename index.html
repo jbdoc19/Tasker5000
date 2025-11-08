@@ -16244,10 +16244,47 @@ body.all-tasks-overlay-active {
     return li;
   }
 
-  const CHECKLIST_CAPACITY_DEFAULT = { mode: "hard", softLevel: 50 };
+  const DEFAULT_QUOTAS = { AM: 0.4, PM: 0.8 };
   let checklistViewMode = "list";
-  let checklistCapacityState = { ...CHECKLIST_CAPACITY_DEFAULT };
+  const capacityState = {};
   let capacitySheetEscapeHandler = null;
+
+  const CAPACITY_OVERRIDE_DEFAULT = { mode: "hard", percent: 0 };
+
+  function getTodayBlockKey(block = "PM") {
+    const normalizedBlock = typeof block === "string" && block.trim() ? block.trim() : "PM";
+    const dayState = neuroScheduleSnapshot?.dayState;
+    if (dayState?.currentDay) {
+      return `${dayState.currentDay}|${normalizedBlock}`;
+    }
+    const now = new Date();
+    const dayName = now.toLocaleDateString("en-US", { weekday: "short" });
+    return `${dayName}|${normalizedBlock}`;
+  }
+
+  function resolveCapacityOverride(block = "PM") {
+    const key = getTodayBlockKey(block);
+    if (!key) return null;
+    const value = capacityState[key];
+    if (!value) return null;
+    return {
+      mode: value.mode === "soft" ? "soft" : "hard",
+      percent: Number.isFinite(value.percent) ? value.percent : 0,
+    };
+  }
+
+  function setCapacityOverride(block, override) {
+    const key = getTodayBlockKey(block);
+    if (!key) return;
+    if (!override) {
+      delete capacityState[key];
+      return;
+    }
+    capacityState[key] = {
+      mode: override.mode === "soft" ? "soft" : "hard",
+      percent: Number.isFinite(override.percent) ? override.percent : 0,
+    };
+  }
 
   function ensureChecklistLayout(card) {
     if (!card) return null;
@@ -16377,6 +16414,16 @@ body.all-tasks-overlay-active {
       capacityButton.addEventListener("click", openCapacitySheet);
     }
 
+    const quotasEl = document.getElementById("quotaBadges");
+    if (quotasEl) {
+      const formatQuota = value => {
+        const percent = Number(value);
+        if (!Number.isFinite(percent)) return "0%";
+        return `${Math.round(percent * 100)}%`;
+      };
+      quotasEl.textContent = `Quotas — AM ${formatQuota(DEFAULT_QUOTAS.AM)} · PM ${formatQuota(DEFAULT_QUOTAS.PM)}`;
+    }
+
     const viewToggle = document.getElementById("viewToggle");
     if (viewToggle) {
       viewToggle.addEventListener("click", event => {
@@ -16437,11 +16484,11 @@ body.all-tasks-overlay-active {
       const mode = target.dataset.capacityMode;
       if (!mode) return;
       if (mode === "hard") {
-        checklistCapacityState = { ...CHECKLIST_CAPACITY_DEFAULT };
+        setCapacityOverride("PM", CAPACITY_OVERRIDE_DEFAULT);
       } else if (mode === "soft") {
         const softLevel = Number.parseInt(target.dataset.softLevel || "", 10);
         if (Number.isFinite(softLevel)) {
-          checklistCapacityState = { mode: "soft", softLevel };
+          setCapacityOverride("PM", { mode: "soft", percent: softLevel });
         }
       }
       applyChecklistControlsState();
@@ -16486,7 +16533,9 @@ body.all-tasks-overlay-active {
   }
 
   function applyChecklistControlsState() {
-    const isSoft = checklistCapacityState.mode === "soft";
+    const override = resolveCapacityOverride("PM") || CAPACITY_OVERRIDE_DEFAULT;
+    const isSoft = override.mode === "soft";
+    const softPercent = Number.isFinite(override.percent) ? override.percent : 0;
     const chip = document.getElementById("foundTimeChip");
     if (chip) {
       chip.style.display = isSoft ? "inline-flex" : "none";
@@ -16503,9 +16552,7 @@ body.all-tasks-overlay-active {
 
     const capacityButton = document.getElementById("capacityWrench");
     if (capacityButton) {
-      const modeLabel = isSoft
-        ? `Soft ${checklistCapacityState.softLevel}%`
-        : "Hard stop";
+      const modeLabel = isSoft ? `Soft ${softPercent}%` : "Hard stop";
       capacityButton.setAttribute(
         "aria-label",
         `Availability / capacity — ${modeLabel}`,
@@ -16519,18 +16566,249 @@ body.all-tasks-overlay-active {
         if (!mode) return;
         let isActive = false;
         if (mode === "hard") {
-          isActive = checklistCapacityState.mode === "hard";
+          isActive = !isSoft;
         } else if (mode === "soft") {
           const softLevel = Number.parseInt(button.getAttribute("data-soft-level") || "", 10);
           isActive =
-            checklistCapacityState.mode === "soft" &&
+            isSoft &&
             Number.isFinite(softLevel) &&
-            softLevel === checklistCapacityState.softLevel;
+            softLevel === softPercent;
         }
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-pressed", isActive ? "true" : "false");
       });
     }
+  }
+
+  function minutesToTimeString(totalMinutes) {
+    if (!Number.isFinite(totalMinutes)) {
+      return "00:00";
+    }
+    const safe = Math.max(0, Math.round(totalMinutes));
+    const hours = Math.floor(safe / 60) % 24;
+    const minutes = safe % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  function slotsToParallelWindows(slots, block = "AM") {
+    if (!Array.isArray(slots) || slots.length === 0) {
+      return [];
+    }
+    const normalized = slots
+      .map(slot => ({ minutes: getMinutesFromTimeString(slot?.time), slot }))
+      .filter(entry => entry.minutes !== null)
+      .sort((a, b) => a.minutes - b.minutes);
+    if (!normalized.length) {
+      return [];
+    }
+    const windows = [];
+    let windowStart = normalized[0].minutes;
+    let windowEnd = normalized[0].minutes + 45;
+
+    normalized.forEach((entry, index) => {
+      const startMinutes = entry.minutes;
+      const nextStart = normalized[index + 1]?.minutes;
+      let slotEnd = startMinutes + 45;
+      if (Number.isFinite(nextStart) && nextStart < slotEnd) {
+        slotEnd = nextStart;
+      }
+      if (startMinutes > windowEnd + 5) {
+        windows.push({
+          start: minutesToTimeString(windowStart),
+          end: minutesToTimeString(windowEnd),
+          type: "Parallel",
+          block,
+        });
+        windowStart = startMinutes;
+      }
+      windowEnd = Math.max(windowEnd, slotEnd);
+      if (index === normalized.length - 1) {
+        windows.push({
+          start: minutesToTimeString(windowStart),
+          end: minutesToTimeString(windowEnd),
+          type: "Parallel",
+          block,
+        });
+      }
+    });
+
+    return windows;
+  }
+
+  function applyCapacity(windows, overrides) {
+    if (!Array.isArray(windows)) {
+      return [];
+    }
+    return windows.map(window => {
+      const block = window?.block || "";
+      const key = block ? getTodayBlockKey(block) : null;
+      const rawOverride = key ? overrides?.[key] : null;
+      if (!rawOverride) {
+        return { ...window };
+      }
+      const normalized = {
+        mode: rawOverride.mode === "soft" ? "soft" : "hard",
+        percent: Number.isFinite(rawOverride.percent) ? rawOverride.percent : 0,
+      };
+      if (normalized.mode === "hard") {
+        return { ...window, type: "Blackout", override: normalized };
+      }
+      return { ...window, override: normalized };
+    });
+  }
+
+  const USER_END_TIME_STORAGE_KEY = "userDefinedEndTime";
+
+  function getUserDefinedEndTime() {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return null;
+    }
+    try {
+      const value = window.localStorage.getItem(USER_END_TIME_STORAGE_KEY);
+      if (typeof value !== "string") {
+        return null;
+      }
+      const minutes = getMinutesFromTimeString(value);
+      if (minutes === null) {
+        return null;
+      }
+      return minutesToTimeString(minutes);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function normalizeBlockPresenceMap(source) {
+    const result = { AM: 0, PM: 0 };
+    if (!source || typeof source !== "object") {
+      return result;
+    }
+    const day = neuroScheduleSnapshot?.dayState?.currentDay;
+    ["AM", "PM"].forEach(block => {
+      if (typeof source[block] === "number") {
+        result[block] = source[block];
+      } else if (typeof source[block] === "boolean") {
+        result[block] = source[block] ? 1 : 0;
+      } else if (day) {
+        const keyed = source[`${day}|${block}`];
+        if (typeof keyed === "number") {
+          result[block] = keyed;
+        } else if (typeof keyed === "boolean") {
+          result[block] = keyed ? 1 : 0;
+        }
+      }
+    });
+    return result;
+  }
+
+  function clonePatientSlot(slot) {
+    return {
+      id: typeof slot?.id === "string" ? slot.id : "",
+      time: typeof slot?.time === "string" ? slot.time : "",
+      label: typeof slot?.label === "string" ? slot.label : "Visit",
+      resident: slot?.resident === true,
+      isCustom: slot?.isCustom === true,
+    };
+  }
+
+  function normalizePatientSlotMap(source) {
+    const result = { AM: [], PM: [] };
+    if (!source || typeof source !== "object") {
+      return result;
+    }
+    const day = neuroScheduleSnapshot?.dayState?.currentDay;
+    ["AM", "PM"].forEach(block => {
+      const direct = source[block];
+      if (Array.isArray(direct)) {
+        result[block] = direct.map(clonePatientSlot);
+        return;
+      }
+      if (day) {
+        const keyed = source[`${day}|${block}`];
+        if (Array.isArray(keyed)) {
+          result[block] = keyed.map(clonePatientSlot);
+        }
+      }
+    });
+    return result;
+  }
+
+  function computeAvailabilityWindows({
+    clinicType,
+    residents,
+    patientSlots,
+    userEndTime,
+    capacityState: overrides,
+  }) {
+    const make = (start, end, type, block) => ({ start, end, type, block });
+    const windows = [];
+    const normalizedType = typeof clinicType === "string" ? clinicType.toLowerCase() : null;
+    const residentCounts = {
+      AM: Number(residents?.AM) || 0,
+      PM: Number(residents?.PM) || 0,
+    };
+    const slotsByBlock = {
+      AM: Array.isArray(patientSlots?.AM) ? patientSlots.AM : [],
+      PM: Array.isArray(patientSlots?.PM) ? patientSlots.PM : [],
+    };
+    const endTime = typeof userEndTime === "string" && userEndTime ? userEndTime : "17:00";
+
+    if (normalizedType === "clinic") {
+      windows.push(make("08:00", "08:15", "Clinical-Supervision", "AM"));
+      if (residentCounts.AM >= 1) {
+        windows.push(...slotsToParallelWindows(slotsByBlock.AM, "AM"));
+      }
+      windows.push(make("10:25", "11:45", "Clinical-Supervision", "AM"));
+      windows.push(make("11:45", "12:00", "Transition", "AM"));
+    }
+
+    if (normalizedType === "admin") {
+      windows.push(make("13:00", endTime, "Admin", "PM"));
+    } else if (normalizedType === "academic") {
+      windows.push(make("13:00", endTime, "Academic-Blackout", "PM"));
+    } else if (normalizedType === "clinic") {
+      windows.push(make("13:00", endTime, "Admin", "PM"));
+    }
+
+    return applyCapacity(windows, overrides || {});
+  }
+
+  function getDailyContext() {
+    const week = getWeekScheduleFromBridge() || {};
+    const dayState = neuroScheduleSnapshot?.dayState || {};
+    const basket = neuroScheduleSnapshot?.clinicBasket || {};
+    const tasksSnapshot = Array.isArray(window.tasks) ? window.tasks.slice() : [];
+    const clinicType = dayState?.clinicSelections?.todayType || dayState?.clinicType || null;
+    const residents = normalizeBlockPresenceMap(dayState?.blockResidentPresence);
+    const patientSlots = normalizePatientSlotMap(dayState?.patientSlots);
+    const userEndTime = getUserDefinedEndTime() || "17:00";
+    const windows = computeAvailabilityWindows({
+      clinicType,
+      residents,
+      patientSlots,
+      userEndTime,
+      capacityState,
+    });
+
+    return {
+      week,
+      dayState,
+      tasks: tasksSnapshot,
+      basket,
+      clinicType,
+      residents,
+      patientSlots,
+      userEndTime,
+      quotas: DEFAULT_QUOTAS,
+      windows,
+    };
+  }
+
+  if (typeof window !== "undefined") {
+    window.TaskerDaily = Object.assign(window.TaskerDaily || {}, {
+      getDailyContext,
+      computeAvailabilityWindows,
+    });
   }
 
   function renderNeuroChecklist() {
@@ -16550,7 +16828,8 @@ body.all-tasks-overlay-active {
     mountChecklistControls(card);
     applyChecklistControlsState();
 
-    const weekSchedule = getWeekScheduleFromBridge();
+    const dailyContext = getDailyContext();
+    const weekSchedule = dailyContext.week;
     const { date: clinicDate, dayName } = getNextClinicDate(weekSchedule || {});
     if (clinicDate) {
       const formatted = clinicDate.toLocaleDateString(undefined, {
@@ -16563,20 +16842,20 @@ body.all-tasks-overlay-active {
       subtitleEl.textContent = "Tomorrow forecast unavailable";
     }
 
-    basketUpdatedEl.textContent = formatClinicBasketTimestamp(neuroScheduleSnapshot.clinicBasket.updatedAt);
+    basketUpdatedEl.textContent = formatClinicBasketTimestamp(dailyContext.basket.updatedAt);
 
-    const activeTasks = tasks.filter(task => !isTaskCompleted(task));
+    const activeTasks = dailyContext.tasks.filter(task => !isTaskCompleted(task));
     const quickActive = activeTasks.filter(task => isQuickTask(task));
     const coreActive = activeTasks.length - quickActive.length;
 
     if (activeTasks.length) {
-      workloadEl.textContent = `${activeTasks.length} active • ${quickActive.length} quick • ${tasks.length} total`;
+      workloadEl.textContent = `${activeTasks.length} active • ${quickActive.length} quick • ${dailyContext.tasks.length} total`;
     } else {
-      workloadEl.textContent = `${tasks.length} total tasks`;
+      workloadEl.textContent = `${dailyContext.tasks.length} total tasks`;
     }
 
     const basketItems = getClinicBasketItemsFromBridge();
-    const basketValues = neuroScheduleSnapshot.clinicBasket.values || {};
+    const basketValues = dailyContext.basket.values || {};
     const basketSummaries = basketItems
       .map(item => ({
         id: item.id,
@@ -16597,10 +16876,10 @@ body.all-tasks-overlay-active {
         if (!block) return;
         hasEntry = true;
         const blockKey = `${dayName}|${blockName}`;
-        const selection = neuroScheduleSnapshot.dayState.clinicSelections?.[blockKey] || null;
+        const selection = dailyContext.dayState.clinicSelections?.[blockKey] || null;
         const label = mapClinicLabel(selection, block?.label);
         const patientCount = Array.isArray(block?.patients) ? block.patients.length : 0;
-        const blockPresence = neuroScheduleSnapshot.dayState.blockResidentPresence || {};
+        const blockPresence = dailyContext.dayState.blockResidentPresence || {};
         const hasResident = typeof blockPresence[blockKey] === "boolean"
           ? blockPresence[blockKey]
           : Boolean(block?.residentRequired);
