@@ -682,9 +682,24 @@ padding:1rem; box-shadow:0 18px 40px rgba(15,23,42,0.25); }
 
 .winlog-footer { display:flex; gap:0.5rem; justify-content:flex-end; }
 
-.winlog-footer .secondary { 
-  background:transparent; color:#0f172a; 
+.winlog-footer .secondary {
+  background:transparent; color:#0f172a;
     }
+
+/* === Phase 5 – Insights Overlay === */
+.insight-overlay {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  background: rgba(2,6,23,0.55); backdrop-filter: blur(2px); z-index: 1350;
+}
+.insight-overlay.hidden { display: none; }
+.insight-card {
+  width: min(520px, 94vw);
+  background: #fff; color: #0f172a;
+  border-radius: 14px; padding: 1rem 1.25rem;
+  box-shadow: 0 18px 40px rgba(15,23,42,0.25);
+}
+.insight-stats { margin-top: 0.5rem; font-size: 0.9rem; line-height: 1.3; }
+.insight-footer { margin-top: 0.75rem; text-align: right; }
     
     .neuro-checklist__list--ordered {
       counter-reset: neuro-focus-counter;
@@ -9913,6 +9928,7 @@ body.all-tasks-overlay-active {
       <span class="command-link__icon" aria-hidden="true">📘</span>
       <span>Resources</span>
     </button>
+    <button id="insightButton" class="command-link" type="button" aria-label="View weekly insights">📈 Insights</button>
     <a href="#reset-zone" class="command-link">
       <span class="command-link__icon" aria-hidden="true">🌙</span>
       <span>Reset</span>
@@ -9921,6 +9937,7 @@ body.all-tasks-overlay-active {
 
   <script type="module" src="./scheduleCard.js"></script>
   <script type="module" src="./scheduleBridge.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
     import generateAdaptiveItinerary from "./timeBlockEngine.js";
 
@@ -22338,6 +22355,14 @@ hud.classList.add("hidden");
 dismiss.addEventListener("click", ()=> hud.classList.add("hidden"));
 
 }
+
+/* === Phase 5 – Insights wiring === */
+function wireInsights() {
+  const btn = $("insightButton");
+  const closeBtn = $("closeInsights");
+  if (btn) btn.addEventListener("click", openInsights);
+  if (closeBtn) closeBtn.addEventListener("click", closeInsights);
+}
   window.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
@@ -22422,6 +22447,7 @@ dismiss.addEventListener("click", ()=> hud.classList.add("hidden"));
     initializeDefuseMode();
     initializeDopamineModule();
     wireWinLogHUD();
+    wireInsights();
     initializeDistractionTools();
     initializeGanttSnapshot();
     initializeWorstDayMode();
@@ -23181,6 +23207,66 @@ function recordEvent(type, payload = {}) {
     console.warn("recordEvent error", err);
   }
 }
+
+/* === Phase 5 – Insights Overlay logic === */
+function openInsights() {
+  const overlay = $("insightOverlay");
+  if (!overlay) return;
+  overlay.classList.remove("hidden");
+  renderInsights();
+}
+
+function closeInsights() {
+  const overlay = $("insightOverlay");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+function renderInsights() {
+  const raw = JSON.parse(localStorage.getItem("taskerMetrics") || "[]");
+  if (!raw.length) {
+    $("insightStats").textContent = "No activity logged yet.";
+    if (window._insightChart) {
+      window._insightChart.destroy();
+      window._insightChart = null;
+    }
+    return;
+  }
+
+  const weekAgo = Date.now() - 7 * 864e5;
+  const recent = raw.filter(e => e.t >= weekAgo);
+  if (!recent.length) {
+    $("insightStats").textContent = "No activity logged in the past week.";
+    if (window._insightChart) {
+      window._insightChart.destroy();
+      window._insightChart = null;
+    }
+    return;
+  }
+  const counts = {};
+  recent.forEach(e => { counts[e.type] = (counts[e.type] || 0) + 1; });
+
+  $("insightStats").innerHTML =
+    Object.entries(counts).map(([k,v])=>`${k}: ${v}`).join("<br>");
+
+  // Simple sparkline bar chart
+  const ctx = document.getElementById("insightChart").getContext("2d");
+  if (window._insightChart) window._insightChart.destroy();
+  window._insightChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: Object.keys(counts),
+      datasets: [{
+        label: "Events this week",
+        data: Object.values(counts),
+        backgroundColor: "rgba(45,212,195,0.6)"
+      }]
+    },
+    options: {
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
       // Edit: JS – Jumpback capture + restore
 
 function setLastContext(ctx){ try{ localStorage.setItem("lastContext", JSON.stringify({...ctx, t:Date.now()})); }catch{} }
@@ -23247,6 +23333,17 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
 </div>
 
+</section>
+<!-- === Phase 5 – Weekly Insights Overlay === -->
+<section id="insightOverlay" class="insight-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="insightTitle">
+  <div class="insight-card">
+    <h3 id="insightTitle">Weekly Insights</h3>
+    <canvas id="insightChart" width="360" height="180"></canvas>
+    <div id="insightStats" class="insight-stats"></div>
+    <div class="insight-footer">
+      <button id="closeInsights">Close</button>
+    </div>
+  </div>
 </section>
 </body>
 </html>
