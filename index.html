@@ -682,9 +682,24 @@ padding:1rem; box-shadow:0 18px 40px rgba(15,23,42,0.25); }
 
 .winlog-footer { display:flex; gap:0.5rem; justify-content:flex-end; }
 
-.winlog-footer .secondary { 
-  background:transparent; color:#0f172a; 
+.winlog-footer .secondary {
+  background:transparent; color:#0f172a;
     }
+
+/* === Phase 5 – Insights Overlay === */
+.insight-overlay {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  background: rgba(2,6,23,0.55); backdrop-filter: blur(2px); z-index: 1350;
+}
+.insight-overlay.hidden { display: none; }
+.insight-card {
+  width: min(520px, 94vw);
+  background: #fff; color: #0f172a;
+  border-radius: 14px; padding: 1rem 1.25rem;
+  box-shadow: 0 18px 40px rgba(15,23,42,0.25);
+}
+.insight-stats { margin-top: 0.5rem; font-size: 0.9rem; line-height: 1.3; }
+.insight-footer { margin-top: 0.75rem; text-align: right; }
     
     .neuro-checklist__list--ordered {
       counter-reset: neuro-focus-counter;
@@ -9913,6 +9928,16 @@ body.all-tasks-overlay-active {
       <span class="command-link__icon" aria-hidden="true">📘</span>
       <span>Resources</span>
     </button>
+    <button
+      id="insightButton"
+      class="command-link"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="insightOverlay"
+    >
+      <span class="command-link__icon" aria-hidden="true">📈</span>
+      <span>Insights</span>
+    </button>
     <a href="#reset-zone" class="command-link">
       <span class="command-link__icon" aria-hidden="true">🌙</span>
       <span>Reset</span>
@@ -9921,6 +9946,7 @@ body.all-tasks-overlay-active {
 
   <script type="module" src="./scheduleCard.js"></script>
   <script type="module" src="./scheduleBridge.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
     import generateAdaptiveItinerary from "./timeBlockEngine.js";
 
@@ -22338,6 +22364,31 @@ hud.classList.add("hidden");
 dismiss.addEventListener("click", ()=> hud.classList.add("hidden"));
 
 }
+
+/* === Phase 5 – Insights wiring === */
+function wireInsights() {
+  const btn = $("insightButton");
+  const closeBtn = $("closeInsights");
+  const overlay = $("insightOverlay");
+  if (btn) btn.addEventListener("click", openInsights);
+  if (closeBtn) closeBtn.addEventListener("click", closeInsights);
+  if (overlay) {
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) closeInsights();
+    });
+  }
+  if (!window._insightsEscapeHandler) {
+    window._insightsEscapeHandler = event => {
+      if (event.key === "Escape") {
+        const activeOverlay = $("insightOverlay");
+        if (activeOverlay && !activeOverlay.classList.contains("hidden")) {
+          closeInsights();
+        }
+      }
+    };
+    document.addEventListener("keydown", window._insightsEscapeHandler);
+  }
+}
   window.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
@@ -22422,6 +22473,7 @@ dismiss.addEventListener("click", ()=> hud.classList.add("hidden"));
     initializeDefuseMode();
     initializeDopamineModule();
     wireWinLogHUD();
+    wireInsights();
     initializeDistractionTools();
     initializeGanttSnapshot();
     initializeWorstDayMode();
@@ -23181,6 +23233,101 @@ function recordEvent(type, payload = {}) {
     console.warn("recordEvent error", err);
   }
 }
+
+/* === Phase 5 – Insights Overlay logic === */
+function openInsights() {
+  const overlay = $("insightOverlay");
+  if (!overlay) return;
+  overlay.classList.remove("hidden");
+  overlay.setAttribute("aria-hidden", "false");
+  const closeBtn = $("closeInsights");
+  if (closeBtn) {
+    closeBtn.focus();
+  } else {
+    const card = overlay.querySelector(".insight-card");
+    card?.focus();
+  }
+  renderInsights();
+}
+
+function closeInsights() {
+  const overlay = $("insightOverlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+  overlay.setAttribute("aria-hidden", "true");
+  destroyInsightChart();
+}
+
+function destroyInsightChart() {
+  if (window._insightChart) {
+    window._insightChart.destroy();
+    window._insightChart = null;
+  }
+}
+
+function renderInsights() {
+  const statsEl = $("insightStats");
+  if (!statsEl) return;
+
+  const raw = JSON.parse(localStorage.getItem("taskerMetrics") || "[]");
+  if (!raw.length) {
+    statsEl.textContent = "No activity logged yet.";
+    destroyInsightChart();
+    return;
+  }
+
+  const weekAgo = Date.now() - 7 * 864e5;
+  const recent = raw.filter(e => e.t >= weekAgo);
+  if (!recent.length) {
+    statsEl.textContent = "No activity logged in the past week.";
+    destroyInsightChart();
+    return;
+  }
+
+  const counts = recent.reduce((acc, entry) => {
+    const key = entry.type || "other";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  statsEl.innerHTML = entries.map(([label, value]) => `${label}: ${value}`).join("<br>");
+
+  const canvas = document.getElementById("insightChart");
+  if (!canvas) {
+    destroyInsightChart();
+    return;
+  }
+
+  if (typeof window.Chart === "undefined") {
+    destroyInsightChart();
+    statsEl.innerHTML += "<br><em>Chart preview unavailable offline.</em>";
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    destroyInsightChart();
+    return;
+  }
+
+  destroyInsightChart();
+  window._insightChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: entries.map(([label]) => label),
+      datasets: [{
+        label: "Events this week",
+        data: entries.map(([, value]) => value),
+        backgroundColor: "rgba(45,212,195,0.6)"
+      }]
+    },
+    options: {
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
       // Edit: JS – Jumpback capture + restore
 
 function setLastContext(ctx){ try{ localStorage.setItem("lastContext", JSON.stringify({...ctx, t:Date.now()})); }catch{} }
@@ -23247,6 +23394,17 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
 </div>
 
+</section>
+<!-- === Phase 5 – Weekly Insights Overlay === -->
+<section id="insightOverlay" class="insight-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="insightTitle" aria-hidden="true">
+  <div class="insight-card" tabindex="-1">
+    <h3 id="insightTitle">Weekly Insights</h3>
+    <canvas id="insightChart" width="360" height="180"></canvas>
+    <div id="insightStats" class="insight-stats"></div>
+    <div class="insight-footer">
+      <button id="closeInsights" type="button">Close</button>
+    </div>
+  </div>
 </section>
 </body>
 </html>
