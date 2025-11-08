@@ -22631,44 +22631,7 @@ function wireInsights() {
         console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
       }
 
-      let restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
-
-      if (!restoredTasks.length && !parseResult.error) {
-        try {
-          const legacyHelper = window.TaskerStorage?.attemptLegacyRestore;
-          if (typeof legacyHelper === "function") {
-            const legacyResult = legacyHelper(saved);
-            restoredTasks = Array.isArray(legacyResult.tasks) ? legacyResult.tasks : [];
-            if (legacyResult.format) {
-              console.info(`Recovered ${restoredTasks.length} tasks using legacy format: ${legacyResult.format}.`);
-            }
-          } else {
-            const legacyParsed = JSON.parse(saved);
-            if (Array.isArray(legacyParsed)) {
-              restoredTasks = legacyParsed;
-            } else if (legacyParsed && typeof legacyParsed === "object" && Array.isArray(legacyParsed.tasks)) {
-              restoredTasks = legacyParsed.tasks;
-            }
-          }
-        } catch (legacyError) {
-          console.warn("Legacy task parse failed; skipping fallback restore.", legacyError);
-        }
-      }
-
-      if (!restoredTasks.length) {
-        const diagnosticsCollector = window.TaskerStorage?.collectTaskDiagnostics;
-        const diagnostics = typeof diagnosticsCollector === "function"
-          ? diagnosticsCollector({ raw: saved })
-          : null;
-        console.warn("Task recovery diagnostics", diagnostics);
-        showTaskRecoveryPanel(saved, diagnostics);
-      } else {
-        const existingPanel = document.querySelector('.task-recovery-panel');
-        if (existingPanel) {
-          existingPanel.remove();
-        }
-      }
-
+      const restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
       const normalizedTasks = [];
 
       restoredTasks.forEach((task, index) => {
