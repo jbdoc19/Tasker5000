@@ -22087,6 +22087,66 @@ closeBtn.addEventListener('click', () => {
       } else {
         runFallback();
       }
+      function getCapacityBackdrop() {
+  let b = document.getElementById('capacityBackdrop');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'capacityBackdrop';
+    b.className = 'checklist-capacity-backdrop';
+    document.body.appendChild(b);
+    b.addEventListener('click', closeCapacitySheet);
+  }
+  return b;
+}
+
+function openCapacitySheet() {
+  const card = document.getElementById('neuroChecklist');
+  if (!card) return;
+  const sheet = ensureCapacitySheet(card);
+  if (!sheet) return;
+
+  sheet.classList.add('is-open');
+  sheet.setAttribute('aria-hidden', 'false');
+
+  const backdrop = getCapacityBackdrop();
+  backdrop.classList.add('is-visible');
+
+  applyChecklistControlsState();
+
+  const focusTarget = sheet.querySelector("[data-action='close']") || sheet.querySelector('button');
+  if (focusTarget instanceof HTMLElement) focusTarget.focus();
+
+  if (!capacitySheetEscapeHandler) {
+    capacitySheetEscapeHandler = (event) => {
+      if (event.key === 'Escape') closeCapacitySheet();
+      // basic focus trap
+      if (event.key === 'Tab') {
+        const focusables = sheet.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        const list = Array.from(focusables);
+        const first = list[0], last = list[list.length - 1];
+        if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
+        else if (!event.shiftKey && document.activeElement === last) { first.focus(); event.preventDefault(); }
+      }
+    };
+    document.addEventListener('keydown', capacitySheetEscapeHandler);
+  }
+}
+
+function closeCapacitySheet() {
+  const sheet = document.getElementById('capacitySheet');
+  if (sheet) {
+    sheet.classList.remove('is-open');
+    sheet.setAttribute('aria-hidden', 'true');
+  }
+  const backdrop = document.getElementById('capacityBackdrop');
+  if (backdrop) backdrop.classList.remove('is-visible');
+
+  if (capacitySheetEscapeHandler) {
+    document.removeEventListener('keydown', capacitySheetEscapeHandler);
+    capacitySheetEscapeHandler = null;
+  }
+}
     })();
   </script>
 </body>
