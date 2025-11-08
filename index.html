@@ -17274,7 +17274,7 @@ host.appendChild(row);
       capacityState,
     });
 
-    return {
+    const context = {
       week,
       dayState,
       tasks: tasksSnapshot,
@@ -17288,6 +17288,16 @@ host.appendChild(row);
       triage,
       windows,
     };
+    // === Phase 5 – Apply adaptive profile ===
+    try {
+      const bias = JSON.parse(localStorage.getItem("adaptiveProfile") || "{}");
+      if (bias.defaultSprintMinutes) context.defaultSprintMinutes = bias.defaultSprintMinutes;
+      if (bias.quickWinBias) context.quickWinBias = bias.quickWinBias;
+      if (bias.shieldPromptTone) context.shieldPromptTone = bias.shieldPromptTone;
+    } catch (e) {
+      console.warn("Adaptive bias load failed", e);
+    }
+    return context;
   }
 
   if (typeof window !== "undefined") {
@@ -22448,6 +22458,7 @@ function wireInsights() {
     initializeDopamineModule();
     wireWinLogHUD();
     wireInsights();
+    recalculateAdaptiveBias();
     initializeDistractionTools();
     initializeGanttSnapshot();
     initializeWorstDayMode();
@@ -23266,6 +23277,40 @@ function renderInsights() {
       plugins: { legend: { display: false } }
     }
   });
+}
+/* === Phase 5 – Adaptive Bias Engine === */
+function recalculateAdaptiveBias() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("taskerMetrics") || "[]");
+    if (!raw.length) return;
+
+    const cutoff = Date.now() - 7 * 864e5;           // last 7 days
+    const week = raw.filter(e => e.t >= cutoff);
+    const counts = {};
+    week.forEach(e => counts[e.type] = (counts[e.type] || 0) + 1);
+
+    const sprints = counts.sprint_end || 0;
+    const meltdowns = counts.meltdown_start || 0;
+    const reflections = counts.reflection_save || 0;
+
+    const resilience = sprints ? Math.max(0, 1 - meltdowns / (sprints + 1)) : 1;
+
+    const profile = {
+      lastUpdate: Date.now(),
+      avgSprints: sprints,
+      meltdownRate: meltdowns,
+      reflectionRate: reflections,
+      resilience,
+      defaultSprintMinutes: resilience < 0.6 ? 20 : resilience > 0.9 ? 35 : 25,
+      quickWinBias: resilience < 0.7 ? 1.5 : 1,
+      shieldPromptTone: resilience < 0.5 ? "gentle" : "standard"
+    };
+
+    localStorage.setItem("adaptiveProfile", JSON.stringify(profile));
+    console.log("Adaptive profile updated", profile);
+  } catch (err) {
+    console.warn("recalculateAdaptiveBias error", err);
+  }
 }
       // Edit: JS – Jumpback capture + restore
 
