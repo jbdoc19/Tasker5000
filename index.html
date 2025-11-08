@@ -381,7 +381,7 @@
   top: calc(100% + 0.5rem);
   right: clamp(1rem, 4vw, 1.5rem);
   width: min(360px, 94vw);
-  background: rgba(9, 14, 20, 0.98);        /* more opaque */
+  background: var(--surface-elevated,#ffffff);        /* stays opaque */
   color: var(--text-primary);
   border-radius: 14px;
   border: 1px solid rgba(148, 163, 184, 0.28);
@@ -3911,6 +3911,23 @@
     .meltdown-shield button {
       font-size: 0.85rem;
     }
+  /* Edit: styles – calming overlay for #meltdownShield */
+.meltdown-shield {
+position: fixed; inset: 0;
+background: rgba(2, 6, 23, 0.55); /* opaque enough to read */
+backdrop-filter: blur(2px);
+display: grid; place-items: center;
+z-index: 1000;
+}
+.meltdown-shield.hidden { display: none; }
+.meltdown-shield .meltdown-shield-prompt,
+.meltdown-shield .meltdown-shield-header,
+.meltdown-shield ul, .meltdown-shield .meltdown-shield-actions {
+background: #fff; color: #0f172a;
+border-radius: 14px; padding: 1rem; max-width: 560px;
+box-shadow: 0 18px 40px rgb a(15,23,42,0.25);          
+}
+
     .meltdown-top-task {
       color: #7bd88f;
       font-weight: 600;
@@ -9308,6 +9325,7 @@ body.all-tasks-overlay-active {
           <label for="name">Task name
             <input id="name" type="text" placeholder="3/14 – J.M. – Complex Care Follow-Up (Resident)" />
           </label>
+          <label><input id="humorizeName" type="checkbox"> Playful name</label>
           <label for="taskCategory">Category
             <select id="taskCategory">
               <option value="General" selected>General</option>
@@ -22907,6 +22925,28 @@ function playPositiveCue() {
     console.warn("Cue error", e);
   }
 }
+      // Edit: JS – Jumpback capture + restore
+
+function setLastContext(ctx){ try{ localStorage.setItem("lastContext", JSON.stringify({...ctx, t:Date.now()})); }catch{} }
+
+function getLastContext(){ try{ return JSON.parse(localStorage.getItem("lastContext")||""); }catch{ return null } }
+
+function restoreLastContext(){
+
+const c=getLastContext(); if(!c) return;
+
+// naive restore: focus a task row by id and scroll into view
+
+const el=document.querySelector(`[data-task-id="${c.taskId}"]`);
+
+if(el){ el.scrollIntoView({block:"center"}); el.focus(); }
+
+}
+     // Edit: in your save/create handler
+
+if($("humorizeName")?.checked){ task.name = playfulName(task.name); }
+
+function playfulName(s){ return s?.replace(/chart/i,"Chart Dragon") || s; }
     })();
   </script>
 </body>
