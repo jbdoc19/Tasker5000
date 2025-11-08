@@ -520,6 +520,87 @@
       gap: 0.65rem;
     }
 
+    .neuro-checklist__section--itinerary {
+      grid-column: span 3;
+    }
+
+    @media (max-width: 899px) {
+      .neuro-checklist__section--itinerary {
+        grid-column: auto;
+      }
+    }
+
+    .neuro-checklist__itinerary {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .neuro-checklist__itinerary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .neuro-checklist__itinerary-timeline {
+      display: none;
+    }
+
+    .neuro-checklist-card.neuro-checklist--timeline .neuro-checklist__body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .neuro-checklist-card.neuro-checklist--timeline .neuro-checklist__section:not(.neuro-checklist__section--itinerary) {
+      display: none;
+    }
+
+    .neuro-checklist-card.neuro-checklist--timeline .neuro-checklist__itinerary-list {
+      display: none;
+    }
+
+    .neuro-checklist-card.neuro-checklist--timeline .neuro-checklist__itinerary-timeline {
+      display: block;
+    }
+
+    .neuro-checklist__itinerary-empty {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .neuro-checklist-card.neuro-checklist--timeline .neuro-checklist__itinerary-empty {
+      text-align: center;
+    }
+
+    .itinerary-timeline {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .itinerary-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 2fr;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .itinerary-row .t-time {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .t-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .t-fill {
+      height: 100%;
+      width: 100%;
+      background: var(--hero-teal);
+    }
+
     .neuro-checklist__list--ordered {
       counter-reset: neuro-focus-counter;
     }
@@ -9677,6 +9758,13 @@ body.all-tasks-overlay-active {
 
   <script type="module" src="./scheduleCard.js"></script>
   <script type="module" src="./scheduleBridge.js"></script>
+  <script type="module">
+    import generateAdaptiveItinerary from "./timeBlockEngine.js";
+
+    window.TaskerDaily = Object.assign(window.TaskerDaily || {}, {
+      generateAdaptiveItinerary,
+    });
+  </script>
   <script>
   const $ = id => document.getElementById(id);
 
@@ -16291,6 +16379,37 @@ body.all-tasks-overlay-active {
     return li;
   }
 
+  function renderMicroItinerary(host, blocks) {
+    if (!host) return;
+    host.innerHTML = "";
+    (Array.isArray(blocks) ? blocks : []).forEach(block => {
+      const label = `${block.start || ""}${block.end ? ` – ${block.end}` : ""} ${block.title || ""}`.trim();
+      const meta = [];
+      if (Array.isArray(block.meta)) {
+        meta.push(...block.meta.filter(Boolean));
+      }
+      host.appendChild(createChecklistEntry(label, meta));
+    });
+  }
+
+  function renderTimeline(host, blocks) {
+    if (!host) return;
+    host.innerHTML = "";
+    const collection = Array.isArray(blocks) ? blocks : [];
+    if (!collection.length) {
+      return;
+    }
+    const wrap = document.createElement("div");
+    wrap.className = "itinerary-timeline";
+    collection.forEach(block => {
+      const row = document.createElement("div");
+      row.className = "itinerary-row";
+      row.innerHTML = `<div class="t-time">${block.start || ""}${block.end ? `–${block.end}` : ""}</div> <div class="t-bar"><div class="t-fill"></div></div> <div class="t-title">${block.title || ""}</div>`;
+      wrap.appendChild(row);
+    });
+    host.appendChild(wrap);
+  }
+
   const DEFAULT_QUOTAS = { AM: 0.4, PM: 0.8 };
   let checklistViewMode = "list";
   const capacityState = {};
@@ -16417,9 +16536,33 @@ body.all-tasks-overlay-active {
     focusSection.appendChild(focusTitle);
     focusSection.appendChild(focusList);
 
+    const itinerarySection = document.createElement("section");
+    itinerarySection.className = "neuro-checklist__section neuro-checklist__section--itinerary";
+    const itineraryTitle = document.createElement("h3");
+    itineraryTitle.className = "neuro-checklist__section-title";
+    itineraryTitle.textContent = "Visual workflow";
+    const itineraryContainer = document.createElement("div");
+    itineraryContainer.className = "neuro-checklist__itinerary";
+    const itineraryList = document.createElement("ul");
+    itineraryList.className = "neuro-checklist__list neuro-checklist__itinerary-list";
+    itineraryList.dataset.checklistItineraryList = "";
+    const itineraryTimeline = document.createElement("div");
+    itineraryTimeline.className = "neuro-checklist__itinerary-timeline";
+    itineraryTimeline.dataset.checklistItineraryTimeline = "";
+    itineraryContainer.appendChild(itineraryList);
+    itineraryContainer.appendChild(itineraryTimeline);
+    const itineraryEmpty = document.createElement("p");
+    itineraryEmpty.className = "neuro-checklist__itinerary-empty";
+    itineraryEmpty.dataset.checklistItineraryEmpty = "";
+    itineraryEmpty.textContent = "Generating adaptive workflow…";
+    itinerarySection.appendChild(itineraryTitle);
+    itinerarySection.appendChild(itineraryContainer);
+    itinerarySection.appendChild(itineraryEmpty);
+
     body.appendChild(clinicSection);
     body.appendChild(workSection);
     body.appendChild(focusSection);
+    body.appendChild(itinerarySection);
 
     card.appendChild(header);
     card.appendChild(body);
@@ -16432,6 +16575,10 @@ body.all-tasks-overlay-active {
       workList,
       focusList,
       statusBox,
+      itineraryList,
+      itineraryTimeline,
+      itineraryEmpty,
+      itineraryContainer,
     };
     card.__checklistRefs = refs;
     return refs;
@@ -16586,6 +16733,21 @@ body.all-tasks-overlay-active {
     const chip = document.getElementById("foundTimeChip");
     if (chip) {
       chip.style.display = isSoft ? "inline-flex" : "none";
+    }
+
+    const card = document.getElementById("neuroChecklist");
+    if (card) {
+      const isTimeline = checklistViewMode === "timeline";
+      card.classList.toggle("neuro-checklist--timeline", isTimeline);
+      const refs = card.__checklistRefs;
+      if (refs) {
+        if (refs.itineraryList) {
+          refs.itineraryList.setAttribute("aria-hidden", isTimeline ? "true" : "false");
+        }
+        if (refs.itineraryTimeline) {
+          refs.itineraryTimeline.setAttribute("aria-hidden", isTimeline ? "false" : "true");
+        }
+      }
     }
 
     const viewToggle = document.getElementById("viewToggle");
@@ -16883,6 +17045,10 @@ body.all-tasks-overlay-active {
       clinicList,
       workList,
       focusList,
+      itineraryList,
+      itineraryTimeline,
+      itineraryEmpty,
+      itineraryContainer,
     } = refs;
 
     mountChecklistControls(card);
@@ -17075,6 +17241,118 @@ body.all-tasks-overlay-active {
         }
         focusList.appendChild(createChecklistEntry(label, metaParts));
       });
+    }
+
+    if (itineraryList) {
+      itineraryList.innerHTML = "";
+    }
+    if (itineraryTimeline) {
+      itineraryTimeline.innerHTML = "";
+    }
+    if (itineraryEmpty) {
+      itineraryEmpty.classList.add("hidden");
+    }
+    if (itineraryContainer) {
+      itineraryContainer.classList.remove("hidden");
+    }
+
+    const itineraryGenerator = window.TaskerDaily?.generateAdaptiveItinerary;
+    let itineraryBlocks = [];
+
+    if (typeof itineraryGenerator === "function") {
+      const itineraryTasks = activeTasks.map(task => {
+        const estimate = estimateTaskMinutes(task);
+        const safeMinutes = Number.isFinite(estimate) && estimate > 0 ? estimate : 30;
+        const descriptors = buildTaskDescriptors(task);
+        const metaSet = new Set(descriptors);
+        if (task.dueDate) {
+          const dueLabel = formatIsoDateLabel(task.dueDate);
+          if (dueLabel) {
+            metaSet.add(`Due ${dueLabel}`);
+          }
+        }
+        if (task.category) {
+          metaSet.add(task.category);
+        }
+        return {
+          name: task.name || "Focused Block",
+          minutes: safeMinutes,
+          quickWin: isQuickTask(task),
+          yield: Math.max(1, Math.round(Number(task.priority) || 1)),
+          meta: Array.from(metaSet).filter(Boolean),
+        };
+      });
+
+      const itineraryBasket = {};
+      sortedClusters.forEach(cluster => {
+        if (!cluster || !Number.isFinite(cluster.totalEstMinutes)) return;
+        const minutes = Math.max(0, cluster.totalEstMinutes);
+        if (minutes <= 0) return;
+        const label = (cluster.name || "").toLowerCase();
+        if (label.includes("result")) {
+          itineraryBasket.Results = { minutes };
+        } else if (label.includes("call")) {
+          itineraryBasket.Calls = { minutes };
+        } else if (label.includes("chart")) {
+          itineraryBasket.Charts = { minutes };
+        } else if (label.includes("advice")) {
+          itineraryBasket.Advice = { minutes };
+        }
+      });
+
+      const itineraryContext = {
+        windows: Array.isArray(dailyContext.windows) ? dailyContext.windows : [],
+        quotas: dailyContext.quotas || DEFAULT_QUOTAS,
+        tasks: itineraryTasks,
+        basket: itineraryBasket,
+        clinicType: dailyContext.clinicType,
+        userEndTime: dailyContext.userEndTime,
+      };
+
+      try {
+        itineraryBlocks = itineraryGenerator(itineraryContext, {});
+      } catch (error) {
+        console.error("Failed to generate adaptive itinerary", error);
+      }
+    }
+
+    const decoratedBlocks = (Array.isArray(itineraryBlocks) ? itineraryBlocks : []).map(block => {
+      const metaSet = new Set();
+      if (Array.isArray(block.meta)) {
+        block.meta.filter(Boolean).forEach(item => metaSet.add(item));
+      }
+      if (Number.isFinite(block.minutes) && block.minutes > 0) {
+        metaSet.add(`~${Math.round(block.minutes)} min`);
+      }
+      if (block.segment) {
+        metaSet.add(`${block.segment} segment`);
+      }
+      if (block.why && typeof block.why === "string" && block.why !== "adaptive") {
+        metaSet.add(block.why);
+      }
+      return {
+        ...block,
+        meta: Array.from(metaSet),
+      };
+    });
+
+    if (decoratedBlocks.length && itineraryContainer) {
+      if (itineraryList) {
+        renderMicroItinerary(itineraryList, decoratedBlocks);
+      }
+      if (itineraryTimeline) {
+        renderTimeline(itineraryTimeline, decoratedBlocks);
+      }
+    } else {
+      if (itineraryContainer) {
+        itineraryContainer.classList.add("hidden");
+      }
+      if (itineraryEmpty) {
+        itineraryEmpty.textContent = typeof itineraryGenerator === "function"
+          ? "Add tasks or adjust availability to generate a workflow."
+          : "Timeline tools unavailable.";
+        itineraryEmpty.classList.remove("hidden");
+      }
     }
   }
 
