@@ -4664,6 +4664,23 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+  /* === Phase 2 – Step 2 : Dopaminergic Feedback === */
+.dopamine-check {
+  animation: pop 400ms ease forwards;
+}
+@keyframes pop {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.progress-bar-fill {
+  height: 6px;
+  background: var(--hero-teal);
+  width: 0%;
+  transition: width 0.4s ease;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
 
 #nextTaskCard,
 .zone-body > .card {
