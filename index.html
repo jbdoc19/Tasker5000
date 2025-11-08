@@ -323,12 +323,119 @@
     }
 
     .neuro-checklist-card {
+      position: relative;
       width: min(960px, calc(100% - var(--page-gutter) * 2));
       margin: 1.5rem auto 0;
       padding: clamp(1.25rem, 3vw, 1.75rem);
       display: flex;
       flex-direction: column;
       gap: clamp(1rem, 2.5vw, 1.5rem);
+    }
+
+    #checklistControls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    #checklistControls .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #checklistControls button {
+      border: none;
+      background: transparent;
+      font: inherit;
+      cursor: pointer;
+      padding: 0.15rem 0.35rem;
+      border-radius: 8px;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    #checklistControls button:is(:hover, :focus-visible) {
+      background: rgba(45, 212, 195, 0.12);
+      color: var(--hero-teal);
+      outline: none;
+    }
+
+    #checklistControls button.is-active {
+      background: rgba(45, 212, 195, 0.18);
+      color: var(--hero-teal);
+    }
+
+    #foundTimeChip {
+      background: rgba(45, 212, 195, 0.1);
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--hero-teal);
+    }
+
+    .checklist-capacity-sheet {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: clamp(1rem, 4vw, 1.5rem);
+      width: min(320px, 90vw);
+      background: var(--surface-elevated, #ffffff);
+      border-radius: 12px;
+      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.18);
+      border: 1px solid rgba(45, 212, 195, 0.18);
+      padding: 1rem;
+      display: none;
+      z-index: 15;
+    }
+
+    .checklist-capacity-sheet.is-open {
+      display: block;
+    }
+
+    .checklist-capacity-sheet__title {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .checklist-capacity-sheet__group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .checklist-capacity-sheet__group button {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.04);
+      border-radius: 10px;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .checklist-capacity-sheet__soft-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .checklist-capacity-sheet__group button.is-active {
+      background: rgba(45, 212, 195, 0.18);
+      color: var(--hero-teal);
+    }
+
+    .checklist-capacity-sheet__footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
+    }
+
+    .checklist-capacity-sheet__footer button {
+      font-weight: 600;
+      color: var(--hero-teal);
     }
 
     .neuro-checklist__header {
@@ -7969,38 +8076,7 @@ body.all-tasks-overlay-active {
           </button>
         </div>
       </header>
-      <section class="card neuro-checklist-card" id="neuroChecklist" aria-live="polite">
-        <header class="neuro-checklist__header">
-          <div>
-            <h2 class="neuro-checklist__title">🧠 Dynamic Neuroadaptive Daily Checklist</h2>
-            <p class="neuro-checklist__subtitle" data-checklist-subtitle>Calibrating tomorrow’s forecast…</p>
-          </div>
-          <div class="neuro-checklist__status">
-            <span data-checklist-workload>—</span>
-            <small data-checklist-basket-updated>Clinic basket —</small>
-          </div>
-        </header>
-        <div class="neuro-checklist__body">
-          <section class="neuro-checklist__section">
-            <h3 class="neuro-checklist__section-title">Clinic forecast</h3>
-            <ul class="neuro-checklist__list" data-checklist-clinic>
-              <li class="neuro-checklist__empty">Loading schedule…</li>
-            </ul>
-          </section>
-          <section class="neuro-checklist__section">
-            <h3 class="neuro-checklist__section-title">Task load radar</h3>
-            <ul class="neuro-checklist__list" data-checklist-worklist>
-              <li class="neuro-checklist__empty">Loading backlog…</li>
-            </ul>
-          </section>
-          <section class="neuro-checklist__section">
-            <h3 class="neuro-checklist__section-title">Focus targets</h3>
-            <ol class="neuro-checklist__list neuro-checklist__list--ordered" data-checklist-focus>
-              <li class="neuro-checklist__empty">Awaiting priority scan…</li>
-            </ol>
-          </section>
-        </div>
-      </section>
+      <section class="card neuro-checklist-card" id="neuroChecklist" aria-live="polite"></section>
     </div>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
@@ -16167,18 +16243,311 @@ body.all-tasks-overlay-active {
     return li;
   }
 
+  const CHECKLIST_CAPACITY_DEFAULT = { mode: "hard", softLevel: 50 };
+  let checklistViewMode = "list";
+  let checklistCapacityState = { ...CHECKLIST_CAPACITY_DEFAULT };
+  let capacitySheetEscapeHandler = null;
+
+  function ensureChecklistLayout(card) {
+    if (!card) return null;
+    if (card.__checklistRefs) {
+      return card.__checklistRefs;
+    }
+
+    card.innerHTML = "";
+
+    const header = document.createElement("header");
+    header.className = "neuro-checklist__header";
+
+    const headingBlock = document.createElement("div");
+    const title = document.createElement("h2");
+    title.className = "neuro-checklist__title";
+    title.textContent = "🧠 Dynamic Neuroadaptive Daily Checklist";
+    const subtitleEl = document.createElement("p");
+    subtitleEl.className = "neuro-checklist__subtitle";
+    subtitleEl.dataset.checklistSubtitle = "";
+    subtitleEl.textContent = "Calibrating tomorrow’s forecast…";
+    headingBlock.appendChild(title);
+    headingBlock.appendChild(subtitleEl);
+
+    const statusBox = document.createElement("div");
+    statusBox.className = "neuro-checklist__status";
+    const workloadEl = document.createElement("span");
+    workloadEl.dataset.checklistWorkload = "";
+    workloadEl.textContent = "—";
+    const basketUpdatedEl = document.createElement("small");
+    basketUpdatedEl.dataset.checklistBasketUpdated = "";
+    basketUpdatedEl.textContent = "Clinic basket —";
+    statusBox.appendChild(workloadEl);
+    statusBox.appendChild(basketUpdatedEl);
+
+    header.appendChild(headingBlock);
+    header.appendChild(statusBox);
+
+    const body = document.createElement("div");
+    body.className = "neuro-checklist__body";
+
+    const clinicSection = document.createElement("section");
+    clinicSection.className = "neuro-checklist__section";
+    const clinicTitle = document.createElement("h3");
+    clinicTitle.className = "neuro-checklist__section-title";
+    clinicTitle.textContent = "Clinic forecast";
+    const clinicList = document.createElement("ul");
+    clinicList.className = "neuro-checklist__list";
+    clinicList.dataset.checklistClinic = "";
+    const clinicEmpty = document.createElement("li");
+    clinicEmpty.className = "neuro-checklist__empty";
+    clinicEmpty.textContent = "Loading schedule…";
+    clinicList.appendChild(clinicEmpty);
+    clinicSection.appendChild(clinicTitle);
+    clinicSection.appendChild(clinicList);
+
+    const workSection = document.createElement("section");
+    workSection.className = "neuro-checklist__section";
+    const workTitle = document.createElement("h3");
+    workTitle.className = "neuro-checklist__section-title";
+    workTitle.textContent = "Task load radar";
+    const workList = document.createElement("ul");
+    workList.className = "neuro-checklist__list";
+    workList.dataset.checklistWorklist = "";
+    const workEmpty = document.createElement("li");
+    workEmpty.className = "neuro-checklist__empty";
+    workEmpty.textContent = "Loading backlog…";
+    workList.appendChild(workEmpty);
+    workSection.appendChild(workTitle);
+    workSection.appendChild(workList);
+
+    const focusSection = document.createElement("section");
+    focusSection.className = "neuro-checklist__section";
+    const focusTitle = document.createElement("h3");
+    focusTitle.className = "neuro-checklist__section-title";
+    focusTitle.textContent = "Focus targets";
+    const focusList = document.createElement("ol");
+    focusList.className = "neuro-checklist__list neuro-checklist__list--ordered";
+    focusList.dataset.checklistFocus = "";
+    const focusEmpty = document.createElement("li");
+    focusEmpty.className = "neuro-checklist__empty";
+    focusEmpty.textContent = "Awaiting priority scan…";
+    focusList.appendChild(focusEmpty);
+    focusSection.appendChild(focusTitle);
+    focusSection.appendChild(focusList);
+
+    body.appendChild(clinicSection);
+    body.appendChild(workSection);
+    body.appendChild(focusSection);
+
+    card.appendChild(header);
+    card.appendChild(body);
+
+    const refs = {
+      subtitleEl,
+      workloadEl,
+      basketUpdatedEl,
+      clinicList,
+      workList,
+      focusList,
+      statusBox,
+    };
+    card.__checklistRefs = refs;
+    return refs;
+  }
+
+  function mountChecklistControls(card) {
+    const host = card.querySelector(".neuro-checklist__status");
+    if (!host || host.querySelector("#checklistControls")) return;
+
+    const box = document.createElement("div");
+    box.id = "checklistControls";
+    box.innerHTML = `
+      <div class="controls-row">
+        <button id="capacityWrench" title="Availability / capacity">🔧</button>
+        <small id="quotaBadges">Quotas — AM 40% · PM 80%</small>
+        <span id="foundTimeChip" style="display:none;">Found time: +15m</span>
+        <small id="viewToggle">
+          <button type="button" data-view="list">List</button>
+          ·
+          <button type="button" data-view="timeline">Timeline</button>
+        </small>
+      </div>`;
+    host.appendChild(box);
+
+    const capacityButton = document.getElementById("capacityWrench");
+    if (capacityButton) {
+      capacityButton.addEventListener("click", openCapacitySheet);
+    }
+
+    const viewToggle = document.getElementById("viewToggle");
+    if (viewToggle) {
+      viewToggle.addEventListener("click", event => {
+        const target = event.target instanceof HTMLElement
+          ? event.target.closest("button[data-view]")
+          : null;
+        if (!target) return;
+        const view = target.dataset.view;
+        if (!view || view === checklistViewMode) return;
+        checklistViewMode = view;
+        applyChecklistControlsState();
+        updateUI();
+      });
+    }
+  }
+
+  function ensureCapacitySheet(card) {
+    if (!card) return null;
+    let sheet = document.getElementById("capacitySheet");
+    if (sheet) return sheet;
+
+    sheet = document.createElement("div");
+    sheet.id = "capacitySheet";
+    sheet.className = "checklist-capacity-sheet";
+    sheet.setAttribute("role", "dialog");
+    sheet.setAttribute("aria-modal", "true");
+    sheet.setAttribute("aria-hidden", "true");
+    sheet.innerHTML = `
+      <h4 class="checklist-capacity-sheet__title">Availability calibration</h4>
+      <p>Tune tomorrow's workload exposure.</p>
+      <div class="checklist-capacity-sheet__group">
+        <button type="button" data-capacity-mode="hard">Hard stop — no tasks</button>
+      </div>
+      <div class="checklist-capacity-sheet__group">
+        <strong>Soft capacity</strong>
+        <div class="checklist-capacity-sheet__soft-options">
+          <button type="button" data-capacity-mode="soft" data-soft-level="25">25%</button>
+          <button type="button" data-capacity-mode="soft" data-soft-level="50">50%</button>
+          <button type="button" data-capacity-mode="soft" data-soft-level="75">75%</button>
+        </div>
+      </div>
+      <div class="checklist-capacity-sheet__footer">
+        <button type="button" data-action="close">Done</button>
+      </div>`;
+    card.appendChild(sheet);
+
+    sheet.addEventListener("click", event => {
+      const target = event.target instanceof HTMLElement
+        ? event.target.closest("[data-capacity-mode], [data-action]")
+        : null;
+      if (!target) {
+        return;
+      }
+      if (target.dataset.action === "close") {
+        closeCapacitySheet();
+        return;
+      }
+      const mode = target.dataset.capacityMode;
+      if (!mode) return;
+      if (mode === "hard") {
+        checklistCapacityState = { ...CHECKLIST_CAPACITY_DEFAULT };
+      } else if (mode === "soft") {
+        const softLevel = Number.parseInt(target.dataset.softLevel || "", 10);
+        if (Number.isFinite(softLevel)) {
+          checklistCapacityState = { mode: "soft", softLevel };
+        }
+      }
+      applyChecklistControlsState();
+      closeCapacitySheet();
+      updateUI();
+    });
+
+    return sheet;
+  }
+
+  function openCapacitySheet() {
+    const card = document.getElementById("neuroChecklist");
+    if (!card) return;
+    const sheet = ensureCapacitySheet(card);
+    if (!sheet) return;
+    sheet.classList.add("is-open");
+    sheet.setAttribute("aria-hidden", "false");
+    applyChecklistControlsState();
+    const focusTarget = sheet.querySelector("[data-action='close']");
+    if (focusTarget instanceof HTMLElement) {
+      focusTarget.focus();
+    }
+    if (!capacitySheetEscapeHandler) {
+      capacitySheetEscapeHandler = event => {
+        if (event.key === "Escape") {
+          closeCapacitySheet();
+        }
+      };
+      document.addEventListener("keydown", capacitySheetEscapeHandler);
+    }
+  }
+
+  function closeCapacitySheet() {
+    const sheet = document.getElementById("capacitySheet");
+    if (!sheet) return;
+    sheet.classList.remove("is-open");
+    sheet.setAttribute("aria-hidden", "true");
+    if (capacitySheetEscapeHandler) {
+      document.removeEventListener("keydown", capacitySheetEscapeHandler);
+      capacitySheetEscapeHandler = null;
+    }
+  }
+
+  function applyChecklistControlsState() {
+    const isSoft = checklistCapacityState.mode === "soft";
+    const chip = document.getElementById("foundTimeChip");
+    if (chip) {
+      chip.style.display = isSoft ? "inline-flex" : "none";
+    }
+
+    const viewToggle = document.getElementById("viewToggle");
+    if (viewToggle) {
+      viewToggle.querySelectorAll("button[data-view]").forEach(button => {
+        const isActive = button.dataset.view === checklistViewMode;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    }
+
+    const capacityButton = document.getElementById("capacityWrench");
+    if (capacityButton) {
+      const modeLabel = isSoft
+        ? `Soft ${checklistCapacityState.softLevel}%`
+        : "Hard stop";
+      capacityButton.setAttribute(
+        "aria-label",
+        `Availability / capacity — ${modeLabel}`,
+      );
+    }
+
+    const sheet = document.getElementById("capacitySheet");
+    if (sheet) {
+      sheet.querySelectorAll("[data-capacity-mode]").forEach(button => {
+        const mode = button.getAttribute("data-capacity-mode");
+        if (!mode) return;
+        let isActive = false;
+        if (mode === "hard") {
+          isActive = checklistCapacityState.mode === "hard";
+        } else if (mode === "soft") {
+          const softLevel = Number.parseInt(button.getAttribute("data-soft-level") || "", 10);
+          isActive =
+            checklistCapacityState.mode === "soft" &&
+            Number.isFinite(softLevel) &&
+            softLevel === checklistCapacityState.softLevel;
+        }
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    }
+  }
+
   function renderNeuroChecklist() {
     const card = document.getElementById("neuroChecklist");
     if (!card) return;
-    const subtitleEl = card.querySelector("[data-checklist-subtitle]");
-    const workloadEl = card.querySelector("[data-checklist-workload]");
-    const basketUpdatedEl = card.querySelector("[data-checklist-basket-updated]");
-    const clinicList = card.querySelector("[data-checklist-clinic]");
-    const workList = card.querySelector("[data-checklist-worklist]");
-    const focusList = card.querySelector("[data-checklist-focus]");
-    if (!subtitleEl || !workloadEl || !clinicList || !workList || !focusList || !basketUpdatedEl) {
-      return;
-    }
+    const refs = ensureChecklistLayout(card);
+    if (!refs) return;
+    const {
+      subtitleEl,
+      workloadEl,
+      basketUpdatedEl,
+      clinicList,
+      workList,
+      focusList,
+    } = refs;
+
+    mountChecklistControls(card);
+    applyChecklistControlsState();
 
     const weekSchedule = getWeekScheduleFromBridge();
     const { date: clinicDate, dayName } = getNextClinicDate(weekSchedule || {});
