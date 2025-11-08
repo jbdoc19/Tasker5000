@@ -375,57 +375,58 @@
       color: var(--hero-teal);
     }
 
-    .checklist-capacity-sheet {
-      position: absolute;
-      top: calc(100% + 0.5rem);
-      right: clamp(1rem, 4vw, 1.5rem);
-      width: min(320px, 90vw);
-      background: var(--surface-elevated, #ffffff);
-      border-radius: 12px;
-      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.18);
-      border: 1px solid rgba(45, 212, 195, 0.18);
-      padding: 1rem;
-      display: none;
-      z-index: 15;
-    }
+    /* Availability calibration sheet (dropdown/modal) */
+.checklist-capacity-sheet {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: clamp(1rem, 4vw, 1.5rem);
+  width: min(360px, 94vw);
+  background: rgba(9, 14, 20, 0.98);        /* more opaque */
+  color: var(--text-primary);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.55);
+  padding: 1rem;
+  display: none;
+  z-index: 1400;                             /* higher than cards/quick-add */
+  backdrop-filter: blur(6px);                /* legibility on bright backgrounds */
+}
 
-    .checklist-capacity-sheet.is-open {
-      display: block;
-    }
+.checklist-capacity-sheet.is-open { display: block; }
 
-    .checklist-capacity-sheet__title {
-      margin: 0 0 0.5rem;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
+/* Buttons inside the sheet */
+.checklist-capacity-sheet__group button {
+  width: 100%;
+  background: rgba(27, 33, 41, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
-    .checklist-capacity-sheet__group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-    }
+.checklist-capacity-sheet__group button.is-active {
+  background: rgba(45, 212, 195, 0.18);
+  border-color: rgba(45, 212, 195, 0.4);
+  color: var(--hero-teal);
+}
 
-    .checklist-capacity-sheet__group button {
-      width: 100%;
-      background: rgba(15, 23, 42, 0.04);
-      border-radius: 10px;
-      padding: 0.5rem 0.75rem;
-      text-align: left;
-      font-weight: 600;
-    }
-
-    .checklist-capacity-sheet__soft-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-      gap: 0.5rem;
-    }
-
-    .checklist-capacity-sheet__group button.is-active {
-      background: rgba(45, 212, 195, 0.18);
-      color: var(--hero-teal);
-    }
+/* Full-screen scrim behind the sheet (for mobile legibility) */
+.checklist-capacity-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 18, 0.55);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  z-index: 1390;
+}
+.checklist-capacity-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 
     .checklist-capacity-sheet__footer {
       display: flex;
