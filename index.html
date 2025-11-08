@@ -15341,7 +15341,7 @@ body.all-tasks-overlay-active {
     const urgency = clampScale(t.urgency, 3);
     const novelty = clampScale(t.novelty, 1);
     const interest = clampScale(t.interest, 1);
-    const pressure = clampScale(t.externalPressure, 1);
+    const pressure = Math.min(4.2, clampScale(t.externalPressure, 1));
     const timeToStart = clampScale(t.timeToStart, 1);
     const difficulty = clampScale(t.difficulty, 1);
     const dopamine = novelty + interest;
@@ -15354,7 +15354,14 @@ body.all-tasks-overlay-active {
     const patientWeight = getPatientTypeWeight(t.patientType);
     const visitWeight = getVisitTypeWeight(t.visitType);
     const sameDayBonus = getSameDayBonus(t.clinicSite, t.createdAt);
-    return baseScore * patientWeight * visitWeight * sameDayBonus;
+    const daysSinceVisit = Number.isFinite(Number(t.daysSinceVisit))
+      ? Number(t.daysSinceVisit)
+      : (t.dateOfService ? calculateDaysSince(t.dateOfService) : null);
+    const daysUntilDue = t.dueDate ? calculateDaysUntil(t.dueDate) : null;
+    const overdueDays = Number.isFinite(daysUntilDue) && daysUntilDue < 0 ? Math.abs(daysUntilDue) : 0;
+    const positiveAging = Number.isFinite(daysSinceVisit) && daysSinceVisit > 0 ? daysSinceVisit : 0;
+    const agingBoost = 1 + Math.min(0.2, (positiveAging / 90) + (overdueDays / 30));
+    return baseScore * patientWeight * visitWeight * sameDayBonus * agingBoost;
   }
 
   function computeTimeWeight(task) {
@@ -16085,6 +16092,43 @@ body.all-tasks-overlay-active {
     return { values, updatedAt };
   }
 
+  function generateClinicClusters(basket) {
+    const EST = {
+      "Chart Completion": 3,
+      Results: 2,
+      "Patient Calls": 5,
+      "Patient Advice": 3,
+    };
+    const source = basket && typeof basket === "object" ? basket : {};
+    return Object.entries(source)
+      .filter(([, value]) => Number.isFinite(value) && value > 0)
+      .map(([name, count]) => {
+        const minutesPerItem = EST[name] || 3;
+        return {
+          id: `cluster-${name}`,
+          name,
+          count,
+          estMinutesPerItem: minutesPerItem,
+          totalEstMinutes: count * minutesPerItem,
+          source: "clinicBasket",
+        };
+      });
+  }
+
+  function clusterTasks(tasks, basket) {
+    const taskList = Array.isArray(tasks) ? tasks : [];
+    const basketMap = basket && typeof basket === "object" ? basket : {};
+    const clusters = generateClinicClusters(basketMap);
+    const quickTasks = taskList
+      .filter(task => isQuickTask(task))
+      .sort((a, b) => (estimateTaskMinutes(a) || 5) - (estimateTaskMinutes(b) || 5));
+    const easyCharts = taskList
+      .filter(task => !isQuickTask(task) && /chart/i.test(task?.category || ""))
+      .sort((a, b) => (estimateTaskMinutes(a) || 15) - (estimateTaskMinutes(b) || 15));
+    const quickWins = [...quickTasks.slice(0, 3), ...easyCharts.slice(0, 3)];
+    return { clusters, quickWins };
+  }
+
   function sanitizePatientSlots(detail) {
     if (!detail || typeof detail !== "object") {
       return {};
@@ -16213,17 +16257,20 @@ body.all-tasks-overlay-active {
 
   function buildClinicFocusHint(info, backlog) {
     if (!info) return "";
+    const backlogLabel = backlog && (backlog.label || backlog.name)
+      ? String(backlog.label || backlog.name).trim()
+      : "";
     if (info.isAdmin) {
-      return backlog
-        ? `Focus: Design backlog sprint on ${backlog.label}.`
+      return backlogLabel
+        ? `Focus: Design backlog sprint on ${backlogLabel}.`
         : "Focus: Protect deep-work admin window.";
     }
     if (info.patientCount === 0) {
       return "Focus: Use block for recovery or strategy planning.";
     }
     if (info.hasResident) {
-      return backlog
-        ? `Focus: Pair resident downtime with ${backlog.label}.`
+      return backlogLabel
+        ? `Focus: Pair resident downtime with ${backlogLabel}.`
         : "Focus: Pair resident downtime with quick backlog batches.";
     }
     return "Focus: Close visit notes before block transition.";
@@ -16778,10 +16825,21 @@ body.all-tasks-overlay-active {
     const dayState = neuroScheduleSnapshot?.dayState || {};
     const basket = neuroScheduleSnapshot?.clinicBasket || {};
     const tasksSnapshot = Array.isArray(window.tasks) ? window.tasks.slice() : [];
+    const activeTasks = tasksSnapshot.filter(task => !isTaskCompleted(task));
     const clinicType = dayState?.clinicSelections?.todayType || dayState?.clinicType || null;
     const residents = normalizeBlockPresenceMap(dayState?.blockResidentPresence);
     const patientSlots = normalizePatientSlotMap(dayState?.patientSlots);
     const userEndTime = getUserDefinedEndTime() || "17:00";
+    const basketItems = getClinicBasketItemsFromBridge();
+    const basketValues = basket?.values || {};
+    const basketByLabel = Object.fromEntries(
+      basketItems.map(item => {
+        const raw = Number.parseInt(basketValues[item.id], 10);
+        const count = Number.isFinite(raw) && raw > 0 ? raw : 0;
+        return [item.label, count];
+      }),
+    );
+    const triage = clusterTasks(activeTasks, basketByLabel);
     const windows = computeAvailabilityWindows({
       clinicType,
       residents,
@@ -16794,12 +16852,14 @@ body.all-tasks-overlay-active {
       week,
       dayState,
       tasks: tasksSnapshot,
+      activeTasks,
       basket,
       clinicType,
       residents,
       patientSlots,
       userEndTime,
       quotas: DEFAULT_QUOTAS,
+      triage,
       windows,
     };
   }
@@ -16844,7 +16904,9 @@ body.all-tasks-overlay-active {
 
     basketUpdatedEl.textContent = formatClinicBasketTimestamp(dailyContext.basket.updatedAt);
 
-    const activeTasks = dailyContext.tasks.filter(task => !isTaskCompleted(task));
+    const activeTasks = Array.isArray(dailyContext.activeTasks)
+      ? dailyContext.activeTasks
+      : dailyContext.tasks.filter(task => !isTaskCompleted(task));
     const quickActive = activeTasks.filter(task => isQuickTask(task));
     const coreActive = activeTasks.length - quickActive.length;
 
@@ -16856,15 +16918,20 @@ body.all-tasks-overlay-active {
 
     const basketItems = getClinicBasketItemsFromBridge();
     const basketValues = dailyContext.basket.values || {};
-    const basketSummaries = basketItems
-      .map(item => ({
-        id: item.id,
-        label: item.label,
-        count: Number.parseInt(basketValues[item.id], 10) || 0,
-      }))
-      .filter(item => Number.isFinite(item.count) && item.count > 0)
-      .sort((a, b) => b.count - a.count);
-    const primaryBacklog = basketSummaries[0] || null;
+    const basketByLabel = Object.fromEntries(
+      basketItems.map(item => {
+        const raw = Number.parseInt(basketValues[item.id], 10);
+        const count = Number.isFinite(raw) && raw > 0 ? raw : 0;
+        return [item.label, count];
+      }),
+    );
+    const triage = dailyContext.triage || clusterTasks(activeTasks, basketByLabel);
+    const clusters = Array.isArray(triage?.clusters) ? triage.clusters : [];
+    const quickWins = Array.isArray(triage?.quickWins) ? triage.quickWins : [];
+    const sortedClusters = clusters
+      .slice()
+      .sort((a, b) => (Number.isFinite(b.totalEstMinutes) ? b.totalEstMinutes : 0) - (Number.isFinite(a.totalEstMinutes) ? a.totalEstMinutes : 0));
+    const primaryBacklog = sortedClusters[0] || null;
 
     clinicList.innerHTML = "";
     if (dayName && weekSchedule && weekSchedule[dayName]) {
@@ -16939,25 +17006,27 @@ body.all-tasks-overlay-active {
         });
       }
     }
-    if (quickActive.length) {
-      const quickNames = quickActive
-        .slice(0, 3)
-        .map(task => task.name)
-        .filter(Boolean);
-      if (quickNames.length) {
-        workEntries.push({
-          label: "Quick wins queued",
-          meta: quickNames.join(", "),
-        });
-      }
-    }
-    basketSummaries.slice(0, 3).forEach(item => {
+    const quickWinNames = quickWins
+      .slice(0, 3)
+      .map(task => task?.name)
+      .filter(name => typeof name === "string" && name.trim().length > 0);
+    if (quickWinNames.length) {
       workEntries.push({
-        label: item.label,
-        meta: `${item.count} pending`,
+        label: "Quick wins queued",
+        meta: quickWinNames.join(", "),
+      });
+    }
+    sortedClusters.slice(0, 3).forEach(cluster => {
+      const parts = [`${cluster.count} item${cluster.count === 1 ? "" : "s"}`];
+      if (Number.isFinite(cluster.totalEstMinutes) && cluster.totalEstMinutes > 0) {
+        parts.push(`~${Math.round(cluster.totalEstMinutes)} min`);
+      }
+      workEntries.push({
+        label: cluster.name,
+        meta: parts.join(" • "),
       });
     });
-    if (!basketSummaries.length) {
+    if (!sortedClusters.length) {
       workEntries.push({
         label: "Clinic basket",
         meta: "No outstanding items recorded",
