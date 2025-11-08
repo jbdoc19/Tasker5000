@@ -8215,7 +8215,23 @@ body.all-tasks-overlay-active {
       </div>
     </div>
   </div>
-
+  <div id="focusBuddy" class="focus-buddy">
+  <h3 class="focus-buddy__title">🧠 Focus Buddy</h3>
+  <p id="focusBuddyPrompt" class="focus-buddy__prompt">Ready to start your sprint?</p>
+  <div class="focus-buddy__mode">
+    <select id="sprintModeSelect">
+      <option value="25">Classic 25 min</option>
+      <option value="50">Deep 50 min</option>
+      <option value="15">Quick 15 min</option>
+    </select>
+  </div>
+  <div class="focus-buddy__timer"><span id="focusTimerDisplay">25:00</span></div>
+  <div class="focus-buddy__controls">
+    <button id="focusStartBtn">▶ Start Sprint</button>
+    <button id="focusPauseBtn" disabled>⏸ Pause</button>
+    <button id="focusEndBtn" disabled>⏹ End</button>
+  </div>
+  </div>
   <div class="focus-actions">
     <button
       id="nextTaskActionButton"
