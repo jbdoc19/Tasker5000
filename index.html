@@ -9928,16 +9928,7 @@ body.all-tasks-overlay-active {
       <span class="command-link__icon" aria-hidden="true">📘</span>
       <span>Resources</span>
     </button>
-    <button
-      id="insightButton"
-      class="command-link"
-      type="button"
-      aria-haspopup="dialog"
-      aria-controls="insightOverlay"
-    >
-      <span class="command-link__icon" aria-hidden="true">📈</span>
-      <span>Insights</span>
-    </button>
+    <button id="insightButton" class="command-link" type="button" aria-label="View weekly insights">📈 Insights</button>
     <a href="#reset-zone" class="command-link">
       <span class="command-link__icon" aria-hidden="true">🌙</span>
       <span>Reset</span>
@@ -22369,25 +22360,8 @@ dismiss.addEventListener("click", ()=> hud.classList.add("hidden"));
 function wireInsights() {
   const btn = $("insightButton");
   const closeBtn = $("closeInsights");
-  const overlay = $("insightOverlay");
   if (btn) btn.addEventListener("click", openInsights);
   if (closeBtn) closeBtn.addEventListener("click", closeInsights);
-  if (overlay) {
-    overlay.addEventListener("click", event => {
-      if (event.target === overlay) closeInsights();
-    });
-  }
-  if (!window._insightsEscapeHandler) {
-    window._insightsEscapeHandler = event => {
-      if (event.key === "Escape") {
-        const activeOverlay = $("insightOverlay");
-        if (activeOverlay && !activeOverlay.classList.contains("hidden")) {
-          closeInsights();
-        }
-      }
-    };
-    document.addEventListener("keydown", window._insightsEscapeHandler);
-  }
 }
   window.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = $("meltdownShieldNext");
@@ -23239,86 +23213,51 @@ function openInsights() {
   const overlay = $("insightOverlay");
   if (!overlay) return;
   overlay.classList.remove("hidden");
-  overlay.setAttribute("aria-hidden", "false");
-  const closeBtn = $("closeInsights");
-  if (closeBtn) {
-    closeBtn.focus();
-  } else {
-    const card = overlay.querySelector(".insight-card");
-    card?.focus();
-  }
   renderInsights();
 }
 
 function closeInsights() {
   const overlay = $("insightOverlay");
-  if (!overlay) return;
-  overlay.classList.add("hidden");
-  overlay.setAttribute("aria-hidden", "true");
-  destroyInsightChart();
-}
-
-function destroyInsightChart() {
-  if (window._insightChart) {
-    window._insightChart.destroy();
-    window._insightChart = null;
-  }
+  if (overlay) overlay.classList.add("hidden");
 }
 
 function renderInsights() {
-  const statsEl = $("insightStats");
-  if (!statsEl) return;
-
   const raw = JSON.parse(localStorage.getItem("taskerMetrics") || "[]");
   if (!raw.length) {
-    statsEl.textContent = "No activity logged yet.";
-    destroyInsightChart();
+    $("insightStats").textContent = "No activity logged yet.";
+    if (window._insightChart) {
+      window._insightChart.destroy();
+      window._insightChart = null;
+    }
     return;
   }
 
   const weekAgo = Date.now() - 7 * 864e5;
   const recent = raw.filter(e => e.t >= weekAgo);
   if (!recent.length) {
-    statsEl.textContent = "No activity logged in the past week.";
-    destroyInsightChart();
+    $("insightStats").textContent = "No activity logged in the past week.";
+    if (window._insightChart) {
+      window._insightChart.destroy();
+      window._insightChart = null;
+    }
     return;
   }
+  const counts = {};
+  recent.forEach(e => { counts[e.type] = (counts[e.type] || 0) + 1; });
 
-  const counts = recent.reduce((acc, entry) => {
-    const key = entry.type || "other";
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
+  $("insightStats").innerHTML =
+    Object.entries(counts).map(([k,v])=>`${k}: ${v}`).join("<br>");
 
-  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  statsEl.innerHTML = entries.map(([label, value]) => `${label}: ${value}`).join("<br>");
-
-  const canvas = document.getElementById("insightChart");
-  if (!canvas) {
-    destroyInsightChart();
-    return;
-  }
-
-  if (typeof window.Chart === "undefined") {
-    destroyInsightChart();
-    statsEl.innerHTML += "<br><em>Chart preview unavailable offline.</em>";
-    return;
-  }
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    destroyInsightChart();
-    return;
-  }
-
-  destroyInsightChart();
+  // Simple sparkline bar chart
+  const ctx = document.getElementById("insightChart").getContext("2d");
+  if (window._insightChart) window._insightChart.destroy();
   window._insightChart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: entries.map(([label]) => label),
+      labels: Object.keys(counts),
       datasets: [{
         label: "Events this week",
-        data: entries.map(([, value]) => value),
+        data: Object.values(counts),
         backgroundColor: "rgba(45,212,195,0.6)"
       }]
     },
@@ -23396,13 +23335,13 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
 </section>
 <!-- === Phase 5 – Weekly Insights Overlay === -->
-<section id="insightOverlay" class="insight-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="insightTitle" aria-hidden="true">
-  <div class="insight-card" tabindex="-1">
+<section id="insightOverlay" class="insight-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="insightTitle">
+  <div class="insight-card">
     <h3 id="insightTitle">Weekly Insights</h3>
     <canvas id="insightChart" width="360" height="180"></canvas>
     <div id="insightStats" class="insight-stats"></div>
     <div class="insight-footer">
-      <button id="closeInsights" type="button">Close</button>
+      <button id="closeInsights">Close</button>
     </div>
   </div>
 </section>
