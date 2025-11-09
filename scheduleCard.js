@@ -21,6 +21,12 @@ const DEFAULT_BASKET_VALUES = CLINIC_BASKET_ITEMS.reduce((acc, item) => {
   acc[item.id] = 0;
   return acc;
 }, {});
+const WEEKEND_AVAILABILITY_STORAGE_KEY = "taskerWeekendAvailability";
+const DEFAULT_WEEKEND_AVAILABILITY = { sat: false, sun: true };
+const WEEKEND_DAYS = [
+  { id: "sat", label: "Saturday" },
+  { id: "sun", label: "Sunday" },
+];
 
 let grid = null;
 let overlay = null;
@@ -41,6 +47,8 @@ let clinicBasketForm = null;
 let clinicBasketUpdatedEl = null;
 let clinicBasketState = createDefaultBasketState();
 let clinicBasketHighlightTimeout = null;
+let weekendAvailability = createDefaultWeekendAvailability();
+const weekendCellRefs = new Map();
 
 function clonePatientSlotsSnapshot() {
   const source = dayState.patientSlots || {};
@@ -142,6 +150,10 @@ function createDefaultBasketState() {
   };
 }
 
+function createDefaultWeekendAvailability() {
+  return { ...DEFAULT_WEEKEND_AVAILABILITY };
+}
+
 function loadClinicBasketState() {
   try {
     const raw = localStorage.getItem(CLINIC_BASKET_STORAGE_KEY);
@@ -173,6 +185,67 @@ function persistClinicBasketState() {
   } catch (error) {
     console.warn("Unable to save clinic basket state:", error);
   }
+}
+
+function loadWeekendAvailability() {
+  try {
+    const raw = localStorage.getItem(WEEKEND_AVAILABILITY_STORAGE_KEY);
+    if (!raw) {
+      return createDefaultWeekendAvailability();
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return createDefaultWeekendAvailability();
+    }
+    const next = createDefaultWeekendAvailability();
+    WEEKEND_DAYS.forEach(day => {
+      next[day.id] = Boolean(parsed[day.id]);
+    });
+    return next;
+  } catch (error) {
+    console.warn("Unable to load weekend availability:", error);
+    return createDefaultWeekendAvailability();
+  }
+}
+
+function persistWeekendAvailability() {
+  try {
+    localStorage.setItem(WEEKEND_AVAILABILITY_STORAGE_KEY, JSON.stringify(weekendAvailability));
+  } catch (error) {
+    console.warn("Unable to save weekend availability:", error);
+  }
+}
+
+function getWeekendAvailabilityValue(dayId) {
+  if (Object.prototype.hasOwnProperty.call(weekendAvailability, dayId)) {
+    return Boolean(weekendAvailability[dayId]);
+  }
+  return false;
+}
+
+function applyWeekendAvailabilityState(dayId) {
+  const refs = weekendCellRefs.get(dayId);
+  if (!refs) return;
+  const isAvailable = getWeekendAvailabilityValue(dayId);
+  refs.badge.textContent = isAvailable ? "Available" : "Off duty";
+  refs.badge.classList.toggle("weekend-card__badge--on", isAvailable);
+  refs.badge.classList.toggle("weekend-card__badge--off", !isAvailable);
+  refs.toggle.setAttribute("aria-pressed", isAvailable ? "true" : "false");
+  refs.toggle.textContent = isAvailable ? "Turn off" : "Turn on";
+  refs.toggle.classList.toggle("weekend-card__toggle--active", isAvailable);
+  if (refs.label) {
+    const action = isAvailable ? "Mark unavailable" : "Mark available";
+    refs.toggle.setAttribute("aria-label", `${action} for ${refs.label}`);
+    refs.toggle.title = `${refs.label} — ${isAvailable ? "On" : "Off"}`;
+  }
+}
+
+function handleWeekendToggle(dayId) {
+  const next = !getWeekendAvailabilityValue(dayId);
+  weekendAvailability[dayId] = next;
+  applyWeekendAvailabilityState(dayId);
+  persistWeekendAvailability();
+  emitScheduleStateUpdate("weekend-availability:update");
 }
 
 function sanitizeBasketValue(value) {
@@ -319,83 +392,159 @@ export function setScheduleMode(mode = "today") {
   renderSchedule(resolvedMode);
 }
 
-function renderSchedule(mode) {
+function appendClinicCell(day, block) {
   if (!grid) return;
-  const currentDay = clampToClinicDay(todayName());
-  const cells = mode === "today"
-    ? SLOT_BLOCKS.map(block => ({ day: currentDay, block }))
-    : DAYS.flatMap(day => SLOT_BLOCKS.map(block => ({ day, block })));
+  const cell = document.createElement("div");
+  cell.className = "weekly-grid__cell";
+  cell.dataset.day = day;
+  cell.dataset.block = block;
+  cell.setAttribute("role", "group");
+  cell.tabIndex = -1;
 
-  if (mode === "week") {
-    grid.style.removeProperty("--weekly-grid-columns");
+  const dayLabel = document.createElement("div");
+  dayLabel.className = "weekly-grid__day";
+  dayLabel.textContent = day;
+
+  const clinicWrapper = document.createElement("div");
+  clinicWrapper.className = "weekly-grid__clinic-wrapper";
+
+  const select = document.createElement("select");
+  select.className = "weekly-grid__clinic-select";
+  const storedClinic = getClinicSelection(day, block) ?? CLINIC_OPTIONS[0];
+  if (!getClinicSelection(day, block)) {
+    setClinicSelection(day, block, storedClinic);
   }
+  CLINIC_OPTIONS.forEach(option => {
+    const optionEl = document.createElement("option");
+    optionEl.value = option;
+    optionEl.textContent = option;
+    select.appendChild(optionEl);
+  });
+  select.value = storedClinic;
+  select.addEventListener("change", () => {
+    setClinicSelection(day, block, select.value);
+    emitScheduleStateUpdate("clinic-selection");
+    if (day === activeCellDay && block === activeCellBlock) {
+      setDay(day, block, select.value);
+    }
+  });
+  select.addEventListener("click", event => {
+    event.stopPropagation();
+  });
 
-  cells.forEach(({ day, block }) => {
+  const residentIcon = document.createElement("span");
+  residentIcon.className = "weekly-grid__resident-icon";
+  residentIcon.textContent = "👥";
+  residentIcon.setAttribute("aria-hidden", "true");
+
+  clinicWrapper.append(select, residentIcon);
+
+  const blockLabel = document.createElement("div");
+  blockLabel.className = "weekly-grid__time";
+  blockLabel.textContent = block;
+
+  const hasStoredResidents = resolveResidentPresence(day, block);
+  updateResidentIcon(residentIcon, hasStoredResidents);
+
+  const manageButton = document.createElement("button");
+  manageButton.type = "button";
+  manageButton.className = "weekly-grid__manage";
+  manageButton.textContent = "⚙️";
+  manageButton.setAttribute("aria-label", `Open ${day} ${block} confirmation`);
+  manageButton.title = `Open ${day} ${block} confirmation`;
+  manageButton.addEventListener("click", () => {
+    activeTrigger = manageButton;
+    openDayOverlay(day, block, cell);
+  });
+
+  cell.append(dayLabel, clinicWrapper, blockLabel, manageButton);
+  grid.appendChild(cell);
+}
+
+function renderWeekendCells(rowSpan) {
+  if (!grid) return;
+  WEEKEND_DAYS.forEach(({ id, label }) => {
     const cell = document.createElement("div");
-    cell.className = "weekly-grid__cell";
-    cell.dataset.day = day;
-    cell.dataset.block = block;
+    cell.className = "weekly-grid__cell weekly-grid__cell--weekend";
+    cell.dataset.weekendDay = id;
     cell.setAttribute("role", "group");
     cell.tabIndex = -1;
+    if (rowSpan > 1) {
+      cell.style.gridRow = `span ${rowSpan}`;
+    }
 
     const dayLabel = document.createElement("div");
     dayLabel.className = "weekly-grid__day";
-    dayLabel.textContent = day;
+    dayLabel.textContent = label;
 
-    const clinicWrapper = document.createElement("div");
-    clinicWrapper.className = "weekly-grid__clinic-wrapper";
+    const card = document.createElement("div");
+    card.className = "weekend-card";
 
-    const select = document.createElement("select");
-    select.className = "weekly-grid__clinic-select";
-    const storedClinic = getClinicSelection(day, block) ?? CLINIC_OPTIONS[0];
-    if (!getClinicSelection(day, block)) {
-      setClinicSelection(day, block, storedClinic);
-    }
-    CLINIC_OPTIONS.forEach(option => {
-      const optionEl = document.createElement("option");
-      optionEl.value = option;
-      optionEl.textContent = option;
-      select.appendChild(optionEl);
-    });
-    select.value = storedClinic;
-    select.addEventListener("change", () => {
-      setClinicSelection(day, block, select.value);
-      emitScheduleStateUpdate("clinic-selection");
-      if (day === activeCellDay && block === activeCellBlock) {
-        setDay(day, block, select.value);
-      }
-    });
-    select.addEventListener("click", event => {
-      event.stopPropagation();
+    const title = document.createElement("div");
+    title.className = "weekend-card__title";
+    title.textContent = "Admin Day";
+
+    const note = document.createElement("p");
+    note.className = "weekend-card__note";
+    note.textContent = "Dedicated space for inbox, planning, and catch-up.";
+
+    const badge = document.createElement("span");
+    badge.className = "weekend-card__badge";
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "weekend-card__toggle";
+    toggle.dataset.weekendToggle = id;
+    toggle.setAttribute("aria-pressed", getWeekendAvailabilityValue(id) ? "true" : "false");
+    toggle.addEventListener("click", () => {
+      handleWeekendToggle(id);
     });
 
-    const residentIcon = document.createElement("span");
-    residentIcon.className = "weekly-grid__resident-icon";
-    residentIcon.textContent = "👥";
-    residentIcon.setAttribute("aria-hidden", "true");
-
-    clinicWrapper.append(select, residentIcon);
-
-    const blockLabel = document.createElement("div");
-    blockLabel.className = "weekly-grid__time";
-    blockLabel.textContent = block;
-
-    const hasStoredResidents = resolveResidentPresence(day, block);
-    updateResidentIcon(residentIcon, hasStoredResidents);
-
-    const manageButton = document.createElement("button");
-    manageButton.type = "button";
-    manageButton.className = "weekly-grid__manage";
-    manageButton.textContent = "⚙️";
-    manageButton.setAttribute("aria-label", `Open ${day} ${block} confirmation`);
-    manageButton.title = `Open ${day} ${block} confirmation`;
-    manageButton.addEventListener("click", () => {
-      openDayOverlay(day, block, cell, manageButton);
-    });
-
-    cell.append(dayLabel, clinicWrapper, blockLabel, manageButton);
+    card.append(title, note, badge, toggle);
+    cell.append(dayLabel, card);
     grid.appendChild(cell);
+
+    weekendCellRefs.set(id, { badge, toggle, cell, label });
+    applyWeekendAvailabilityState(id);
   });
+}
+
+function renderSchedule(mode) {
+  if (!grid) return;
+  weekendCellRefs.clear();
+  const currentDay = clampToClinicDay(todayName());
+
+  if (mode === "today") {
+    grid.classList.remove("weekly-grid--with-weekend");
+    grid.style.removeProperty("--weekly-grid-columns");
+    grid.style.removeProperty("--weekly-grid-rows");
+    SLOT_BLOCKS.forEach(block => {
+      appendClinicCell(currentDay, block);
+    });
+    return;
+  }
+
+  const columnCount = DAYS.length + WEEKEND_DAYS.length;
+  const rowCount = Math.max(SLOT_BLOCKS.length, 1);
+  grid.classList.add("weekly-grid--with-weekend");
+  grid.style.setProperty("--weekly-grid-columns", String(columnCount));
+  grid.style.setProperty("--weekly-grid-rows", String(rowCount));
+
+  if (SLOT_BLOCKS.length > 0) {
+    const [firstBlock, ...remainingBlocks] = SLOT_BLOCKS;
+    DAYS.forEach(day => {
+      appendClinicCell(day, firstBlock);
+    });
+    renderWeekendCells(rowCount);
+    remainingBlocks.forEach(block => {
+      DAYS.forEach(day => {
+        appendClinicCell(day, block);
+      });
+    });
+    return;
+  }
+
+  renderWeekendCells(rowCount);
 }
 
 function resolveResidentPresence(day, block) {
@@ -697,6 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
   scheduleSummaryEl = document.querySelector("#weeklyScheduleCard [data-schedule-summary]");
 
   initializeClinicBasket();
+  weekendAvailability = loadWeekendAvailability();
 
   if (!grid) {
     return;
