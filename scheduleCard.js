@@ -49,6 +49,9 @@ let clinicBasketState = createDefaultBasketState();
 let clinicBasketHighlightTimeout = null;
 let weekendAvailability = createDefaultWeekendAvailability();
 const weekendCellRefs = new Map();
+let todayToggleButton = null;
+let weekToggleButton = null;
+let currentScheduleMode = null;
 
 function clonePatientSlotsSnapshot() {
   const source = dayState.patientSlots || {};
@@ -227,16 +230,18 @@ function applyWeekendAvailabilityState(dayId) {
   const refs = weekendCellRefs.get(dayId);
   if (!refs) return;
   const isAvailable = getWeekendAvailabilityValue(dayId);
-  refs.badge.textContent = isAvailable ? "Available" : "Off duty";
+  const statusText = isAvailable ? "Available" : "Off duty";
+  refs.badge.textContent = statusText;
   refs.badge.classList.toggle("weekend-card__badge--on", isAvailable);
   refs.badge.classList.toggle("weekend-card__badge--off", !isAvailable);
   refs.toggle.setAttribute("aria-pressed", isAvailable ? "true" : "false");
-  refs.toggle.textContent = isAvailable ? "Turn off" : "Turn on";
+  refs.toggle.textContent = statusText;
   refs.toggle.classList.toggle("weekend-card__toggle--active", isAvailable);
   if (refs.label) {
-    const action = isAvailable ? "Mark unavailable" : "Mark available";
-    refs.toggle.setAttribute("aria-label", `${action} for ${refs.label}`);
-    refs.toggle.title = `${refs.label} — ${isAvailable ? "On" : "Off"}`;
+    const action = isAvailable ? "Mark off duty" : "Mark available";
+    const description = `${action} (${refs.label} — ${statusText})`;
+    refs.toggle.setAttribute("aria-label", description);
+    refs.toggle.title = description;
   }
 }
 
@@ -414,6 +419,20 @@ function updateScheduleSummary(mode) {
   parts.text.textContent = `${day} — ${datePart}`;
 }
 
+function updateScheduleModeButtons(mode) {
+  const resolved = mode === "week" ? "week" : "today";
+  if (todayToggleButton) {
+    const isToday = resolved === "today";
+    todayToggleButton.classList.toggle("schedule-card__mode-button--active", isToday);
+    todayToggleButton.setAttribute("aria-pressed", isToday ? "true" : "false");
+  }
+  if (weekToggleButton) {
+    const isWeek = resolved === "week";
+    weekToggleButton.classList.toggle("schedule-card__mode-button--active", isWeek);
+    weekToggleButton.setAttribute("aria-pressed", isWeek ? "true" : "false");
+  }
+}
+
 export function setScheduleMode(mode = "today") {
   if (!grid) return;
   const resolvedMode = mode === "week" ? "week" : "today";
@@ -421,6 +440,8 @@ export function setScheduleMode(mode = "today") {
   grid.classList.toggle("weekly-grid--single-day", resolvedMode === "today");
   updateScheduleSummary(resolvedMode);
   renderSchedule(resolvedMode);
+  currentScheduleMode = resolvedMode;
+  updateScheduleModeButtons(resolvedMode);
 }
 
 function appendClinicCell(day, block) {
@@ -511,6 +532,9 @@ function renderWeekendCells(rowSpan) {
     const card = document.createElement("div");
     card.className = "weekend-card";
 
+    const header = document.createElement("div");
+    header.className = "weekend-card__header";
+
     const title = document.createElement("div");
     title.className = "weekend-card__title";
     title.textContent = "Admin Day";
@@ -531,7 +555,9 @@ function renderWeekendCells(rowSpan) {
       handleWeekendToggle(id);
     });
 
-    card.append(title, note, badge, toggle);
+    header.append(title, toggle);
+
+    card.append(header, note, badge);
     cell.append(dayLabel, card);
     grid.appendChild(cell);
 
@@ -772,30 +798,47 @@ function injectHeaderToggles() {
   const header = document.querySelector("#weeklyScheduleCard .schedule-card__header");
   if (!header) return;
 
-  let todayButton = header.querySelector("[data-open-today]");
-  if (!todayButton) {
-    todayButton = document.createElement("button");
-    todayButton.type = "button";
-    todayButton.dataset.openToday = "";
-    todayButton.textContent = "Today";
-    header.appendChild(todayButton);
-  } else {
-    todayButton.type = "button";
+  let modeContainer = header.querySelector("[data-schedule-mode]");
+  if (!modeContainer) {
+    modeContainer = document.createElement("div");
+    modeContainer.className = "schedule-card__mode-buttons";
+    modeContainer.dataset.scheduleMode = "";
+    const titleGroup = header.querySelector(".schedule-card__title-group");
+    if (titleGroup) {
+      titleGroup.appendChild(modeContainer);
+    } else {
+      header.appendChild(modeContainer);
+    }
   }
 
-  let weekButton = header.querySelector("[data-open-week]");
+  let todayButton = modeContainer.querySelector("[data-open-today]");
+  if (!todayButton) {
+    todayButton = document.createElement("button");
+    todayButton.dataset.openToday = "";
+    todayButton.textContent = "Today";
+    modeContainer.appendChild(todayButton);
+  }
+  todayButton.type = "button";
+  todayButton.classList.add("schedule-card__mode-button");
+  todayButton.setAttribute("aria-pressed", "false");
+
+  let weekButton = modeContainer.querySelector("[data-open-week]");
   if (!weekButton) {
     weekButton = document.createElement("button");
-    weekButton.type = "button";
     weekButton.dataset.openWeek = "";
     weekButton.textContent = "Week";
-    header.appendChild(weekButton);
-  } else {
-    weekButton.type = "button";
+    modeContainer.appendChild(weekButton);
   }
+  weekButton.type = "button";
+  weekButton.classList.add("schedule-card__mode-button");
+  weekButton.setAttribute("aria-pressed", "false");
 
   todayButton.addEventListener("click", () => setScheduleMode("today"));
   weekButton.addEventListener("click", () => setScheduleMode("week"));
+
+  todayToggleButton = todayButton;
+  weekToggleButton = weekButton;
+  updateScheduleModeButtons(currentScheduleMode ?? "today");
 }
 
 function attachOverlayControls() {
