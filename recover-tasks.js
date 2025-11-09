@@ -33,8 +33,18 @@
       return;
     }
 
-    const tasks = Array.isArray(parsed) ? parsed : parsed.tasks || [];
+    const isPlainObject = parsed && typeof parsed === 'object' && !Array.isArray(parsed);
+    const tasks = Array.isArray(parsed)
+      ? parsed
+      : (isPlainObject && Array.isArray(parsed.allTasks)
+        ? parsed.allTasks
+        : (isPlainObject && Array.isArray(parsed.tasks)
+          ? parsed.tasks
+          : []));
+    const quickTasks = isPlainObject && Array.isArray(parsed.quickTasks) ? parsed.quickTasks : [];
+
     log("Detected tasks count: " + tasks.length);
+    log("Detected quick tasks count: " + quickTasks.length);
 
     if (tasks.length > 0) {
       log("First task preview:");
@@ -46,11 +56,16 @@
       btn.textContent = "Download Backup (JSON)";
       btn.style.cssText = "margin-top:0.5rem;padding:0.4rem 0.8rem;";
       btn.onclick = () => {
-        const blob = new Blob([raw], { type: "application/json" });
+        const payload = isPlainObject
+          ? parsed
+          : { allTasks: tasks, quickTasks };
+        const serialized = JSON.stringify(payload);
+        const blob = new Blob([serialized], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "tasker-tasks-backup.json";
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        a.download = `task-backup-${timestamp}.json`;
         a.click();
         URL.revokeObjectURL(url);
       };
