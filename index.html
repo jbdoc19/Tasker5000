@@ -17725,7 +17725,7 @@ host.appendChild(row);
     const week = getWeekScheduleFromBridge() || {};
     const dayState = neuroScheduleSnapshot?.dayState || {};
     const basket = neuroScheduleSnapshot?.clinicBasket || {};
-    const tasksSnapshot = Array.isArray(window.tasks) ? window.tasks.slice() : [];
+    const tasksSnapshot = Array.isArray(tasks) ? tasks.slice() : [];
     const activeTasks = tasksSnapshot.filter(task => !isTaskCompleted(task));
     const clinicType = dayState?.clinicSelections?.todayType || dayState?.clinicType || null;
     const residents = normalizeBlockPresenceMap(dayState?.blockResidentPresence);
