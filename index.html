@@ -383,15 +383,14 @@
       top: calc(100% + 0.5rem);
       right: clamp(1rem, 4vw, 1.5rem);
       width: min(420px, 94vw);
-      background: var(--surface-elevated, #0f172a);
+      background: #0f172a;
       color: var(--text-primary);
       border-radius: 16px;
       border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.55);
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.65);
       padding: 1.25rem 1.4rem 1.1rem;
       display: none;
       z-index: 1400;
-      backdrop-filter: blur(8px);
       flex-direction: column;
       gap: 1.1rem;
       max-height: 80vh;
@@ -701,6 +700,7 @@
       color: var(--text-secondary);
       font-size: 0.9rem;
       max-width: 100%;
+      white-space: pre-line;
     }
 
     .neuro-checklist__control-grid {
@@ -17420,9 +17420,74 @@ host.appendChild(row);
   const DEFAULT_QUOTAS = { AM: 0.4, PM: 0.8 };
   let checklistViewMode = "list";
   const capacityAdjustmentsState = {};
+  const CAPACITY_ADJUSTMENTS_STORAGE_KEY = "taskerCapacityAdjustments";
   let energySheetEscapeHandler = null;
   let capacitySheetEscapeHandler = null;
   let capacityAdjustmentSerial = 0;
+
+  function hydrateCapacityAdjustmentsState() {
+    if (typeof localStorage === "undefined") {
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(CAPACITY_ADJUSTMENTS_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return;
+      let maxSerial = capacityAdjustmentSerial;
+      Object.entries(parsed).forEach(([dayKey, entry]) => {
+        if (!dayKey) return;
+        const adjustments = Array.isArray(entry?.adjustments) ? entry.adjustments : [];
+        const normalized = adjustments.map(item => {
+          const kind = item?.kind === "gain" ? "gain" : "loss";
+          const start = typeof item?.start === "string" ? item.start : "";
+          const end = typeof item?.end === "string" ? item.end : "";
+          const reason = typeof item?.reason === "string" ? item.reason : "";
+          let id = typeof item?.id === "string" && item.id.trim() ? item.id.trim() : null;
+          if (id) {
+            const match = id.match(/cap-(\d+)/);
+            if (match) {
+              maxSerial = Math.max(maxSerial, Number(match[1]) || 0);
+            }
+          } else {
+            maxSerial += 1;
+            id = `cap-${maxSerial}`;
+          }
+          return { id, kind, start, end, reason };
+        });
+        capacityAdjustmentsState[dayKey] = { adjustments: normalized };
+      });
+      capacityAdjustmentSerial = Math.max(capacityAdjustmentSerial, maxSerial);
+    } catch (error) {
+      console.warn("Failed to load availability adjustments", error);
+    }
+  }
+
+  function persistCapacityAdjustmentsState() {
+    if (typeof localStorage === "undefined") {
+      return;
+    }
+    try {
+      const snapshot = {};
+      Object.entries(capacityAdjustmentsState).forEach(([dayKey, entry]) => {
+        if (!dayKey || !entry || !Array.isArray(entry.adjustments)) return;
+        snapshot[dayKey] = {
+          adjustments: entry.adjustments.map(item => ({
+            id: typeof item?.id === "string" ? item.id : null,
+            kind: item?.kind === "gain" ? "gain" : "loss",
+            start: typeof item?.start === "string" ? item.start : "",
+            end: typeof item?.end === "string" ? item.end : "",
+            reason: typeof item?.reason === "string" ? item.reason : "",
+          })),
+        };
+      });
+      localStorage.setItem(CAPACITY_ADJUSTMENTS_STORAGE_KEY, JSON.stringify(snapshot));
+    } catch (error) {
+      console.warn("Failed to save availability adjustments", error);
+    }
+  }
+
+  hydrateCapacityAdjustmentsState();
 
   function getCapacityDayKey() {
     const dayState = neuroScheduleSnapshot?.dayState;
@@ -17668,21 +17733,6 @@ host.appendChild(row);
     const body = document.createElement("div");
     body.className = "neuro-checklist__body";
 
-    const clinicSection = document.createElement("section");
-    clinicSection.className = "neuro-checklist__section";
-    const clinicTitle = document.createElement("h3");
-    clinicTitle.className = "neuro-checklist__section-title";
-    clinicTitle.textContent = "Clinic forecast";
-    const clinicList = document.createElement("ul");
-    clinicList.className = "neuro-checklist__list";
-    clinicList.dataset.checklistClinic = "";
-    const clinicEmpty = document.createElement("li");
-    clinicEmpty.className = "neuro-checklist__empty";
-    clinicEmpty.textContent = "Loading schedule…";
-    clinicList.appendChild(clinicEmpty);
-    clinicSection.appendChild(clinicTitle);
-    clinicSection.appendChild(clinicList);
-
     const focusSection = document.createElement("section");
     focusSection.className = "neuro-checklist__section";
     const focusTitle = document.createElement("h3");
@@ -17721,7 +17771,6 @@ host.appendChild(row);
     itinerarySection.appendChild(itineraryContainer);
     itinerarySection.appendChild(itineraryEmpty);
 
-    body.appendChild(clinicSection);
     body.appendChild(focusSection);
     body.appendChild(itinerarySection);
 
@@ -17733,7 +17782,6 @@ host.appendChild(row);
       workloadEl,
       basketUpdatedEl,
       controlGrid,
-      clinicList,
       focusList,
       itineraryList,
       itineraryTimeline,
@@ -17935,11 +17983,14 @@ host.appendChild(row);
     renderCapacitySummary(sheet);
   }
 
-  function ensureEnergySheet(card) {
-    if (!card) return null;
+  function ensureEnergySheet() {
     let sheet = document.getElementById("energySheet");
     if (sheet) {
       return sheet;
+    }
+
+    if (!document.body) {
+      return null;
     }
 
     sheet = document.createElement("div");
@@ -18000,14 +18051,14 @@ host.appendChild(row);
     });
 
     sheet.__refreshEnergySheet = refreshSheet;
-    card.appendChild(sheet);
+    document.body.appendChild(sheet);
     return sheet;
   }
 
   function openEnergySheet() {
     const card = document.getElementById("neuroChecklist");
     if (!card) return;
-    const sheet = ensureEnergySheet(card);
+    const sheet = ensureEnergySheet();
     if (!sheet) return;
 
     const currentLevel = alignEnergySliders(getEnergyLevel(), "sheet");
@@ -18131,6 +18182,7 @@ host.appendChild(row);
         <div class="capacity-adjustments__list" data-adjustment-list="gain"></div>
       </section>
       <div class="checklist-capacity-sheet__footer">
+        <button type="button" data-action="save">Save</button>
         <button type="button" data-action="close">Done</button>
       </div>`;
     card.appendChild(sheet);
@@ -18142,7 +18194,18 @@ host.appendChild(row);
       if (!target) return;
       const action = target.dataset.action;
       if (action === "close") {
+        persistCapacityAdjustmentsState();
         closeCapacitySheet();
+        return;
+      }
+      if (action === "save") {
+        persistCapacityAdjustmentsState();
+        renderCapacitySummary(sheet);
+        if (typeof showToast === "function") {
+          showToast("Availability calibration", "Availability adjustments saved.");
+        } else {
+          window.alert("Availability adjustments saved.");
+        }
         return;
       }
       if (action === "add") {
@@ -18150,6 +18213,7 @@ host.appendChild(row);
         const entry = ensureCapacityAdjustmentsEntry();
         if (!entry) return;
         entry.adjustments.push(createCapacityAdjustment(kind));
+        persistCapacityAdjustmentsState();
         renderCapacityRows(sheet);
         renderCapacitySummary(sheet);
         applyChecklistControlsState();
@@ -18163,6 +18227,7 @@ host.appendChild(row);
         const entry = ensureCapacityAdjustmentsEntry();
         if (!entry) return;
         entry.adjustments = entry.adjustments.filter(item => item.id !== id);
+        persistCapacityAdjustmentsState();
         renderCapacitySheet(sheet);
         applyChecklistControlsState();
         renderNeuroChecklist();
@@ -18182,6 +18247,7 @@ host.appendChild(row);
       const adjustment = entry.adjustments.find(item => item.id === id);
       if (!adjustment) return;
       adjustment[field] = target.value || "";
+      persistCapacityAdjustmentsState();
       renderCapacitySummary(sheet);
       applyChecklistControlsState();
       renderNeuroChecklist();
@@ -18584,7 +18650,7 @@ host.appendChild(row);
 
   function buildClinicSnapshotLine(dailyContext, weekSchedule, dayName) {
     if (!dailyContext) {
-      return "Snapshot unavailable";
+      return null;
     }
     const scheduleForDay = dayName && weekSchedule ? weekSchedule[dayName] : null;
     const selections = dailyContext.dayState?.clinicSelections || {};
@@ -18628,12 +18694,18 @@ host.appendChild(row);
       parts.push(`${blockName} • ${blockLabel} (${details.join(", ")})`);
     });
 
+    const totalLabel = totalPatients === 1 ? "1 Total Patient" : `${totalPatients} Total Patients`;
     if (!parts.length) {
-      return "No clinic blocks scheduled";
+      return {
+        totalLabel,
+        blocks: ["No clinic blocks scheduled."],
+      };
     }
 
-    const totalLabel = `Total ${totalPatients} pt${totalPatients === 1 ? "" : "s"}`;
-    return `${parts.join(" | ")} • ${totalLabel}`;
+    return {
+      totalLabel,
+      blocks: parts,
+    };
   }
 
   function renderNeuroChecklist() {
@@ -18645,7 +18717,6 @@ host.appendChild(row);
       snapshotEl,
       workloadEl,
       basketUpdatedEl,
-      clinicList,
       focusList,
       itineraryList,
       itineraryTimeline,
@@ -18667,9 +18738,19 @@ host.appendChild(row);
         })
       : null;
     if (snapshotEl) {
-      const snapshotSummary = buildClinicSnapshotLine(dailyContext, weekSchedule, dayName);
-      const prefix = formattedDate ? `${formattedDate} • ${snapshotSummary}` : snapshotSummary;
-      snapshotEl.textContent = `Clinic snapshot — ${prefix}`;
+      const summary = buildClinicSnapshotLine(dailyContext, weekSchedule, dayName);
+      if (summary) {
+        const headerLine = formattedDate
+          ? `${formattedDate} • ${summary.totalLabel}`
+          : summary.totalLabel;
+        const detailLines = Array.isArray(summary.blocks)
+          ? summary.blocks.map(line => `• ${line}`)
+          : [];
+        const lines = [`Clinic snapshot — ${headerLine}`, ...detailLines];
+        snapshotEl.textContent = lines.join("\n");
+      } else {
+        snapshotEl.textContent = "Clinic snapshot — Schedule unavailable.";
+      }
     }
 
     basketUpdatedEl.textContent = formatClinicBasketTimestamp(dailyContext.basket.updatedAt);
@@ -18698,63 +18779,6 @@ host.appendChild(row);
     const sortedClusters = clusters
       .slice()
       .sort((a, b) => (Number.isFinite(b.totalEstMinutes) ? b.totalEstMinutes : 0) - (Number.isFinite(a.totalEstMinutes) ? a.totalEstMinutes : 0));
-    const primaryBacklog = sortedClusters[0] || null;
-
-    clinicList.innerHTML = "";
-    if (dayName && weekSchedule && weekSchedule[dayName]) {
-      const scheduleForDay = weekSchedule[dayName];
-      const blocks = getSlotBlocksFromBridge();
-      let hasEntry = false;
-      blocks.forEach(blockName => {
-        const block = scheduleForDay[blockName];
-        if (!block) return;
-        hasEntry = true;
-        const blockKey = `${dayName}|${blockName}`;
-        const selection = dailyContext.dayState.clinicSelections?.[blockKey] || null;
-        const label = mapClinicLabel(selection, block?.label);
-        const patientCount = Array.isArray(block?.patients) ? block.patients.length : 0;
-        const blockPresence = dailyContext.dayState.blockResidentPresence || {};
-        const hasResident = typeof blockPresence[blockKey] === "boolean"
-          ? blockPresence[blockKey]
-          : Boolean(block?.residentRequired);
-        const isAdmin = selection === "Admin Time"
-          || /admin|didactic/i.test(label || "")
-          || patientCount === 0;
-        const metaParts = [];
-        if (patientCount > 0) {
-          metaParts.push(`${patientCount} patient${patientCount === 1 ? "" : "s"}`);
-        }
-        if (hasResident && patientCount > 0) {
-          metaParts.push("Resident co-pilot");
-        }
-        if (isAdmin) {
-          metaParts.push("Admin window");
-        }
-        if (!metaParts.length) {
-          metaParts.push("No visits scheduled");
-        }
-        const focusHint = buildClinicFocusHint({
-          blockName,
-          label,
-          isAdmin,
-          patientCount,
-          hasResident,
-        }, primaryBacklog);
-        const entry = createChecklistEntry(`${blockName} • ${label}`, focusHint ? [...metaParts, focusHint] : metaParts);
-        clinicList.appendChild(entry);
-      });
-      if (!hasEntry) {
-        const empty = document.createElement("li");
-        empty.className = "neuro-checklist__empty";
-        empty.textContent = "No clinic blocks scheduled.";
-        clinicList.appendChild(empty);
-      }
-    } else {
-      const empty = document.createElement("li");
-      empty.className = "neuro-checklist__empty";
-      empty.textContent = "No clinic blocks scheduled.";
-      clinicList.appendChild(empty);
-    }
 
     focusList.innerHTML = "";
     const focusCandidates = sortTasksByMode(
