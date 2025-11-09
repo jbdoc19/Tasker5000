@@ -1013,6 +1013,10 @@ padding:1rem; box-shadow:0 18px 40px rgba(15,23,42,0.25); }
       overflow: hidden;
     }
 
+    .weekly-grid:empty {
+      display: none;
+    }
+
     .weekly-grid__cell {
       position: relative;
       display: flex;
@@ -23666,6 +23670,10 @@ closeBtn.addEventListener('click', () => {
         dispatchScheduleUpdate("fallback:init");
       }
 
+      if (typeof window !== "undefined") {
+        window.ensureScheduleFallback = ensureScheduleFallback;
+      }
+
       function runFallback() {
         window.setTimeout(ensureScheduleFallback, 0);
       }
@@ -23953,6 +23961,157 @@ function playfulName(s){ return s?.replace(/chart/i,"Chart Dragon") || s; }
   }
 </script>
 
+  <script>
+    (function () {
+      const GRID_ID = "weeklyScheduleGrid";
+      const AVAIL_KEY = "taskerWeekendAvailability";
+      const AVAIL_DEFAULT = { sat: false, sun: true };
+
+      function loadAvailability() {
+        const storage = typeof window !== "undefined" ? window.localStorage : null;
+        if (!storage) {
+          return { ...AVAIL_DEFAULT };
+        }
+        try {
+          const raw = storage.getItem(AVAIL_KEY);
+          if (!raw) {
+            return { ...AVAIL_DEFAULT };
+          }
+          const parsed = JSON.parse(raw);
+          return {
+            sat: Boolean(parsed?.sat),
+            sun: parsed && Object.prototype.hasOwnProperty.call(parsed, "sun") ? Boolean(parsed.sun) : true,
+          };
+        } catch (error) {
+          console.warn("[schedule] Unable to load weekend availability", error);
+          return { ...AVAIL_DEFAULT };
+        }
+      }
+
+      function persistAvailability(next) {
+        const storage = typeof window !== "undefined" ? window.localStorage : null;
+        if (!storage) {
+          return;
+        }
+        try {
+          storage.setItem(AVAIL_KEY, JSON.stringify(next));
+        } catch (error) {
+          console.warn("[schedule] Unable to persist weekend availability", error);
+        }
+      }
+
+      function applyAvailabilityUI(state, badge, toggle) {
+        const isOn = Boolean(state);
+        badge.textContent = isOn ? "Available" : "Off duty";
+        badge.classList.toggle("weekend-card__badge--on", isOn);
+        badge.classList.toggle("weekend-card__badge--off", !isOn);
+        toggle.textContent = isOn ? "Turn off" : "Turn on";
+        toggle.classList.toggle("weekend-card__toggle--active", isOn);
+        toggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+      }
+
+      function createWeekendCell(dayKey, label, availability) {
+        const cell = document.createElement("div");
+        cell.className = "weekly-grid__cell weekly-grid__cell--weekend";
+        cell.dataset.weekendDay = dayKey;
+        cell.setAttribute("role", "group");
+        cell.tabIndex = -1;
+
+        const dayLabel = document.createElement("div");
+        dayLabel.className = "weekly-grid__day";
+        dayLabel.textContent = label;
+
+        const card = document.createElement("div");
+        card.className = "weekend-card";
+
+        const title = document.createElement("div");
+        title.className = "weekend-card__title";
+        title.textContent = "Admin Day";
+
+        const note = document.createElement("p");
+        note.className = "weekend-card__note";
+        note.textContent = "Dedicated space for inbox, planning, and catch-up.";
+
+        const badge = document.createElement("span");
+        badge.className = "weekend-card__badge";
+
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "weekend-card__toggle";
+        toggle.dataset.weekendToggle = dayKey;
+
+        const setState = () => {
+          const isAvailable = dayKey === "sun" ? availability.sun : availability.sat;
+          applyAvailabilityUI(isAvailable, badge, toggle);
+          const stateLabel = `${label} — ${isAvailable ? "On" : "Off"}`;
+          toggle.setAttribute("aria-label", stateLabel);
+          toggle.title = stateLabel;
+        };
+
+        setState();
+
+        toggle.addEventListener("click", () => {
+          if (dayKey === "sun") {
+            availability.sun = !availability.sun;
+          } else {
+            availability.sat = !availability.sat;
+          }
+          setState();
+          persistAvailability(availability);
+          try {
+            window.dispatchEvent(
+              new CustomEvent("tasker:weekendAvailabilityChanged", {
+                detail: { ...availability },
+              }),
+            );
+          } catch (error) {
+            console.warn("[schedule] Weekend availability dispatch failed", error);
+          }
+        });
+
+        card.append(title, note, badge, toggle);
+        cell.append(dayLabel, card);
+        return cell;
+      }
+
+      function injectWeekendPlaceholders(grid) {
+        const availability = loadAvailability();
+        persistAvailability(availability);
+        grid.classList.add("weekly-grid--with-weekend");
+        grid.append(
+          createWeekendCell("sat", "Saturday", availability),
+          createWeekendCell("sun", "Sunday", availability),
+        );
+      }
+
+      function initializeWatchdog() {
+        const grid = document.getElementById(GRID_ID);
+        if (!grid) {
+          return;
+        }
+
+        try {
+          const fallback = window.ensureScheduleFallback;
+          if (typeof fallback === "function") {
+            fallback();
+          }
+        } catch (error) {
+          console.warn("[schedule] ensureScheduleFallback failed", error);
+        }
+
+        setTimeout(() => {
+          if (grid.children.length === 0) {
+            injectWeekendPlaceholders(grid);
+          }
+        }, 0);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeWatchdog);
+      } else {
+        initializeWatchdog();
+      }
+    })();
   </script>
 </body>
 </html>
