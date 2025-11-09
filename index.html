@@ -9010,6 +9010,21 @@ body.all-tasks-overlay-active {
       ⏩ Quick Tasks
     </button>
     <button
+      id="exportTasksBackupButton"
+      class="btn-quiet task-backup-action"
+      type="button"
+    >
+      💾 Export Tasks Backup
+    </button>
+    <button
+      id="importTasksBackupButton"
+      class="btn-quiet task-backup-action"
+      type="button"
+    >
+      📂 Import Tasks Backup
+    </button>
+    <input type="file" id="importTasksBackupInput" accept="application/json" class="visually-hidden" />
+    <button
       id="shredTopTaskButton"
       class="btn-quiet shred-top-task"
       type="button"
@@ -16119,6 +16134,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   }
 
   let tasks = [];
+  let isHydratingTasks = true;
   let templates = [];
   let focusQueue = [];
   let editingTaskId = null;
@@ -16588,12 +16604,260 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return task;
   }
 
+  function buildTaskStoragePayload(taskList) {
+    const allTasks = Array.isArray(taskList)
+      ? taskList.map(task => ({ ...task }))
+      : [];
+    const quickTasksSnapshot = allTasks.filter(task => isQuickTask(task));
+    return {
+      allTasks,
+      quickTasks: quickTasksSnapshot,
+    };
+  }
+
   function persist() {
+    if (isHydratingTasks) {
+      return;
+    }
     try {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
+      const payload = buildTaskStoragePayload(tasks);
+      localStorage.setItem("tasks", JSON.stringify(payload));
     } catch (error) {
       console.warn("Unable to persist tasks", error);
     }
+  }
+
+  function hydrateTasksFromStorage() {
+    if (typeof localStorage === "undefined") {
+      isHydratingTasks = false;
+      return;
+    }
+
+    let restoredTasks = [];
+
+    try {
+      const saved = localStorage.getItem("tasks");
+      if (saved) {
+        const parser = window.TaskerStorage?.parseStoredTasks;
+        const parseResult = typeof parser === "function"
+          ? parser(saved)
+          : { tasks: [], discarded: 0, error: null };
+
+        if (parseResult.error) {
+          console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+        }
+
+        if (parseResult.discarded > 0) {
+          const label = parseResult.discarded === 1 ? "entry" : "entries";
+          console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
+        }
+
+        restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
+      }
+    } catch (error) {
+      console.error("Unable to access saved tasks from localStorage.", error);
+    }
+
+    tasks = normalizeTasksFromStorage(restoredTasks);
+    isHydratingTasks = false;
+    persist();
+  }
+
+  function normalizeTasksFromStorage(restoredTasks = []) {
+    const normalizedTasks = [];
+    if (!Array.isArray(restoredTasks)) {
+      return normalizedTasks;
+    }
+
+    restoredTasks.forEach((task, index) => {
+      try {
+        const normalizedTask = {
+          ...task,
+          authorType: task?.authorType || "attending",
+          patientType: normalizePatientType(task?.patientType),
+          visitType: normalizeVisitType(task?.visitType),
+          clinicSite: normalizeClinicSite(task?.clinicSite),
+          dateOfService: task?.dateOfService || null,
+          createdAt: task?.createdAt || task?.addedAt || new Date().toISOString(),
+        };
+        if (normalizedTask.dateOfService) {
+          normalizedTask.daysSinceVisit = calculateDaysSince(normalizedTask.dateOfService);
+        }
+        normalizedTasks.push(recalcTaskPriority(normalizedTask));
+      } catch (error) {
+        console.warn(`Unable to normalize stored task at index ${index}; skipping.`, error);
+      }
+    });
+
+    return normalizedTasks;
+  }
+
+  function mergeTaskCollections(existingTasks, incomingTasks) {
+    const merged = [];
+    const seen = new Set();
+
+    const append = task => {
+      if (!task || typeof task !== "object") {
+        return;
+      }
+      let id = typeof task.id === "string" ? task.id.trim() : "";
+      if (!id) {
+        id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+        task.id = id;
+      }
+      if (seen.has(id)) {
+        return;
+      }
+      seen.add(id);
+      merged.push(task);
+    };
+
+    if (Array.isArray(existingTasks)) {
+      existingTasks.forEach(append);
+    }
+    if (Array.isArray(incomingTasks)) {
+      incomingTasks.forEach(append);
+    }
+
+    return merged;
+  }
+
+  function exportTasksBackup() {
+    const payload = buildTaskStoragePayload(tasks);
+    const downloader = window.TaskerStorage?.downloadTaskBackup;
+    if (typeof downloader === "function") {
+      downloader(payload);
+      return;
+    }
+    try {
+      const serialized = JSON.stringify(payload, null, 2);
+      const blob = new Blob([serialized], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.download = `task-backup-${timestamp}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.warn("Unable to export tasks backup", error);
+    }
+  }
+
+  function processImportedBackup(serialized) {
+    if (typeof serialized !== "string" || !serialized.trim()) {
+      return { success: false, message: "The selected backup file is empty." };
+    }
+
+    const parser = window.TaskerStorage?.parseStoredTasks;
+    let parseResult = null;
+
+    if (typeof parser === "function") {
+      parseResult = parser(serialized);
+    } else {
+      try {
+        const parsed = JSON.parse(serialized);
+        const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
+        const taskEntries = Array.isArray(parsed)
+          ? parsed
+          : (isPlainObject && Array.isArray(parsed.allTasks)
+            ? parsed.allTasks
+            : (isPlainObject && Array.isArray(parsed.tasks)
+              ? parsed.tasks
+              : []));
+        parseResult = { tasks: taskEntries, error: null };
+      } catch (error) {
+        return { success: false, message: "Unable to read the backup file. It may not be valid JSON." };
+      }
+    }
+
+    if (parseResult.error) {
+      return { success: false, message: "The backup file could not be parsed." };
+    }
+
+    const normalizedIncoming = normalizeTasksFromStorage(parseResult.tasks);
+    if (!normalizedIncoming.length) {
+      return { success: false, message: "No tasks were found inside the backup file." };
+    }
+
+    const existingCount = tasks.length;
+    const merged = mergeTaskCollections(tasks, normalizedIncoming);
+    const addedCount = merged.length - existingCount;
+
+    tasks = merged;
+    persist();
+    updateUI();
+
+    return { success: true, addedCount };
+  }
+
+  function handleBackupFileSelection(event) {
+    const input = event?.target;
+    if (!input || !input.files || !input.files.length) {
+      return;
+    }
+    const file = input.files[0];
+    if (!file) {
+      input.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const rawResult = reader.result;
+        const text = typeof rawResult === "string" ? rawResult : String(rawResult ?? "");
+        const outcome = processImportedBackup(text);
+        if (outcome.success) {
+          const added = outcome.addedCount || 0;
+          const label = added === 1 ? "task" : "tasks";
+          alert(added > 0
+            ? `Backup imported successfully. Added ${added} ${label}.`
+            : "Backup imported successfully. No new tasks were added.");
+        } else if (outcome.message) {
+          alert(outcome.message);
+        }
+      } catch (error) {
+        console.error("Unable to import tasks backup", error);
+        alert("Unable to import tasks backup. Please verify the file and try again.");
+      } finally {
+        input.value = "";
+      }
+    };
+    reader.onerror = () => {
+      console.error("Unable to read the selected backup file", reader.error);
+      alert("Unable to read the selected backup file.");
+      input.value = "";
+    };
+    reader.readAsText(file);
+  }
+
+  function initializeTaskBackupControls() {
+    const exportBtn = $("exportTasksBackupButton");
+    const importBtn = $("importTasksBackupButton");
+    const input = $("importTasksBackupInput");
+    if (!exportBtn || !importBtn || !input) {
+      return;
+    }
+
+    exportBtn.addEventListener("click", () => {
+      if (!tasks.length) {
+        const confirmExport = confirm("Your task list is empty. Export an empty backup anyway?");
+        if (!confirmExport) {
+          return;
+        }
+      }
+      exportTasksBackup();
+    });
+
+    importBtn.addEventListener("click", () => {
+      input.value = "";
+      input.click();
+    });
+
+    input.addEventListener("change", handleBackupFileSelection);
   }
 
   function buildTaskDraftFromForm() {
@@ -23840,6 +24104,7 @@ function wireInsights() {
     setTimeout(() => toast.remove(), 300);
   }, duration);
     }
+    hydrateTasksFromStorage();
     restoreBriefModePreference();
     setupMomentumZones();
     setupNextBestObserver();
@@ -23899,47 +24164,7 @@ function wireInsights() {
     initializeDistractionTools();
     initializeGanttSnapshot();
     initializeWorstDayMode();
-    const saved = localStorage.getItem("tasks");
-    if (saved) {
-      const parser = window.TaskerStorage?.parseStoredTasks;
-      const parseResult = typeof parser === "function"
-        ? parser(saved)
-        : { tasks: [], discarded: 0, error: null };
-
-      if (parseResult.error) {
-        console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
-      }
-
-      if (parseResult.discarded > 0) {
-        const label = parseResult.discarded === 1 ? "entry" : "entries";
-        console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
-      }
-
-      const restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
-      const normalizedTasks = [];
-
-      restoredTasks.forEach((task, index) => {
-        try {
-          const normalizedTask = {
-            ...task,
-            authorType: task.authorType || "attending",
-            patientType: normalizePatientType(task.patientType),
-            visitType: normalizeVisitType(task.visitType),
-            clinicSite: normalizeClinicSite(task.clinicSite),
-            dateOfService: task.dateOfService || null,
-            createdAt: task.createdAt || task.addedAt || new Date().toISOString()
-          };
-          if (normalizedTask.dateOfService) {
-            normalizedTask.daysSinceVisit = calculateDaysSince(normalizedTask.dateOfService);
-          }
-          normalizedTasks.push(recalcTaskPriority(normalizedTask));
-        } catch (error) {
-          console.warn(`Unable to normalize stored task at index ${index}; skipping.`, error);
-        }
-      });
-
-      tasks = normalizedTasks;
-    }
+    initializeTaskBackupControls();
     const savedTemplates = localStorage.getItem("templates");
     if (savedTemplates) {
       templates = JSON.parse(savedTemplates).map(template => ({
