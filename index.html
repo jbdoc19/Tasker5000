@@ -377,49 +377,6 @@
       gap: clamp(0.85rem, 2.2vw, 1.4rem);
     }
 
-    #checklistControls {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    #checklistControls .controls-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    #checklistControls button {
-      border: none;
-      background: transparent;
-      font: inherit;
-      cursor: pointer;
-      padding: 0.15rem 0.35rem;
-      border-radius: 8px;
-      transition: background 160ms ease, color 160ms ease;
-    }
-
-    #checklistControls button:is(:hover, :focus-visible) {
-      background: rgba(45, 212, 195, 0.12);
-      color: var(--hero-teal);
-      outline: none;
-    }
-
-    #checklistControls button.is-active {
-      background: rgba(45, 212, 195, 0.18);
-      color: var(--hero-teal);
-    }
-
-    #foundTimeChip {
-      background: rgba(45, 212, 195, 0.1);
-      border-radius: 999px;
-      padding: 0.15rem 0.55rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--hero-teal);
-    }
-
     /* Availability calibration sheet */
     .checklist-capacity-sheet {
       position: absolute;
@@ -632,6 +589,81 @@
       color: var(--hero-teal);
     }
 
+    .energy-sheet {
+      position: fixed;
+      inset: auto 50% 5%;
+      transform: translateX(50%);
+      width: min(420px, 90vw);
+      background: rgba(15, 22, 30, 0.96);
+      border: 1px solid rgba(120, 164, 193, 0.35);
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+      z-index: 1500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .energy-sheet.is-open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(50%) translateY(-12px);
+    }
+
+    .energy-sheet__header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .energy-sheet__title {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #fbbf24;
+    }
+
+    .energy-sheet__subtitle {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .energy-sheet__body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .energy-sheet__slider {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .energy-sheet__labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .energy-sheet__value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .energy-sheet__actions {
+      display: flex;
+      justify-content: center;
+    }
+
+    .energy-sheet__actions button {
+      min-width: 120px;
+    }
+
     /* Backdrop for sheet */
     .checklist-capacity-backdrop {
       position: fixed;
@@ -651,39 +683,73 @@
 
     .neuro-checklist__header {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1rem;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
     }
 
     .neuro-checklist__title {
       margin: 0;
-      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+      font-size: clamp(1.15rem, 3vw, 1.45rem);
+      color: #7bd88f;
+      letter-spacing: 0.01em;
     }
 
-    .neuro-checklist__subtitle {
-      margin: 0.15rem 0 0;
+    .neuro-checklist__snapshot {
+      margin: 0;
       color: var(--text-secondary);
       font-size: 0.9rem;
+      max-width: 100%;
     }
 
-    .neuro-checklist__status {
-      background: rgba(45, 212, 195, 0.08);
-      border: 1px solid rgba(45, 212, 195, 0.2);
-      border-radius: 12px;
-      padding: 0.6rem 0.9rem;
-      min-width: 180px;
+    .neuro-checklist__control-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(0.5rem, 2vw, 1rem);
+      width: 100%;
+      justify-items: center;
+    }
+
+    .neuro-checklist__control {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 0.35rem;
-      color: var(--hero-teal);
-      font-weight: 600;
     }
 
-    .neuro-checklist__status small {
+    .neuro-checklist__control button {
+      margin: 0;
+      width: clamp(48px, 10vw, 56px);
+      height: clamp(48px, 10vw, 56px);
+      border-radius: 14px;
+      font-size: clamp(1.25rem, 5vw, 1.6rem);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13, 19, 25, 0.85);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .neuro-checklist__control button:hover,
+    .neuro-checklist__control button:focus-visible {
+      transform: translateY(-1px);
+      background: rgba(31, 42, 54, 0.9);
+      border-color: rgba(125, 196, 177, 0.55);
+    }
+
+    .neuro-checklist__control button.is-active {
+      background: rgba(45, 212, 195, 0.18);
+      border-color: rgba(45, 212, 195, 0.6);
+    }
+
+    .neuro-checklist__control span {
+      font-size: 0.75rem;
       color: var(--text-secondary);
-      font-weight: 500;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
 
     .neuro-checklist__body {
@@ -14531,6 +14597,26 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     if (nextField) {
       nextField.setAttribute('data-value', String(resolved));
     }
+    if (source !== "sheet") {
+      const sheet = document.getElementById("energySheet");
+      const refresh = sheet && typeof sheet.__refreshEnergySheet === "function"
+        ? sheet.__refreshEnergySheet
+        : null;
+      if (refresh) {
+        refresh(resolved);
+      } else {
+        const sheetSlider = document.getElementById("energySheetSlider");
+        if (sheetSlider) {
+          sheetSlider.value = String(resolved);
+          sheetSlider.setAttribute("data-value", String(resolved));
+        }
+        const sheetValue = document.getElementById("energySheetValue");
+        if (sheetValue) {
+          const label = ENERGY_LABELS[resolved] || resolved;
+          sheetValue.textContent = `${resolved} • ${label}`;
+        }
+      }
+    }
     syncingEnergySliders = false;
     return resolved;
   }
@@ -17334,6 +17420,7 @@ host.appendChild(row);
   const DEFAULT_QUOTAS = { AM: 0.4, PM: 0.8 };
   let checklistViewMode = "list";
   const capacityAdjustmentsState = {};
+  let energySheetEscapeHandler = null;
   let capacitySheetEscapeHandler = null;
   let capacityAdjustmentSerial = 0;
 
@@ -17547,30 +17634,36 @@ host.appendChild(row);
     const header = document.createElement("header");
     header.className = "neuro-checklist__header";
 
-    const headingBlock = document.createElement("div");
     const title = document.createElement("h2");
     title.className = "neuro-checklist__title";
-    title.textContent = "🧠 Dynamic Neuroadaptive Daily Checklist";
-    const subtitleEl = document.createElement("p");
-    subtitleEl.className = "neuro-checklist__subtitle";
-    subtitleEl.dataset.checklistSubtitle = "";
-    subtitleEl.textContent = "Calibrating today’s forecast…";
-    headingBlock.appendChild(title);
-    headingBlock.appendChild(subtitleEl);
+    title.textContent = "Capacity Center";
 
-    const statusBox = document.createElement("div");
-    statusBox.className = "neuro-checklist__status";
+    const snapshotEl = document.createElement("p");
+    snapshotEl.className = "neuro-checklist__snapshot";
+    snapshotEl.dataset.checklistSnapshot = "";
+    snapshotEl.textContent = "Clinic snapshot loading…";
+
+    const controlGrid = document.createElement("div");
+    controlGrid.className = "neuro-checklist__control-grid";
+    controlGrid.id = "capacityControlGrid";
+    controlGrid.setAttribute("role", "group");
+    controlGrid.setAttribute("aria-label", "Capacity center controls");
+
+    const metricsBox = document.createElement("div");
+    metricsBox.className = "visually-hidden";
     const workloadEl = document.createElement("span");
     workloadEl.dataset.checklistWorkload = "";
     workloadEl.textContent = "—";
-    const basketUpdatedEl = document.createElement("small");
+    const basketUpdatedEl = document.createElement("span");
     basketUpdatedEl.dataset.checklistBasketUpdated = "";
     basketUpdatedEl.textContent = "Clinic basket —";
-    statusBox.appendChild(workloadEl);
-    statusBox.appendChild(basketUpdatedEl);
+    metricsBox.appendChild(workloadEl);
+    metricsBox.appendChild(basketUpdatedEl);
 
-    header.appendChild(headingBlock);
-    header.appendChild(statusBox);
+    header.appendChild(title);
+    header.appendChild(snapshotEl);
+    header.appendChild(controlGrid);
+    header.appendChild(metricsBox);
 
     const body = document.createElement("div");
     body.className = "neuro-checklist__body";
@@ -17636,12 +17729,12 @@ host.appendChild(row);
     card.appendChild(body);
 
     const refs = {
-      subtitleEl,
+      snapshotEl,
       workloadEl,
       basketUpdatedEl,
+      controlGrid,
       clinicList,
       focusList,
-      statusBox,
       itineraryList,
       itineraryTimeline,
       itineraryEmpty,
@@ -17652,53 +17745,76 @@ host.appendChild(row);
   }
 
   function mountChecklistControls(card) {
-    const host = card.querySelector(".neuro-checklist__status");
-    if (!host || host.querySelector("#checklistControls")) return;
+    const host = card.querySelector("#capacityControlGrid");
+    if (!host || host.dataset.controlsMounted === "true") return;
 
-    const box = document.createElement("div");
-    box.id = "checklistControls";
-    box.innerHTML = `
-      <div class="controls-row">
-        <button id="capacityWrench" title="Availability / capacity">🔧</button>
-        <small id="quotaBadges">Quotas — AM 40% · PM 80%</small>
-        <span id="foundTimeChip" style="display:none;">Found time: +15m</span>
-        <small id="viewToggle">
-          <button type="button" data-view="list">List</button>
-          ·
-          <button type="button" data-view="timeline">Timeline</button>
-        </small>
-      </div>`;
-    host.appendChild(box);
+    const createControl = (id, icon, label) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "neuro-checklist__control";
 
-    const capacityButton = document.getElementById("capacityWrench");
-    if (capacityButton) {
-      capacityButton.addEventListener("click", openCapacitySheet);
-    }
+      const button = document.createElement("button");
+      button.id = id;
+      button.type = "button";
+      button.setAttribute("aria-pressed", "false");
+      button.textContent = icon;
 
-    const quotasEl = document.getElementById("quotaBadges");
-    if (quotasEl) {
-      const formatQuota = value => {
-        const percent = Number(value);
-        if (!Number.isFinite(percent)) return "0%";
-        return `${Math.round(percent * 100)}%`;
-      };
-      quotasEl.textContent = `Quotas — AM ${formatQuota(DEFAULT_QUOTAS.AM)} · PM ${formatQuota(DEFAULT_QUOTAS.PM)}`;
-    }
+      const caption = document.createElement("span");
+      caption.textContent = label;
 
-    const viewToggle = document.getElementById("viewToggle");
-    if (viewToggle) {
-      viewToggle.addEventListener("click", event => {
-        const target = event.target instanceof HTMLElement
-          ? event.target.closest("button[data-view]")
-          : null;
-        if (!target) return;
-        const view = target.dataset.view;
-        if (!view || view === checklistViewMode) return;
-        checklistViewMode = view;
-        applyChecklistControlsState();
+      wrapper.appendChild(button);
+      wrapper.appendChild(caption);
+      return { wrapper, button };
+    };
+
+    const availability = createControl("capacityWrench", "🔧", "Availability");
+    const energy = createControl("energyDial", "🔋", "Energy");
+    const focusView = createControl("focusViewButton", "🔎", "Focus View");
+    const workflow = createControl("visualWorkflowButton", "🌐", "Visual Workflow");
+
+    host.append(
+      availability.wrapper,
+      energy.wrapper,
+      focusView.wrapper,
+      workflow.wrapper,
+    );
+
+    host.dataset.controlsMounted = "true";
+
+    availability.button.addEventListener("click", () => {
+      openCapacitySheet();
+    });
+
+    energy.button.addEventListener("click", () => {
+      openEnergySheet();
+    });
+
+    focusView.button.addEventListener("click", () => {
+      const shouldUpdate = checklistViewMode !== "list";
+      checklistViewMode = "list";
+      applyChecklistControlsState();
+      if (shouldUpdate) {
         updateUI();
-      });
-    }
+      }
+      const refs = card.__checklistRefs;
+      const section = refs?.focusList?.closest("section");
+      if (section instanceof HTMLElement) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+
+    workflow.button.addEventListener("click", () => {
+      const shouldUpdate = checklistViewMode !== "timeline";
+      checklistViewMode = "timeline";
+      applyChecklistControlsState();
+      if (shouldUpdate) {
+        updateUI();
+      }
+      const refs = card.__checklistRefs;
+      const hostEl = refs?.itineraryContainer || refs?.itineraryTimeline;
+      if (hostEl instanceof HTMLElement) {
+        hostEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   }
 
   function renderCapacityRows(sheet) {
@@ -17817,6 +17933,147 @@ host.appendChild(row);
   function renderCapacitySheet(sheet) {
     renderCapacityRows(sheet);
     renderCapacitySummary(sheet);
+  }
+
+  function ensureEnergySheet(card) {
+    if (!card) return null;
+    let sheet = document.getElementById("energySheet");
+    if (sheet) {
+      return sheet;
+    }
+
+    sheet = document.createElement("div");
+    sheet.id = "energySheet";
+    sheet.className = "energy-sheet";
+    sheet.setAttribute("role", "dialog");
+    sheet.setAttribute("aria-modal", "true");
+    sheet.setAttribute("aria-hidden", "true");
+    sheet.innerHTML = `
+      <div class="energy-sheet__header">
+        <h4 class="energy-sheet__title">Energy check</h4>
+        <p class="energy-sheet__subtitle">Set how charged you feel so focus picks the right lift.</p>
+      </div>
+      <div class="energy-sheet__body">
+        <div class="energy-sheet__slider">
+          <input id="energySheetSlider" type="range" min="1" max="5" step="1" value="3" aria-label="Energy level" />
+          <div class="energy-sheet__labels">
+            <span>Low</span>
+            <span id="energySheetValue" class="energy-sheet__value">3 • Balanced</span>
+            <span>Max</span>
+          </div>
+        </div>
+        <div class="energy-sheet__actions">
+          <button type="button" data-action="done">Done</button>
+        </div>
+      </div>`;
+
+    const slider = sheet.querySelector("#energySheetSlider");
+    const valueEl = sheet.querySelector("#energySheetValue");
+
+    const refreshSheet = value => {
+      const resolved = clampScale(value, 3);
+      if (slider) {
+        slider.value = String(resolved);
+        slider.setAttribute("data-value", String(resolved));
+      }
+      if (valueEl) {
+        const label = ENERGY_LABELS[resolved] || resolved;
+        valueEl.textContent = `${resolved} • ${label}`;
+      }
+    };
+
+    if (slider) {
+      slider.addEventListener("input", event => {
+        const raw = Number(event.target.value || slider.value || 3);
+        const resolved = alignEnergySliders(raw, "sheet");
+        refreshSheet(resolved);
+      });
+    }
+
+    sheet.addEventListener("click", event => {
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (!target) return;
+      const action = target.dataset.action;
+      if (action === "done") {
+        closeEnergySheet();
+      }
+    });
+
+    sheet.__refreshEnergySheet = refreshSheet;
+    card.appendChild(sheet);
+    return sheet;
+  }
+
+  function openEnergySheet() {
+    const card = document.getElementById("neuroChecklist");
+    if (!card) return;
+    const sheet = ensureEnergySheet(card);
+    if (!sheet) return;
+
+    const currentLevel = alignEnergySliders(getEnergyLevel(), "sheet");
+    const refresh = typeof sheet.__refreshEnergySheet === "function" ? sheet.__refreshEnergySheet : null;
+    if (refresh) {
+      refresh(currentLevel);
+    }
+
+    sheet.classList.add("is-open");
+    sheet.setAttribute("aria-hidden", "false");
+
+    const slider = sheet.querySelector("#energySheetSlider");
+    if (slider instanceof HTMLElement) {
+      slider.focus();
+    }
+
+    const backdrop = typeof getCapacityBackdrop === "function" ? getCapacityBackdrop() : null;
+    if (backdrop) {
+      backdrop.classList.add("is-visible");
+    }
+
+    if (!energySheetEscapeHandler) {
+      energySheetEscapeHandler = event => {
+        if (event.key === "Escape") {
+          closeEnergySheet();
+          return;
+        }
+        if (event.key === "Tab") {
+          const focusables = sheet.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          );
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      document.addEventListener("keydown", energySheetEscapeHandler);
+    }
+  }
+
+  function closeEnergySheet() {
+    const sheet = document.getElementById("energySheet");
+    if (sheet) {
+      sheet.classList.remove("is-open");
+      sheet.setAttribute("aria-hidden", "true");
+    }
+
+    const capacityOpen = document.getElementById("capacitySheet")?.classList.contains("is-open");
+    if (!capacityOpen) {
+      const backdrop = document.getElementById("capacityBackdrop");
+      if (backdrop) {
+        backdrop.classList.remove("is-visible");
+      }
+    }
+
+    if (energySheetEscapeHandler) {
+      document.removeEventListener("keydown", energySheetEscapeHandler);
+      energySheetEscapeHandler = null;
+    }
   }
 
   function ensureCapacitySheet(card) {
@@ -17988,9 +18245,12 @@ host.appendChild(row);
       sheet.classList.remove("is-open");
       sheet.setAttribute("aria-hidden", "true");
     }
-    const backdrop = document.getElementById("capacityBackdrop");
-    if (backdrop) {
-      backdrop.classList.remove("is-visible");
+    const energyOpen = document.getElementById("energySheet")?.classList.contains("is-open");
+    if (!energyOpen) {
+      const backdrop = document.getElementById("capacityBackdrop");
+      if (backdrop) {
+        backdrop.classList.remove("is-visible");
+      }
     }
     if (capacitySheetEscapeHandler) {
       document.removeEventListener("keydown", capacitySheetEscapeHandler);
@@ -17999,20 +18259,9 @@ host.appendChild(row);
   }
 
   function applyChecklistControlsState() {
-    const chip = document.getElementById("foundTimeChip");
     const metrics = calculateCapacityMetrics();
     const baseMinutes = metrics?.baseMinutes ?? 0;
     const netMinutes = metrics?.netMinutes ?? baseMinutes;
-    const deltaMinutes = netMinutes - baseMinutes;
-    if (chip) {
-      if (Math.abs(deltaMinutes) >= 1) {
-        chip.style.display = "inline-flex";
-        const prefix = deltaMinutes >= 0 ? "+" : "−";
-        chip.textContent = `Today's shift: ${prefix}${formatDuration(deltaMinutes)}`;
-      } else {
-        chip.style.display = "none";
-      }
-    }
 
     const card = document.getElementById("neuroChecklist");
     if (card) {
@@ -18029,13 +18278,20 @@ host.appendChild(row);
       }
     }
 
-    const viewToggle = document.getElementById("viewToggle");
-    if (viewToggle) {
-      viewToggle.querySelectorAll("button[data-view]").forEach(button => {
-        const isActive = button.dataset.view === checklistViewMode;
-        button.classList.toggle("is-active", isActive);
-        button.setAttribute("aria-pressed", isActive ? "true" : "false");
-      });
+    const focusButton = document.getElementById("focusViewButton");
+    if (focusButton) {
+      const isActive = checklistViewMode !== "timeline";
+      focusButton.classList.toggle("is-active", isActive);
+      focusButton.setAttribute("aria-pressed", isActive ? "true" : "false");
+      focusButton.setAttribute("aria-label", "Focus view");
+    }
+
+    const workflowButton = document.getElementById("visualWorkflowButton");
+    if (workflowButton) {
+      const isActive = checklistViewMode === "timeline";
+      workflowButton.classList.toggle("is-active", isActive);
+      workflowButton.setAttribute("aria-pressed", isActive ? "true" : "false");
+      workflowButton.setAttribute("aria-label", "Visual workflow view");
     }
 
     const capacityButton = document.getElementById("capacityWrench");
@@ -18047,6 +18303,14 @@ host.appendChild(row);
         "aria-label",
         `Availability / capacity — ${labelSummary}`,
       );
+    }
+
+    const energyButton = document.getElementById("energyDial");
+    if (energyButton) {
+      const level = clampScale(getEnergyLevel(), 3);
+      const label = ENERGY_LABELS[level] || level;
+      energyButton.setAttribute("aria-label", `Energy — ${level} (${label})`);
+      energyButton.setAttribute("aria-pressed", "false");
     }
   }
 
@@ -18318,13 +18582,67 @@ host.appendChild(row);
     });
   }
 
+  function buildClinicSnapshotLine(dailyContext, weekSchedule, dayName) {
+    if (!dailyContext) {
+      return "Snapshot unavailable";
+    }
+    const scheduleForDay = dayName && weekSchedule ? weekSchedule[dayName] : null;
+    const selections = dailyContext.dayState?.clinicSelections || {};
+    const blockPresence = dailyContext.dayState?.blockResidentPresence || {};
+    const patientSlots = dailyContext.patientSlots || {};
+    const residents = dailyContext.residents || {};
+    const blocks = ["AM", "PM"];
+    const parts = [];
+    let totalPatients = 0;
+
+    blocks.forEach(blockName => {
+      const blockKey = dayName ? `${dayName}|${blockName}` : blockName;
+      const scheduleBlock = scheduleForDay?.[blockName] || null;
+      const selection = selections[blockKey] || null;
+      const label = mapClinicLabel(selection, scheduleBlock?.label);
+      const slots = Array.isArray(patientSlots?.[blockName]) ? patientSlots[blockName] : [];
+      const schedulePatients = Array.isArray(scheduleBlock?.patients) ? scheduleBlock.patients.length : 0;
+      const patientCount = slots.length || schedulePatients;
+      totalPatients += patientCount;
+      const hasResident = Boolean(
+        Number(residents?.[blockName]) > 0
+        || blockPresence[blockKey] === true
+        || scheduleBlock?.residentRequired === true,
+      );
+      const isAdmin = selection === "Admin Time"
+        || /admin|didactic/i.test(String(label || ""))
+        || patientCount === 0;
+      const details = [];
+      if (patientCount > 0) {
+        details.push(`${patientCount} pt${patientCount === 1 ? "" : "s"}`);
+      } else {
+        details.push("0 pts");
+      }
+      if (hasResident && patientCount > 0) {
+        details.push("Resident");
+      }
+      if (isAdmin) {
+        details.push("Admin");
+      }
+      const blockLabel = label || "Clinic block";
+      parts.push(`${blockName} • ${blockLabel} (${details.join(", ")})`);
+    });
+
+    if (!parts.length) {
+      return "No clinic blocks scheduled";
+    }
+
+    const totalLabel = `Total ${totalPatients} pt${totalPatients === 1 ? "" : "s"}`;
+    return `${parts.join(" | ")} • ${totalLabel}`;
+  }
+
   function renderNeuroChecklist() {
     const card = document.getElementById("neuroChecklist");
     if (!card) return;
     const refs = ensureChecklistLayout(card);
     if (!refs) return;
     const {
-      subtitleEl,
+      snapshotEl,
       workloadEl,
       basketUpdatedEl,
       clinicList,
@@ -18341,15 +18659,17 @@ host.appendChild(row);
     const dailyContext = getDailyContext();
     const weekSchedule = dailyContext.week;
     const { date: todayDate, dayName } = getTodayClinicInfo(weekSchedule, dailyContext.dayState);
-    if (todayDate) {
-      const formatted = todayDate.toLocaleDateString(undefined, {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-      });
-      subtitleEl.textContent = `Today • ${formatted}`;
-    } else {
-      subtitleEl.textContent = "Today’s forecast unavailable";
+    const formattedDate = todayDate
+      ? todayDate.toLocaleDateString(undefined, {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
+    if (snapshotEl) {
+      const snapshotSummary = buildClinicSnapshotLine(dailyContext, weekSchedule, dayName);
+      const prefix = formattedDate ? `${formattedDate} • ${snapshotSummary}` : snapshotSummary;
+      snapshotEl.textContent = `Clinic snapshot — ${prefix}`;
     }
 
     basketUpdatedEl.textContent = formatClinicBasketTimestamp(dailyContext.basket.updatedAt);
@@ -24137,7 +24457,10 @@ closeBtn.addEventListener('click', () => {
     b.id = 'capacityBackdrop';
     b.className = 'checklist-capacity-backdrop';
     document.body.appendChild(b);
-    b.addEventListener('click', closeCapacitySheet);
+    b.addEventListener('click', () => {
+      closeCapacitySheet();
+      closeEnergySheet();
+    });
   }
   return b;
 }
