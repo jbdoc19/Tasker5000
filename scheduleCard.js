@@ -374,7 +374,8 @@ function updateScheduleSummary(mode) {
     return;
   }
   const now = new Date();
-  const day = clampToClinicDay(todayName());
+  const today = todayName();
+  const day = today || clampToClinicDay(today);
   const datePart = now.toLocaleDateString("en-US", {
     month: "numeric",
     day: "numeric",
