@@ -17000,31 +17000,17 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return `Clinic basket • ${datePart} ${timePart}`;
   }
 
-  function getNextClinicDate(weekSchedule) {
-    if (!weekSchedule) {
-      return { date: null, dayName: null };
-    }
+  function getTodayClinicInfo(weekSchedule, dayState) {
     const today = new Date();
-    for (let offset = 1; offset <= 7; offset += 1) {
-      const candidate = new Date(today);
-      candidate.setDate(today.getDate() + offset);
-      const dayName = candidate.toLocaleDateString("en-US", { weekday: "long" });
-      if (weekSchedule[dayName]) {
-        return { date: candidate, dayName };
-      }
-    }
-    return { date: null, dayName: null };
-  }
-
-  function isTaskDueOnDate(task, targetDate) {
-    if (!task || !targetDate || !task.dueDate) {
-      return false;
-    }
-    const dueDate = new Date(`${task.dueDate}T00:00:00`);
-    if (Number.isNaN(dueDate.getTime())) {
-      return false;
-    }
-    return isSameLocalDay(dueDate, targetDate);
+    const schedule = weekSchedule || {};
+    const todayName = today.toLocaleDateString("en-US", { weekday: "long" });
+    const stateDay = typeof dayState?.currentDay === "string" ? dayState.currentDay : null;
+    const preferredDay = stateDay && schedule[stateDay] ? stateDay : null;
+    const fallbackDay = schedule[todayName] ? todayName : null;
+    return {
+      date: today,
+      dayName: preferredDay || fallbackDay || null,
+    };
   }
 
   function formatIsoDateLabel(value) {
@@ -17240,7 +17226,7 @@ host.appendChild(row);
     const subtitleEl = document.createElement("p");
     subtitleEl.className = "neuro-checklist__subtitle";
     subtitleEl.dataset.checklistSubtitle = "";
-    subtitleEl.textContent = "Calibrating tomorrow’s forecast…";
+    subtitleEl.textContent = "Calibrating today’s forecast…";
     headingBlock.appendChild(title);
     headingBlock.appendChild(subtitleEl);
 
@@ -17275,21 +17261,6 @@ host.appendChild(row);
     clinicList.appendChild(clinicEmpty);
     clinicSection.appendChild(clinicTitle);
     clinicSection.appendChild(clinicList);
-
-    const workSection = document.createElement("section");
-    workSection.className = "neuro-checklist__section";
-    const workTitle = document.createElement("h3");
-    workTitle.className = "neuro-checklist__section-title";
-    workTitle.textContent = "Task load radar";
-    const workList = document.createElement("ul");
-    workList.className = "neuro-checklist__list";
-    workList.dataset.checklistWorklist = "";
-    const workEmpty = document.createElement("li");
-    workEmpty.className = "neuro-checklist__empty";
-    workEmpty.textContent = "Loading backlog…";
-    workList.appendChild(workEmpty);
-    workSection.appendChild(workTitle);
-    workSection.appendChild(workList);
 
     const focusSection = document.createElement("section");
     focusSection.className = "neuro-checklist__section";
@@ -17330,7 +17301,6 @@ host.appendChild(row);
     itinerarySection.appendChild(itineraryEmpty);
 
     body.appendChild(clinicSection);
-    body.appendChild(workSection);
     body.appendChild(focusSection);
     body.appendChild(itinerarySection);
 
@@ -17342,7 +17312,6 @@ host.appendChild(row);
       workloadEl,
       basketUpdatedEl,
       clinicList,
-      workList,
       focusList,
       statusBox,
       itineraryList,
@@ -17823,7 +17792,6 @@ host.appendChild(row);
       workloadEl,
       basketUpdatedEl,
       clinicList,
-      workList,
       focusList,
       itineraryList,
       itineraryTimeline,
@@ -17836,16 +17804,16 @@ host.appendChild(row);
 
     const dailyContext = getDailyContext();
     const weekSchedule = dailyContext.week;
-    const { date: clinicDate, dayName } = getNextClinicDate(weekSchedule || {});
-    if (clinicDate) {
-      const formatted = clinicDate.toLocaleDateString(undefined, {
+    const { date: todayDate, dayName } = getTodayClinicInfo(weekSchedule, dailyContext.dayState);
+    if (todayDate) {
+      const formatted = todayDate.toLocaleDateString(undefined, {
         weekday: "long",
         month: "short",
         day: "numeric",
       });
-      subtitleEl.textContent = `Tomorrow • ${formatted}`;
+      subtitleEl.textContent = `Today • ${formatted}`;
     } else {
-      subtitleEl.textContent = "Tomorrow forecast unavailable";
+      subtitleEl.textContent = "Today’s forecast unavailable";
     }
 
     basketUpdatedEl.textContent = formatClinicBasketTimestamp(dailyContext.basket.updatedAt);
@@ -17854,8 +17822,6 @@ host.appendChild(row);
       ? dailyContext.activeTasks
       : dailyContext.tasks.filter(task => !isTaskCompleted(task));
     const quickActive = activeTasks.filter(task => isQuickTask(task));
-    const coreActive = activeTasks.length - quickActive.length;
-
     if (activeTasks.length) {
       workloadEl.textContent = `${activeTasks.length} active • ${quickActive.length} quick • ${dailyContext.tasks.length} total`;
     } else {
@@ -17873,7 +17839,6 @@ host.appendChild(row);
     );
     const triage = dailyContext.triage || clusterTasks(activeTasks, basketByLabel);
     const clusters = Array.isArray(triage?.clusters) ? triage.clusters : [];
-    const quickWins = Array.isArray(triage?.quickWins) ? triage.quickWins : [];
     const sortedClusters = clusters
       .slice()
       .sort((a, b) => (Number.isFinite(b.totalEstMinutes) ? b.totalEstMinutes : 0) - (Number.isFinite(a.totalEstMinutes) ? a.totalEstMinutes : 0));
@@ -17933,60 +17898,6 @@ host.appendChild(row);
       empty.className = "neuro-checklist__empty";
       empty.textContent = "No clinic blocks scheduled.";
       clinicList.appendChild(empty);
-    }
-
-    workList.innerHTML = "";
-    const workEntries = [];
-    workEntries.push({
-      label: "Active backlog",
-      meta: activeTasks.length
-        ? `${activeTasks.length} tasks • ${coreActive} core • ${quickActive.length} quick`
-        : "No active tasks",
-    });
-    if (clinicDate) {
-      const dueTomorrow = activeTasks.filter(task => isTaskDueOnDate(task, clinicDate)).length;
-      if (dueTomorrow > 0) {
-        workEntries.push({
-          label: "Due tomorrow",
-          meta: `${dueTomorrow} task${dueTomorrow === 1 ? "" : "s"} aligned with ${dayName}`,
-        });
-      }
-    }
-    const quickWinNames = quickWins
-      .slice(0, 3)
-      .map(task => task?.name)
-      .filter(name => typeof name === "string" && name.trim().length > 0);
-    if (quickWinNames.length) {
-      workEntries.push({
-        label: "Quick wins queued",
-        meta: quickWinNames.join(", "),
-      });
-    }
-    sortedClusters.slice(0, 3).forEach(cluster => {
-      const parts = [`${cluster.count} item${cluster.count === 1 ? "" : "s"}`];
-      if (Number.isFinite(cluster.totalEstMinutes) && cluster.totalEstMinutes > 0) {
-        parts.push(`~${Math.round(cluster.totalEstMinutes)} min`);
-      }
-      workEntries.push({
-        label: cluster.name,
-        meta: parts.join(" • "),
-      });
-    });
-    if (!sortedClusters.length) {
-      workEntries.push({
-        label: "Clinic basket",
-        meta: "No outstanding items recorded",
-      });
-    }
-    if (!workEntries.length) {
-      const empty = document.createElement("li");
-      empty.className = "neuro-checklist__empty";
-      empty.textContent = "Backlog clear.";
-      workList.appendChild(empty);
-    } else {
-      workEntries.forEach(entry => {
-        workList.appendChild(createChecklistEntry(entry.label, [entry.meta]));
-      });
     }
 
     focusList.innerHTML = "";
