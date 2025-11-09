@@ -420,68 +420,233 @@
       color: var(--hero-teal);
     }
 
-    /* Availability calibration sheet (dropdown/modal) */
-.checklist-capacity-sheet {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: clamp(1rem, 4vw, 1.5rem);
-  width: min(360px, 94vw);
-  background: var(--surface-elevated,#ffffff);        /* stays opaque */
-  color: var(--text-primary);
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  box-shadow: 0 24px 48px rgba(0,0,0,0.55);
-  padding: 1rem;
-  display: none;
-  z-index: 1400;                             /* higher than cards/quick-add */
-  backdrop-filter: blur(6px);                /* legibility on bright backgrounds */
-}
+    /* Availability calibration sheet */
+    .checklist-capacity-sheet {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: clamp(1rem, 4vw, 1.5rem);
+      width: min(420px, 94vw);
+      background: var(--surface-elevated, #0f172a);
+      color: var(--text-primary);
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.55);
+      padding: 1.25rem 1.4rem 1.1rem;
+      display: none;
+      z-index: 1400;
+      backdrop-filter: blur(8px);
+      flex-direction: column;
+      gap: 1.1rem;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
 
-.checklist-capacity-sheet.is-open { display: block; }
+    .checklist-capacity-sheet.is-open {
+      display: flex;
+    }
 
-/* Buttons inside the sheet */
-.checklist-capacity-sheet__group button {
-  width: 100%;
-  background: rgba(27, 33, 41, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 12px;
-  padding: 0.6rem 0.8rem;
-  text-align: left;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+    .checklist-capacity-sheet__header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
 
-.checklist-capacity-sheet__group button.is-active {
-  background: rgba(45, 212, 195, 0.18);
-  border-color: rgba(45, 212, 195, 0.4);
-  color: var(--hero-teal);
-}
+    .checklist-capacity-sheet__title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
 
-/* Full-screen scrim behind the sheet (for mobile legibility) */
-.checklist-capacity-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(8, 12, 18, 0.55);
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease;
-  z-index: 1390;
-}
-.checklist-capacity-backdrop.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
+    .checklist-capacity-sheet__subtitle {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    .checklist-capacity-sheet__summary {
+      display: grid;
+      gap: 0.45rem;
+      background: rgba(45, 212, 195, 0.08);
+      border: 1px solid rgba(45, 212, 195, 0.18);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+    }
+
+    .checklist-capacity-sheet__summary strong {
+      font-size: 0.95rem;
+    }
+
+    .checklist-capacity-sheet__stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.6rem 1rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .checklist-capacity-sheet__stat strong {
+      display: block;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .capacity-adjustments {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .capacity-adjustments__heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .capacity-adjustments__heading h5 {
+      margin: 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--text-secondary);
+    }
+
+    .capacity-adjustments__list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .capacity-adjustments__row {
+      display: grid;
+      grid-template-columns: auto auto auto auto 1fr auto;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+    }
+
+    .capacity-adjustments__row[data-kind="gain"] {
+      border-color: rgba(74, 222, 128, 0.32);
+      background: rgba(22, 101, 52, 0.18);
+    }
+
+    .capacity-adjustments__row[data-kind="loss"] {
+      border-color: rgba(248, 113, 113, 0.28);
+      background: rgba(127, 29, 29, 0.18);
+    }
+
+    .capacity-adjustments__row input[type="time"] {
+      width: 5.2rem;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 8px;
+      padding: 0.35rem 0.4rem;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .capacity-adjustments__row input[type="text"] {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.35);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 8px;
+      padding: 0.35rem 0.55rem;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+    }
+
+    .capacity-adjustments__icon {
+      font-size: 1.1rem;
+    }
+
+    .capacity-adjustments__label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .capacity-adjustments__remove {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0.2rem;
+      cursor: pointer;
+    }
+
+    .capacity-adjustments__remove:hover,
+    .capacity-adjustments__remove:focus-visible {
+      color: var(--hero-teal);
+    }
+
+    .capacity-adjustments__add {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(45, 212, 195, 0.12);
+      border: 1px solid rgba(45, 212, 195, 0.22);
+      border-radius: 999px;
+      color: var(--hero-teal);
+      padding: 0.35rem 0.75rem;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .capacity-adjustments__add[data-kind="loss"] {
+      background: rgba(248, 113, 113, 0.1);
+      border-color: rgba(248, 113, 113, 0.2);
+      color: #fca5a5;
+    }
+
+    .capacity-adjustments__add:hover,
+    .capacity-adjustments__add:focus-visible {
+      box-shadow: 0 0 0 2px rgba(45, 212, 195, 0.28);
+      outline: none;
+    }
+
+    .capacity-adjustments__add[data-kind="loss"]:hover,
+    .capacity-adjustments__add[data-kind="loss"]:focus-visible {
+      box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.25);
+    }
+
+    .capacity-adjustments__empty {
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-style: italic;
+    }
 
     .checklist-capacity-sheet__footer {
       display: flex;
       justify-content: flex-end;
-      margin-top: 0.75rem;
+      gap: 0.5rem;
     }
 
     .checklist-capacity-sheet__footer button {
       font-weight: 600;
       color: var(--hero-teal);
+    }
+
+    /* Backdrop for sheet */
+    .checklist-capacity-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 12, 18, 0.55);
+      backdrop-filter: blur(3px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+      z-index: 1390;
+    }
+
+    .checklist-capacity-backdrop.is-visible {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .neuro-checklist__header {
@@ -17168,44 +17333,207 @@ host.appendChild(row);
 
   const DEFAULT_QUOTAS = { AM: 0.4, PM: 0.8 };
   let checklistViewMode = "list";
-  const capacityState = {};
+  const capacityAdjustmentsState = {};
   let capacitySheetEscapeHandler = null;
+  let capacityAdjustmentSerial = 0;
 
-  const CAPACITY_OVERRIDE_DEFAULT = { mode: "hard", percent: 0 };
+  function getCapacityDayKey() {
+    const dayState = neuroScheduleSnapshot?.dayState;
+    if (typeof dayState?.currentDay === "string" && dayState.currentDay.trim()) {
+      return dayState.currentDay.trim();
+    }
+    const today = new Date();
+    const dayName = today.toLocaleDateString("en-US", { weekday: "short" });
+    const iso = today.toISOString().slice(0, 10);
+    return `${dayName}|${iso}`;
+  }
 
   function getTodayBlockKey(block = "PM") {
     const normalizedBlock = typeof block === "string" && block.trim() ? block.trim() : "PM";
-    const dayState = neuroScheduleSnapshot?.dayState;
-    if (dayState?.currentDay) {
-      return `${dayState.currentDay}|${normalizedBlock}`;
-    }
-    const now = new Date();
-    const dayName = now.toLocaleDateString("en-US", { weekday: "short" });
-    return `${dayName}|${normalizedBlock}`;
+    const dayKey = getCapacityDayKey();
+    if (!dayKey) return null;
+    return `${dayKey}|${normalizedBlock}`;
   }
 
-  function resolveCapacityOverride(block = "PM") {
-    const key = getTodayBlockKey(block);
-    if (!key) return null;
-    const value = capacityState[key];
-    if (!value) return null;
+  function ensureCapacityAdjustmentsEntry(dayKey = getCapacityDayKey()) {
+    if (!dayKey) return null;
+    if (!capacityAdjustmentsState[dayKey]) {
+      capacityAdjustmentsState[dayKey] = { adjustments: [] };
+    }
+    return capacityAdjustmentsState[dayKey];
+  }
+
+  function getCapacityAdjustments(dayKey = getCapacityDayKey()) {
+    const entry = dayKey ? capacityAdjustmentsState[dayKey] : null;
+    if (!entry || !Array.isArray(entry.adjustments)) {
+      return [];
+    }
+    return entry.adjustments;
+  }
+
+  function createCapacityAdjustment(kind) {
+    capacityAdjustmentSerial += 1;
     return {
-      mode: value.mode === "soft" ? "soft" : "hard",
-      percent: Number.isFinite(value.percent) ? value.percent : 0,
+      id: `cap-${capacityAdjustmentSerial}`,
+      kind: kind === "loss" ? "loss" : "gain",
+      start: "",
+      end: "",
+      reason: "",
     };
   }
 
-  function setCapacityOverride(block, override) {
-    const key = getTodayBlockKey(block);
-    if (!key) return;
-    if (!override) {
-      delete capacityState[key];
-      return;
-    }
-    capacityState[key] = {
-      mode: override.mode === "soft" ? "soft" : "hard",
-      percent: Number.isFinite(override.percent) ? override.percent : 0,
+  function normalizeCapacityAdjustment(adjustment) {
+    if (!adjustment || typeof adjustment !== "object") return null;
+    const kind = adjustment.kind === "loss" ? "loss" : "gain";
+    const start = typeof adjustment.start === "string" ? adjustment.start : "";
+    const end = typeof adjustment.end === "string" ? adjustment.end : "";
+    const reason = typeof adjustment.reason === "string" ? adjustment.reason : "";
+    const startMinutes = getMinutesFromTimeString(start);
+    const endMinutes = getMinutesFromTimeString(end);
+    return {
+      id: typeof adjustment.id === "string" ? adjustment.id : null,
+      kind,
+      start,
+      end,
+      reason,
+      startMinutes: Number.isFinite(startMinutes) ? startMinutes : null,
+      endMinutes: Number.isFinite(endMinutes) ? endMinutes : null,
     };
+  }
+
+  function getBlockFromMinutes(minutes) {
+    if (!Number.isFinite(minutes)) return "PM";
+    return minutes < 12 * 60 ? "AM" : "PM";
+  }
+
+  function sumWindowMinutes(windows) {
+    return (Array.isArray(windows) ? windows : []).reduce((total, window) => {
+      const start = getMinutesFromTimeString(window?.start);
+      const end = getMinutesFromTimeString(window?.end);
+      if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+        return total;
+      }
+      return total + (end - start);
+    }, 0);
+  }
+
+  function subtractIntervalFromWindows(windows, startMinutes, endMinutes, trackRemoved = true) {
+    if (!Array.isArray(windows)) {
+      return { updatedWindows: [], removedMinutes: 0 };
+    }
+    const updated = [];
+    let removed = 0;
+    windows.forEach(window => {
+      const winStart = getMinutesFromTimeString(window?.start);
+      const winEnd = getMinutesFromTimeString(window?.end);
+      if (!Number.isFinite(winStart) || !Number.isFinite(winEnd) || winEnd <= winStart) {
+        updated.push({ ...window });
+        return;
+      }
+      if (endMinutes <= winStart || startMinutes >= winEnd) {
+        updated.push({ ...window });
+        return;
+      }
+      const overlapStart = Math.max(winStart, startMinutes);
+      const overlapEnd = Math.min(winEnd, endMinutes);
+      if (trackRemoved) {
+        removed += Math.max(0, overlapEnd - overlapStart);
+      }
+      if (overlapStart > winStart) {
+        updated.push({ ...window, end: minutesToTimeString(overlapStart) });
+      }
+      if (overlapEnd < winEnd) {
+        updated.push({ ...window, start: minutesToTimeString(overlapEnd) });
+      }
+    });
+    return { updatedWindows: updated, removedMinutes: trackRemoved ? removed : 0 };
+  }
+
+  function applyCapacityAdjustmentsToWindows(windows, adjustmentsState, dayKey = getCapacityDayKey()) {
+    const baseWindows = Array.isArray(windows) ? windows.map(window => ({ ...window })) : [];
+    const entry = dayKey ? adjustmentsState?.[dayKey] : null;
+    const adjustments = Array.isArray(entry?.adjustments) ? entry.adjustments.map(normalizeCapacityAdjustment) : [];
+    const losses = adjustments.filter(adj => adj && adj.kind === "loss" && adj.startMinutes !== null && adj.endMinutes !== null && adj.endMinutes > adj.startMinutes);
+    const gains = adjustments.filter(adj => adj && adj.kind === "gain" && adj.startMinutes !== null && adj.endMinutes !== null && adj.endMinutes > adj.startMinutes);
+
+    let workingWindows = baseWindows;
+    let lossMinutes = 0;
+    losses.forEach(loss => {
+      const { updatedWindows, removedMinutes } = subtractIntervalFromWindows(
+        workingWindows,
+        loss.startMinutes,
+        loss.endMinutes,
+        true,
+      );
+      workingWindows = updatedWindows;
+      lossMinutes += removedMinutes;
+    });
+
+    let gainMinutes = 0;
+    gains.forEach(gain => {
+      const { updatedWindows } = subtractIntervalFromWindows(
+        workingWindows,
+        gain.startMinutes,
+        gain.endMinutes,
+        false,
+      );
+      workingWindows = updatedWindows;
+      const block = getBlockFromMinutes(gain.startMinutes);
+      const nextWindow = {
+        start: minutesToTimeString(gain.startMinutes),
+        end: minutesToTimeString(gain.endMinutes),
+        type: "Focus",
+        block,
+        adjustment: {
+          kind: "gain",
+          reason: gain.reason,
+        },
+      };
+      workingWindows.push(nextWindow);
+      gainMinutes += gain.endMinutes - gain.startMinutes;
+    });
+
+    const normalizedWindows = workingWindows
+      .map(window => {
+        const start = getMinutesFromTimeString(window?.start);
+        const end = getMinutesFromTimeString(window?.end);
+        if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+          return null;
+        }
+        return {
+          ...window,
+          start: minutesToTimeString(start),
+          end: minutesToTimeString(end),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        const aStart = getMinutesFromTimeString(a.start) ?? 0;
+        const bStart = getMinutesFromTimeString(b.start) ?? 0;
+        if (aStart === bStart) {
+          const aEnd = getMinutesFromTimeString(a.end) ?? aStart;
+          const bEnd = getMinutesFromTimeString(b.end) ?? bStart;
+          return aEnd - bEnd;
+        }
+        return aStart - bStart;
+      });
+
+    return { windows: normalizedWindows, lossMinutes, gainMinutes };
+  }
+
+  function formatDuration(minutes) {
+    if (!Number.isFinite(minutes)) return "0m";
+    const abs = Math.abs(Math.round(minutes));
+    const hours = Math.floor(abs / 60);
+    const mins = abs % 60;
+    const parts = [];
+    if (hours > 0) {
+      parts.push(`${hours}h`);
+    }
+    if (mins > 0 || parts.length === 0) {
+      parts.push(`${mins}m`);
+    }
+    return parts.join(" ");
   }
 
   function ensureChecklistLayout(card) {
@@ -17373,10 +17701,131 @@ host.appendChild(row);
     }
   }
 
+  function renderCapacityRows(sheet) {
+    if (!sheet) return;
+    const dayKey = getCapacityDayKey();
+    const entry = ensureCapacityAdjustmentsEntry(dayKey);
+    const adjustments = Array.isArray(entry?.adjustments) ? entry.adjustments : [];
+
+    const renderList = (kind, host) => {
+      if (!host) return;
+      host.innerHTML = "";
+      const filtered = adjustments.filter(adjustment => adjustment.kind === kind);
+      if (!filtered.length) {
+        const empty = document.createElement("p");
+        empty.className = "capacity-adjustments__empty";
+        empty.textContent = kind === "loss"
+          ? "No time losses logged yet."
+          : "No extra availability captured yet.";
+        host.appendChild(empty);
+        return;
+      }
+      filtered.forEach(adjustment => {
+        if (!adjustment.id) {
+          adjustment.id = `cap-${++capacityAdjustmentSerial}`;
+        }
+        const row = document.createElement("div");
+        row.className = "capacity-adjustments__row";
+        row.dataset.kind = kind;
+        row.dataset.adjustmentId = adjustment.id;
+
+        const icon = document.createElement("span");
+        icon.className = "capacity-adjustments__icon";
+        icon.textContent = kind === "loss" ? "🔻" : "🔺️";
+
+        const startInput = document.createElement("input");
+        startInput.type = "time";
+        startInput.dataset.field = "start";
+        startInput.value = adjustment.start || "";
+
+        const label = document.createElement("span");
+        label.className = "capacity-adjustments__label";
+        label.textContent = "to";
+
+        const endInput = document.createElement("input");
+        endInput.type = "time";
+        endInput.dataset.field = "end";
+        endInput.value = adjustment.end || "";
+
+        const reasonInput = document.createElement("input");
+        reasonInput.type = "text";
+        reasonInput.dataset.field = "reason";
+        reasonInput.placeholder = "Reason (optional)";
+        reasonInput.value = adjustment.reason || "";
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "capacity-adjustments__remove";
+        remove.dataset.action = "remove";
+        remove.setAttribute("aria-label", "Remove time adjustment");
+        remove.textContent = "✕";
+
+        row.append(icon, startInput, label, endInput, reasonInput, remove);
+        host.appendChild(row);
+      });
+    };
+
+    renderList("loss", sheet.querySelector('[data-adjustment-list="loss"]'));
+    renderList("gain", sheet.querySelector('[data-adjustment-list="gain"]'));
+  }
+
+  function renderCapacitySummary(sheet) {
+    if (!sheet) return;
+    const summary = sheet.querySelector("[data-capacity-summary]");
+    if (!summary) return;
+    const headlineEl = summary.querySelector("[data-capacity-summary-headline]");
+    const baselineEl = summary.querySelector("[data-capacity-summary-baseline]");
+    const lossEl = summary.querySelector("[data-capacity-summary-loss]");
+    const gainEl = summary.querySelector("[data-capacity-summary-gain]");
+    const netEl = summary.querySelector("[data-capacity-summary-net]");
+
+    const metrics = calculateCapacityMetrics();
+    if (!metrics) {
+      if (headlineEl) headlineEl.textContent = "Availability data unavailable.";
+      if (baselineEl) baselineEl.textContent = "—";
+      if (lossEl) lossEl.textContent = "—";
+      if (gainEl) gainEl.textContent = "—";
+      if (netEl) netEl.textContent = "—";
+      return;
+    }
+
+    const { baseMinutes, lossMinutes, gainMinutes, netMinutes, percentLabel } = metrics;
+
+    if (headlineEl) {
+      headlineEl.textContent = `Today's capacity — ${formatDuration(netMinutes)}`;
+    }
+    if (baselineEl) {
+      baselineEl.textContent = `${formatDuration(baseMinutes)} scheduled`;
+    }
+    if (lossEl) {
+      lossEl.textContent = lossMinutes > 0
+        ? `−${formatDuration(lossMinutes)}`
+        : "0m";
+    }
+    if (gainEl) {
+      gainEl.textContent = gainMinutes > 0
+        ? `+${formatDuration(gainMinutes)}`
+        : "0m";
+    }
+    if (netEl) {
+      netEl.textContent = percentLabel
+        ? `${formatDuration(netMinutes)} (${percentLabel})`
+        : formatDuration(netMinutes);
+    }
+  }
+
+  function renderCapacitySheet(sheet) {
+    renderCapacityRows(sheet);
+    renderCapacitySummary(sheet);
+  }
+
   function ensureCapacitySheet(card) {
     if (!card) return null;
     let sheet = document.getElementById("capacitySheet");
-    if (sheet) return sheet;
+    if (sheet) {
+      renderCapacitySheet(sheet);
+      return sheet;
+    }
 
     sheet = document.createElement("div");
     sheet.id = "capacitySheet";
@@ -17385,48 +17834,100 @@ host.appendChild(row);
     sheet.setAttribute("aria-modal", "true");
     sheet.setAttribute("aria-hidden", "true");
     sheet.innerHTML = `
-      <h4 class="checklist-capacity-sheet__title">Availability calibration</h4>
-      <p>Tune tomorrow's workload exposure.</p>
-      <div class="checklist-capacity-sheet__group">
-        <button type="button" data-capacity-mode="hard">Hard stop — no tasks</button>
+      <div class="checklist-capacity-sheet__header">
+        <h4 class="checklist-capacity-sheet__title">Availability calibration</h4>
+        <p class="checklist-capacity-sheet__subtitle">Add or subtract actual time gains and losses for today's workflow.</p>
       </div>
-      <div class="checklist-capacity-sheet__group">
-        <strong>Soft capacity</strong>
-        <div class="checklist-capacity-sheet__soft-options">
-          <button type="button" data-capacity-mode="soft" data-soft-level="25">25%</button>
-          <button type="button" data-capacity-mode="soft" data-soft-level="50">50%</button>
-          <button type="button" data-capacity-mode="soft" data-soft-level="75">75%</button>
+      <div class="checklist-capacity-sheet__summary" data-capacity-summary>
+        <strong data-capacity-summary-headline>Today's capacity — loading…</strong>
+        <div class="checklist-capacity-sheet__stats">
+          <div class="checklist-capacity-sheet__stat">
+            <strong>Baseline</strong>
+            <span data-capacity-summary-baseline>—</span>
+          </div>
+          <div class="checklist-capacity-sheet__stat">
+            <strong>Lost</strong>
+            <span data-capacity-summary-loss>—</span>
+          </div>
+          <div class="checklist-capacity-sheet__stat">
+            <strong>Gained</strong>
+            <span data-capacity-summary-gain>—</span>
+          </div>
+          <div class="checklist-capacity-sheet__stat">
+            <strong>Net availability</strong>
+            <span data-capacity-summary-net>—</span>
+          </div>
         </div>
       </div>
+      <section class="capacity-adjustments" data-capacity-section="loss">
+        <div class="capacity-adjustments__heading">
+          <h5>Time lost</h5>
+          <button type="button" class="capacity-adjustments__add" data-action="add" data-kind="loss">🔻 Add loss time</button>
+        </div>
+        <div class="capacity-adjustments__list" data-adjustment-list="loss"></div>
+      </section>
+      <section class="capacity-adjustments" data-capacity-section="gain">
+        <div class="capacity-adjustments__heading">
+          <h5>Time gained</h5>
+          <button type="button" class="capacity-adjustments__add" data-action="add" data-kind="gain">🔺️ Add gained time</button>
+        </div>
+        <div class="capacity-adjustments__list" data-adjustment-list="gain"></div>
+      </section>
       <div class="checklist-capacity-sheet__footer">
         <button type="button" data-action="close">Done</button>
       </div>`;
     card.appendChild(sheet);
 
+    renderCapacitySheet(sheet);
+
     sheet.addEventListener("click", event => {
-      const target = event.target instanceof HTMLElement
-        ? event.target.closest("[data-capacity-mode], [data-action]")
-        : null;
-      if (!target) {
-        return;
-      }
-      if (target.dataset.action === "close") {
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (!target) return;
+      const action = target.dataset.action;
+      if (action === "close") {
         closeCapacitySheet();
         return;
       }
-      const mode = target.dataset.capacityMode;
-      if (!mode) return;
-      if (mode === "hard") {
-        setCapacityOverride("PM", CAPACITY_OVERRIDE_DEFAULT);
-      } else if (mode === "soft") {
-        const softLevel = Number.parseInt(target.dataset.softLevel || "", 10);
-        if (Number.isFinite(softLevel)) {
-          setCapacityOverride("PM", { mode: "soft", percent: softLevel });
-        }
+      if (action === "add") {
+        const kind = target.dataset.kind === "loss" ? "loss" : "gain";
+        const entry = ensureCapacityAdjustmentsEntry();
+        if (!entry) return;
+        entry.adjustments.push(createCapacityAdjustment(kind));
+        renderCapacityRows(sheet);
+        renderCapacitySummary(sheet);
+        applyChecklistControlsState();
+        renderNeuroChecklist();
+        return;
       }
+      if (action === "remove") {
+        const row = target.closest("[data-adjustment-id]");
+        const id = row?.getAttribute("data-adjustment-id");
+        if (!id) return;
+        const entry = ensureCapacityAdjustmentsEntry();
+        if (!entry) return;
+        entry.adjustments = entry.adjustments.filter(item => item.id !== id);
+        renderCapacitySheet(sheet);
+        applyChecklistControlsState();
+        renderNeuroChecklist();
+      }
+    });
+
+    sheet.addEventListener("input", event => {
+      const target = event.target instanceof HTMLInputElement ? event.target : null;
+      if (!target) return;
+      const row = target.closest("[data-adjustment-id]");
+      const id = row?.getAttribute("data-adjustment-id");
+      if (!id) return;
+      const field = target.dataset.field;
+      if (!field) return;
+      const entry = ensureCapacityAdjustmentsEntry();
+      if (!entry) return;
+      const adjustment = entry.adjustments.find(item => item.id === id);
+      if (!adjustment) return;
+      adjustment[field] = target.value || "";
+      renderCapacitySummary(sheet);
       applyChecklistControlsState();
-      closeCapacitySheet();
-      updateUI();
+      renderNeuroChecklist();
     });
 
     return sheet;
@@ -17439,7 +17940,12 @@ host.appendChild(row);
     if (!sheet) return;
     sheet.classList.add("is-open");
     sheet.setAttribute("aria-hidden", "false");
+    renderCapacitySheet(sheet);
     applyChecklistControlsState();
+    const backdrop = typeof getCapacityBackdrop === "function" ? getCapacityBackdrop() : null;
+    if (backdrop) {
+      backdrop.classList.add("is-visible");
+    }
     const focusTarget = sheet.querySelector("[data-action='close']");
     if (focusTarget instanceof HTMLElement) {
       focusTarget.focus();
@@ -17448,6 +17954,28 @@ host.appendChild(row);
       capacitySheetEscapeHandler = event => {
         if (event.key === "Escape") {
           closeCapacitySheet();
+          return;
+        }
+        if (event.key === "Tab") {
+          const focusables = sheet.querySelectorAll(
+            "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+          );
+          if (!focusables.length) {
+            return;
+          }
+          const list = Array.from(focusables).filter(element => !element.hasAttribute("disabled"));
+          if (!list.length) return;
+          const first = list[0];
+          const last = list[list.length - 1];
+          if (event.shiftKey) {
+            if (document.activeElement === first || !sheet.contains(document.activeElement)) {
+              last.focus();
+              event.preventDefault();
+            }
+          } else if (document.activeElement === last) {
+            first.focus();
+            event.preventDefault();
+          }
         }
       };
       document.addEventListener("keydown", capacitySheetEscapeHandler);
@@ -17456,9 +17984,14 @@ host.appendChild(row);
 
   function closeCapacitySheet() {
     const sheet = document.getElementById("capacitySheet");
-    if (!sheet) return;
-    sheet.classList.remove("is-open");
-    sheet.setAttribute("aria-hidden", "true");
+    if (sheet) {
+      sheet.classList.remove("is-open");
+      sheet.setAttribute("aria-hidden", "true");
+    }
+    const backdrop = document.getElementById("capacityBackdrop");
+    if (backdrop) {
+      backdrop.classList.remove("is-visible");
+    }
     if (capacitySheetEscapeHandler) {
       document.removeEventListener("keydown", capacitySheetEscapeHandler);
       capacitySheetEscapeHandler = null;
@@ -17466,12 +17999,19 @@ host.appendChild(row);
   }
 
   function applyChecklistControlsState() {
-    const override = resolveCapacityOverride("PM") || CAPACITY_OVERRIDE_DEFAULT;
-    const isSoft = override.mode === "soft";
-    const softPercent = Number.isFinite(override.percent) ? override.percent : 0;
     const chip = document.getElementById("foundTimeChip");
+    const metrics = calculateCapacityMetrics();
+    const baseMinutes = metrics?.baseMinutes ?? 0;
+    const netMinutes = metrics?.netMinutes ?? baseMinutes;
+    const deltaMinutes = netMinutes - baseMinutes;
     if (chip) {
-      chip.style.display = isSoft ? "inline-flex" : "none";
+      if (Math.abs(deltaMinutes) >= 1) {
+        chip.style.display = "inline-flex";
+        const prefix = deltaMinutes >= 0 ? "+" : "−";
+        chip.textContent = `Today's shift: ${prefix}${formatDuration(deltaMinutes)}`;
+      } else {
+        chip.style.display = "none";
+      }
     }
 
     const card = document.getElementById("neuroChecklist");
@@ -17500,31 +18040,13 @@ host.appendChild(row);
 
     const capacityButton = document.getElementById("capacityWrench");
     if (capacityButton) {
-      const modeLabel = isSoft ? `Soft ${softPercent}%` : "Hard stop";
+      const labelSummary = metrics?.percentLabel
+        ? `${formatDuration(netMinutes)} (${metrics.percentLabel})`
+        : formatDuration(netMinutes);
       capacityButton.setAttribute(
         "aria-label",
-        `Availability / capacity — ${modeLabel}`,
+        `Availability / capacity — ${labelSummary}`,
       );
-    }
-
-    const sheet = document.getElementById("capacitySheet");
-    if (sheet) {
-      sheet.querySelectorAll("[data-capacity-mode]").forEach(button => {
-        const mode = button.getAttribute("data-capacity-mode");
-        if (!mode) return;
-        let isActive = false;
-        if (mode === "hard") {
-          isActive = !isSoft;
-        } else if (mode === "soft") {
-          const softLevel = Number.parseInt(button.getAttribute("data-soft-level") || "", 10);
-          isActive =
-            isSoft &&
-            Number.isFinite(softLevel) &&
-            softLevel === softPercent;
-        }
-        button.classList.toggle("is-active", isActive);
-        button.setAttribute("aria-pressed", isActive ? "true" : "false");
-      });
     }
   }
 
@@ -17581,28 +18103,6 @@ host.appendChild(row);
     });
 
     return windows;
-  }
-
-  function applyCapacity(windows, overrides) {
-    if (!Array.isArray(windows)) {
-      return [];
-    }
-    return windows.map(window => {
-      const block = window?.block || "";
-      const key = block ? getTodayBlockKey(block) : null;
-      const rawOverride = key ? overrides?.[key] : null;
-      if (!rawOverride) {
-        return { ...window };
-      }
-      const normalized = {
-        mode: rawOverride.mode === "soft" ? "soft" : "hard",
-        percent: Number.isFinite(rawOverride.percent) ? rawOverride.percent : 0,
-      };
-      if (normalized.mode === "hard") {
-        return { ...window, type: "Blackout", override: normalized };
-      }
-      return { ...window, override: normalized };
-    });
   }
 
   const USER_END_TIME_STORAGE_KEY = "userDefinedEndTime";
@@ -17681,13 +18181,7 @@ host.appendChild(row);
     return result;
   }
 
-  function computeAvailabilityWindows({
-    clinicType,
-    residents,
-    patientSlots,
-    userEndTime,
-    capacityState: overrides,
-  }) {
+  function buildBaseAvailabilityWindows({ clinicType, residents, patientSlots, userEndTime }) {
     const make = (start, end, type, block) => ({ start, end, type, block });
     const windows = [];
     const normalizedType = typeof clinicType === "string" ? clinicType.toLowerCase() : null;
@@ -17718,7 +18212,49 @@ host.appendChild(row);
       windows.push(make("13:00", endTime, "Admin", "PM"));
     }
 
-    return applyCapacity(windows, overrides || {});
+    return windows;
+  }
+
+  function computeAvailabilityWindows({
+    clinicType,
+    residents,
+    patientSlots,
+    userEndTime,
+    capacityAdjustments,
+  }) {
+    const baseWindows = buildBaseAvailabilityWindows({ clinicType, residents, patientSlots, userEndTime });
+    const { windows } = applyCapacityAdjustmentsToWindows(
+      baseWindows,
+      capacityAdjustments || capacityAdjustmentsState,
+      getCapacityDayKey(),
+    );
+    return windows;
+  }
+
+  function calculateCapacityMetrics() {
+    const dayState = neuroScheduleSnapshot?.dayState || {};
+    const clinicType = dayState?.clinicSelections?.todayType || dayState?.clinicType || null;
+    const residents = normalizeBlockPresenceMap(dayState?.blockResidentPresence);
+    const patientSlots = normalizePatientSlotMap(dayState?.patientSlots);
+    const userEndTime = getUserDefinedEndTime() || "17:00";
+    const baseWindows = buildBaseAvailabilityWindows({ clinicType, residents, patientSlots, userEndTime });
+    const { windows: adjustedWindows, lossMinutes, gainMinutes } = applyCapacityAdjustmentsToWindows(
+      baseWindows,
+      capacityAdjustmentsState,
+      getCapacityDayKey(),
+    );
+    const baseMinutes = sumWindowMinutes(baseWindows);
+    const netMinutes = sumWindowMinutes(adjustedWindows);
+    const percent = baseMinutes > 0 ? Math.round((netMinutes / baseMinutes) * 100) : null;
+    return {
+      baseMinutes,
+      lossMinutes,
+      gainMinutes,
+      netMinutes,
+      percentLabel: Number.isFinite(percent) ? `${percent}%` : null,
+      baseWindows,
+      adjustedWindows,
+    };
   }
 
   function getDailyContext() {
@@ -17746,7 +18282,7 @@ host.appendChild(row);
       residents,
       patientSlots,
       userEndTime,
-      capacityState,
+      capacityAdjustments: capacityAdjustmentsState,
     });
 
     const context = {
@@ -23606,53 +24142,6 @@ closeBtn.addEventListener('click', () => {
   return b;
 }
 
-function openCapacitySheet() {
-  const card = document.getElementById('neuroChecklist');
-  if (!card) return;
-  const sheet = ensureCapacitySheet(card);
-  if (!sheet) return;
-
-  sheet.classList.add('is-open');
-  sheet.setAttribute('aria-hidden', 'false');
-
-  const backdrop = getCapacityBackdrop();
-  backdrop.classList.add('is-visible');
-
-  applyChecklistControlsState();
-
-  const focusTarget = sheet.querySelector("[data-action='close']") || sheet.querySelector('button');
-  if (focusTarget instanceof HTMLElement) focusTarget.focus();
-
-  if (!capacitySheetEscapeHandler) {
-    capacitySheetEscapeHandler = (event) => {
-      if (event.key === 'Escape') closeCapacitySheet();
-      // basic focus trap
-      if (event.key === 'Tab') {
-        const focusables = sheet.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])');
-        if (!focusables.length) return;
-        const list = Array.from(focusables);
-        const first = list[0], last = list[list.length - 1];
-        if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
-        else if (!event.shiftKey && document.activeElement === last) { first.focus(); event.preventDefault(); }
-      }
-    };
-    document.addEventListener('keydown', capacitySheetEscapeHandler);
-  }
-}
-
-function closeCapacitySheet() {
-  const sheet = document.getElementById('capacitySheet');
-  if (sheet) {
-    sheet.classList.remove('is-open');
-    sheet.setAttribute('aria-hidden', 'true');
-  }
-  const backdrop = document.getElementById('capacityBackdrop');
-  if (backdrop) backdrop.classList.remove('is-visible');
-
-  if (capacitySheetEscapeHandler) {
-    document.removeEventListener('keydown', capacitySheetEscapeHandler);
-    capacitySheetEscapeHandler = null;
-  }
   let focusTimer = null;
 let focusSeconds = 0;
 let focusRunning = false;
