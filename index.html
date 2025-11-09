@@ -10011,6 +10011,207 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     </div>
   </section>
 
+  <section class="card schedule-card" id="weeklyScheduleCard" aria-label="Weekly clinic schedule">
+    <div class="schedule-card__header">
+      <h2 class="schedule-card__title">Care I will Provide Today</h2>
+    </div>
+    <div class="schedule-card__content">
+      <div class="schedule-card__column schedule-card__column--schedule">
+        <header class="schedule-card__column-head">
+          <h3 class="schedule-card__column-title">Patient schedule</h3>
+          <span class="schedule-card__column-meta" data-schedule-summary>—</span>
+        </header>
+        <div class="schedule-card__grid-wrapper">
+          <div
+            class="weekly-grid"
+            id="weeklyScheduleGrid"
+            data-weekly-grid
+            role="grid"
+            aria-label="Clinic schedule for selected day"
+          ></div>
+        </div>
+      </div>
+      <aside class="schedule-card__column schedule-card__column--basket">
+        <div class="clinic-basket" data-clinic-basket>
+          <header class="clinic-basket__header">
+            <h3 class="clinic-basket__title">Clinic Basket</h3>
+            <time class="clinic-basket__updated" data-clinic-basket-updated datetime="">last updated —</time>
+          </header>
+          <form class="clinic-basket__list" data-clinic-basket-form>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Patient Calls</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="patientCalls"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Results Follow up</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="resultsFollowUp"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Results</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="results"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Chart Completion</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="chartCompletion"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Patient Advice</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="patientAdvice"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Pending Orders</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="pendingOrders"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Hospital Admits</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="hospitalAdmits"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">CC'd charts</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="ccdCharts"
+                />
+              </span>
+            </label>
+            <label class="clinic-basket__row">
+              <span class="clinic-basket__label">Staff Messages</span>
+              <span class="clinic-basket__value">
+                <input
+                  class="clinic-basket__input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  value="0"
+                  data-basket-input="staffMessages"
+                />
+              </span>
+            </label>
+          </form>
+          <p class="clinic-basket__hint">Numbers save automatically when updated.</p>
+        </div>
+      </aside>
+    </div>
+    <div
+      class="day-overlay"
+      data-day-overlay
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      hidden
+    >
+      <div class="day-overlay__dialog" role="document">
+        <button
+          type="button"
+          class="day-overlay__close"
+          data-day-overlay-close
+          aria-label="Close day overlay"
+        >
+          &times;
+        </button>
+        <header class="day-overlay__header">
+          <h3 class="day-overlay__title" data-day-overlay-title></h3>
+          <p class="day-overlay__subtitle" data-day-overlay-subtitle></p>
+        </header>
+        <div class="day-overlay__slots" data-day-overlay-slots></div>
+        <div class="day-overlay__actions">
+          <button type="button" class="day-overlay__add-patient" data-day-overlay-add-patient>
+            + Add patient
+          </button>
+          <button type="button" class="day-overlay__confirm" data-day-overlay-confirm>
+            Confirm Patients
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div id="resourcesBackdrop" class="drawer-backdrop" hidden></div>
   <aside
     id="resourcesDrawer"
