@@ -367,9 +367,33 @@ function initializeClinicBasket() {
   emitScheduleStateUpdate("clinic-basket:init");
 }
 
+function ensureScheduleSummaryParts() {
+  if (!scheduleSummaryEl) {
+    return null;
+  }
+
+  let icon = scheduleSummaryEl.querySelector(".schedule-summary__icon");
+  let text = scheduleSummaryEl.querySelector(".schedule-summary__text");
+
+  if (!icon || !text) {
+    scheduleSummaryEl.innerHTML = "";
+    icon = document.createElement("span");
+    icon.className = "schedule-summary__icon";
+    icon.setAttribute("aria-hidden", "true");
+    scheduleSummaryEl.appendChild(icon);
+
+    text = document.createElement("span");
+    text.className = "schedule-summary__text";
+    scheduleSummaryEl.appendChild(text);
+  }
+
+  return { icon, text };
+}
+
 function updateScheduleSummary(mode) {
   if (!scheduleSummaryEl) return;
   if (mode === "week") {
+    scheduleSummaryEl.classList.remove("schedule-summary--with-icon");
     scheduleSummaryEl.textContent = "Week overview";
     return;
   }
@@ -381,7 +405,13 @@ function updateScheduleSummary(mode) {
     day: "numeric",
     year: "numeric"
   });
-  scheduleSummaryEl.textContent = `${day} — ${datePart}`;
+  const parts = ensureScheduleSummaryParts();
+  if (!parts) {
+    return;
+  }
+  scheduleSummaryEl.classList.add("schedule-summary--with-icon");
+  parts.icon.textContent = "📅";
+  parts.text.textContent = `${day} — ${datePart}`;
 }
 
 export function setScheduleMode(mode = "today") {
