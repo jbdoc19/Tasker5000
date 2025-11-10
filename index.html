@@ -16227,15 +16227,41 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     try {
       const saved = localStorage.getItem("tasks");
       if (!saved) return null;
-      const parsed = JSON.parse(saved);
-      if (!Array.isArray(parsed)) return null;
-      const fallbackActive = parsed
+
+      let storedTasks = [];
+      const parser = window.TaskerStorage?.parseStoredTasks;
+
+      if (typeof parser === "function") {
+        const snapshot = parser(saved);
+        if (snapshot?.error) {
+          console.error("Unable to parse saved tasks for Meltdown Shield.", snapshot.error);
+          return null;
+        }
+        storedTasks = Array.isArray(snapshot?.tasks) ? snapshot.tasks : [];
+      } else {
+        const parsed = JSON.parse(saved);
+        const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
+        storedTasks = Array.isArray(parsed)
+          ? parsed
+          : (isPlainObject && Array.isArray(parsed.allTasks)
+            ? parsed.allTasks
+            : (isPlainObject && Array.isArray(parsed.tasks)
+              ? parsed.tasks
+              : []));
+      }
+
+      if (!storedTasks.length) {
+        return null;
+      }
+
+      const fallbackActive = storedTasks
         .filter(task => task && !isTaskCompleted(task))
         .map(task => ({
           ...task,
           priority: resolvePriorityValue(task?.priority)
         }))
         .sort((a, b) => b.priority - a.priority);
+
       return fallbackActive.length > 0 ? (fallbackActive[0].name || null) : null;
     } catch (error) {
       console.error("Unable to parse saved tasks for Meltdown Shield.", error);
@@ -16605,6 +16631,10 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   }
 
   function buildTaskStoragePayload(taskList) {
+    const api = window.TaskerStorage;
+    if (api && typeof api.buildTaskStoragePayload === "function") {
+      return api.buildTaskStoragePayload(taskList);
+    }
     const allTasks = Array.isArray(taskList)
       ? taskList.map(task => ({ ...task }))
       : [];
@@ -16619,8 +16649,31 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     if (isHydratingTasks) {
       return;
     }
+
+    let payload = null;
+    const api = window.TaskerStorage;
+
+    if (api && typeof api.saveTasksToStorage === "function") {
+      try {
+        const result = api.saveTasksToStorage(tasks);
+        if (!result?.success && result?.error) {
+          console.warn("Unable to persist tasks", result.error);
+        }
+        if (result?.payload && typeof result.payload === "object") {
+          payload = result.payload;
+        } else if (result?.success && typeof api.buildTaskStoragePayload === "function") {
+          payload = api.buildTaskStoragePayload(tasks);
+        }
+      } catch (error) {
+        console.warn("Unable to persist tasks via storage helpers", error);
+      }
+    }
+
+    if (!payload) {
+      payload = buildTaskStoragePayload(tasks);
+    }
+
     try {
-      const payload = buildTaskStoragePayload(tasks);
       localStorage.setItem("tasks", JSON.stringify(payload));
     } catch (error) {
       console.warn("Unable to persist tasks", error);
@@ -16687,70 +16740,103 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   }
 
   function hydrateTasksFromStorage() {
-    const saved = (() => {
-      try {
-        return localStorage.getItem("tasks");
-      } catch (error) {
-        console.warn("Unable to read saved tasks from localStorage.", error);
-        return null;
+    try {
+      const api = window.TaskerStorage;
+      if (api && typeof api.loadStoredTasks === "function") {
+        let snapshot = null;
+        try {
+          snapshot = api.loadStoredTasks();
+        } catch (error) {
+          console.error("Unable to restore saved tasks from localStorage.", error);
+        }
+
+        if (snapshot) {
+          if (snapshot.error) {
+            console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
+            tasks = [];
+            return;
+          }
+          if (snapshot.storageAvailable === false) {
+            tasks = [];
+            return;
+          }
+
+          const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
+          const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
+          tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+
+          if (snapshot.discarded) {
+            console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+          }
+          if (snapshot.quickDiscarded) {
+            console.warn(`Skipped ${snapshot.quickDiscarded} invalid quick task ${snapshot.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+          }
+          return;
+        }
       }
-    })();
 
-    if (!saved) {
-      tasks = [];
-      isHydratingTasks = false;
-      return;
-    }
+      const saved = (() => {
+        try {
+          return localStorage.getItem("tasks");
+        } catch (error) {
+          console.warn("Unable to read saved tasks from localStorage.", error);
+          return null;
+        }
+      })();
 
-    const parser = window.TaskerStorage?.parseStoredTasks;
-    let parseResult = null;
-
-    if (typeof parser === "function") {
-      parseResult = parser(saved);
-    } else {
-      try {
-        const parsed = JSON.parse(saved);
-        const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
-        const taskEntries = Array.isArray(parsed)
-          ? parsed
-          : (isPlainObject && Array.isArray(parsed.allTasks)
-            ? parsed.allTasks
-            : (isPlainObject && Array.isArray(parsed.tasks)
-              ? parsed.tasks
-              : []));
-        const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
-          ? parsed.quickTasks
-          : [];
-        parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
-      } catch (error) {
-        console.error("Unable to parse saved tasks.", error);
+      if (!saved) {
         tasks = [];
-        isHydratingTasks = false;
         return;
       }
-    }
 
-    if (!parseResult || parseResult.error) {
-      if (parseResult?.error) {
-        console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+      const parser = window.TaskerStorage?.parseStoredTasks;
+      let parseResult = null;
+
+      if (typeof parser === "function") {
+        parseResult = parser(saved);
+      } else {
+        try {
+          const parsed = JSON.parse(saved);
+          const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
+          const taskEntries = Array.isArray(parsed)
+            ? parsed
+            : (isPlainObject && Array.isArray(parsed.allTasks)
+              ? parsed.allTasks
+              : (isPlainObject && Array.isArray(parsed.tasks)
+                ? parsed.tasks
+                : []));
+          const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
+            ? parsed.quickTasks
+            : [];
+          parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
+        } catch (error) {
+          console.error("Unable to parse saved tasks.", error);
+          tasks = [];
+          return;
+        }
       }
-      tasks = [];
+
+      if (!parseResult || parseResult.error) {
+        if (parseResult?.error) {
+          console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+        }
+        tasks = [];
+        return;
+      }
+
+      const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
+      const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
+      tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+
+      if (parseResult.discarded) {
+        console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+      }
+      if (parseResult.quickDiscarded) {
+        console.warn(`Skipped ${parseResult.quickDiscarded} invalid quick task ${parseResult.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+      }
+    } finally {
       isHydratingTasks = false;
-      return;
     }
-
-    const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
-    const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
-    tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
-
-    if (parseResult.discarded) {
-      console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-    }
-    if (parseResult.quickDiscarded) {
-      console.warn(`Skipped ${parseResult.quickDiscarded} invalid quick task ${parseResult.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-    }
-
-    isHydratingTasks = false;
   }
 
   function exportTasksBackup() {
@@ -24196,25 +24282,6 @@ function wireInsights() {
     initializeGanttSnapshot();
     initializeWorstDayMode();
     initializeTaskBackupControls();
-    const saved = localStorage.getItem("tasks");
-    if (saved) {
-      const parser = window.TaskerStorage?.parseStoredTasks;
-      const parseResult = typeof parser === "function"
-        ? parser(saved)
-        : { tasks: [], discarded: 0, error: null };
-
-      if (parseResult.error) {
-        console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
-      }
-
-      if (parseResult.discarded > 0) {
-        const label = parseResult.discarded === 1 ? "entry" : "entries";
-        console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
-      }
-
-      const restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
-      tasks = normalizeTasksFromStorage(restoredTasks);
-    }
     const savedTemplates = localStorage.getItem("templates");
     if (savedTemplates) {
       templates = JSON.parse(savedTemplates).map(template => ({
@@ -24292,64 +24359,65 @@ function wireInsights() {
     const container = document.querySelector(".recovery-routines-container");
     if (!container) {
       console.error("Error: Rounded container for recovery routines is missing.");
-      return;
+    } else {
+      console.log("Recovery routines container found:", container);
+
+      const containerStyles = getComputedStyle(container);
+      if (containerStyles.display !== "grid") {
+        console.error(
+          "Error: Container is not using grid layout. Current display property:",
+          containerStyles.display
+        );
+      } else {
+        console.log("Container is using grid layout.");
+      }
+
+      const modules = container.querySelectorAll(".routine-tile");
+      if (modules.length !== 4) {
+        console.error(`Error: Expected 4 routine modules, found ${modules.length}.`);
+      } else {
+        console.info("Routine modules found:", modules);
+        const expectedTitles = ["🌅 AM Start", "🚀 Launch Pad", "😴 Sleep Toolkit", "🎵 Dopa-Me"];
+
+        modules.forEach((module, index) => {
+          const titleElement = module.querySelector(".routine-tile__title");
+          const title = titleElement ? titleElement.textContent.trim() : null;
+
+          if (title !== expectedTitles[index]) {
+            console.error(
+              `Error: Routine ${index + 1} has incorrect title. Expected: "${expectedTitles[index]}", Found: "${title}".`
+            );
+          } else {
+            console.info(`Routine ${index + 1} title is correct: "${title}".`);
+          }
+        });
+      }
+
+      const outline = containerStyles.border || containerStyles.boxShadow;
+      if (!outline || outline === "none") {
+        console.error("Error: No outline is applied to the container.");
+      } else {
+        console.log("Outline applied to the container:", outline);
+      }
     }
 
-    console.log("Recovery routines container found:", container);
+    const overlay = document.querySelector(".all-tasks-overlay");
+    const openBtn = document.getElementById("openAllTasksButton");
+    const closeBtn = overlay?.querySelector(".all-tasks-overlay__close");
 
-    const containerStyles = getComputedStyle(container);
-    if (containerStyles.display !== "grid") {
-      console.error(
-        "Error: Container is not using grid layout. Current display property:",
-        containerStyles.display
-      );
-    } else {
-      console.log("Container is using grid layout.");
-    }
-
-    const modules = container.querySelectorAll(".routine-tile");
-    if (modules.length !== 4) {
-      console.error(`Error: Expected 4 routine modules, found ${modules.length}.`);
-    } else {
-      console.info("Routine modules found:", modules);
-      const expectedTitles = ["🌅 AM Start", "🚀 Launch Pad", "😴 Sleep Toolkit", "🎵 Dopa-Me"];
-
-      modules.forEach((module, index) => {
-        const titleElement = module.querySelector(".routine-tile__title");
-        const title = titleElement ? titleElement.textContent.trim() : null;
-
-        if (title !== expectedTitles[index]) {
-          console.error(
-            `Error: Routine ${index + 1} has incorrect title. Expected: "${expectedTitles[index]}", Found: "${title}".`
-          );
-        } else {
-          console.info(`Routine ${index + 1} title is correct: "${title}".`);
-        }
+    if (overlay && openBtn) {
+      openBtn.addEventListener("click", () => {
+        overlay.removeAttribute("hidden");
+        document.body.classList.add("all-tasks-overlay-active");
       });
     }
 
-    const outline = containerStyles.border || containerStyles.boxShadow;
-    if (!outline || outline === "none") {
-      console.error("Error: No outline is applied to the container.");
-    } else {
-      console.log("Outline applied to the container:", outline);
+    if (overlay && closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        overlay.setAttribute("hidden", "");
+        document.body.classList.remove("all-tasks-overlay-active");
+      });
     }
-    // Select elements
-const overlay = document.querySelector('.all-tasks-overlay');
-const openBtn = document.querySelector('#openAllTasks'); // your "All Tasks" button
-const closeBtn = document.querySelector('.all-tasks-overlay__close');
-
-// Open overlay
-openBtn.addEventListener('click', () => {
-  overlay.removeAttribute('hidden');                 // make it visible
-  document.body.classList.add('all-tasks-overlay-active'); // lock background scroll
-});
-
-// Close overlay
-closeBtn.addEventListener('click', () => {
-  overlay.setAttribute('hidden', '');                // hide overlay
-  document.body.classList.remove('all-tasks-overlay-active'); // restore scroll
-});
   });
     </script>
   <script>
