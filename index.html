@@ -16650,6 +16650,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       return;
     }
     const api = window.TaskerStorage;
+    const payload = buildTaskStoragePayload(tasks);
     if (api && typeof api.saveTasksToStorage === "function") {
       const result = api.saveTasksToStorage(tasks);
       if (!result?.success && result?.error) {
@@ -16725,57 +16726,23 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return merged;
   }
 
-  function hydrateTasksFromStorage() {
-    const api = window.TaskerStorage;
-    if (api && typeof api.loadStoredTasks === "function") {
-      const snapshot = api.loadStoredTasks();
-      if (snapshot?.error) {
-        console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
-        tasks = [];
-        isHydratingTasks = false;
-        return;
-      }
-      if (!snapshot || snapshot.storageAvailable === false) {
-        tasks = [];
-        isHydratingTasks = false;
-        return;
-      }
-      const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
-      const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
-      tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
-      if (snapshot.discarded) {
-        console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-      }
-      if (snapshot.quickDiscarded) {
-        console.warn(`Skipped ${snapshot.quickDiscarded} invalid quick task ${snapshot.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-      }
-      isHydratingTasks = false;
-      return;
-    }
-    const saved = (() => {
+    function hydrateTasksFromStorage() {
+      const api = window.TaskerStorage;
       try {
-        return localStorage.getItem("tasks");
-      } catch (error) {
-        console.warn("Unable to read saved tasks from localStorage.", error);
-        return null;
-      }
-    })();
-
-        if (snapshot) {
-          if (snapshot.error) {
+        if (api && typeof api.loadStoredTasks === "function") {
+          const snapshot = api.loadStoredTasks();
+          if (snapshot?.error) {
             console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
             tasks = [];
             return;
           }
-          if (snapshot.storageAvailable === false) {
+          if (!snapshot || snapshot.storageAvailable === false) {
             tasks = [];
             return;
           }
-
           const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
           const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
           tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
-
           if (snapshot.discarded) {
             console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
           }
@@ -16784,71 +16751,70 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
           }
           return;
         }
-      }
 
-      const saved = (() => {
-        try {
-          return localStorage.getItem("tasks");
-        } catch (error) {
-          console.warn("Unable to read saved tasks from localStorage.", error);
-          return null;
-        }
-      })();
+        const saved = (() => {
+          try {
+            return localStorage.getItem("tasks");
+          } catch (error) {
+            console.warn("Unable to read saved tasks from localStorage.", error);
+            return null;
+          }
+        })();
 
-      if (!saved) {
-        tasks = [];
-        return;
-      }
-
-      const parser = window.TaskerStorage?.parseStoredTasks;
-      let parseResult = null;
-
-      if (typeof parser === "function") {
-        parseResult = parser(saved);
-      } else {
-        try {
-          const parsed = JSON.parse(saved);
-          const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
-          const taskEntries = Array.isArray(parsed)
-            ? parsed
-            : (isPlainObject && Array.isArray(parsed.allTasks)
-              ? parsed.allTasks
-              : (isPlainObject && Array.isArray(parsed.tasks)
-                ? parsed.tasks
-                : []));
-          const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
-            ? parsed.quickTasks
-            : [];
-          parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
-        } catch (error) {
-          console.error("Unable to parse saved tasks.", error);
+        if (!saved) {
           tasks = [];
           return;
         }
-      }
 
-      if (!parseResult || parseResult.error) {
-        if (parseResult?.error) {
-          console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+        const parser = api?.parseStoredTasks;
+        let parseResult = null;
+
+        if (typeof parser === "function") {
+          parseResult = parser(saved);
+        } else {
+          try {
+            const parsed = JSON.parse(saved);
+            const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
+            const taskEntries = Array.isArray(parsed)
+              ? parsed
+              : (isPlainObject && Array.isArray(parsed.allTasks)
+                ? parsed.allTasks
+                : (isPlainObject && Array.isArray(parsed.tasks)
+                  ? parsed.tasks
+                  : []));
+            const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
+              ? parsed.quickTasks
+              : [];
+            parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
+          } catch (error) {
+            console.error("Unable to parse saved tasks.", error);
+            tasks = [];
+            return;
+          }
         }
-        tasks = [];
-        return;
-      }
 
-      const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
-      const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
-      tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+        if (!parseResult || parseResult.error) {
+          if (parseResult?.error) {
+            console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+          }
+          tasks = [];
+          return;
+        }
 
-      if (parseResult.discarded) {
-        console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+        const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
+        const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
+        tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+
+        if (parseResult.discarded) {
+          console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+        }
+        if (parseResult.quickDiscarded) {
+          console.warn(`Skipped ${parseResult.quickDiscarded} invalid quick task ${parseResult.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+        }
+      } finally {
+        isHydratingTasks = false;
       }
-      if (parseResult.quickDiscarded) {
-        console.warn(`Skipped ${parseResult.quickDiscarded} invalid quick task ${parseResult.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-      }
-    } finally {
-      isHydratingTasks = false;
     }
-  }
 
   function exportTasksBackup() {
     const payload = buildTaskStoragePayload(tasks);
