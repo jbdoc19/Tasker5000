@@ -17633,14 +17633,85 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return { clusters, quickWins };
   }
 
-  function sanitizePatientSlots(detail) {
+  const CLINIC_ARCHETYPE_LOOKUP = new Map([
+    ["faculty", "clinic"],
+    ["continuity", "clinic"],
+    ["st. pjs", "clinic"],
+    ["st. pj's", "clinic"],
+    ["st. pj’s", "clinic"],
+    ["clinic", "clinic"],
+    ["admin", "admin"],
+    ["admin time", "admin"],
+    ["administrative time", "admin"],
+    ["admin / flex overflow", "admin"],
+    ["academics", "academic"],
+    ["academic", "academic"],
+    ["didactics / academics", "academic"],
+  ]);
+
+  function resolveClinicArchetype(value) {
+    if (typeof value !== "string") {
+      return null;
+    }
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+    if (CLINIC_ARCHETYPE_LOOKUP.has(normalized)) {
+      return CLINIC_ARCHETYPE_LOOKUP.get(normalized);
+    }
+    if (normalized.includes("admin")) {
+      return "admin";
+    }
+    if (normalized.includes("academ")) {
+      return "academic";
+    }
+    if (
+      normalized.includes("clinic") ||
+      normalized.includes("continuity") ||
+      normalized.includes("faculty") ||
+      normalized.includes("precept") ||
+      normalized.includes("st.") ||
+      normalized.includes("st ")
+    ) {
+      return "clinic";
+    }
+    return null;
+  }
+
+  function sanitizePatientSlots(detail, clinicSelections = {}, currentDay = null) {
     if (!detail || typeof detail !== "object") {
       return {};
     }
+    const selectionMap = clinicSelections && typeof clinicSelections === "object"
+      ? clinicSelections
+      : {};
+    const resolveSelectionForKey = key => {
+      if (typeof key !== "string") {
+        return null;
+      }
+      if (typeof selectionMap[key] === "string") {
+        return selectionMap[key];
+      }
+      if (key.includes("|")) {
+        const [dayPart, blockPart] = key.split("|");
+        const combined = `${dayPart}|${blockPart}`;
+        if (typeof selectionMap[combined] === "string") {
+          return selectionMap[combined];
+        }
+      }
+      if (currentDay) {
+        const fallbackKey = `${currentDay}|${key}`;
+        if (typeof selectionMap[fallbackKey] === "string") {
+          return selectionMap[fallbackKey];
+        }
+      }
+      return null;
+    };
+
     return Object.fromEntries(
-      Object.entries(detail).map(([key, slots]) => [
-        key,
-        Array.isArray(slots)
+      Object.entries(detail).map(([key, slots]) => {
+        const normalizedSlots = Array.isArray(slots)
           ? slots.map(slot => ({
               id: typeof slot?.id === "string" ? slot.id : "",
               time: typeof slot?.time === "string" ? slot.time : "",
@@ -17648,8 +17719,17 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
               resident: slot?.resident === true,
               isCustom: slot?.isCustom === true,
             }))
-          : [],
-      ]),
+          : [];
+        const clinicSelection = resolveSelectionForKey(key);
+        const archetype = resolveClinicArchetype(clinicSelection);
+        if (archetype === "admin" || archetype === "academic") {
+          const hasManualPatients = normalizedSlots.some(slot => slot.isCustom === true);
+          if (!hasManualPatients) {
+            return [key, []];
+          }
+        }
+        return [key, normalizedSlots];
+      }),
     );
   }
 
@@ -17672,7 +17752,11 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       clinicSelections: { ...(detail.clinicSelections || {}) },
       blockResidentPresence: { ...(detail.blockResidentPresence || {}) },
       residentMap: { ...(detail.residentMap || {}) },
-      patientSlots: sanitizePatientSlots(detail.patientSlots || {}),
+      patientSlots: sanitizePatientSlots(
+        detail.patientSlots || {},
+        detail.clinicSelections || {},
+        detail.currentDay || null,
+      ),
     };
   }
 
@@ -19043,7 +19127,7 @@ host.appendChild(row);
   function buildBaseAvailabilityWindows({ clinicType, residents, patientSlots, userEndTime }) {
     const make = (start, end, type, block) => ({ start, end, type, block });
     const windows = [];
-    const normalizedType = typeof clinicType === "string" ? clinicType.toLowerCase() : null;
+    const archetype = resolveClinicArchetype(clinicType);
     const residentCounts = {
       AM: Number(residents?.AM) || 0,
       PM: Number(residents?.PM) || 0,
@@ -19054,7 +19138,7 @@ host.appendChild(row);
     };
     const endTime = typeof userEndTime === "string" && userEndTime ? userEndTime : "17:00";
 
-    if (normalizedType === "clinic") {
+    if (archetype === "clinic") {
       windows.push(make("08:00", "08:15", "Clinical-Supervision", "AM"));
       if (residentCounts.AM >= 1) {
         windows.push(...slotsToParallelWindows(slotsByBlock.AM, "AM"));
@@ -19063,11 +19147,11 @@ host.appendChild(row);
       windows.push(make("11:45", "12:00", "Transition", "AM"));
     }
 
-    if (normalizedType === "admin") {
+    if (archetype === "admin") {
       windows.push(make("13:00", endTime, "Admin", "PM"));
-    } else if (normalizedType === "academic") {
+    } else if (archetype === "academic") {
       windows.push(make("13:00", endTime, "Academic-Blackout", "PM"));
-    } else if (normalizedType === "clinic") {
+    } else if (archetype === "clinic") {
       windows.push(make("13:00", endTime, "Admin", "PM"));
     }
 
@@ -24542,6 +24626,17 @@ function wireInsights() {
         PM: ["13:00", "14:00", "15:00", "16:00"]
       };
 
+      const isOpenCapacityClinic = value => {
+        if (typeof value !== "string") {
+          return false;
+        }
+        const normalized = value.trim().toLowerCase();
+        if (!normalized) {
+          return false;
+        }
+        return normalized.includes("admin") || normalized.includes("academ");
+      };
+
       function getTodayClinicDay() {
         const name = new Date().toLocaleDateString("en-US", { weekday: "long" });
         return CLINIC_DAYS.includes(name) ? name : CLINIC_DAYS[0];
@@ -24675,15 +24770,41 @@ function wireInsights() {
 
         const getSlotsForBlock = (dayValue, blockValue) => {
           const key = blockKeyFor(dayValue, blockValue);
+          const clinicSelection = scheduleState.clinicSelections?.[key];
+          const openCapacity = isOpenCapacityClinic(clinicSelection);
           const stored = scheduleState.patientSlots?.[key];
           if (Array.isArray(stored) && stored.length > 0) {
-            return stored.map((slot, index) => ({
+            const normalized = stored.map((slot, index) => ({
               id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
               time: typeof slot.time === "string" ? slot.time : "",
               label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
               resident: slot.resident === true,
               isCustom: slot.isCustom === true,
             }));
+            const hasManual = normalized.some(slot => slot.isCustom);
+            if (openCapacity && !hasManual) {
+              if (scheduleState.patientSlots) {
+                delete scheduleState.patientSlots[key];
+              }
+              if (scheduleState.blockResidentPresence) {
+                delete scheduleState.blockResidentPresence[key];
+              }
+              if (scheduleState.residentMap) {
+                const prefix = `${key}|`;
+                Object.keys(scheduleState.residentMap).forEach(resKey => {
+                  if (resKey.startsWith(prefix)) {
+                    delete scheduleState.residentMap[resKey];
+                  }
+                });
+              }
+              saveScheduleState();
+              dispatchScheduleUpdate("patient-slot:clear-open");
+              return [];
+            }
+            return normalized;
+          }
+          if (openCapacity) {
+            return [];
           }
           const times = SLOT_TIMES[blockValue] || [];
           return times.map((time, index) => ({
@@ -24874,6 +24995,24 @@ function wireInsights() {
             scheduleState.currentDay = day;
             scheduleState.currentBlock = block;
             scheduleState.clinicType = select.value;
+            if (isOpenCapacityClinic(select.value)) {
+              if (scheduleState.patientSlots) {
+                delete scheduleState.patientSlots[blockKey];
+              }
+              if (scheduleState.blockResidentPresence) {
+                delete scheduleState.blockResidentPresence[blockKey];
+              }
+              if (scheduleState.residentMap) {
+                const prefix = `${blockKey}|`;
+                Object.keys(scheduleState.residentMap).forEach(resKey => {
+                  if (resKey.startsWith(prefix)) {
+                    delete scheduleState.residentMap[resKey];
+                  }
+                });
+              }
+              residentIcon.classList.remove("weekly-grid__resident-icon--visible");
+              residentIcon.setAttribute("aria-hidden", "true");
+            }
             saveScheduleState();
             dispatchScheduleUpdate("fallback:clinic-selection");
           });
