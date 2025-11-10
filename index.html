@@ -16623,30 +16623,16 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     if (isHydratingTasks) {
       return;
     }
-
-    let payload = null;
     const api = window.TaskerStorage;
-
     if (api && typeof api.saveTasksToStorage === "function") {
-      try {
-        const result = api.saveTasksToStorage(tasks);
-        if (!result?.success && result?.error) {
-          console.warn("Unable to persist tasks", result.error);
-        }
-        if (result?.payload && typeof result.payload === "object") {
-          payload = result.payload;
-        } else if (result?.success && typeof api.buildTaskStoragePayload === "function") {
-          payload = api.buildTaskStoragePayload(tasks);
-        }
-      } catch (error) {
-        console.warn("Unable to persist tasks via storage helpers", error);
+      const result = api.saveTasksToStorage(tasks);
+      if (!result?.success && result?.error) {
+        console.warn("Unable to persist tasks", result.error);
+      }
+      if (result?.success) {
+        return;
       }
     }
-
-    if (!payload) {
-      payload = buildTaskStoragePayload(tasks);
-    }
-
     try {
       localStorage.setItem("tasks", JSON.stringify(payload));
     } catch (error) {
@@ -16714,15 +16700,40 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   }
 
   function hydrateTasksFromStorage() {
-    try {
-      const api = window.TaskerStorage;
-      if (api && typeof api.loadStoredTasks === "function") {
-        let snapshot = null;
-        try {
-          snapshot = api.loadStoredTasks();
-        } catch (error) {
-          console.error("Unable to restore saved tasks from localStorage.", error);
-        }
+    const api = window.TaskerStorage;
+    if (api && typeof api.loadStoredTasks === "function") {
+      const snapshot = api.loadStoredTasks();
+      if (snapshot?.error) {
+        console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
+        tasks = [];
+        isHydratingTasks = false;
+        return;
+      }
+      if (!snapshot || snapshot.storageAvailable === false) {
+        tasks = [];
+        isHydratingTasks = false;
+        return;
+      }
+      const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
+      const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
+      tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+      if (snapshot.discarded) {
+        console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+      }
+      if (snapshot.quickDiscarded) {
+        console.warn(`Skipped ${snapshot.quickDiscarded} invalid quick task ${snapshot.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+      }
+      isHydratingTasks = false;
+      return;
+    }
+    const saved = (() => {
+      try {
+        return localStorage.getItem("tasks");
+      } catch (error) {
+        console.warn("Unable to read saved tasks from localStorage.", error);
+        return null;
+      }
+    })();
 
         if (snapshot) {
           if (snapshot.error) {
