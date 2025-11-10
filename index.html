@@ -18043,6 +18043,21 @@ host.appendChild(row);
     }, 0);
   }
 
+  function getLatestWindowEndMinutes(windows) {
+    if (!Array.isArray(windows) || windows.length === 0) {
+      return null;
+    }
+    let latest = null;
+    windows.forEach(window => {
+      const endMinutes = getMinutesFromTimeString(window?.end);
+      if (!Number.isFinite(endMinutes)) {
+        return;
+      }
+      latest = latest === null ? endMinutes : Math.max(latest, endMinutes);
+    });
+    return latest;
+  }
+
   function subtractIntervalFromWindows(windows, startMinutes, endMinutes, trackRemoved = true) {
     if (!Array.isArray(windows)) {
       return { updatedWindows: [], removedMinutes: 0 };
@@ -19129,6 +19144,20 @@ host.appendChild(row);
       capacityAdjustments: capacityAdjustmentsState,
     });
 
+    const latestWindowEnd = getLatestWindowEndMinutes(windows);
+    const userEndMinutes = getMinutesFromTimeString(userEndTime);
+    const hasLatestWindowEnd = typeof latestWindowEnd === "number" && Number.isFinite(latestWindowEnd);
+    const hasUserEndMinutes = typeof userEndMinutes === "number" && Number.isFinite(userEndMinutes);
+    let effectiveEndMinutes = hasUserEndMinutes ? userEndMinutes : null;
+    if (hasLatestWindowEnd) {
+      effectiveEndMinutes = hasUserEndMinutes
+        ? Math.max(userEndMinutes, latestWindowEnd)
+        : latestWindowEnd;
+    }
+    const effectiveUserEndTime = typeof effectiveEndMinutes === "number" && Number.isFinite(effectiveEndMinutes)
+      ? minutesToTimeString(effectiveEndMinutes)
+      : userEndTime;
+
     const context = {
       week,
       dayState,
@@ -19138,7 +19167,7 @@ host.appendChild(row);
       clinicType,
       residents,
       patientSlots,
-      userEndTime,
+      userEndTime: effectiveUserEndTime,
       quotas: DEFAULT_QUOTAS,
       triage,
       windows,
