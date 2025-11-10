@@ -24386,22 +24386,24 @@ function wireInsights() {
     } else {
       console.log("Outline applied to the container:", outline);
     }
-    // Select elements
-const overlay = document.querySelector('.all-tasks-overlay');
-const openBtn = document.querySelector('#openAllTasks'); // your "All Tasks" button
-const closeBtn = document.querySelector('.all-tasks-overlay__close');
 
-// Open overlay
-openBtn.addEventListener('click', () => {
-  overlay.removeAttribute('hidden');                 // make it visible
-  document.body.classList.add('all-tasks-overlay-active'); // lock background scroll
-});
+    const overlay = document.querySelector(".all-tasks-overlay");
+    const openBtn = document.getElementById("openAllTasksButton");
+    const closeBtn = overlay?.querySelector(".all-tasks-overlay__close");
 
-// Close overlay
-closeBtn.addEventListener('click', () => {
-  overlay.setAttribute('hidden', '');                // hide overlay
-  document.body.classList.remove('all-tasks-overlay-active'); // restore scroll
-});
+    if (overlay && openBtn) {
+      openBtn.addEventListener("click", () => {
+        overlay.removeAttribute("hidden");
+        document.body.classList.add("all-tasks-overlay-active");
+      });
+    }
+
+    if (overlay && closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        overlay.setAttribute("hidden", "");
+        document.body.classList.remove("all-tasks-overlay-active");
+      });
+    }
   });
     </script>
   <script>
