@@ -16134,6 +16134,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   }
 
   let tasks = [];
+  let isHydratingTasks = true;
   let templates = [];
   let focusQueue = [];
   let editingTaskId = null;
@@ -16615,6 +16616,9 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   }
 
   function persist() {
+    if (isHydratingTasks) {
+      return;
+    }
     try {
       const payload = buildTaskStoragePayload(tasks);
       localStorage.setItem("tasks", JSON.stringify(payload));
@@ -24064,6 +24068,7 @@ function wireInsights() {
     setTimeout(() => toast.remove(), 300);
   }, duration);
     }
+    hydrateTasksFromStorage();
     restoreBriefModePreference();
     setupMomentumZones();
     setupNextBestObserver();
