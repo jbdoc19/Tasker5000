@@ -16728,28 +16728,70 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
     function hydrateTasksFromStorage() {
       const api = window.TaskerStorage;
+      const hydrationResult = {
+        primaryRestored: 0,
+        quickRestored: 0,
+        totalRestored: 0,
+        discarded: 0,
+        quickDiscarded: 0,
+        scheduledUpdate: false,
+        storageAvailable: true,
+        error: null,
+      };
+
+      const scheduleHydratedRender = () => {
+        if (hydrationResult.totalRestored <= 0) {
+          return;
+        }
+        const render = () => {
+          try {
+            updateUI();
+          } catch (renderError) {
+            console.error("Unable to render hydrated tasks after load.", renderError);
+            // TODO: Validate hydrated task rendering across supported browsers.
+          }
+        };
+        try {
+          if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+            window.requestAnimationFrame(render);
+          } else {
+            setTimeout(render, 0);
+          }
+          hydrationResult.scheduledUpdate = true;
+        } catch (scheduleError) {
+          console.warn("Unable to schedule hydrated task render", scheduleError);
+        }
+      };
+
       try {
         if (api && typeof api.loadStoredTasks === "function") {
           const snapshot = api.loadStoredTasks();
           if (snapshot?.error) {
             console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
+            hydrationResult.error = snapshot.error;
             tasks = [];
-            return;
+            return hydrationResult;
           }
           if (!snapshot || snapshot.storageAvailable === false) {
             tasks = [];
-            return;
+            hydrationResult.storageAvailable = Boolean(snapshot?.storageAvailable);
+            return hydrationResult;
           }
           const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
           const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
           tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+          hydrationResult.primaryRestored = normalizedPrimary.length;
+          hydrationResult.quickRestored = normalizedQuick.length;
+          hydrationResult.totalRestored = tasks.length;
+          hydrationResult.discarded = snapshot.discarded || 0;
+          hydrationResult.quickDiscarded = snapshot.quickDiscarded || 0;
           if (snapshot.discarded) {
             console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
           }
           if (snapshot.quickDiscarded) {
             console.warn(`Skipped ${snapshot.quickDiscarded} invalid quick task ${snapshot.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
           }
-          return;
+          return hydrationResult;
         }
 
         const saved = (() => {
@@ -16757,13 +16799,14 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
             return localStorage.getItem("tasks");
           } catch (error) {
             console.warn("Unable to read saved tasks from localStorage.", error);
+            hydrationResult.error = error;
             return null;
           }
         })();
 
         if (!saved) {
           tasks = [];
-          return;
+          return hydrationResult;
         }
 
         const parser = api?.parseStoredTasks;
@@ -16788,22 +16831,29 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
             parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
           } catch (error) {
             console.error("Unable to parse saved tasks.", error);
+            hydrationResult.error = error;
             tasks = [];
-            return;
+            return hydrationResult;
           }
         }
 
         if (!parseResult || parseResult.error) {
           if (parseResult?.error) {
             console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+            hydrationResult.error = parseResult.error;
           }
           tasks = [];
-          return;
+          return hydrationResult;
         }
 
         const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
         const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
         tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+        hydrationResult.primaryRestored = normalizedPrimary.length;
+        hydrationResult.quickRestored = normalizedQuick.length;
+        hydrationResult.totalRestored = tasks.length;
+        hydrationResult.discarded = parseResult.discarded || 0;
+        hydrationResult.quickDiscarded = parseResult.quickDiscarded || 0;
 
         if (parseResult.discarded) {
           console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
@@ -16813,7 +16863,10 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
         }
       } finally {
         isHydratingTasks = false;
+        scheduleHydratedRender();
       }
+
+      return hydrationResult;
     }
 
   function exportTasksBackup() {
@@ -24198,7 +24251,7 @@ function wireInsights() {
     setTimeout(() => toast.remove(), 300);
   }, duration);
     }
-    hydrateTasksFromStorage();
+    const hydrationOutcome = hydrateTasksFromStorage();
     restoreBriefModePreference();
     setupMomentumZones();
     setupNextBestObserver();
@@ -24274,7 +24327,9 @@ function wireInsights() {
     setupStartRewardObserver();
     startReminderLoop();
     renderTemplates();
-    updateUI();
+    if (!hydrationOutcome?.scheduledUpdate) {
+      updateUI();
+    }
     updateSleepToolkitUI();
     updateDerivedFields();
   });
