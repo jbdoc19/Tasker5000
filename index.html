@@ -377,6 +377,11 @@
       display: flex;
       flex-direction: column;
       gap: clamp(0.85rem, 2.2vw, 1.4rem);
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      box-shadow: 0 20px 48px #000000;
+      opacity: 1;
+      isolation: isolate;
     }
 
     /* Availability calibration sheet */
@@ -385,11 +390,11 @@
       top: calc(100% + 0.5rem);
       right: clamp(1rem, 4vw, 1.5rem);
       width: min(420px, 94vw);
-      background-color: #0f172a;
+      background: #0b172d;
       color: var(--text-primary);
       border-radius: 16px;
-      border: 1px solid #46546a;
-      box-shadow: 0 24px 64px #000000;
+      border: 1px solid #1f2a3d;
+      box-shadow: 0 32px 80px #000000;
       padding: 1.25rem 1.4rem 1.1rem;
       display: none;
       z-index: 1400;
@@ -397,11 +402,19 @@
       gap: 1.1rem;
       max-height: 80vh;
       overflow-y: auto;
+      isolation: isolate;
     }
 
     .checklist-capacity-sheet,
     .checklist-capacity-sheet * {
       opacity: 1 !important;
+    }
+
+    .capacity-overlay-active .card.collapsed,
+    .capacity-overlay-active .module-card.collapsed,
+    .capacity-overlay-active .neuro-checklist-card {
+      opacity: 1 !important;
+      filter: none !important;
     }
 
     .checklist-capacity-sheet.is-open {
@@ -18535,6 +18548,18 @@ host.appendChild(row);
     return sheet;
   }
 
+  function syncCapacityOverlayState() {
+    const body = document.body;
+    if (!body) return;
+    const capacityOpen = document.getElementById("capacitySheet")?.classList.contains("is-open");
+    const energyOpen = document.getElementById("energySheet")?.classList.contains("is-open");
+    if (capacityOpen || energyOpen) {
+      body.classList.add("capacity-overlay-active");
+    } else {
+      body.classList.remove("capacity-overlay-active");
+    }
+  }
+
   function openEnergySheet() {
     const card = document.getElementById("neuroChecklist");
     if (!card) return;
@@ -18550,6 +18575,7 @@ host.appendChild(row);
     sheet.classList.add("is-open");
     sheet.setAttribute("aria-hidden", "false");
     applyChecklistControlsState();
+    syncCapacityOverlayState();
 
     const slider = sheet.querySelector("#energySheetSlider");
     if (slider instanceof HTMLElement) {
@@ -18608,6 +18634,7 @@ host.appendChild(row);
     }
 
     applyChecklistControlsState();
+    syncCapacityOverlayState();
   }
 
   function ensureCapacitySheet(card) {
@@ -18748,6 +18775,7 @@ host.appendChild(row);
     sheet.setAttribute("aria-hidden", "false");
     renderCapacitySheet(sheet);
     applyChecklistControlsState();
+    syncCapacityOverlayState();
     const backdrop = typeof getCapacityBackdrop === "function" ? getCapacityBackdrop() : null;
     if (backdrop) {
       backdrop.classList.add("is-visible");
@@ -18805,6 +18833,7 @@ host.appendChild(row);
       document.removeEventListener("keydown", capacitySheetEscapeHandler);
       capacitySheetEscapeHandler = null;
     }
+    syncCapacityOverlayState();
   }
 
   function applyChecklistControlsState() {
