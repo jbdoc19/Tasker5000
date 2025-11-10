@@ -16686,6 +16686,73 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return merged;
   }
 
+  function hydrateTasksFromStorage() {
+    const saved = (() => {
+      try {
+        return localStorage.getItem("tasks");
+      } catch (error) {
+        console.warn("Unable to read saved tasks from localStorage.", error);
+        return null;
+      }
+    })();
+
+    if (!saved) {
+      tasks = [];
+      isHydratingTasks = false;
+      return;
+    }
+
+    const parser = window.TaskerStorage?.parseStoredTasks;
+    let parseResult = null;
+
+    if (typeof parser === "function") {
+      parseResult = parser(saved);
+    } else {
+      try {
+        const parsed = JSON.parse(saved);
+        const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
+        const taskEntries = Array.isArray(parsed)
+          ? parsed
+          : (isPlainObject && Array.isArray(parsed.allTasks)
+            ? parsed.allTasks
+            : (isPlainObject && Array.isArray(parsed.tasks)
+              ? parsed.tasks
+              : []));
+        const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
+          ? parsed.quickTasks
+          : [];
+        parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
+      } catch (error) {
+        console.error("Unable to parse saved tasks.", error);
+        tasks = [];
+        isHydratingTasks = false;
+        return;
+      }
+    }
+
+    if (!parseResult || parseResult.error) {
+      if (parseResult?.error) {
+        console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+      }
+      tasks = [];
+      isHydratingTasks = false;
+      return;
+    }
+
+    const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
+    const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
+    tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+
+    if (parseResult.discarded) {
+      console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+    }
+    if (parseResult.quickDiscarded) {
+      console.warn(`Skipped ${parseResult.quickDiscarded} invalid quick task ${parseResult.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+    }
+
+    isHydratingTasks = false;
+  }
+
   function exportTasksBackup() {
     const payload = buildTaskStoragePayload(tasks);
     const downloader = window.TaskerStorage?.downloadTaskBackup;
