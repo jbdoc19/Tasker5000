@@ -385,7 +385,7 @@
       top: calc(100% + 0.5rem);
       right: clamp(1rem, 4vw, 1.5rem);
       width: min(420px, 94vw);
-      background: #0f172a;
+      background-color: #0f172a;
       color: var(--text-primary);
       border-radius: 16px;
       border: 1px solid rgba(148, 163, 184, 0.35);
@@ -529,12 +529,20 @@
 
     .capacity-adjustments__remove {
       border: none;
-      background: transparent;
+      background-color: #1b2537;
       color: var(--text-secondary);
       font-size: 1rem;
       line-height: 1;
       padding: 0.2rem;
       cursor: pointer;
+    }
+
+    .capacity-adjustments__row[data-kind="gain"] .capacity-adjustments__remove {
+      background-color: #1a3a2b;
+    }
+
+    .capacity-adjustments__row[data-kind="loss"] .capacity-adjustments__remove {
+      background-color: #3a1f1f;
     }
 
     .capacity-adjustments__remove:hover,
@@ -669,18 +677,13 @@
     .checklist-capacity-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(8, 12, 18, 0.75);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 180ms ease;
+      background-color: #020617;
+      display: none;
       z-index: 1390;
     }
 
     .checklist-capacity-backdrop.is-visible {
-      opacity: 1;
-      pointer-events: auto;
+      display: block;
     }
 
     .neuro-checklist__header {
