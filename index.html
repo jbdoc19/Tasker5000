@@ -52,6 +52,10 @@
       overflow-x: hidden;
     }
 
+    body.modal-active {
+      overflow: hidden;
+    }
+
     h1,
     h2,
     h3,
@@ -4698,6 +4702,35 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
     .wizard-content h3,
     .modal-card h3 {
       margin: 0 0 0.75rem;
+    }
+
+    #addTaskOverlay .modal-card {
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 3rem);
+    }
+
+    #addTaskOverlay .modal-scroll-content {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      gap: var(--space-3);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    #addTaskOverlay .modal-scroll-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    #addTaskOverlay .modal-scroll-content > .modal__close {
+      justify-self: flex-end;
+    }
+
+    #addTaskOverlay .card-sticky-actions {
+      flex-shrink: 0;
     }
 
     .templates-card {
@@ -9909,10 +9942,11 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
   <div id="addTaskOverlay" class="modal-overlay hidden" aria-hidden="true">
     <div class="modal-card modal-card--wide" role="dialog" aria-modal="true" aria-labelledby="addTaskTitle">
-      <button id="addTaskClose" class="modal__close" type="button" aria-label="Close task builder">✕</button>
-      <h3 id="addTaskTitle">Add task</h3>
-      <div class="card-body" id="addTaskCardBody" aria-hidden="false">
-        <div class="task-form-group">
+      <div class="modal-scroll-content">
+        <button id="addTaskClose" class="modal__close" type="button" aria-label="Close task builder">✕</button>
+        <h3 id="addTaskTitle">Add task</h3>
+        <div class="card-body" id="addTaskCardBody" aria-hidden="false">
+          <div class="task-form-group">
           <span class="task-form-group__label">New task</span>
           <p id="quickTaskTemplateHint" class="quick-task-hint hidden">Quick task mode: name it and tap Add.</p>
           <label for="name">Task name
@@ -21594,6 +21628,9 @@ host.appendChild(row);
     const open = !collapsed;
     overlay.classList.toggle("hidden", collapsed);
     overlay.setAttribute("aria-hidden", collapsed ? "true" : "false");
+    if (document?.body) {
+      document.body.classList.toggle("modal-active", open);
+    }
     if (!skipPersist) {
       localStorage.setItem(ADD_TASK_CARD_STATE_KEY, collapsed ? "collapsed" : "expanded");
     }
