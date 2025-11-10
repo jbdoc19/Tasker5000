@@ -1,4 +1,25 @@
+import { CLINIC_OPTIONS } from "./scheduleData.js";
+
 const STORAGE_KEY = "taskerScheduleState";
+
+const CLINIC_OPTION_LOOKUP = new Map(
+  CLINIC_OPTIONS.map(option => [option.toLowerCase(), option]),
+);
+
+function normalizeClinicOption(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const directMatch = CLINIC_OPTION_LOOKUP.get(trimmed.toLowerCase());
+  if (directMatch) {
+    return directMatch;
+  }
+  return null;
+}
 
 const hasStorage = () => typeof window !== "undefined" && window.localStorage;
 
@@ -65,12 +86,18 @@ function loadStateFromStorage() {
     if (typeof parsed.currentBlock === "string") {
       base.currentBlock = parsed.currentBlock;
     }
-    if (typeof parsed.clinicType === "string") {
-      base.clinicType = parsed.clinicType;
+    const storedClinicType = normalizeClinicOption(parsed.clinicType);
+    if (storedClinicType) {
+      base.clinicType = storedClinicType;
     }
     if (parsed.clinicSelections && typeof parsed.clinicSelections === "object") {
       base.clinicSelections = Object.fromEntries(
-        Object.entries(parsed.clinicSelections).map(([key, value]) => [key, typeof value === "string" ? value : ""]),
+        Object.entries(parsed.clinicSelections)
+          .map(([key, value]) => {
+            const normalized = normalizeClinicOption(value);
+            return normalized ? [key, normalized] : null;
+          })
+          .filter(Boolean),
       );
     }
     if (parsed.blockResidentPresence && typeof parsed.blockResidentPresence === "object") {
@@ -118,7 +145,8 @@ export const dayState = initialState;
 export function setDay(day, block, clinicType) {
   dayState.currentDay = day ?? null;
   dayState.currentBlock = block ?? null;
-  dayState.clinicType = clinicType ?? null;
+  const normalized = normalizeClinicOption(clinicType);
+  dayState.clinicType = normalized ?? null;
   persistState();
 }
 
