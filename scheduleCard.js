@@ -53,6 +53,17 @@ let todayToggleButton = null;
 let weekToggleButton = null;
 let currentScheduleMode = null;
 
+function isOpenCapacityClinic(selection) {
+  if (typeof selection !== "string") {
+    return false;
+  }
+  const normalized = selection.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return normalized.includes("admin") || normalized.includes("academic");
+}
+
 function clonePatientSlotsSnapshot() {
   const source = dayState.patientSlots || {};
   return Object.fromEntries(
@@ -475,6 +486,10 @@ function appendClinicCell(day, block) {
   select.value = storedClinic;
   select.addEventListener("change", () => {
     setClinicSelection(day, block, select.value);
+    if (isOpenCapacityClinic(select.value)) {
+      setPatientSlots(day, block, []);
+      updateResidentIcon(residentIcon, false);
+    }
     emitScheduleStateUpdate("clinic-selection");
     if (day === activeCellDay && block === activeCellBlock) {
       setDay(day, block, select.value);
@@ -631,14 +646,25 @@ function createDefaultSlot(day, block, time, index) {
 
 function loadOverlaySlots(day, block) {
   const stored = getPatientSlots(day, block);
+  const clinicSelection = getClinicSelection(day, block);
+  const openCapacity = isOpenCapacityClinic(clinicSelection);
   if (Array.isArray(stored) && stored.length > 0) {
-    return stored.map((slot, index) => ({
+    const normalizedSlots = stored.map((slot, index) => ({
       id: typeof slot.id === "string" && slot.id.trim() ? slot.id : `slot-${index}`,
       time: typeof slot.time === "string" ? slot.time : "",
       label: typeof slot.label === "string" && slot.label.trim() ? slot.label.trim() : "Visit",
       resident: Boolean(slot.resident),
       isCustom: Boolean(slot.isCustom),
     }));
+    const hasManualPatients = normalizedSlots.some(slot => slot.isCustom);
+    if (openCapacity && !hasManualPatients) {
+      setPatientSlots(day, block, []);
+      return [];
+    }
+    return normalizedSlots;
+  }
+  if (openCapacity) {
+    return [];
   }
   const times = SLOT_TIMES[block] || [];
   return times.map((time, index) => createDefaultSlot(day, block, time, index));
