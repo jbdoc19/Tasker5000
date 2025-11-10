@@ -16246,9 +16246,9 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     setQuickTaskTemplateMode(false);
   }
 
+  let templates = [];
   let tasks = [];
   let isHydratingTasks = true;
-  let templates = [];
   function normalizeStoredTemplate(template) {
     if (!template || typeof template !== "object") {
       return null;
@@ -16321,7 +16321,10 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       return;
     }
     const payload = templates.map(normalizeStoredTemplate).filter(Boolean);
-    templates = payload.map(template => ({ ...template }));
+    templates.length = 0;
+    payload.forEach(template => {
+      templates.push({ ...template });
+    });
     try {
       const serialized = JSON.stringify(payload);
       localStorage.setItem(TEMPLATE_STORAGE_KEY, serialized);
@@ -24590,6 +24593,7 @@ function wireInsights() {
   }, duration);
     }
     const hydrationOutcome = hydrateTasksFromStorage();
+    hydrateTemplatesFromStorage();
     restoreBriefModePreference();
     setupMomentumZones();
     setupNextBestObserver();
@@ -24650,7 +24654,6 @@ function wireInsights() {
     initializeGanttSnapshot();
     initializeWorstDayMode();
     initializeTaskBackupControls();
-    hydrateTemplatesFromStorage();
     registerCategoryFilterControl();
     registerTaskSortControl();
     setupStartRewardObserver();
