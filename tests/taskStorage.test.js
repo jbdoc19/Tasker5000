@@ -1,6 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseStoredTasks } from '../taskStorage.js';
+import {
+  parseStoredTasks,
+  buildTaskStoragePayload,
+  saveTasksToStorage,
+  loadStoredTasks,
+} from '../taskStorage.js';
+
+class MemoryStorage {
+  constructor() {
+    this.store = new Map();
+  }
+
+  getItem(key) {
+    return this.store.has(key) ? this.store.get(key) : null;
+  }
+
+  setItem(key, value) {
+    this.store.set(key, String(value));
+  }
+
+  removeItem(key) {
+    this.store.delete(key);
+  }
+}
 
 test('parseStoredTasks returns sanitized task objects', () => {
   const saved = JSON.stringify([
@@ -63,4 +86,52 @@ test('parseStoredTasks reads structured payload with quick tasks', () => {
   assert.equal(result.quickTasks[0].id, 'quick-1');
   assert.equal(result.quickDiscarded, 2);
   assert.equal(result.error, null);
+});
+
+test('buildTaskStoragePayload clones tasks and flags quick entries', () => {
+  const tasks = [
+    { id: '1', name: 'Regular', category: 'General', meta: { nested: true } },
+    { id: '2', name: 'Quickie', category: 'Quick Task' },
+  ];
+
+  const payload = buildTaskStoragePayload(tasks);
+
+  assert.equal(payload.allTasks.length, 2);
+  assert.equal(payload.quickTasks.length, 1);
+  assert.equal(payload.quickTasks[0].id, '2');
+  assert.notStrictEqual(payload.allTasks[0], tasks[0]);
+  assert.notStrictEqual(payload.allTasks[1], tasks[1]);
+});
+
+test('saveTasksToStorage writes structured payload to provided storage', () => {
+  const storage = new MemoryStorage();
+  const tasks = [
+    { id: 'x', name: 'Keep me', category: 'General' },
+    { id: 'q', name: 'Quick keep', category: 'Quick Task' },
+  ];
+
+  const result = saveTasksToStorage(tasks, storage);
+
+  assert.equal(result.success, true);
+  const raw = storage.getItem('tasks');
+  const parsed = JSON.parse(raw);
+  assert.equal(parsed.allTasks.length, 2);
+  assert.equal(parsed.quickTasks.length, 1);
+});
+
+test('loadStoredTasks returns parsed data from provided storage', () => {
+  const storage = new MemoryStorage();
+  storage.setItem('tasks', JSON.stringify({
+    allTasks: [{ id: 'a', name: 'Stored' }],
+    quickTasks: [{ id: 'b', name: 'Quick stored' }],
+  }));
+
+  const snapshot = loadStoredTasks(storage);
+
+  assert.equal(snapshot.storageAvailable, true);
+  assert.equal(snapshot.tasks.length, 1);
+  assert.equal(snapshot.tasks[0].id, 'a');
+  assert.equal(snapshot.quickTasks.length, 1);
+  assert.equal(snapshot.quickTasks[0].id, 'b');
+  assert.equal(snapshot.error, null);
 });

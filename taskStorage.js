@@ -1,4 +1,5 @@
 const TASKS_STORAGE_KEY = "tasks";
+const QUICK_TASK_LABEL = "quick task";
 
 function sanitizeTaskEntries(entries) {
   if (!Array.isArray(entries)) {
@@ -51,13 +52,99 @@ export function parseStoredTasks(serialized) {
   }
 }
 
-export function getStoredTasksSnapshot() {
-  const raw = getRawTaskPayload();
-  if (typeof raw !== "string" || !raw) {
-    return { raw: raw ?? null, tasks: [], quickTasks: [], discarded: 0, quickDiscarded: 0, error: null };
+function isQuickTaskEntry(task) {
+  if (!task) {
+    return false;
   }
-  const result = parseStoredTasks(raw);
-  return { raw, ...result };
+  const category = typeof task.category === "string" ? task.category.toLowerCase() : "";
+  return category === QUICK_TASK_LABEL;
+}
+
+export function buildTaskStoragePayload(taskList = []) {
+  const allTasks = Array.isArray(taskList)
+    ? taskList.map(task => ({ ...task }))
+    : [];
+  const quickTasks = allTasks.filter(isQuickTaskEntry);
+  return { allTasks, quickTasks };
+}
+
+function resolveStorage(candidate) {
+  if (candidate && typeof candidate.getItem === "function" && typeof candidate.setItem === "function") {
+    return candidate;
+  }
+  if (typeof localStorage !== "undefined" && localStorage && typeof localStorage.getItem === "function") {
+    return localStorage;
+  }
+  return null;
+}
+
+export function saveTasksToStorage(taskList = [], storage) {
+  const target = resolveStorage(storage);
+  if (!target) {
+    return { success: false, payload: null, error: null, storageAvailable: false };
+  }
+  try {
+    const payload = buildTaskStoragePayload(taskList);
+    target.setItem(TASKS_STORAGE_KEY, JSON.stringify(payload));
+    return { success: true, payload, error: null, storageAvailable: true };
+  } catch (error) {
+    return { success: false, payload: null, error, storageAvailable: true };
+  }
+}
+
+export function loadStoredTasks(storage) {
+  const target = resolveStorage(storage);
+  if (!target) {
+    return {
+      raw: null,
+      tasks: [],
+      quickTasks: [],
+      discarded: 0,
+      quickDiscarded: 0,
+      error: null,
+      storageAvailable: false,
+    };
+  }
+
+  let raw = null;
+  try {
+    raw = target.getItem(TASKS_STORAGE_KEY);
+  } catch (error) {
+    return {
+      raw: null,
+      tasks: [],
+      quickTasks: [],
+      discarded: 0,
+      quickDiscarded: 0,
+      error,
+      storageAvailable: true,
+    };
+  }
+
+  if (typeof raw !== "string" || !raw) {
+    return {
+      raw: raw ?? null,
+      tasks: [],
+      quickTasks: [],
+      discarded: 0,
+      quickDiscarded: 0,
+      error: null,
+      storageAvailable: true,
+    };
+  }
+
+  const parsed = parseStoredTasks(raw);
+  return {
+    raw,
+    ...parsed,
+    storageAvailable: true,
+  };
+}
+
+export function getStoredTasksSnapshot() {
+  const snapshot = loadStoredTasks();
+  const { raw, tasks, quickTasks, discarded, quickDiscarded, error } = snapshot;
+  return { raw, tasks, quickTasks, discarded, quickDiscarded, error };
 }
 
 export function collectTaskDiagnostics() {
@@ -130,6 +217,9 @@ function getRawTaskPayload() {
 if (typeof window !== "undefined") {
   window.TaskerStorage = Object.assign(window.TaskerStorage || {}, {
     parseStoredTasks,
+    buildTaskStoragePayload,
+    saveTasksToStorage,
+    loadStoredTasks,
     getStoredTasksSnapshot,
     collectTaskDiagnostics,
     downloadTaskBackup,
