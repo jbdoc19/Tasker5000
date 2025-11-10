@@ -6591,6 +6591,10 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
       display: none;
     }
 
+    #template-modal {
+      z-index: 1600;
+    }
+
     .modal__content {
       width: min(560px, 92vw);
       max-height: 80vh;
@@ -8410,9 +8414,16 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
 
     .app-header__actions {
       display: flex;
-      align-items: flex-start;
+      flex-direction: column;
+      align-items: flex-end;
       justify-content: flex-end;
+      gap: clamp(0.35rem, 1.5vw, 0.65rem);
       margin-left: auto;
+    }
+
+    .app-header__quick-add {
+      width: clamp(40px, 7vw, 52px);
+      height: clamp(40px, 7vw, 52px);
     }
 
     .app-header__main {
@@ -8976,6 +8987,15 @@ body.all-tasks-overlay-active {
               title="Open settings"
             >
               ⚙️
+            </button>
+            <button
+              id="headerQuickAddButton"
+              class="quick-add-button quick-add-button--plus app-header__quick-add"
+              type="button"
+              aria-label="Add a new task"
+              title="Add a task"
+            >
+              ➕️
             </button>
           </div>
         </div>
@@ -10754,6 +10774,8 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   const MODULE_STATE_PREFIX = "moduleState_";
   const ADD_TASK_CARD_STATE_KEY = "ui.addTask.collapsed";
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
+  const TEMPLATE_STORAGE_KEY = "tasker5000.templates";
+  const LEGACY_TEMPLATE_STORAGE_KEY = "templates";
   const ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.collapsed";
   const COLLAPSIBLE_MODULE_IDS = [];
   const ROUTINE_STATE_KEY = "ui.routines.metadata";
@@ -16227,6 +16249,97 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   let tasks = [];
   let isHydratingTasks = true;
   let templates = [];
+  function normalizeStoredTemplate(template) {
+    if (!template || typeof template !== "object") {
+      return null;
+    }
+    const name = typeof template.name === "string" ? template.name.trim() : "";
+    if (!name) {
+      return null;
+    }
+    const category = typeof template.category === "string" && template.category.trim()
+      ? template.category
+      : "General";
+    return {
+      name,
+      category,
+      authorType: template.authorType || "attending",
+      patientType: normalizePatientType(template.patientType),
+      visitType: normalizeVisitType(template.visitType),
+      clinicSite: normalizeClinicSite(template.clinicSite),
+      importance: clampScale(template.importance, 1),
+      urgency: clampScale(template.urgency, 3),
+      novelty: clampScale(template.novelty, 1),
+      interest: clampScale(template.interest, 1),
+      externalPressure: clampScale(template.externalPressure, 1),
+      timeToStart: clampScale(template.timeToStart, 1),
+      difficulty: clampScale(template.difficulty, 1)
+    };
+  }
+
+  function readTemplatesFromStorage() {
+    if (typeof localStorage === "undefined") {
+      return { templates: [], migrated: false };
+    }
+    const sources = [
+      { key: TEMPLATE_STORAGE_KEY, migrated: false },
+      { key: LEGACY_TEMPLATE_STORAGE_KEY, migrated: true }
+    ];
+    for (const source of sources) {
+      let raw;
+      try {
+        raw = localStorage.getItem(source.key);
+      } catch (error) {
+        console.warn("Unable to read templates from storage.", error);
+        return { templates: [], migrated: false };
+      }
+      if (raw === null) {
+        continue;
+      }
+      if (raw === "") {
+        return { templates: [], migrated: source.migrated };
+      }
+      if (typeof raw !== "string") {
+        continue;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          continue;
+        }
+        const normalized = parsed.map(normalizeStoredTemplate).filter(Boolean);
+        return { templates: normalized, migrated: source.migrated };
+      } catch (error) {
+        console.warn("Unable to parse saved templates.", error);
+      }
+    }
+    return { templates: [], migrated: false };
+  }
+
+  function persistTemplates() {
+    if (typeof localStorage === "undefined") {
+      return;
+    }
+    const payload = templates.map(normalizeStoredTemplate).filter(Boolean);
+    templates = payload.map(template => ({ ...template }));
+    try {
+      const serialized = JSON.stringify(payload);
+      localStorage.setItem(TEMPLATE_STORAGE_KEY, serialized);
+      localStorage.setItem(LEGACY_TEMPLATE_STORAGE_KEY, serialized);
+    } catch (error) {
+      console.warn("Unable to persist templates.", error);
+    }
+  }
+
+  function hydrateTemplatesFromStorage() {
+    const { templates: storedTemplates, migrated } = readTemplatesFromStorage();
+    if (Array.isArray(storedTemplates)) {
+      templates = storedTemplates;
+      if (migrated) {
+        persistTemplates();
+      }
+    }
+  }
   let focusQueue = [];
   let editingTaskId = null;
   let focusTimerId = null;
@@ -23146,12 +23259,14 @@ host.appendChild(row);
   }
 
   function initializeQuickAddMenu() {
-    const plusBtn = document.querySelector(".quick-add-button--plus");
-    if (plusBtn) {
-      plusBtn.addEventListener("click", () => {
-        cancelEdit();
-        setAddTaskCardCollapsed(false);
-        syncAddTaskActions();
+    const plusButtons = Array.from(document.querySelectorAll(".quick-add-button--plus"));
+    if (plusButtons.length) {
+      plusButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          cancelEdit();
+          setAddTaskCardCollapsed(false);
+          syncAddTaskActions();
+        });
       });
     }
     const quickTemplateBtn = document.querySelector(".quick-add-button--cherry");
@@ -23687,7 +23802,7 @@ initializeFocusFabLongPress();
       difficulty: clampScale($("difficulty").value, 1)
     };
     templates.push(template);
-    localStorage.setItem("templates", JSON.stringify(templates));
+    persistTemplates();
     renderTemplates();
   }
 
@@ -23736,7 +23851,7 @@ initializeFocusFabLongPress();
         const newName = prompt("Edit template name:", t.name);
         if (!newName) return;
         t.name = newName;
-        localStorage.setItem("templates", JSON.stringify(templates));
+        persistTemplates();
         renderTemplates();
       };
       const deleteBtn = document.createElement("button");
@@ -23746,7 +23861,7 @@ initializeFocusFabLongPress();
       deleteBtn.onclick = () => {
         if (!confirm("Delete this template?")) return;
         templates.splice(templateIndex, 1);
-        localStorage.setItem("templates", JSON.stringify(templates));
+        persistTemplates();
         renderTemplates();
       };
       [useBtn, editBtn, deleteBtn].forEach(b => {
@@ -24535,16 +24650,7 @@ function wireInsights() {
     initializeGanttSnapshot();
     initializeWorstDayMode();
     initializeTaskBackupControls();
-    const savedTemplates = localStorage.getItem("templates");
-    if (savedTemplates) {
-      templates = JSON.parse(savedTemplates).map(template => ({
-        ...template,
-        authorType: template.authorType || "attending",
-        patientType: normalizePatientType(template.patientType),
-        visitType: normalizeVisitType(template.visitType),
-        clinicSite: normalizeClinicSite(template.clinicSite)
-      }));
-    }
+    hydrateTemplatesFromStorage();
     registerCategoryFilterControl();
     registerTaskSortControl();
     setupStartRewardObserver();
