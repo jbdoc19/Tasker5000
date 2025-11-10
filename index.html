@@ -16627,42 +16627,6 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     }
   }
 
-  function hydrateTasksFromStorage() {
-    if (typeof localStorage === "undefined") {
-      isHydratingTasks = false;
-      return;
-    }
-
-    let restoredTasks = [];
-
-    try {
-      const saved = localStorage.getItem("tasks");
-      if (saved) {
-        const parser = window.TaskerStorage?.parseStoredTasks;
-        const parseResult = typeof parser === "function"
-          ? parser(saved)
-          : { tasks: [], discarded: 0, error: null };
-
-        if (parseResult.error) {
-          console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
-        }
-
-        if (parseResult.discarded > 0) {
-          const label = parseResult.discarded === 1 ? "entry" : "entries";
-          console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
-        }
-
-        restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
-      }
-    } catch (error) {
-      console.error("Unable to access saved tasks from localStorage.", error);
-    }
-
-    tasks = normalizeTasksFromStorage(restoredTasks);
-    isHydratingTasks = false;
-    persist();
-  }
-
   function normalizeTasksFromStorage(restoredTasks = []) {
     const normalizedTasks = [];
     if (!Array.isArray(restoredTasks)) {
@@ -24165,6 +24129,25 @@ function wireInsights() {
     initializeGanttSnapshot();
     initializeWorstDayMode();
     initializeTaskBackupControls();
+    const saved = localStorage.getItem("tasks");
+    if (saved) {
+      const parser = window.TaskerStorage?.parseStoredTasks;
+      const parseResult = typeof parser === "function"
+        ? parser(saved)
+        : { tasks: [], discarded: 0, error: null };
+
+      if (parseResult.error) {
+        console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+      }
+
+      if (parseResult.discarded > 0) {
+        const label = parseResult.discarded === 1 ? "entry" : "entries";
+        console.warn(`Skipped ${parseResult.discarded} invalid task ${label} while restoring saved tasks.`);
+      }
+
+      const restoredTasks = Array.isArray(parseResult.tasks) ? parseResult.tasks : [];
+      tasks = normalizeTasksFromStorage(restoredTasks);
+    }
     const savedTemplates = localStorage.getItem("templates");
     if (savedTemplates) {
       templates = JSON.parse(savedTemplates).map(template => ({
