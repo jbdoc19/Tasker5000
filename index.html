@@ -388,8 +388,8 @@
       background-color: #0f172a;
       color: var(--text-primary);
       border-radius: 16px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.65);
+      border: 1px solid #46546a;
+      box-shadow: 0 24px 64px #000000;
       padding: 1.25rem 1.4rem 1.1rem;
       display: none;
       z-index: 1400;
@@ -397,6 +397,11 @@
       gap: 1.1rem;
       max-height: 80vh;
       overflow-y: auto;
+    }
+
+    .checklist-capacity-sheet,
+    .checklist-capacity-sheet * {
+      opacity: 1 !important;
     }
 
     .checklist-capacity-sheet.is-open {
@@ -680,6 +685,7 @@
       background-color: #020617;
       display: none;
       z-index: 1390;
+      opacity: 1 !important;
     }
 
     .checklist-capacity-backdrop.is-visible {
