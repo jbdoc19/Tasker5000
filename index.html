@@ -622,9 +622,12 @@
 
     .energy-sheet {
       position: fixed;
-      inset: auto 50% 5%;
-      transform: translateX(50%);
+      top: var(--energy-sheet-top, 50%);
+      left: var(--energy-sheet-left, 50%);
+      transform: translate(-50%, calc(-50% + 24px));
       width: min(420px, 90vw);
+      max-height: calc(100vh - 32px);
+      overflow: auto;
       background: rgba(15, 22, 30, 0.96);
       border: 1px solid rgba(120, 164, 193, 0.35);
       border-radius: 18px;
@@ -639,7 +642,7 @@
     .energy-sheet.is-open {
       opacity: 1;
       pointer-events: auto;
-      transform: translateX(50%) translateY(-12px);
+      transform: translate(-50%, -50%);
     }
 
     .energy-sheet__header {
@@ -18810,10 +18813,19 @@ host.appendChild(row);
     };
 
     if (slider) {
-      slider.addEventListener("input", event => {
-        const raw = Number(event.target.value || slider.value || 3);
+      const applySliderValue = event => {
+        const raw = Number(event?.target?.value || slider.value || 3);
         const resolved = alignEnergySliders(raw, "sheet");
         refreshSheet(resolved);
+        return resolved;
+      };
+
+      slider.addEventListener("input", applySliderValue);
+      slider.addEventListener("change", event => {
+        applySliderValue(event);
+        window.requestAnimationFrame(() => {
+          closeEnergySheet();
+        });
       });
     }
 
@@ -18829,6 +18841,47 @@ host.appendChild(row);
     sheet.__refreshEnergySheet = refreshSheet;
     host.appendChild(sheet);
     return sheet;
+  }
+
+  function positionEnergySheet(sheet, anchor) {
+    if (!(sheet instanceof HTMLElement)) return;
+
+    const viewportWidth = window.innerWidth || document.documentElement?.clientWidth || 0;
+    const viewportHeight = window.innerHeight || document.documentElement?.clientHeight || 0;
+    const sheetRect = sheet.getBoundingClientRect();
+    const sheetWidth = sheetRect.width || sheet.offsetWidth || 0;
+    const sheetHeight = sheetRect.height || sheet.offsetHeight || 0;
+    const margin = 16;
+
+    const anchorRect = anchor instanceof HTMLElement ? anchor.getBoundingClientRect() : null;
+    let centerX = anchorRect ? anchorRect.left + anchorRect.width / 2 : viewportWidth / 2;
+    let centerY = anchorRect ? anchorRect.top + anchorRect.height / 2 : viewportHeight / 2;
+
+    const halfWidth = sheetWidth / 2;
+    const halfHeight = sheetHeight / 2;
+
+    if (viewportWidth > 0 && halfWidth > 0) {
+      const minCenterX = margin + halfWidth;
+      const maxCenterX = viewportWidth - margin - halfWidth;
+      if (maxCenterX >= minCenterX) {
+        centerX = Math.min(Math.max(centerX, minCenterX), maxCenterX);
+      } else {
+        centerX = viewportWidth / 2;
+      }
+    }
+
+    if (viewportHeight > 0 && halfHeight > 0) {
+      const minCenterY = margin + halfHeight;
+      const maxCenterY = viewportHeight - margin - halfHeight;
+      if (maxCenterY >= minCenterY) {
+        centerY = Math.min(Math.max(centerY, minCenterY), maxCenterY);
+      } else {
+        centerY = viewportHeight / 2;
+      }
+    }
+
+    sheet.style.setProperty("--energy-sheet-left", `${Math.round(centerX)}px`);
+    sheet.style.setProperty("--energy-sheet-top", `${Math.round(centerY)}px`);
   }
 
   function syncCapacityOverlayState() {
@@ -18885,6 +18938,9 @@ host.appendChild(row);
     if (refresh) {
       refresh(currentLevel);
     }
+
+    const anchor = card.querySelector("#capacityControlGrid");
+    positionEnergySheet(sheet, anchor instanceof HTMLElement ? anchor : card);
 
     sheet.classList.add("is-open");
     sheet.setAttribute("aria-hidden", "false");
