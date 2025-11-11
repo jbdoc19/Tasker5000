@@ -10776,6 +10776,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   const LEGACY_ADD_TASK_CARD_STATE_KEY = "addTaskCardState";
   const TEMPLATE_STORAGE_KEY = "tasker5000.templates";
   const LEGACY_TEMPLATE_STORAGE_KEY = "templates";
+  let templates = [];
   const ALL_TASKS_CARD_STATE_KEY = "ui.allTasks.collapsed";
   const COLLAPSIBLE_MODULE_IDS = [];
   const ROUTINE_STATE_KEY = "ui.routines.metadata";
@@ -16318,6 +16319,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
   function persistTemplates() {
     if (typeof localStorage === "undefined") {
+      console.info("[templates] Skipping persist: localStorage unavailable.");
       return;
     }
     const payload = templates.map(normalizeStoredTemplate).filter(Boolean);
@@ -16329,6 +16331,8 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       const serialized = JSON.stringify(payload);
       localStorage.setItem(TEMPLATE_STORAGE_KEY, serialized);
       localStorage.setItem(LEGACY_TEMPLATE_STORAGE_KEY, serialized);
+      const count = payload.length;
+      console.info(`[templates] Persisted ${count} template${count === 1 ? "" : "s"} to storage.`);
     } catch (error) {
       console.warn("Unable to persist templates.", error);
     }
@@ -16336,12 +16340,19 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
   function hydrateTemplatesFromStorage() {
     const { templates: storedTemplates, migrated } = readTemplatesFromStorage();
-    if (Array.isArray(storedTemplates)) {
-      templates = storedTemplates;
-      if (migrated) {
-        persistTemplates();
-      }
+    templates.length = 0;
+    if (Array.isArray(storedTemplates) && storedTemplates.length) {
+      storedTemplates.forEach(template => {
+        templates.push({ ...template });
+      });
     }
+    if (migrated && templates.length) {
+      console.info("[templates] Migrated legacy templates to consolidated storage key.");
+      persistTemplates();
+    }
+    const count = templates.length;
+    console.info(`[templates] Hydrated ${count} template${count === 1 ? "" : "s"} from storage.`);
+    renderTemplates();
   }
   let focusQueue = [];
   let editingTaskId = null;
@@ -22773,6 +22784,7 @@ host.appendChild(row);
   function openTemplatesOverlay(trigger = null) {
     const overlay = $("templatesOverlay");
     if (!overlay) return;
+    renderTemplates();
     lastTemplatesOpener = trigger || document.activeElement;
     overlay.classList.remove("hidden");
     overlay.setAttribute("aria-hidden", "false");
