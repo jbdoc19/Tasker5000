@@ -18845,9 +18845,40 @@ host.appendChild(row);
 
   function openEnergySheet() {
     const card = document.getElementById("neuroChecklist");
-    if (!card) return;
+    if (!card) {
+      if (!openEnergySheet.__waitForCard) {
+        const handleCardReady = () => {
+          openEnergySheet.__waitForCard = null;
+          openEnergySheet();
+        };
+        openEnergySheet.__waitForCard = handleCardReady;
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", handleCardReady, { once: true });
+        } else {
+          window.requestAnimationFrame(handleCardReady);
+        }
+      }
+      return;
+    }
+    openEnergySheet.__waitForCard = null;
+
     const sheet = ensureEnergySheet();
-    if (!sheet) return;
+    if (!sheet) {
+      if (!openEnergySheet.__waitForSheet) {
+        const handleSheetReady = () => {
+          openEnergySheet.__waitForSheet = null;
+          openEnergySheet();
+        };
+        openEnergySheet.__waitForSheet = handleSheetReady;
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", handleSheetReady, { once: true });
+        } else {
+          window.requestAnimationFrame(handleSheetReady);
+        }
+      }
+      return;
+    }
+    openEnergySheet.__waitForSheet = null;
 
     const currentLevel = alignEnergySliders(getEnergyLevel(), "sheet");
     const refresh = typeof sheet.__refreshEnergySheet === "function" ? sheet.__refreshEnergySheet : null;
