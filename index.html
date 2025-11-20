@@ -665,6 +665,12 @@
       font-size: 0.9rem;
     }
 
+    .energy-sheet__hint {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+    }
+
     .energy-sheet__body {
       display: flex;
       flex-direction: column;
@@ -748,6 +754,58 @@
       flex-direction: column;
       align-items: center;
       gap: 0.35rem;
+    }
+
+    .neuro-checklist__context {
+      margin-top: 0.5rem;
+      display: grid;
+      gap: 0.35rem;
+      align-items: start;
+    }
+
+    @media (min-width: 760px) {
+      .neuro-checklist__context {
+        grid-template-columns: auto 1fr;
+        align-items: center;
+      }
+    }
+
+    .neuro-checklist__context-label {
+      margin: 0;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    .neuro-checklist__context-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .neuro-checklist__context-option {
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      background: rgba(13, 19, 25, 0.75);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      line-height: 1.1;
+      transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+    }
+
+    .neuro-checklist__context-option:hover,
+    .neuro-checklist__context-option:focus-visible {
+      border-color: rgba(125, 196, 177, 0.65);
+      color: #ecfeff;
+    }
+
+    .neuro-checklist__context-option.is-active {
+      background: rgba(45, 212, 195, 0.16);
+      border-color: rgba(45, 212, 195, 0.55);
+      color: #ecfeff;
     }
 
     .neuro-checklist__control button {
@@ -10771,7 +10829,15 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   const SessionState = {
     energyLevel: 3,
     contextLocation: "home_solo",
+    contextSource: "auto",
   };
+  const CONTEXT_LOCATION_OPTIONS = [
+    { value: "clinic_open_door", label: "Clinic (door open)" },
+    { value: "clinic_closed", label: "Clinic (closed)" },
+    { value: "home_solo", label: "Home (solo)" },
+    { value: "zoom_buddy", label: "Buddy (Zoom)" },
+    { value: "cafe", label: "Buddy (café)" },
+  ];
   const ENERGY_SCORE_MAP = {
     1: 0.15,
     2: 0.35,
@@ -14671,6 +14737,35 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return task && isQuickTaskCategory(task.category);
   }
 
+  function isDailyCriticalTask(task) {
+    if (!task) return false;
+    if (task.isDailyCritical === true) return true;
+    if (task.isDailyCritical === false) return false;
+    const haystackParts = [
+      task.category,
+      task.type,
+      task.kind,
+      task.name,
+    ]
+      .concat(Array.isArray(task.tags) ? task.tags : [])
+      .concat(Array.isArray(task.meta) ? task.meta : [])
+      .map(value => String(value || "").toLowerCase());
+    const haystack = haystackParts.join(" ");
+    if (!haystack) return false;
+    return [
+      "refill",
+      "med refill",
+      "prescription",
+      "result",
+      "lab",
+      "urgent document",
+      "form",
+      "message",
+      "portal",
+      "parent",
+    ].some(keyword => haystack.includes(keyword));
+  }
+
   function buildChartSteps(authorType) {
     const steps = [...BASE_CHART_STEPS];
     if (String(authorType).toLowerCase() === "resident") {
@@ -16665,13 +16760,23 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return null;
   }
 
-  function setSessionContextLocation(location) {
-    if (!location) return SessionState.contextLocation;
+  function normalizeContextLocation(location) {
     const normalized = (location || "").toString().toLowerCase().replace(/\s+/g, "_");
-    const resolved = SOCIAL_SCORE_MAP[normalized] !== undefined ? normalized : SessionState.contextLocation;
-    const changed = SessionState.contextLocation !== resolved;
-    SessionState.contextLocation = resolved;
-    if (changed) {
+    return SOCIAL_SCORE_MAP[normalized] !== undefined ? normalized : null;
+  }
+
+  function setSessionContextLocation(location, options = {}) {
+    const source = options.source === "user" ? "user" : "auto";
+    const normalized = normalizeContextLocation(location);
+    if (!normalized) return SessionState.contextLocation;
+    if (source !== "user" && SessionState.contextSource === "user") {
+      return SessionState.contextLocation;
+    }
+    const changed = SessionState.contextLocation !== normalized;
+    SessionState.contextLocation = normalized;
+    const sourceChanged = SessionState.contextSource !== source && source === "user";
+    SessionState.contextSource = sourceChanged ? source : SessionState.contextSource || source;
+    if (changed || sourceChanged) {
       schedulePriorityRefresh("context-change");
     }
     return SessionState.contextLocation;
@@ -16922,6 +17027,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     } else {
       task.completed = Boolean(task.completed);
     }
+    task.isDailyCritical = isDailyCriticalTask(task);
     if (isChartTask(task) && task.useChartTemplate === undefined) {
       const defaults = new Set(buildChartSteps(task.authorType).map(step => step.toLowerCase()));
       const hasCustomSteps = Array.isArray(task.subTasks)
@@ -18097,7 +18203,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     neuroScheduleSnapshot.dayState = sanitizeDayStateSnapshot(detail);
     const derivedContext = deriveContextLocationFromDayState(neuroScheduleSnapshot.dayState);
     if (derivedContext) {
-      setSessionContextLocation(derivedContext);
+      setSessionContextLocation(derivedContext, { source: "auto" });
     }
   }
 
@@ -18169,7 +18275,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return "Focus: Close visit notes before block transition.";
   }
 
-  function createChecklistEntry(label, metaLines = []) {
+  function createChecklistEntry(label, metaLines = [], options = {}) {
     const li = document.createElement("li");
     const labelEl = document.createElement("span");
     labelEl.className = "neuro-checklist__item-label";
@@ -18181,6 +18287,9 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       meta.textContent = text;
       li.appendChild(meta);
     });
+    if (options.title) {
+      li.title = options.title;
+    }
     /* === Phase 2 – Step 2 : Progress-bar + click animation === */
   const bar = document.createElement("div");
   bar.className = "progress-bar-fill";
@@ -18606,6 +18715,30 @@ host.appendChild(row);
     controlGrid.setAttribute("role", "group");
     controlGrid.setAttribute("aria-label", "Capacity center controls");
 
+    const contextToggle = document.createElement("div");
+    contextToggle.className = "neuro-checklist__context";
+    const contextLabel = document.createElement("p");
+    contextLabel.className = "neuro-checklist__context-label";
+    contextLabel.textContent = "Context";
+    const contextOptions = document.createElement("div");
+    contextOptions.className = "neuro-checklist__context-options";
+    contextOptions.setAttribute("role", "radiogroup");
+    contextOptions.setAttribute("aria-label", "Context location");
+    const contextButtons = new Map();
+    CONTEXT_LOCATION_OPTIONS.forEach(option => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "neuro-checklist__context-option";
+      button.textContent = option.label;
+      button.dataset.contextLocation = option.value;
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", "false");
+      contextButtons.set(option.value, button);
+      contextOptions.appendChild(button);
+    });
+    contextToggle.appendChild(contextLabel);
+    contextToggle.appendChild(contextOptions);
+
     const metricsBox = document.createElement("div");
     metricsBox.className = "visually-hidden";
     const workloadEl = document.createElement("span");
@@ -18620,6 +18753,7 @@ host.appendChild(row);
     header.appendChild(title);
     header.appendChild(snapshotEl);
     header.appendChild(controlGrid);
+    header.appendChild(contextToggle);
     header.appendChild(metricsBox);
 
     const body = document.createElement("div");
@@ -18674,6 +18808,7 @@ host.appendChild(row);
       workloadEl,
       basketUpdatedEl,
       controlGrid,
+      contextButtons,
       focusList,
       itineraryList,
       itineraryTimeline,
@@ -18762,6 +18897,18 @@ host.appendChild(row);
         hostEl.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
+
+    const contextButtons = card.__checklistRefs?.contextButtons;
+    if (contextButtons instanceof Map) {
+      contextButtons.forEach((button, value) => {
+        if (!(button instanceof HTMLElement)) return;
+        button.addEventListener("click", () => {
+          setSessionContextLocation(value, { source: "user" });
+          applyChecklistControlsState();
+          renderNeuroChecklist();
+        });
+      });
+    }
   }
 
   function renderCapacityRows(sheet) {
@@ -18914,6 +19061,7 @@ host.appendChild(row);
       <div class="energy-sheet__header">
         <h4 class="energy-sheet__title">Energy check</h4>
         <p class="energy-sheet__subtitle">Set how charged you feel so focus picks the right lift.</p>
+        <p class="energy-sheet__hint">Energy affects which tasks are suggested first.</p>
       </div>
       <div class="energy-sheet__body">
         <div class="energy-sheet__slider">
@@ -19394,6 +19542,23 @@ host.appendChild(row);
       energyButton.setAttribute("aria-pressed", sheetOpen ? "true" : "false");
       energyButton.classList.toggle("is-active", Boolean(sheetOpen));
     }
+
+    const contextButtons = card?.__checklistRefs?.contextButtons;
+    if (contextButtons instanceof Map) {
+      const current = SessionState.contextLocation;
+      const sourceLabel = SessionState.contextSource === "user" ? "Manual" : "Auto (schedule)";
+      contextButtons.forEach((button, value) => {
+        if (!(button instanceof HTMLElement)) return;
+        const normalized = normalizeContextLocation(value);
+        const isActive = normalized === current;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-checked", isActive ? "true" : "false");
+        button.setAttribute(
+          "aria-label",
+          `${button.textContent || "Context"} — ${isActive ? "selected" : "set context"}; Source: ${sourceLabel}`,
+        );
+      });
+    }
   }
 
   function minutesToTimeString(totalMinutes) {
@@ -19661,7 +19826,7 @@ host.appendChild(row);
     };
     const derivedContextLocation = deriveContextLocationFromDayState(dayState);
     if (derivedContextLocation) {
-      setSessionContextLocation(derivedContextLocation);
+      setSessionContextLocation(derivedContextLocation, { source: "auto" });
     }
     // === Phase 5 – Apply adaptive profile ===
     try {
@@ -19815,10 +19980,15 @@ host.appendChild(row);
       .sort((a, b) => (Number.isFinite(b.totalEstMinutes) ? b.totalEstMinutes : 0) - (Number.isFinite(a.totalEstMinutes) ? a.totalEstMinutes : 0));
 
     focusList.innerHTML = "";
-    const focusCandidates = sortTasksByMode(
-      activeTasks.filter(task => !isQuickTask(task)),
-      TASK_SORT_MODES.PRIORITY,
-    ).slice(0, 3);
+    const focusCandidates = (() => {
+      const dailyCritical = activeTasks
+        .filter(task => task.isDailyCritical)
+        .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0));
+      const nonQuickCore = activeTasks
+        .filter(task => !isQuickTask(task) && !task.isDailyCritical)
+        .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0));
+      return [...dailyCritical.slice(0, 1), ...nonQuickCore].slice(0, 3);
+    })();
 
     if (!focusCandidates.length) {
       const empty = document.createElement("li");
@@ -19832,6 +20002,9 @@ host.appendChild(row);
         const descriptorText = descriptors.join(" • ");
         const estimate = estimateTaskMinutes(task);
         const metaParts = [];
+        if (task.isDailyCritical) {
+          metaParts.push("Daily clinical lane");
+        }
         if (descriptorText) {
           metaParts.push(descriptorText);
         }
@@ -19844,7 +20017,10 @@ host.appendChild(row);
             metaParts.push(`Due ${dueLabel}`);
           }
         }
-        focusList.appendChild(createChecklistEntry(label, metaParts));
+        const tooltip = `Energy: ${SessionState.energyLevel ?? "?"} • Fit x${
+          task?.stateFitMultiplier ? task.stateFitMultiplier.toFixed(2) : "?"
+        }`;
+        focusList.appendChild(createChecklistEntry(label, metaParts, { title: tooltip }));
       });
     }
 
@@ -19865,7 +20041,15 @@ host.appendChild(row);
     let itineraryBlocks = [];
 
     if (typeof itineraryGenerator === "function") {
-      const itineraryTasks = activeTasks.map(task => {
+      const prioritizedTasks = activeTasks
+        .slice()
+        .sort((a, b) => {
+          if (a?.isDailyCritical && !b?.isDailyCritical) return -1;
+          if (b?.isDailyCritical && !a?.isDailyCritical) return 1;
+          return (Number(b?.priority) || 0) - (Number(a?.priority) || 0);
+        });
+
+      const itineraryTasks = prioritizedTasks.map(task => {
         const estimate = estimateTaskMinutes(task);
         const safeMinutes = Number.isFinite(estimate) && estimate > 0 ? estimate : 30;
         const descriptors = buildTaskDescriptors(task);
@@ -19878,6 +20062,9 @@ host.appendChild(row);
         }
         if (task.category) {
           metaSet.add(task.category);
+        }
+        if (task.isDailyCritical) {
+          metaSet.add("Daily clinical lane");
         }
         return {
           name: task.name || "Focused Block",
