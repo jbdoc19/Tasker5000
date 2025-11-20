@@ -790,6 +790,10 @@
       gap: clamp(1rem, 3vw, 1.5rem);
     }
 
+    .neuro-checklist-card.neuro-checklist--collapsed .neuro-checklist__body {
+      display: none;
+    }
+
     @media (min-width: 900px) {
       .neuro-checklist__body {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -18164,7 +18168,7 @@ host.appendChild(row);
   }
 
   const DEFAULT_QUOTAS = { AM: 0.4, PM: 0.8 };
-  let checklistViewMode = "list";
+  let checklistViewMode = null;
   const capacityAdjustmentsState = {};
   const CAPACITY_ADJUSTMENTS_STORAGE_KEY = "taskerCapacityAdjustments";
   let energySheetEscapeHandler = null;
@@ -19215,21 +19219,28 @@ host.appendChild(row);
     const card = document.getElementById("neuroChecklist");
     if (card) {
       const isTimeline = checklistViewMode === "timeline";
+      const isList = checklistViewMode === "list";
+      const isCollapsed = !isTimeline && !isList;
       card.classList.toggle("neuro-checklist--timeline", isTimeline);
+      card.classList.toggle("neuro-checklist--collapsed", isCollapsed);
       const refs = card.__checklistRefs;
       if (refs) {
+        if (refs.focusList) {
+          refs.focusList.setAttribute("aria-hidden", isList ? "false" : "true");
+        }
         if (refs.itineraryList) {
-          refs.itineraryList.setAttribute("aria-hidden", isTimeline ? "true" : "false");
+          refs.itineraryList.setAttribute("aria-hidden", isList ? "false" : "true");
         }
         if (refs.itineraryTimeline) {
           refs.itineraryTimeline.setAttribute("aria-hidden", isTimeline ? "false" : "true");
         }
       }
+      card.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
     }
 
     const focusButton = document.getElementById("focusViewButton");
     if (focusButton) {
-      const isActive = checklistViewMode !== "timeline";
+      const isActive = checklistViewMode === "list";
       focusButton.classList.toggle("is-active", isActive);
       focusButton.setAttribute("aria-pressed", isActive ? "true" : "false");
       focusButton.setAttribute("aria-label", "Focus view");
