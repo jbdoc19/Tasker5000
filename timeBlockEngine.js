@@ -506,7 +506,22 @@ export function finalizeLabels(blocks) {
 }
 
 export function generateAdaptiveItinerary(ctx, opts = {}) {
-  const { windows = [], quotas = {}, tasks = [], basket = {}, clinicType, userEndTime } = ctx || {};
+  const { windows = [], quotas = {}, tasks = [], basket = {}, clinicType, userEndTime, sessionState = {} } = ctx || {};
+  const mentalEnergyScore = typeof sessionState.mentalEnergyScore === 'number'
+    ? sessionState.mentalEnergyScore
+    : null;
+  const capacityBias = mentalEnergyScore != null
+    ? Math.max(0.6, Math.min(1.15, 0.85 + mentalEnergyScore * 0.35))
+    : 1;
+  const resolveQuota = (value, fallback) => {
+    const base = Number.isFinite(value) ? value : fallback;
+    const adjusted = base * capacityBias;
+    return Math.max(0.1, Math.min(1, adjusted));
+  };
+  const resolvedQuotas = {
+    AM: resolveQuota(quotas.AM, 0.4),
+    PM: resolveQuota(quotas.PM, 0.8),
+  };
   const segmentMeta = computeSegmentMeta(windows);
   const queues = clusterTasks(tasks, basket);
   const counter = { value: 0 };
@@ -515,13 +530,13 @@ export function generateAdaptiveItinerary(ctx, opts = {}) {
   const amWindows = windows.filter(window => window?.block === 'AM');
   if (amWindows.length) {
     enqueueQuickWin(blocks, queues.quickWins, 'AM', segmentMeta, counter);
-    buildFromWindows(blocks, amWindows, queues, quotas.AM ?? 0.4, counter);
+    buildFromWindows(blocks, amWindows, queues, resolvedQuotas.AM, counter);
   }
 
   const pmWindows = windows.filter(window => window?.block === 'PM');
   if (pmWindows.length) {
     enqueueQuickWin(blocks, queues.quickWins, 'PM', segmentMeta, counter);
-    buildFromWindows(blocks, pmWindows, queues, quotas.PM ?? 0.8, counter);
+    buildFromWindows(blocks, pmWindows, queues, resolvedQuotas.PM, counter);
   }
 
   if (clinicType === 'clinic') {
