@@ -785,6 +785,38 @@
       gap: 0.5rem;
     }
 
+    .neuro-checklist__energy {
+      display: grid;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    @media (min-width: 760px) {
+      .neuro-checklist__energy {
+        grid-template-columns: auto 1fr auto;
+      }
+    }
+
+    .neuro-checklist__energy-label {
+      margin: 0;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    .neuro-checklist__energy-hint {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .neuro-checklist__energy-slider {
+      width: 100%;
+      accent-color: #2dd4c3;
+    }
+
     .neuro-checklist__context-option {
       padding: 0.35rem 0.65rem;
       border-radius: 999px;
@@ -17277,134 +17309,142 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return merged;
   }
 
-    function hydrateTasksFromStorage() {
-      const api = window.TaskerStorage;
-      const hydrationResult = {
-        primaryRestored: 0,
-        quickRestored: 0,
-        totalRestored: 0,
-        discarded: 0,
-        quickDiscarded: 0,
-        scheduledUpdate: false,
-        storageAvailable: true,
-        error: null,
-      };
+  function getTasksFromStorage() {
+    const api = window.TaskerStorage;
+    if (api && typeof api.getTasksFromStorage === "function") {
+      const result = api.getTasksFromStorage();
+      if (typeof result === "string" || result === null) {
+        return result;
+      }
+      if (result && typeof result === "object" && typeof result.serialized === "string") {
+        return result.serialized;
+      }
+    }
+    try {
+      return localStorage.getItem("tasks");
+    } catch (error) {
+      console.warn("Unable to read saved tasks from localStorage.", error);
+      return null;
+    }
+  }
 
-      const scheduleHydratedRender = () => {
-        if (hydrationResult.totalRestored <= 0) {
-          return;
-        }
-        const render = () => {
-          try {
-            updateUI();
-          } catch (renderError) {
-            console.error("Unable to render hydrated tasks after load.", renderError);
-            // TODO: Validate hydrated task rendering across supported browsers.
-          }
-        };
+  function hydrateTasksFromStorage() {
+    const api = window.TaskerStorage;
+    const hydrationResult = {
+      primaryRestored: 0,
+      quickRestored: 0,
+      totalRestored: 0,
+      discarded: 0,
+      quickDiscarded: 0,
+      scheduledUpdate: false,
+      storageAvailable: true,
+      error: null,
+    };
+
+    const scheduleHydratedRender = () => {
+      const render = () => {
         try {
-          if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-            window.requestAnimationFrame(render);
-          } else {
-            setTimeout(render, 0);
-          }
-          hydrationResult.scheduledUpdate = true;
-        } catch (scheduleError) {
-          console.warn("Unable to schedule hydrated task render", scheduleError);
+          updateUI();
+        } catch (renderError) {
+          console.error("Unable to render hydrated tasks after load.", renderError);
+          // TODO: Validate hydrated task rendering across supported browsers.
         }
       };
-
       try {
-        if (api && typeof api.loadStoredTasks === "function") {
-          const snapshot = api.loadStoredTasks();
-          if (snapshot?.error) {
-            console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
-            hydrationResult.error = snapshot.error;
-            tasks = [];
-            return hydrationResult;
-          }
-          if (!snapshot || snapshot.storageAvailable === false) {
-            tasks = [];
-            hydrationResult.storageAvailable = Boolean(snapshot?.storageAvailable);
-            return hydrationResult;
-          }
-          const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
-          const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
-          tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
-          hydrationResult.primaryRestored = normalizedPrimary.length;
-          hydrationResult.quickRestored = normalizedQuick.length;
-          hydrationResult.totalRestored = tasks.length;
-          hydrationResult.discarded = snapshot.discarded || 0;
-          hydrationResult.quickDiscarded = snapshot.quickDiscarded || 0;
-          if (snapshot.discarded) {
-            console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-          }
-          if (snapshot.quickDiscarded) {
-            console.warn(`Skipped ${snapshot.quickDiscarded} invalid quick task ${snapshot.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
-          }
-          return hydrationResult;
-        }
-
-        const saved = (() => {
-          try {
-            return localStorage.getItem("tasks");
-          } catch (error) {
-            console.warn("Unable to read saved tasks from localStorage.", error);
-            hydrationResult.error = error;
-            return null;
-          }
-        })();
-
-        if (!saved) {
-          tasks = [];
-          return hydrationResult;
-        }
-
-        const parser = api?.parseStoredTasks;
-        let parseResult = null;
-
-        if (typeof parser === "function") {
-          parseResult = parser(saved);
+        if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+          window.requestAnimationFrame(render);
         } else {
-          try {
-            const parsed = JSON.parse(saved);
-            const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
-            const taskEntries = Array.isArray(parsed)
-              ? parsed
-              : (isPlainObject && Array.isArray(parsed.allTasks)
-                ? parsed.allTasks
-                : (isPlainObject && Array.isArray(parsed.tasks)
-                  ? parsed.tasks
-                  : []));
-            const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
-              ? parsed.quickTasks
-              : [];
-            parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
-          } catch (error) {
-            console.error("Unable to parse saved tasks.", error);
-            hydrationResult.error = error;
-            tasks = [];
-            return hydrationResult;
-          }
+          setTimeout(render, 0);
         }
+        hydrationResult.scheduledUpdate = true;
+      } catch (scheduleError) {
+        console.warn("Unable to schedule hydrated task render", scheduleError);
+      }
+    };
 
-        if (!parseResult || parseResult.error) {
-          if (parseResult?.error) {
-            console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
-            hydrationResult.error = parseResult.error;
-          }
+    try {
+      if (api && typeof api.loadStoredTasks === "function") {
+        const snapshot = api.loadStoredTasks();
+        if (snapshot?.error) {
+          console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
+          hydrationResult.error = snapshot.error;
           tasks = [];
           return hydrationResult;
         }
-
-        const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
-        const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
+        if (!snapshot || snapshot.storageAvailable === false) {
+          tasks = [];
+          hydrationResult.storageAvailable = Boolean(snapshot?.storageAvailable);
+          return hydrationResult;
+        }
+        const normalizedPrimary = normalizeTasksFromStorage(snapshot.tasks);
+        const normalizedQuick = normalizeTasksFromStorage(snapshot.quickTasks || []);
         tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
         hydrationResult.primaryRestored = normalizedPrimary.length;
         hydrationResult.quickRestored = normalizedQuick.length;
         hydrationResult.totalRestored = tasks.length;
-        hydrationResult.discarded = parseResult.discarded || 0;
-        hydrationResult.quickDiscarded = parseResult.quickDiscarded || 0;
+        hydrationResult.discarded = snapshot.discarded || 0;
+        hydrationResult.quickDiscarded = snapshot.quickDiscarded || 0;
+        if (snapshot.discarded) {
+          console.warn(`Skipped ${snapshot.discarded} invalid task ${snapshot.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+        }
+        if (snapshot.quickDiscarded) {
+          console.warn(`Skipped ${snapshot.quickDiscarded} invalid quick task ${snapshot.quickDiscarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
+        }
+        return hydrationResult;
+      }
+
+      const saved = getTasksFromStorage();
+
+      if (!saved) {
+        tasks = [];
+        return hydrationResult;
+      }
+
+      const parser = api?.parseStoredTasks;
+      let parseResult = null;
+
+      if (typeof parser === "function") {
+        parseResult = parser(saved);
+      } else {
+        try {
+          const parsed = JSON.parse(saved);
+          const isPlainObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
+          const taskEntries = Array.isArray(parsed)
+            ? parsed
+            : (isPlainObject && Array.isArray(parsed.allTasks)
+              ? parsed.allTasks
+              : (isPlainObject && Array.isArray(parsed.tasks)
+                ? parsed.tasks
+                : []));
+          const quickEntries = isPlainObject && Array.isArray(parsed.quickTasks)
+            ? parsed.quickTasks
+            : [];
+          parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
+        } catch (error) {
+          console.error("Unable to parse saved tasks.", error);
+          hydrationResult.error = error;
+          tasks = [];
+          return hydrationResult;
+        }
+      }
+
+      if (!parseResult || parseResult.error) {
+        if (parseResult?.error) {
+          console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+          hydrationResult.error = parseResult.error;
+        }
+        tasks = [];
+        return hydrationResult;
+      }
+
+      const normalizedPrimary = normalizeTasksFromStorage(parseResult.tasks);
+      const normalizedQuick = normalizeTasksFromStorage(parseResult.quickTasks || []);
+      tasks = mergeTaskCollections(normalizedPrimary, normalizedQuick);
+      hydrationResult.primaryRestored = normalizedPrimary.length;
+      hydrationResult.quickRestored = normalizedQuick.length;
+      hydrationResult.totalRestored = tasks.length;
+      hydrationResult.discarded = parseResult.discarded || 0;
+      hydrationResult.quickDiscarded = parseResult.quickDiscarded || 0;
 
         if (parseResult.discarded) {
           console.warn(`Skipped ${parseResult.discarded} invalid task ${parseResult.discarded === 1 ? "entry" : "entries"} while restoring saved tasks.`);
@@ -18847,6 +18887,24 @@ host.appendChild(row);
     snapshotEl.dataset.checklistSnapshot = "";
     snapshotEl.textContent = "Clinic snapshot loading…";
 
+    const energyBlock = document.createElement("div");
+    energyBlock.className = "neuro-checklist__energy";
+    const energyLabel = document.createElement("p");
+    energyLabel.className = "neuro-checklist__energy-label";
+    energyLabel.textContent = "Energy check";
+    const energySlider = document.createElement("input");
+    energySlider.type = "range";
+    energySlider.className = "neuro-checklist__energy-slider";
+    energySlider.id = "checklistEnergySlider";
+    energySlider.min = "1";
+    energySlider.max = "5";
+    energySlider.step = "1";
+    energySlider.value = String(clampScale(getEnergyLevel(), 3));
+    const energyHint = document.createElement("p");
+    energyHint.className = "neuro-checklist__energy-hint";
+    energyHint.dataset.energyHint = "";
+    energyBlock.append(energyLabel, energySlider, energyHint);
+
     const controlGrid = document.createElement("div");
     controlGrid.className = "neuro-checklist__control-grid";
     controlGrid.id = "capacityControlGrid";
@@ -18892,6 +18950,7 @@ host.appendChild(row);
     header.appendChild(snapshotEl);
     header.appendChild(controlGrid);
     header.appendChild(contextToggle);
+    header.appendChild(energyBlock);
     header.appendChild(metricsBox);
 
     const body = document.createElement("div");
@@ -19012,6 +19071,8 @@ host.appendChild(row);
       snapshotEl,
       workloadEl,
       basketUpdatedEl,
+      energySlider,
+      energyHint,
       controlGrid,
       contextButtons,
       focusList,
@@ -19028,6 +19089,19 @@ host.appendChild(row);
       itineraryAdvisory,
     };
     card.__checklistRefs = refs;
+    const updateEnergyHint = value => {
+      if (energyHint) {
+        const label = ENERGY_LABELS[value] || value;
+        energyHint.textContent = `Energy influences suggested tasks — ${label}`;
+      }
+    };
+
+    energySlider.addEventListener("input", event => {
+      const value = Number(event.target.value);
+      const resolved = alignEnergySliders(value, "neuro");
+      updateEnergyHint(resolved);
+    });
+    updateEnergyHint(clampScale(getEnergyLevel(), 3));
     return refs;
   }
 
@@ -19754,6 +19828,17 @@ host.appendChild(row);
       energyButton.setAttribute("aria-label", `Energy — ${level} (${label})`);
       energyButton.setAttribute("aria-pressed", sheetOpen ? "true" : "false");
       energyButton.classList.toggle("is-active", Boolean(sheetOpen));
+    }
+
+    const energySlider = card?.__checklistRefs?.energySlider;
+    const energyHint = card?.__checklistRefs?.energyHint;
+    if (energySlider) {
+      const level = clampScale(getEnergyLevel(), 3);
+      energySlider.value = String(level);
+      if (energyHint) {
+        const label = ENERGY_LABELS[level] || level;
+        energyHint.textContent = `Energy influences suggested tasks — ${label}`;
+      }
     }
 
     const contextButtons = card?.__checklistRefs?.contextButtons;
