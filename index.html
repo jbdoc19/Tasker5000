@@ -672,6 +672,10 @@
       gap: 1.25rem;
     }
 
+    .energy-sheet__body--dual {
+      gap: 1rem;
+    }
+
     .energy-sheet__slider {
       display: flex;
       flex-direction: column;
@@ -688,6 +692,101 @@
     .energy-sheet__value {
       font-weight: 600;
       color: var(--text-primary);
+    }
+
+    .energy-sheet__bucket {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(120, 164, 193, 0.25);
+      border-radius: 12px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .energy-sheet__bucket-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .energy-sheet__bucket-title {
+      font-weight: 700;
+      color: #f8fafc;
+      font-size: 0.95rem;
+    }
+
+    .energy-sheet__bucket-labels {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .energy-sheet__bucket-labels span {
+      padding: 0.35rem 0.25rem;
+      border-radius: 10px;
+      border: 1px solid transparent;
+    }
+
+    .energy-sheet__bucket-labels span.is-active {
+      border-color: rgba(248, 180, 0, 0.6);
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.08);
+      font-weight: 600;
+    }
+
+    .energy-sheet__bucket-notes {
+      margin: 0;
+      padding-left: 1rem;
+      color: var(--text-secondary);
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .energy-sheet__bucket-notes li {
+      line-height: 1.4;
+    }
+
+    .energy-sheet__bucket-approx {
+      color: #8ed1fc;
+      font-weight: 600;
+      list-style: none;
+      margin-top: 0.25rem;
+    }
+
+    .energy-sheet__summary {
+      background: linear-gradient(90deg, rgba(8, 47, 73, 0.8), rgba(14, 116, 144, 0.7));
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .energy-sheet__summary-title {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.75rem;
+      color: #bae6fd;
+      margin: 0;
+    }
+
+    .energy-sheet__summary-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0;
+    }
+
+    .energy-sheet__summary-detail {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
     }
 
     .energy-sheet__actions {
@@ -18786,48 +18885,277 @@ host.appendChild(row);
     sheet.innerHTML = `
       <div class="energy-sheet__header">
         <h4 class="energy-sheet__title">Energy check</h4>
-        <p class="energy-sheet__subtitle">Set how charged you feel so focus picks the right lift.</p>
+        <p class="energy-sheet__subtitle">Pick the buckets that best match how you feel right now.</p>
       </div>
-      <div class="energy-sheet__body">
-        <div class="energy-sheet__slider">
-          <input id="energySheetSlider" type="range" min="1" max="5" step="1" value="3" aria-label="Energy level" />
-          <div class="energy-sheet__labels">
-            <span>Low</span>
-            <span id="energySheetValue" class="energy-sheet__value">3 • Balanced</span>
-            <span>Max</span>
+      <div class="energy-sheet__body energy-sheet__body--dual">
+        <div class="energy-sheet__bucket" data-kind="physical">
+          <div class="energy-sheet__bucket-heading">
+            <div class="energy-sheet__bucket-title">Physical energy 💚</div>
+            <div id="energySheetPhysicalValue" class="energy-sheet__value"></div>
           </div>
+          <input
+            id="energySheetPhysical"
+            type="range"
+            min="0"
+            max="3"
+            step="1"
+            value="2"
+            aria-label="Physical energy bucket"
+          />
+          <div class="energy-sheet__bucket-labels" id="energySheetPhysicalLabels"></div>
+          <ul id="energySheetPhysicalNotes" class="energy-sheet__bucket-notes"></ul>
         </div>
+        <div class="energy-sheet__bucket" data-kind="mental">
+          <div class="energy-sheet__bucket-heading">
+            <div class="energy-sheet__bucket-title">Mental energy 🧠</div>
+            <div id="energySheetMentalValue" class="energy-sheet__value"></div>
+          </div>
+          <input
+            id="energySheetMental"
+            type="range"
+            min="0"
+            max="3"
+            step="1"
+            value="2"
+            aria-label="Mental energy bucket"
+          />
+          <div class="energy-sheet__bucket-labels" id="energySheetMentalLabels"></div>
+          <ul id="energySheetMentalNotes" class="energy-sheet__bucket-notes"></ul>
+        </div>
+        <div class="energy-sheet__summary" aria-live="polite">
+          <div class="energy-sheet__summary-title">Overall focus fuel</div>
+          <div id="energySheetValue" class="energy-sheet__summary-value"></div>
+          <p class="energy-sheet__summary-detail" id="energySheetSummary"></p>
+        </div>
+        <input id="energySheetSlider" type="hidden" value="3" aria-hidden="true" />
         <div class="energy-sheet__actions">
           <button type="button" data-action="done">Done</button>
         </div>
       </div>`;
 
-    const slider = sheet.querySelector("#energySheetSlider");
-    const valueEl = sheet.querySelector("#energySheetValue");
+    const hiddenSlider = sheet.querySelector("#energySheetSlider");
+    const overallValue = sheet.querySelector("#energySheetValue");
+    const summaryDetail = sheet.querySelector("#energySheetSummary");
+    const physicalSlider = sheet.querySelector("#energySheetPhysical");
+    const mentalSlider = sheet.querySelector("#energySheetMental");
+    const physicalValue = sheet.querySelector("#energySheetPhysicalValue");
+    const mentalValue = sheet.querySelector("#energySheetMentalValue");
+    const physicalLabels = sheet.querySelector("#energySheetPhysicalLabels");
+    const mentalLabels = sheet.querySelector("#energySheetMentalLabels");
+    const physicalNotes = sheet.querySelector("#energySheetPhysicalNotes");
+    const mentalNotes = sheet.querySelector("#energySheetMentalNotes");
 
-    const refreshSheet = value => {
-      const resolved = clampScale(value, 3);
-      if (slider) {
-        slider.value = String(resolved);
-        slider.setAttribute("data-value", String(resolved));
-      }
-      if (valueEl) {
-        const label = ENERGY_LABELS[resolved] || resolved;
-        valueEl.textContent = `${resolved} • ${label}`;
-      }
+    const PHYSICAL_ENERGY_BUCKETS = [
+      {
+        label: "Trash fire",
+        approx: 0.15,
+        notes: [
+          "< 3.5 h sleep",
+          "Very poor hydration/eating/exercise for > 14 days",
+          "Ill or migraine",
+        ],
+      },
+      {
+        label: "Heavy but functional",
+        approx: 0.4,
+        notes: [
+          "3.5–5 h sleep",
+          "Poor hydration/eating/exercise for > 7 days",
+          "Maybe prodrome of illness",
+        ],
+      },
+      {
+        label: "Decent",
+        approx: 0.7,
+        notes: [
+          "5–7 h sleep",
+          "Hydration/eating/exercise at least every other day",
+          "No illness",
+        ],
+      },
+      {
+        label: "Unicorn",
+        approx: 0.95,
+        notes: ["7 h sleep", "Good hydration/eating/exercise for > 7 days"],
+      },
+    ];
+
+    const MENTAL_ENERGY_BUCKETS = [
+      {
+        label: "Storm",
+        approx: 0.15,
+        notes: [
+          "Panic, high dread, unmedicated, or totally burnt",
+          "Full panel of complex patients makes it worse",
+          "Unlikely to start admin even during admin time unless external threat",
+        ],
+      },
+      {
+        label: "Noisy but possible",
+        approx: 0.4,
+        notes: [
+          "Anxiety/burnout present",
+          "Stars have to align to start",
+          "Slightly more productive on half days and academic days",
+        ],
+      },
+      {
+        label: "Stable",
+        approx: 0.7,
+        notes: [
+          "Meds on board",
+          "Mood okay, mild dread",
+          "High stakes tasks pending but doable",
+        ],
+      },
+      {
+        label: "Rare clear day",
+        approx: 0.95,
+        notes: [
+          "No high stakes tasks hanging over you",
+          "Feel effective and appreciated",
+        ],
+      },
+    ];
+
+    const pickClosestBucket = (buckets, target) => {
+      let bestIndex = 0;
+      let bestDistance = Number.POSITIVE_INFINITY;
+      buckets.forEach((bucket, index) => {
+        const distance = Math.abs(bucket.approx - target);
+        if (distance < bestDistance) {
+          bestIndex = index;
+          bestDistance = distance;
+        }
+      });
+      return bestIndex;
     };
 
-    if (slider) {
-      const applySliderValue = event => {
-        const raw = Number(event?.target?.value || slider.value || 3);
-        const resolved = alignEnergySliders(raw, "sheet");
-        refreshSheet(resolved);
-        return resolved;
-      };
+    const normalizedToEnergyValue = normalized => {
+      const clamped = Math.max(0, Math.min(1, normalized));
+      if (clamped < 0.25) return 1;
+      if (clamped < 0.55) return 2;
+      if (clamped < 0.75) return 3;
+      if (clamped < 0.9) return 4;
+      return 5;
+    };
 
-      slider.addEventListener("input", applySliderValue);
-      slider.addEventListener("change", event => {
-        applySliderValue(event);
+    const clampBucketIndex = value => {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) return 0;
+      return Math.max(0, Math.min(3, Math.round(numeric)));
+    };
+
+    const renderBucketLabels = (container, buckets) => {
+      if (!container) return;
+      container.innerHTML = buckets
+        .map((bucket, index) => `<span data-index="${index}">${bucket.label}</span>`)
+        .join("");
+    };
+
+    renderBucketLabels(physicalLabels, PHYSICAL_ENERGY_BUCKETS);
+    renderBucketLabels(mentalLabels, MENTAL_ENERGY_BUCKETS);
+
+    const attachLabelSelection = (container, slider) => {
+      if (!container || !slider) return;
+      container.addEventListener("click", event => {
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        if (!target || !target.dataset.index) return;
+        slider.value = target.dataset.index;
+        const energyValue = updateSheetFromBuckets();
+        alignEnergySliders(energyValue, "sheet");
+      });
+    };
+
+    const applyBucketNotes = (bucket, list) => {
+      if (!bucket || !list) return;
+      list.innerHTML = "";
+      bucket.notes.forEach(note => {
+        const item = document.createElement("li");
+        item.textContent = note;
+        list.appendChild(item);
+      });
+      const approx = document.createElement("li");
+      approx.className = "energy-sheet__bucket-approx";
+      approx.textContent = `→ Set R ≈ ${bucket.approx.toFixed(2)}`;
+      list.appendChild(approx);
+    };
+
+    const syncBucketHighlight = (container, activeIndex) => {
+      if (!container) return;
+      container.querySelectorAll("span").forEach(label => {
+        const index = Number(label.dataset.index || 0);
+        label.classList.toggle("is-active", index === activeIndex);
+      });
+    };
+
+    const updateSheetFromBuckets = overrideEnergyValue => {
+      const physicalIndex = clampBucketIndex(physicalSlider?.value || 0);
+      const mentalIndex = clampBucketIndex(mentalSlider?.value || 0);
+      const physicalBucket = PHYSICAL_ENERGY_BUCKETS[physicalIndex] || PHYSICAL_ENERGY_BUCKETS[0];
+      const mentalBucket = MENTAL_ENERGY_BUCKETS[mentalIndex] || MENTAL_ENERGY_BUCKETS[0];
+      const combinedNormalized = (physicalBucket.approx + mentalBucket.approx) / 2;
+      const energyValue = Number.isFinite(overrideEnergyValue)
+        ? clampScale(overrideEnergyValue, 3)
+        : normalizedToEnergyValue(combinedNormalized);
+      const energyLabel = ENERGY_LABELS[energyValue] || `${energyValue}`;
+
+      if (physicalValue) {
+        physicalValue.textContent = `${physicalBucket.label} • ${physicalBucket.approx}`;
+      }
+      if (mentalValue) {
+        mentalValue.textContent = `${mentalBucket.label} • ${mentalBucket.approx}`;
+      }
+      if (overallValue) {
+        overallValue.textContent = `${energyValue} • ${energyLabel}`;
+      }
+      if (summaryDetail) {
+        summaryDetail.textContent = `Physical: ${physicalBucket.label} (${physicalBucket.approx}) • Mental: ${mentalBucket.label} (${mentalBucket.approx})`;
+      }
+      if (hiddenSlider) {
+        hiddenSlider.value = String(energyValue);
+        hiddenSlider.setAttribute("data-value", String(energyValue));
+      }
+      applyBucketNotes(physicalBucket, physicalNotes);
+      applyBucketNotes(mentalBucket, mentalNotes);
+      syncBucketHighlight(physicalLabels, physicalIndex);
+      syncBucketHighlight(mentalLabels, mentalIndex);
+
+      return energyValue;
+    };
+
+    const refreshSheet = value => {
+      const normalized = Math.max(0, Math.min(1, Number(value) / 5 || 0));
+      const physicalIndex = pickClosestBucket(PHYSICAL_ENERGY_BUCKETS, normalized);
+      const mentalIndex = pickClosestBucket(MENTAL_ENERGY_BUCKETS, normalized);
+      if (physicalSlider) physicalSlider.value = String(physicalIndex);
+      if (mentalSlider) mentalSlider.value = String(mentalIndex);
+      updateSheetFromBuckets(value);
+    };
+
+    attachLabelSelection(physicalLabels, physicalSlider);
+    attachLabelSelection(mentalLabels, mentalSlider);
+
+    if (physicalSlider) {
+      physicalSlider.addEventListener("input", () => {
+        const energyValue = updateSheetFromBuckets();
+        alignEnergySliders(energyValue, "sheet");
+      });
+      physicalSlider.addEventListener("change", () => {
+        updateSheetFromBuckets();
+        window.requestAnimationFrame(() => {
+          closeEnergySheet();
+        });
+      });
+    }
+
+    if (mentalSlider) {
+      mentalSlider.addEventListener("input", () => {
+        const energyValue = updateSheetFromBuckets();
+        alignEnergySliders(energyValue, "sheet");
+      });
+      mentalSlider.addEventListener("change", () => {
+        updateSheetFromBuckets();
         window.requestAnimationFrame(() => {
           closeEnergySheet();
         });
@@ -18845,6 +19173,7 @@ host.appendChild(row);
 
     sheet.__refreshEnergySheet = refreshSheet;
     host.appendChild(sheet);
+    updateSheetFromBuckets();
     return sheet;
   }
 
@@ -18952,7 +19281,7 @@ host.appendChild(row);
     applyChecklistControlsState();
     syncCapacityOverlayState();
 
-    const slider = sheet.querySelector("#energySheetSlider");
+    const slider = sheet.querySelector("#energySheetPhysical");
     if (slider instanceof HTMLElement) {
       slider.focus();
     }
