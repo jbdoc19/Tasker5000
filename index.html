@@ -16477,6 +16477,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   let templates = [];
   let tasks = [];
   let isHydratingTasks = true;
+  let hydrationFailed = false;
   function normalizeStoredTemplate(template) {
     if (!template || typeof template !== "object") {
       return null;
@@ -17232,6 +17233,12 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     if (isHydratingTasks) {
       return;
     }
+    if (hydrationFailed && tasks.length === 0) {
+      return;
+    }
+    if (hydrationFailed && tasks.length > 0) {
+      hydrationFailed = false;
+    }
     const api = window.TaskerStorage;
     const payload = buildTaskStoragePayload(tasks);
     if (api && typeof api.saveTasksToStorage === "function") {
@@ -17330,6 +17337,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
   function hydrateTasksFromStorage() {
     const api = window.TaskerStorage;
+    hydrationFailed = false;
     const hydrationResult = {
       primaryRestored: 0,
       quickRestored: 0,
@@ -17367,6 +17375,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
         const snapshot = api.loadStoredTasks();
         if (snapshot?.error) {
           console.error("Unable to restore saved tasks from localStorage.", snapshot.error);
+          hydrationFailed = true;
           hydrationResult.error = snapshot.error;
           tasks = [];
           return hydrationResult;
@@ -17422,6 +17431,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
           parseResult = { tasks: taskEntries, quickTasks: quickEntries, discarded: 0, quickDiscarded: 0, error: null };
         } catch (error) {
           console.error("Unable to parse saved tasks.", error);
+          hydrationFailed = true;
           hydrationResult.error = error;
           tasks = [];
           return hydrationResult;
@@ -17431,6 +17441,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       if (!parseResult || parseResult.error) {
         if (parseResult?.error) {
           console.error("Unable to restore saved tasks from localStorage.", parseResult.error);
+          hydrationFailed = true;
           hydrationResult.error = parseResult.error;
         }
         tasks = [];
