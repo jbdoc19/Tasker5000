@@ -808,6 +808,75 @@
       color: #ecfeff;
     }
 
+    .chart-horizon {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .chart-horizon__meta {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .chart-horizon__row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chart-horizon__gauge,
+    .chart-horizon__progress {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .chart-horizon__fill {
+      position: absolute;
+      inset: 0;
+      width: 0;
+      background: linear-gradient(90deg, #8ef9f3, #2dd4c3);
+      transition: width 200ms ease;
+    }
+
+    .chart-horizon__label {
+      min-width: 140px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+    }
+
+    .chart-horizon__controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chart-horizon__actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .chart-horizon__list {
+      margin: 0;
+      padding-left: 1rem;
+    }
+
+    .chart-horizon__empty {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
     .neuro-checklist__control button {
       margin: 0;
       width: clamp(48px, 10vw, 56px);
@@ -10831,6 +10900,14 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     contextLocation: "home_solo",
     contextSource: "auto",
   };
+  const CHART_HORIZON_PAGE = 3;
+  const CHART_BACKLOG_COMFORT = 80;
+  const SPOOKY_MICRO_STEPS = [
+    { id: "open", label: "Open chart" },
+    { id: "scan-orders", label: "Scan orders" },
+    { id: "visit-type", label: "Decide well-visit vs follow-up" },
+  ];
+  const NIGHT_HERO_THRESHOLD_MINUTES = 20 * 60;
   const CONTEXT_LOCATION_OPTIONS = [
     { value: "clinic_open_door", label: "Clinic (door open)" },
     { value: "clinic_closed", label: "Clinic (closed)" },
@@ -10857,6 +10934,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   let sprintDurationMinutes = null;
   let sprintEndTime = null;
   let nextTaskId = null;
+  let chartHorizonStart = 0;
   let lastFocusedBeforeTemplateModal = null;
   let lastFocusedBeforeAllTasksOverlay = null;
   const MODULE_STATE_PREFIX = "moduleState_";
@@ -16913,6 +16991,35 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return infoSparse && resolvedAge !== null && resolvedAge > 30;
   }
 
+  function getSpookyMicroStepState(task) {
+    if (!task || !isChartTask(task)) return null;
+    if (!task.spookyMicroSteps || typeof task.spookyMicroSteps !== "object") {
+      task.spookyMicroSteps = { completed: [] };
+    }
+    if (!Array.isArray(task.spookyMicroSteps.completed)) {
+      task.spookyMicroSteps.completed = [];
+    }
+    return task.spookyMicroSteps;
+  }
+
+  function getNextSpookyMicroStep(task) {
+    const state = getSpookyMicroStepState(task);
+    if (!state) return null;
+    const completed = new Set(state.completed);
+    return SPOOKY_MICRO_STEPS.find(step => !completed.has(step.id)) || null;
+  }
+
+  function logSpookyStepCompletion(task, stepId) {
+    const state = getSpookyMicroStepState(task);
+    if (!state) return false;
+    if (!SPOOKY_MICRO_STEPS.some(step => step.id === stepId)) return false;
+    if (!state.completed.includes(stepId)) {
+      state.completed.push(stepId);
+      return true;
+    }
+    return false;
+  }
+
   function computeChartTimeAgeWeight(task) {
     if (!isChartTask(task)) return 1;
     const parsedDays = Number(task?.daysSinceVisit);
@@ -18689,6 +18796,37 @@ host.appendChild(row);
     return parts.join(" ");
   }
 
+  function resolveBlockStartMinutes(block) {
+    if (!block) return null;
+    if (Number.isFinite(block.startMinutes)) return block.startMinutes;
+    const start = getMinutesFromTimeString(block.start);
+    if (start !== null) return start;
+    if (Number.isFinite(block.endMinutes) && Number.isFinite(block.minutes)) {
+      return Math.max(0, block.endMinutes - block.minutes);
+    }
+    return null;
+  }
+
+  function isNightChartBlock(block) {
+    if (!block) return false;
+    const isCharty = /chart/i.test(block.title || "")
+      || (Array.isArray(block.meta) && block.meta.some(meta => /chart/i.test(String(meta))));
+    if (!isCharty) return false;
+    const startMinutes = resolveBlockStartMinutes(block);
+    return Number.isFinite(startMinutes) && startMinutes >= NIGHT_HERO_THRESHOLD_MINUTES;
+  }
+
+  function describeBlockWindow(block) {
+    const startMinutes = resolveBlockStartMinutes(block);
+    const startLabel = typeof block?.start === "string"
+      ? block.start
+      : (Number.isFinite(startMinutes) ? minutesToTimeString(startMinutes) : "");
+    const endLabel = typeof block?.end === "string"
+      ? block.end
+      : (Number.isFinite(block?.endMinutes) ? minutesToTimeString(block.endMinutes) : "");
+    return [startLabel, endLabel].filter(Boolean).join("–") || "after hours";
+  }
+
   function ensureChecklistLayout(card) {
     if (!card) return null;
     if (card.__checklistRefs) {
@@ -18774,6 +18912,67 @@ host.appendChild(row);
     focusSection.appendChild(focusTitle);
     focusSection.appendChild(focusList);
 
+    const chartSection = document.createElement("section");
+    chartSection.className = "neuro-checklist__section";
+    const chartTitle = document.createElement("h3");
+    chartTitle.className = "neuro-checklist__section-title";
+    chartTitle.textContent = "Chart Horizon";
+
+    const chartHorizon = document.createElement("div");
+    chartHorizon.className = "chart-horizon";
+
+    const metaGrid = document.createElement("div");
+    metaGrid.className = "chart-horizon__meta";
+
+    const backlogRow = document.createElement("div");
+    backlogRow.className = "chart-horizon__row";
+    const backlogLabel = document.createElement("span");
+    backlogLabel.className = "chart-horizon__label";
+    backlogLabel.dataset.chartBacklogLabel = "";
+    const backlogGauge = document.createElement("div");
+    backlogGauge.className = "chart-horizon__gauge";
+    const backlogFill = document.createElement("div");
+    backlogFill.className = "chart-horizon__fill";
+    backlogFill.dataset.chartBacklogFill = "";
+    backlogGauge.appendChild(backlogFill);
+    backlogRow.append(backlogLabel, backlogGauge);
+
+    const progressRow = document.createElement("div");
+    progressRow.className = "chart-horizon__row";
+    const progressLabel = document.createElement("span");
+    progressLabel.className = "chart-horizon__label";
+    progressLabel.dataset.chartProgressLabel = "";
+    const progressBar = document.createElement("div");
+    progressBar.className = "chart-horizon__progress";
+    const progressFill = document.createElement("div");
+    progressFill.className = "chart-horizon__fill";
+    progressFill.dataset.chartProgressFill = "";
+    progressBar.appendChild(progressFill);
+    progressRow.append(progressLabel, progressBar);
+
+    metaGrid.append(backlogRow, progressRow);
+
+    const horizonControls = document.createElement("div");
+    horizonControls.className = "chart-horizon__controls";
+    const horizonCaption = document.createElement("p");
+    horizonCaption.className = "chart-horizon__empty";
+    horizonCaption.textContent = "Three-chart preview to prevent overload.";
+    const horizonActions = document.createElement("div");
+    horizonActions.className = "chart-horizon__actions";
+    const horizonNext = document.createElement("button");
+    horizonNext.type = "button";
+    horizonNext.textContent = "Next 3";
+    horizonNext.dataset.chartHorizonNext = "";
+    horizonActions.appendChild(horizonNext);
+    horizonControls.append(horizonCaption, horizonActions);
+
+    const chartList = document.createElement("ol");
+    chartList.className = "neuro-checklist__list neuro-checklist__list--ordered chart-horizon__list";
+    chartList.dataset.chartHorizonList = "";
+
+    chartHorizon.append(metaGrid, horizonControls, chartList);
+    chartSection.append(chartTitle, chartHorizon);
+
     const itinerarySection = document.createElement("section");
     itinerarySection.className = "neuro-checklist__section neuro-checklist__section--itinerary";
     const itineraryTitle = document.createElement("h3");
@@ -18789,15 +18988,21 @@ host.appendChild(row);
     itineraryTimeline.dataset.checklistItineraryTimeline = "";
     itineraryContainer.appendChild(itineraryList);
     itineraryContainer.appendChild(itineraryTimeline);
+    const itineraryAdvisory = document.createElement("p");
+    itineraryAdvisory.className = "chart-horizon__empty";
+    itineraryAdvisory.dataset.itineraryAdvisory = "";
+    itineraryAdvisory.textContent = "";
     const itineraryEmpty = document.createElement("p");
     itineraryEmpty.className = "neuro-checklist__itinerary-empty";
     itineraryEmpty.dataset.checklistItineraryEmpty = "";
     itineraryEmpty.textContent = "Generating adaptive workflow…";
     itinerarySection.appendChild(itineraryTitle);
     itinerarySection.appendChild(itineraryContainer);
+    itinerarySection.appendChild(itineraryAdvisory);
     itinerarySection.appendChild(itineraryEmpty);
 
     body.appendChild(focusSection);
+    body.appendChild(chartSection);
     body.appendChild(itinerarySection);
 
     card.appendChild(header);
@@ -18810,10 +19015,17 @@ host.appendChild(row);
       controlGrid,
       contextButtons,
       focusList,
+      chartHorizonList,
+      chartHorizonNext,
+      chartBacklogFill: backlogFill,
+      chartBacklogLabel: backlogLabel,
+      chartProgressFill: progressFill,
+      chartProgressLabel: progressLabel,
       itineraryList,
       itineraryTimeline,
       itineraryEmpty,
       itineraryContainer,
+      itineraryAdvisory,
     };
     card.__checklistRefs = refs;
     return refs;
@@ -18906,6 +19118,7 @@ host.appendChild(row);
           setSessionContextLocation(value, { source: "user" });
           applyChecklistControlsState();
           renderNeuroChecklist();
+          updateUI();
         });
       });
     }
@@ -19917,10 +20130,17 @@ host.appendChild(row);
       workloadEl,
       basketUpdatedEl,
       focusList,
+      chartHorizonList,
+      chartHorizonNext,
+      chartBacklogFill,
+      chartBacklogLabel,
+      chartProgressFill,
+      chartProgressLabel,
       itineraryList,
       itineraryTimeline,
       itineraryEmpty,
       itineraryContainer,
+      itineraryAdvisory,
     } = refs;
 
     mountChecklistControls(card);
@@ -19962,6 +20182,109 @@ host.appendChild(row);
       workloadEl.textContent = `${activeTasks.length} active • ${quickActive.length} quick • ${dailyContext.tasks.length} total`;
     } else {
       workloadEl.textContent = `${dailyContext.tasks.length} total tasks`;
+    }
+
+    const chartBacklog = activeTasks.filter(task => isChartTask(task));
+    const allChartTasks = dailyContext.tasks.filter(task => isChartTask(task));
+    const sortedCharts = chartBacklog
+      .slice()
+      .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0));
+    if (sortedCharts.length <= chartHorizonStart) {
+      chartHorizonStart = 0;
+    }
+
+    if (chartBacklogLabel && chartBacklogFill) {
+      const comfort = CHART_BACKLOG_COMFORT || 80;
+      const percent = comfort > 0 ? Math.min((chartBacklog.length / comfort) * 100, 130) : 0;
+      chartBacklogFill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+      const delta = chartBacklog.length - comfort;
+      const mood = delta > 0 ? `+${delta} over comfort` : `${Math.abs(delta)} under comfort`;
+      chartBacklogLabel.textContent = `Chart backlog: ${chartBacklog.length}/${comfort} (${mood})`;
+    }
+
+    if (chartProgressLabel && chartProgressFill) {
+      let chartUnits = 0;
+      let chartUnitsDone = 0;
+      (allChartTasks.length ? allChartTasks : sortedCharts).forEach(task => {
+        const progress = getSubTaskProgress(task);
+        if (progress) {
+          chartUnits += progress.total;
+          chartUnitsDone += progress.completed;
+        } else {
+          chartUnits += 1;
+          if (isTaskCompleted(task)) {
+            chartUnitsDone += 1;
+          }
+        }
+      });
+      const progressPercent = chartUnits > 0 ? Math.min(100, (chartUnitsDone / chartUnits) * 100) : 0;
+      chartProgressFill.style.width = `${progressPercent}%`;
+      chartProgressLabel.textContent = chartUnits
+        ? `Chart progress: ${chartUnitsDone}/${chartUnits} sections logged`
+        : "Chart progress: no sections queued";
+    }
+
+    if (chartHorizonList) {
+      chartHorizonList.innerHTML = "";
+      const visibleCount = Math.min(CHART_HORIZON_PAGE, sortedCharts.length);
+      if (visibleCount === 0) {
+        const empty = document.createElement("li");
+        empty.className = "neuro-checklist__empty chart-horizon__empty";
+        empty.textContent = "No chart backlog to preview.";
+        chartHorizonList.appendChild(empty);
+      } else {
+        for (let i = 0; i < visibleCount; i += 1) {
+          const idx = (chartHorizonStart + i) % sortedCharts.length;
+          const task = sortedCharts[idx];
+          const meta = [];
+          if (Number.isFinite(task.priority)) {
+            meta.push(`Priority ${task.priority.toFixed(1)}`);
+          }
+          if (Number.isFinite(task.daysSinceVisit)) {
+            meta.push(`${task.daysSinceVisit} days old`);
+          }
+          const progress = getSubTaskProgress(task);
+          if (progress) {
+            meta.push(`${progress.completed}/${progress.total} sections`);
+          }
+          const spooky = isSpookyChart(task, task.daysSinceVisit);
+          if (spooky) {
+            const microState = getSpookyMicroStepState(task);
+            const completed = Array.isArray(microState?.completed) ? microState.completed.length : 0;
+            meta.push(`Spooky micro-steps ${completed}/${SPOOKY_MICRO_STEPS.length}`);
+          }
+          const entry = createChecklistEntry(task.name || "Chart", meta);
+          if (spooky) {
+            const nextStep = getNextSpookyMicroStep(task);
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = nextStep ? `Micro-step: ${nextStep.label}` : "Spooky steps logged";
+            btn.disabled = !nextStep;
+            btn.addEventListener("click", () => {
+              const current = getNextSpookyMicroStep(task);
+              if (!current) return;
+              const logged = logSpookyStepCompletion(task, current.id);
+              if (logged) {
+                persist();
+                renderNeuroChecklist();
+                if (typeof showToast === "function") {
+                  showToast("Spooky chart eased", `Logged: ${current.label}`);
+                }
+              }
+            });
+            entry.appendChild(btn);
+          }
+          chartHorizonList.appendChild(entry);
+        }
+      }
+    }
+    if (chartHorizonNext) {
+      chartHorizonNext.disabled = sortedCharts.length <= CHART_HORIZON_PAGE;
+      chartHorizonNext.onclick = () => {
+        if (!sortedCharts.length) return;
+        chartHorizonStart = (chartHorizonStart + CHART_HORIZON_PAGE) % sortedCharts.length;
+        renderNeuroChecklist();
+      };
     }
 
     const basketItems = getClinicBasketItemsFromBridge();
@@ -20133,6 +20456,18 @@ host.appendChild(row);
         meta: Array.from(metaSet),
       };
     });
+
+    if (itineraryAdvisory) {
+      const nightCharts = decoratedBlocks.filter(block => isNightChartBlock(block));
+      if (nightCharts.length) {
+        const windows = nightCharts.map(block => describeBlockWindow(block)).join(", ");
+        itineraryAdvisory.textContent = `Night sprint warning: ${nightCharts.length} chart block${nightCharts.length === 1 ? "" : "s"} after 8pm (${windows}). Consider moving to a clinic/admin block with more social context.`;
+        itineraryAdvisory.classList.remove("hidden");
+      } else {
+        itineraryAdvisory.textContent = "";
+        itineraryAdvisory.classList.add("hidden");
+      }
+    }
 
     if (decoratedBlocks.length && itineraryContainer) {
       if (itineraryList) {
@@ -24023,17 +24358,29 @@ initializeFocusFabLongPress();
     focusQueue = tasks
       .filter(t => !isTaskCompleted(t) && (activeCategory === "All" || t.category === activeCategory))
       .sort((a, b) => score(b) - score(a));
+    const userSelected = initialTaskId
+      ? focusQueue.find(task => task.id === initialTaskId)
+        || tasks.find(t => t.id === initialTaskId && !isTaskCompleted(t))
+      : null;
+    const topDailyCritical = focusQueue
+      .filter(task => task.isDailyCritical)
+      .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0))[0];
+    if (topDailyCritical) {
+      focusQueue = [topDailyCritical, ...focusQueue.filter(task => task.id !== topDailyCritical.id)];
+    }
     if (initialTaskId) {
       const targetIndex = focusQueue.findIndex(task => task.id === initialTaskId);
-      if (targetIndex > 0) {
+      if (targetIndex > 0 && !topDailyCritical) {
         const [selected] = focusQueue.splice(targetIndex, 1);
         focusQueue.unshift(selected);
-      } else if (targetIndex === -1) {
-        const directTask = tasks.find(t => t.id === initialTaskId && !isTaskCompleted(t));
-        if (directTask) {
-          focusQueue.unshift(directTask);
-        }
+      } else if (targetIndex === -1 && userSelected) {
+        focusQueue.splice(topDailyCritical ? 1 : 0, 0, userSelected);
+      } else if (targetIndex > 1 && topDailyCritical) {
+        const [selected] = focusQueue.splice(targetIndex, 1);
+        focusQueue.splice(1, 0, selected);
       }
+    } else if (userSelected && !focusQueue.some(task => task.id === userSelected.id)) {
+      focusQueue.unshift(userSelected);
     }
     showNextTask();
   }
