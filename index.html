@@ -10768,6 +10768,25 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
   let readyToLaunchRevealBaseline = READY_TO_LAUNCH_INITIAL_COUNT;
   let derivedDaysSinceVisit = null;
   let urgencyAuto = true;
+  const SessionState = {
+    energyLevel: 3,
+    contextLocation: "home_solo",
+  };
+  const ENERGY_SCORE_MAP = {
+    1: 0.15,
+    2: 0.35,
+    3: 0.6,
+    4: 0.8,
+    5: 0.95,
+  };
+  const SOCIAL_SCORE_MAP = {
+    home_solo: 0,
+    clinic_closed: 0.4,
+    clinic_open_door: 0.7,
+    cafe: 0.8,
+    zoom_buddy: 1,
+  };
+  let pendingPriorityRefresh = null;
   const runningTimers = new Map();
   let sprintDurationMinutes = null;
   let sprintEndTime = null;
@@ -14745,6 +14764,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       return resolved;
     }
     syncingEnergySliders = true;
+    setSessionEnergyLevel(resolved);
     const nextSlider = $("nextBestEnergy");
     if (nextSlider && source !== "next" ) {
       nextSlider.value = String(resolved);
@@ -16605,6 +16625,101 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return Math.min(5, Math.max(1, base));
   }
 
+  function schedulePriorityRefresh(reason = "state-change") {
+    if (pendingPriorityRefresh) {
+      return;
+    }
+    const trigger = () => {
+      pendingPriorityRefresh = null;
+      if (Array.isArray(tasks)) {
+        tasks.forEach(task => recalcTaskPriority(task));
+      }
+      try {
+        updateUI();
+      } catch (error) {
+        console.error("Unable to refresh UI after state change", reason, error);
+      }
+    };
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+      pendingPriorityRefresh = window.requestAnimationFrame(trigger);
+    } else {
+      pendingPriorityRefresh = setTimeout(trigger, 0);
+    }
+  }
+
+  function setSessionEnergyLevel(level) {
+    const resolved = clampScale(level, SessionState.energyLevel || 3);
+    const changed = SessionState.energyLevel !== resolved;
+    SessionState.energyLevel = resolved;
+    if (changed) {
+      schedulePriorityRefresh("energy-change");
+    }
+    return SessionState.energyLevel;
+  }
+
+  function deriveContextLocationFromDayState(dayState) {
+    const selection = dayState?.clinicSelections?.todayType || dayState?.clinicType || null;
+    const normalized = (selection || "").toString().toLowerCase();
+    if (normalized.includes("clinic")) return "clinic_open_door";
+    if (normalized.includes("admin")) return "home_solo";
+    return null;
+  }
+
+  function setSessionContextLocation(location) {
+    if (!location) return SessionState.contextLocation;
+    const normalized = (location || "").toString().toLowerCase().replace(/\s+/g, "_");
+    const resolved = SOCIAL_SCORE_MAP[normalized] !== undefined ? normalized : SessionState.contextLocation;
+    const changed = SessionState.contextLocation !== resolved;
+    SessionState.contextLocation = resolved;
+    if (changed) {
+      schedulePriorityRefresh("context-change");
+    }
+    return SessionState.contextLocation;
+  }
+
+  function getMentalEnergyScore() {
+    const level = Number.isFinite(SessionState.energyLevel) ? SessionState.energyLevel : 3;
+    return ENERGY_SCORE_MAP[level] ?? ENERGY_SCORE_MAP[3];
+  }
+
+  function getSocialContextScore() {
+    const location = SessionState.contextLocation || "home_solo";
+    return SOCIAL_SCORE_MAP[location] ?? SOCIAL_SCORE_MAP.home_solo;
+  }
+
+  function getEaseScore(task) {
+    const invTime = 6 - (task?.timeToStart || 3);
+    const invDiff = 6 - (task?.difficulty || 3);
+    const raw = invTime + invDiff;
+    return Math.max(0.2, Math.min(1, raw / 10));
+  }
+
+  function getEngagementScore(task) {
+    const nov = task?.novelty || 3;
+    const int = task?.interest || 3;
+    const raw = nov + int;
+    return Math.max(0.2, Math.min(1, raw / 10));
+  }
+
+  function computeStateFitMultiplier(task) {
+    const mentalEnergy = getMentalEnergyScore();
+    const social = getSocialContextScore();
+    const ease = getEaseScore(task);
+    const engagement = getEngagementScore(task);
+
+    const alpha = 0.7;
+    const kEase = 0.4;
+    const kEngagement = 0.4;
+    const kSocial = 0.5;
+
+    const energyComponent = Math.pow(mentalEnergy, alpha);
+    const easeBoost = 1 + kEase * ease;
+    const engagementBoost = 1 + kEngagement * engagement;
+    const socialBoost = 1 + kSocial * social;
+
+    return energyComponent * easeBoost * engagementBoost * socialBoost;
+  }
+
   function normalizePatientType(value) {
     const normalized = (value || "").toString().toLowerCase();
     return normalized === "complex" ? "Complex" : "Non-Complex";
@@ -16676,62 +16791,73 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     const patientWeight = getPatientTypeWeight(t.patientType);
     const visitWeight = getVisitTypeWeight(t.visitType);
     const sameDayBonus = getSameDayBonus(t.clinicSite, t.createdAt);
-    const daysSinceVisit = Number.isFinite(Number(t.daysSinceVisit))
-      ? Number(t.daysSinceVisit)
-      : (t.dateOfService ? calculateDaysSince(t.dateOfService) : null);
-    const daysUntilDue = t.dueDate ? calculateDaysUntil(t.dueDate) : null;
-    const overdueDays = Number.isFinite(daysUntilDue) && daysUntilDue < 0 ? Math.abs(daysUntilDue) : 0;
-    const positiveAging = Number.isFinite(daysSinceVisit) && daysSinceVisit > 0 ? daysSinceVisit : 0;
-    const agingBoost = 1 + Math.min(0.2, (positiveAging / 90) + (overdueDays / 30));
-    return baseScore * patientWeight * visitWeight * sameDayBonus * agingBoost;
+    return baseScore * patientWeight * visitWeight * sameDayBonus;
+  }
+
+  function computeNonChartTimeWeight(task) {
+    const daysUntilDue = task?.dueDate ? calculateDaysUntil(task.dueDate) : null;
+    if (daysUntilDue !== null && Number.isFinite(daysUntilDue) && daysUntilDue <= 3 && daysUntilDue >= 0) {
+      return 1.2;
+    }
+    return 1.0;
+  }
+
+  function isSpookyChart(task, ageDays) {
+    const infoSparse = task?.infoSparse === true;
+    const resolvedAge = Number.isFinite(ageDays) ? ageDays : null;
+    return infoSparse && resolvedAge !== null && resolvedAge > 30;
+  }
+
+  function computeChartTimeAgeWeight(task) {
+    if (!isChartTask(task)) return 1;
+    const parsedDays = Number(task?.daysSinceVisit);
+    const daysSince = Number.isFinite(parsedDays)
+      ? parsedDays
+      : (task?.dateOfService ? calculateDaysSince(task.dateOfService) : null);
+    const daysUntilDue = task?.dueDate ? calculateDaysUntil(task.dueDate) : null;
+
+    let billingWeight = 1;
+    if (daysSince !== null && Number.isFinite(daysSince)) {
+      if (daysSince <= 7) {
+        billingWeight = 1.5;
+      } else if (daysSince <= 30) {
+        billingWeight = 1.3;
+      } else if (daysSince <= 90) {
+        billingWeight = 1.0;
+      } else if (daysSince <= 120 && task?.stillBillable !== false) {
+        billingWeight = 1.2;
+      } else {
+        billingWeight = 0.6;
+      }
+    }
+
+    let dueWeight = 1;
+    if (daysUntilDue !== null && Number.isFinite(daysUntilDue)) {
+      if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+        dueWeight = 1.6;
+      } else if (daysUntilDue < 0) {
+        dueWeight = 1.3;
+      }
+    }
+
+    const spookyWeight = isSpookyChart(task, daysSince) ? 1.5 : 1.0;
+
+    return billingWeight * dueWeight * spookyWeight;
   }
 
   function computeTimeWeight(task) {
-    if (!task) return 1;
-    if (isQuickTask(task)) return 1;
-    const isChart = isChartTask(task);
-    const parsedDays = Number(task.daysSinceVisit);
-    const daysSince = Number.isFinite(parsedDays)
-      ? parsedDays
-      : (task.dateOfService ? calculateDaysSince(task.dateOfService) : null);
-    const daysUntilDue = task.dueDate ? calculateDaysUntil(task.dueDate) : null;
-    const currentMonth = isDateInCurrentMonth(task.dateOfService)
-      || isDateInCurrentMonth(task.dueDate);
-
-    if (!isChart) {
-      if (daysUntilDue !== null && Number.isFinite(daysUntilDue) && daysUntilDue <= 3 && daysUntilDue >= 0) {
-        return 1.2;
-      }
-      return 1.0;
+    if (!task || isQuickTask(task)) return 1;
+    if (isChartTask(task)) {
+      return computeChartTimeAgeWeight(task);
     }
-
-    if (daysSince !== null && Number.isFinite(daysSince)) {
-      if (daysSince > 95) return 0.5;
-      if (daysSince >= 90 && daysSince <= 95) return 2.0;
-      if (daysSince >= 0 && daysSince < 3) return 1.8;
-      if (daysSince >= 3 && currentMonth) return 1.3;
-    }
-
-    if (daysUntilDue !== null && Number.isFinite(daysUntilDue)) {
-      if (daysUntilDue <= 3 && daysUntilDue >= 0) {
-        return 1.8;
-      }
-      if (daysUntilDue < 0 && daysSince === null) {
-        return currentMonth ? 1.3 : 1.0;
-      }
-      if (currentMonth) {
-        return 1.3;
-      }
-    }
-
-    return 1.0;
+    return computeNonChartTimeWeight(task);
   }
 
   function computePriority(t) {
     if (isQuickTask(t)) {
       return 1;
     }
-    const weightedBase = computeRawPriorityScore(t) * computeTimeWeight(t);
+    const weightedBase = computeRawPriorityScore(t) * computeStateFitMultiplier(t) * computeTimeWeight(t);
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
       if (remaining.length === 0) return 0;
@@ -16805,8 +16931,10 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     }
     const baseRaw = computeRawPriorityScore({ ...task, subTasks: [] });
     const timeWeight = computeTimeWeight(task);
+    const stateFit = computeStateFitMultiplier(task);
     task.timeWeight = timeWeight;
-    const base = baseRaw * timeWeight;
+    task.stateFitMultiplier = stateFit;
+    const base = baseRaw * timeWeight * stateFit;
     if (isChartTask(task)) {
       ensureChartSubTasks(task, { basePriority: base });
     }
@@ -17967,6 +18095,10 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
 
   function updateNeuroDayState(detail) {
     neuroScheduleSnapshot.dayState = sanitizeDayStateSnapshot(detail);
+    const derivedContext = deriveContextLocationFromDayState(neuroScheduleSnapshot.dayState);
+    if (derivedContext) {
+      setSessionContextLocation(derivedContext);
+    }
   }
 
   function updateNeuroClinicBasket(detail) {
@@ -19527,6 +19659,10 @@ host.appendChild(row);
       triage,
       windows,
     };
+    const derivedContextLocation = deriveContextLocationFromDayState(dayState);
+    if (derivedContextLocation) {
+      setSessionContextLocation(derivedContextLocation);
+    }
     // === Phase 5 – Apply adaptive profile ===
     try {
       const bias = JSON.parse(localStorage.getItem("adaptiveProfile") || "{}");
@@ -19776,6 +19912,12 @@ host.appendChild(row);
         basket: itineraryBasket,
         clinicType: dailyContext.clinicType,
         userEndTime: dailyContext.userEndTime,
+        sessionState: {
+          energyLevel: SessionState.energyLevel,
+          mentalEnergyScore: getMentalEnergyScore(),
+          contextLocation: SessionState.contextLocation,
+          socialScore: getSocialContextScore(),
+        },
       };
 
       try {
