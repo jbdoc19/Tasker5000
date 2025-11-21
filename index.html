@@ -9109,7 +9109,7 @@ body.all-tasks-overlay-active {
 
   <section id="capture">
     <div class="app-shell">
-      <header class="app-header">
+      <header class="app-header" id="taskerHeader">
         <div class="app-header__top">
           <div class="app-header__date-block">
             <span class="app-header__meta-label">Today</span>
@@ -25058,6 +25058,105 @@ initializeFocusFabLongPress();
     reminder.innerHTML = `<span class="header-chip"><span class="header-chip__label">Eligibility cutoff</span><span class="header-chip__value">${formatted}</span></span>`;
   }
 
+  function ensureCaptureShell() {
+    const capture = document.getElementById("capture");
+    if (!capture) return null;
+    let shell = capture.querySelector(".app-shell");
+    if (!shell) {
+      shell = document.createElement("div");
+      shell.className = "app-shell";
+      while (capture.firstChild) {
+        shell.appendChild(capture.firstChild);
+      }
+      capture.appendChild(shell);
+    }
+    return shell;
+  }
+
+  function ensureTaskerHeader(shell) {
+    if (!shell) return null;
+    let header = shell.querySelector("#taskerHeader");
+    if (header) return header;
+
+    header = document.createElement("header");
+    header.className = "app-header";
+    header.id = "taskerHeader";
+    header.innerHTML = `
+      <div class="app-header__top">
+        <div class="app-header__date-block">
+          <span class="app-header__meta-label">Today</span>
+          <time id="headerDate" class="app-header__date" datetime=""></time>
+        </div>
+        <div class="app-header__actions">
+          <button
+            id="settingsToggle"
+            class="settings-trigger"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="settingsMenu"
+            title="Open settings"
+          >
+            ⚙️
+          </button>
+          <button
+            id="headerQuickAddButton"
+            class="quick-add-button quick-add-button--plus app-header__quick-add"
+            type="button"
+            aria-label="Add a new task"
+            title="Add a task"
+          >
+            ➕️
+          </button>
+        </div>
+      </div>
+      <div class="app-header__main">
+        <h1 class="app-header__title">Tasker 5000</h1>
+        <small class="billing-reminder" id="billingReminder"></small>
+        <p id="headerSubtitle" class="app-header__subtitle"></p>
+      </div>
+      <div id="settingsMenu" class="settings-menu" aria-hidden="true">
+        <div class="settings-menu__section">
+          <label class="settings-menu__toggle" for="routineHapticsToggle">
+            <span>Enable haptic nudges</span>
+            <input type="checkbox" id="routineHapticsToggle" />
+          </label>
+        </div>
+        <button type="button" class="settings-menu__item" id="settingsTemplates">
+          <span aria-hidden="true">🧩</span>
+          <span>Templates</span>
+        </button>
+      </div>
+    `;
+
+    const capacityCard = shell.querySelector("#capacityCenter");
+    if (capacityCard) {
+      shell.insertBefore(header, capacityCard);
+    } else {
+      shell.prepend(header);
+    }
+    return header;
+  }
+
+  function ensureCapacityCenterCard(shell) {
+    if (!shell) return null;
+    let card = shell.querySelector("#capacityCenter");
+    if (!card) {
+      card = document.createElement("section");
+      card.className = "card neuro-checklist-card";
+      card.id = "capacityCenter";
+      card.dataset.legacyId = "neuroChecklist";
+      card.setAttribute("aria-live", "polite");
+      const header = shell.querySelector("#taskerHeader");
+      if (header && header.nextSibling) {
+        shell.insertBefore(card, header.nextSibling);
+      } else {
+        shell.appendChild(card);
+      }
+    }
+    return card;
+  }
+
   function registerFieldListeners() {
     const dateField = $("dateOfService");
     if (dateField) {
@@ -25252,15 +25351,22 @@ function wireInsights() {
   if (closeBtn) closeBtn.addEventListener("click", closeInsights);
 }
 
-function safeRun(label, fn) {
-  try {
-    return fn();
-  } catch (error) {
-    console.error(`Tasker init error [${label}]`, error);
-    return null;
+  function safeRun(label, fn) {
+    try {
+      return fn();
+    } catch (error) {
+      console.error(`Tasker init error [${label}]`, error);
+      return null;
+    }
   }
-}
   window.addEventListener('DOMContentLoaded', () => {
+    const captureShell = ensureCaptureShell();
+    const header = ensureTaskerHeader(captureShell);
+    const capacityCard = ensureCapacityCenterCard(captureShell);
+    if (captureShell && header && capacityCard && header.nextSibling !== capacityCard) {
+      captureShell.insertBefore(capacityCard, header.nextSibling);
+    }
+
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
       nextStepBtn.addEventListener("click", completeCurrentMeltdownStep);
