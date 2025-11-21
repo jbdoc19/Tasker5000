@@ -918,12 +918,18 @@
       padding: 0.65rem 0.75rem;
       height: auto;
       font-size: 0.95rem;
-      justify-content: center;
-      gap: 0.4rem;
+      justify-content: space-between;
+      gap: 0.5rem;
       background: rgba(13, 19, 25, 0.85);
     }
 
     .context-location__trigger span { text-transform: none; }
+
+    .context-location__boost {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
 
     .context-location__caret {
       opacity: 0.8;
@@ -943,18 +949,16 @@
       margin: 0.35rem 0 0;
       padding: 0.35rem;
       position: absolute;
-      top: 100%;
-      left: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
-      min-width: 100%;
-      max-width: 100%;
       background: rgba(13, 19, 25, 0.95);
       border: 1px solid rgba(124, 144, 160, 0.35);
       border-radius: 14px;
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
       max-height: 300px;
       overflow-y: auto;
-      z-index: 6;
+      z-index: 10;
     }
 
     .context-location__menu[hidden] {
@@ -18868,20 +18872,34 @@ host.appendChild(row);
     const availability = createControl("capacityWrench", "🔧", "Availability");
     const energy = createControl("energyDial", "🔋", "Energy");
 
-    const contextLocation = createControl("contextLocationButton", "👨‍💻", "");
-    contextLocation.wrapper.classList.add("context-location");
-    contextLocation.button.classList.add("context-location__trigger");
-    contextLocation.button.setAttribute("aria-pressed", "false");
-    contextLocation.button.setAttribute("aria-haspopup", "listbox");
-    contextLocation.button.setAttribute("aria-expanded", "false");
-    contextLocation.caption.classList.add("context-location__caption");
-    contextLocation.caption.dataset.contextLocationLabel = "";
+    const contextLocation = document.createElement("div");
+    contextLocation.className = "neuro-checklist__control context-location";
+
+    const contextButton = document.createElement("button");
+    contextButton.id = "contextLocationButton";
+    contextButton.type = "button";
+    contextButton.className = "context-location__trigger";
+    contextButton.setAttribute("aria-pressed", "false");
+    contextButton.setAttribute("aria-haspopup", "listbox");
+    contextButton.setAttribute("aria-expanded", "false");
+
+    const contextButtonLabel = document.createElement("span");
+    contextButtonLabel.dataset.contextLocationButtonLabel = "";
+
+    const contextButtonBoost = document.createElement("span");
+    contextButtonBoost.dataset.contextLocationButtonBoost = "";
+    contextButtonBoost.className = "context-location__boost";
 
     const contextButtonCaret = document.createElement("span");
     contextButtonCaret.className = "context-location__caret";
     contextButtonCaret.setAttribute("aria-hidden", "true");
     contextButtonCaret.textContent = "▾";
-    contextLocation.button.appendChild(contextButtonCaret);
+
+    contextButton.append(contextButtonLabel, contextButtonBoost, contextButtonCaret);
+
+    const contextCaption = document.createElement("span");
+    contextCaption.dataset.contextLocationLabel = "";
+    contextCaption.className = "context-location__caption";
 
     const contextMenu = document.createElement("ul");
     contextMenu.id = "contextLocationMenu";
@@ -18891,12 +18909,12 @@ host.appendChild(row);
 
     const closeContextMenu = () => {
       contextMenu.hidden = true;
-      contextLocation.button.setAttribute("aria-expanded", "false");
+      contextButton.setAttribute("aria-expanded", "false");
     };
 
     const openContextMenu = () => {
       contextMenu.hidden = false;
-      contextLocation.button.setAttribute("aria-expanded", "true");
+      contextButton.setAttribute("aria-expanded", "true");
     };
 
     const toggleContextMenu = (force) => {
@@ -18913,7 +18931,7 @@ host.appendChild(row);
       updateContextLocationControls();
       applyChecklistControlsState();
       closeContextMenu();
-      contextLocation.button.focus({ preventScroll: true });
+      contextButton.focus({ preventScroll: true });
     };
 
     SOCIAL_CONTEXT_OPTIONS.forEach(option => {
@@ -18941,19 +18959,19 @@ host.appendChild(row);
         }
         if (event.key === "Escape") {
           closeContextMenu();
-          contextLocation.button.focus({ preventScroll: true });
+          contextButton.focus({ preventScroll: true });
         }
       });
 
       contextMenu.appendChild(item);
     });
 
-    contextLocation.wrapper.appendChild(contextMenu);
+    contextLocation.append(contextButton, contextCaption, contextMenu);
 
     host.append(
       availability.wrapper,
       energy.wrapper,
-      contextLocation.wrapper,
+      contextLocation,
     );
 
     host.dataset.controlsMounted = "true";
@@ -18973,11 +18991,11 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    contextLocation.button.addEventListener("click", () => {
+    contextButton.addEventListener("click", () => {
       toggleContextMenu();
     });
 
-    contextLocation.button.addEventListener("keydown", (event) => {
+    contextButton.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         closeContextMenu();
       }
@@ -18990,7 +19008,7 @@ host.appendChild(row);
     });
 
     document.addEventListener("click", (event) => {
-      if (!contextLocation.wrapper.contains(event.target)) {
+      if (!contextLocation.contains(event.target)) {
         closeContextMenu();
       }
     });
@@ -19036,6 +19054,8 @@ host.appendChild(row);
   function updateContextLocationControls() {
     const button = document.getElementById("contextLocationButton");
     const caption = document.querySelector("[data-context-location-label]");
+    const buttonLabel = document.querySelector("[data-context-location-button-label]");
+    const buttonBoost = document.querySelector("[data-context-location-button-boost]");
     const menu = document.getElementById("contextLocationMenu");
     const option = getSocialContextOption();
     const friendly = formatSocialContextLabel();
@@ -19043,6 +19063,14 @@ host.appendChild(row);
 
     if (caption) {
       caption.textContent = `Context — ${friendly} (${score}% boost)`;
+    }
+
+    if (buttonLabel) {
+      buttonLabel.textContent = friendly;
+    }
+
+    if (buttonBoost) {
+      buttonBoost.textContent = `${score}% boost`;
     }
 
     if (button) {
