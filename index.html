@@ -378,10 +378,10 @@
       position: relative;
       width: min(100%, var(--focus-shell-width));
       margin: clamp(0.75rem, 2vw, 1rem) auto 0;
-      padding: clamp(1.1rem, 2.5vw, 1.65rem);
+      padding: clamp(0.95rem, 2vw, 1.35rem);
       display: flex;
       flex-direction: column;
-      gap: clamp(0.85rem, 2.2vw, 1.4rem);
+      gap: clamp(0.65rem, 2vw, 1.1rem);
       background: #0b1120;
       border: 1px solid #1e293b;
       box-shadow: 0 20px 48px #000000;
@@ -837,7 +837,7 @@
 
     .neuro-checklist__control-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
       gap: clamp(0.5rem, 2vw, 1rem);
       width: 100%;
       justify-items: center;
@@ -18853,8 +18853,8 @@ host.appendChild(row);
 
     host.append(
       availability.wrapper,
-      energy.wrapper,
       contextLocation.wrapper,
+      energy.wrapper,
     );
 
     host.dataset.controlsMounted = "true";
@@ -18939,7 +18939,8 @@ host.appendChild(row);
     const score = Math.round(getSocialContextScore() * 100);
 
     if (caption) {
-      caption.textContent = `Context — ${friendly} (${score}% boost)`;
+      caption.textContent = "Context";
+      caption.title = `${friendly} (${score}% boost)`;
     }
 
     if (button) {
