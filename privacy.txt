@@ -1,0 +1,4 @@
+Privacy Notice
+This task management application does not collect, store, or share any personal information outside of what you choose to share in GitHub through repository usage. No external tracking or analytics are used. If you submit issues, comments, or pull requests, your GitHub username and public activity will be visible to others as governed by GitHub’s own privacy policy. Use caution before sharing any sensitive information in public areas of the repository.
+
+For more information about how GitHub handles your data, please refer to the GitHub Privacy Statement
