@@ -9162,6 +9162,26 @@ body.all-tasks-overlay-active {
         data-legacy-id="neuroChecklist"
         aria-live="polite"
       ></section>
+
+      <section class="card morning-launch-card" data-morning-launch aria-live="polite">
+        <header class="morning-launch__header">
+          <button
+            class="morning-launch__toggle"
+            type="button"
+            data-ml-toggle
+            aria-expanded="false"
+            aria-controls="morningLaunchPanel"
+          >
+            <span class="morning-launch__chevron" data-ml-toggle-icon aria-hidden="true">▸</span>
+            <span class="morning-launch__title">Morning Launch</span>
+          </button>
+          <p class="morning-launch__progress" data-ml-progress>0 / 5 steps ready</p>
+        </header>
+        <div id="morningLaunchPanel" class="morning-launch__panel" data-ml-panel hidden>
+          <p class="morning-launch__intro">Kickstart the day with five fast readiness checks.</p>
+          <ol class="morning-launch__list" data-ml-list></ol>
+        </div>
+      </section>
     </div>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
@@ -9419,61 +9439,45 @@ body.all-tasks-overlay-active {
           </header>
           <div class="zone-body">
             <span id="tasks-zone" class="zone-anchor" aria-hidden="true"></span>
-      <section class="card due-today-card hidden" aria-live="polite" data-due-today-section>
-        <div class="section-heading">
-          <h2>Due today</h2>
-          <span class="chip chip-muted section-chip">Ready today</span>
-        </div>
-        <div class="due-today-accordion" data-open="false" data-accordion="dueToday">
-          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
-            <span data-due-today-summary-text>0 ready • est —</span>
-            <span class="due-today-summary__icon" aria-hidden="true">▸</span>
-          </button>
-          <div class="due-today-list" hidden data-accordion-panel data-due-today-list></div>
-        </div>
-        <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
-      </section>
-<section id="winLogHUD" class="winlog-hud hidden" role="dialog" aria-modal="true" aria-labelledby="winLogTitle">
+            <section class="card due-today-card hidden" aria-live="polite" data-due-today-section>
+              <div class="section-heading">
+                <h2>Due today</h2>
+                <span class="chip chip-muted section-chip">Ready today</span>
+              </div>
+              <div class="due-today-accordion" data-open="false" data-accordion="dueToday">
+                <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+                  <span data-due-today-summary-text>0 ready • est —</span>
+                  <span class="due-today-summary__icon" aria-hidden="true">▸</span>
+                </button>
+                <div class="due-today-list" hidden data-accordion-panel data-due-today-list></div>
+              </div>
+              <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
+            </section>
 
-<div class="winlog-card">
-
-<h3 id="winLogTitle">Quick reflection</h3>
-
-<p class="winlog-sub">What helped you restart?</p>
-
-<div class="winlog-actions">
-
-<button data-log="timer">Timer</button>
-
-<button data-log="buddy">Buddy</button>
-
-<button data-log="ritual">Ritual</button>
-
-<button data-log="music">Music</button>
-
-<button data-log="other">Other</button>
-
-</div>
-
-<input id="winLogNote" type="text" placeholder="Optional note…" />
-
-<div class="winlog-footer">
-
-<button id="winLogSave">Save</button>
-
-<button id="winLogDismiss" class="secondary">Dismiss</button>
-document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
-  label.addEventListener("click",()=>{
-    const duration=parseInt(label.textContent.match(/\d+/)?.[0]||25,10);
-    openOverlay("focusOverlay");        // existing helper
-    startFocusSprint(duration);
-  });
-});
-</div>
-
-</div>
-
-</section>
+            <section
+              id="winLogHUD"
+              class="winlog-hud hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="winLogTitle"
+            >
+              <div class="winlog-card">
+                <h3 id="winLogTitle">Quick reflection</h3>
+                <p class="winlog-sub">What helped you restart?</p>
+                <div class="winlog-actions">
+                  <button data-log="timer">Timer</button>
+                  <button data-log="buddy">Buddy</button>
+                  <button data-log="ritual">Ritual</button>
+                  <button data-log="music">Music</button>
+                  <button data-log="other">Other</button>
+                </div>
+                <input id="winLogNote" type="text" placeholder="Optional note…" />
+                <div class="winlog-footer">
+                  <button id="winLogSave">Save</button>
+                  <button id="winLogDismiss" class="secondary">Dismiss</button>
+                </div>
+              </div>
+            </section>
         <section
           id="routineOverlay"
           class="routine-overlay hidden"
@@ -10879,9 +10883,10 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     </button>
   </nav>
 
-  <script type="module" src="./taskStorage.js"></script>  
+  <script type="module" src="./taskStorage.js"></script>
   <script type="module" src="./scheduleCard.js"></script>
   <script type="module" src="./scheduleBridge.js"></script>
+  <script type="module" src="./morningLaunch.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
     import generateAdaptiveItinerary from "./timeBlockEngine.js";
@@ -25470,6 +25475,17 @@ function wireInsights() {
     safeRun("updateSleepToolkitUI", updateSleepToolkitUI);
     safeRun("updateDerivedFields", updateDerivedFields);
   });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".neuro-checklist__item-label").forEach(label => {
+        label.addEventListener("click", () => {
+          const duration = parseInt(label.textContent.match(/\d+/)?.[0] || 25, 10);
+          openOverlay("focusOverlay");
+          startFocusSprint(duration);
+        });
+      });
+    });
   </script>
     <script>
   (function () {
