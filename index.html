@@ -8198,58 +8198,44 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
       box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 16px 40px rgba(45, 212, 195, 0.35);
     }
     .focus-command-deck {
-      background: linear-gradient(145deg, rgba(15, 18, 26, 0.98), rgba(12, 22, 20, 0.9));
-      border: 1px solid rgba(147, 160, 170, 0.22);
+      background: linear-gradient(145deg, rgba(15,18,26,0.98), rgba(12,22,20,0.9));
+      border: 1px solid rgba(147,160,170,0.22);
       border-radius: 20px;
-      padding: clamp(1.4rem, 3vw, 1.8rem);
+      padding: 1.5rem;
       width: var(--focus-shell-width);
-      margin: clamp(0.9rem, 2vw, 1.35rem) auto;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      margin: 1rem auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
       display: flex;
       flex-direction: column;
-      gap: clamp(1rem, 3vw, 1.35rem);
+      gap: 1.25rem;
       color: #e6eef7;
       font-family: "Inter", system-ui, sans-serif;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .focus-command-deck::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--tasker-brand-gradient);
-      border-radius: 16px 16px 12px 12px;
-      pointer-events: none;
     }
 
 .focus-title {
-      font-size: clamp(1.4rem, 2.3vw, 1.6rem);
-      margin: 0;
-      color: #7bd88f;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: clamp(0.45rem, 1.2vw, 0.65rem);
-    }
+  font-size: clamp(1.4rem, 2.3vw, 1.6rem);
+  margin: 0;
+  color: #7bd88f;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .focus-title__link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      padding: 0.35rem;
-      margin-left: 0;
-      border-radius: 10px;
-      border: 1px solid rgba(45, 212, 195, 0.4);
-      background: rgba(45, 212, 195, 0.18);
-      text-decoration: none;
-      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-    }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0.35rem;
+  margin-left: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(45, 212, 195, 0.4);
+  background: rgba(45, 212, 195, 0.18);
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
 
 .focus-title__link:hover,
 .focus-title__link:focus-visible {
@@ -8260,10 +8246,10 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
 }
 
 .focus-title__icon {
-      width: 18px;
-      height: 18px;
-      object-fit: contain;
-    }
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 
 .focus-top {
   display: flex;
@@ -8443,7 +8429,6 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
       background: rgba(17, 23, 30, 0.82);
       border: 1px solid rgba(147, 160, 170, 0.18);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-      position: static;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -8525,12 +8510,12 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
 /* --- TASK FOCUS HEADER --- */
     .app-header {
       background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.85));
-      border: 1px solid var(--card-border-color);
-      border-radius: 16px;
-      padding: clamp(1.05rem, 3vw, 1.3rem) clamp(1.05rem, 4vw, 1.45rem);
-      margin: 0 auto clamp(0.75rem, 2vw, 1.15rem);
-      width: min(var(--focus-shell-width), 520px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: clamp(1rem, 3vw, 1.2rem) clamp(1rem, 4vw, 1.4rem);
+      margin: 0 auto 1rem;
+      width: min(94vw, 480px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       position: relative;
       display: flex;
       flex-direction: column;
@@ -8791,13 +8776,13 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 2px;
+  height: 3px;
   width: 100%;
   background: linear-gradient(90deg, #2dd4c3, #7bd88f, #2dd4c3);
-  opacity: 0.8;
+  opacity: 0.85;
   background-size: 200% auto;
-  animation: slide-glow 8s linear infinite;
-  border-radius: 2px;
+  animation: slide-glow 6s linear infinite;
+  border-radius: 3px;
 }
 
 @keyframes slide-glow {
@@ -8822,6 +8807,7 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
 }
 
 /* === HOME SCREEN CARD SPACING === */
+.focus-command-deck,
 .quick-add,
 .quick-tasks,
 .title-card {
@@ -25251,12 +25237,21 @@ function wireInsights() {
   if (btn) btn.addEventListener("click", openInsights);
   if (closeBtn) closeBtn.addEventListener("click", closeInsights);
 }
+
+function safeRun(label, fn) {
+  try {
+    return fn();
+  } catch (error) {
+    console.error(`Tasker init error [${label}]`, error);
+    return null;
+  }
+}
   window.addEventListener('DOMContentLoaded', () => {
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
       nextStepBtn.addEventListener("click", completeCurrentMeltdownStep);
     }
-    prepareAccordionContainers();
+    safeRun("prepareAccordionContainers", prepareAccordionContainers);
     function showToast(message, duration = 2000) {
   const toast = document.createElement("div");
   toast.textContent = message;
@@ -25282,78 +25277,78 @@ function wireInsights() {
     setTimeout(() => toast.remove(), 300);
   }, duration);
     }
-    const hydrationOutcome = hydrateTasksFromStorage();
-    hydrateTemplatesFromStorage();
-    restoreBriefModePreference();
-    setupMomentumZones();
-    setupNextBestObserver();
-    setupSmartCollapse();
-    setupTaskGestures();
-    setupFocusOverlay();
-    setupLazyMedia();
-    initializeChartFields();
-    registerFieldListeners();
-    registerTaskListModeControl();
-    registerTimeBudgetControl();
-    registerReadyToLaunchControl();
-    setDefaultFieldValues();
-    updateHeaderSubtitle();
-    updateBillingReminder();
-    initializeSoundPreference();
-    initializeFirstThreeWizard();
-    initializeTaskForm();
-    initializeQuickAddMenu();
-    initializeQuickTaskShortcut();
-    initializeShredTopTaskButton();
-    initializeBlockBatchModule();
-    initializeAddTaskCardState();
-    initializePreflightToggles();
-    initializeDueTodayAccordionState();
-    initializeAllTasksCardState();
-    initializeAllTasksOverlay();
-    initializeFocusLaunchSheet();
-    initializeQuickCaptureModal();
-    initializeSettingsMenu();
-    initializeTemplatesOverlay();
-    initializeConflictOverlay();
+    const hydrationOutcome = safeRun("hydrateTasksFromStorage", hydrateTasksFromStorage) || {};
+    safeRun("hydrateTemplatesFromStorage", hydrateTemplatesFromStorage);
+    safeRun("restoreBriefModePreference", restoreBriefModePreference);
+    safeRun("setupMomentumZones", setupMomentumZones);
+    safeRun("setupNextBestObserver", setupNextBestObserver);
+    safeRun("setupSmartCollapse", setupSmartCollapse);
+    safeRun("setupTaskGestures", setupTaskGestures);
+    safeRun("setupFocusOverlay", setupFocusOverlay);
+    safeRun("setupLazyMedia", setupLazyMedia);
+    safeRun("initializeChartFields", initializeChartFields);
+    safeRun("registerFieldListeners", registerFieldListeners);
+    safeRun("registerTaskListModeControl", registerTaskListModeControl);
+    safeRun("registerTimeBudgetControl", registerTimeBudgetControl);
+    safeRun("registerReadyToLaunchControl", registerReadyToLaunchControl);
+    safeRun("setDefaultFieldValues", setDefaultFieldValues);
+    safeRun("updateHeaderSubtitle", updateHeaderSubtitle);
+    safeRun("updateBillingReminder", updateBillingReminder);
+    safeRun("initializeSoundPreference", initializeSoundPreference);
+    safeRun("initializeFirstThreeWizard", initializeFirstThreeWizard);
+    safeRun("initializeTaskForm", initializeTaskForm);
+    safeRun("initializeQuickAddMenu", initializeQuickAddMenu);
+    safeRun("initializeQuickTaskShortcut", initializeQuickTaskShortcut);
+    safeRun("initializeShredTopTaskButton", initializeShredTopTaskButton);
+    safeRun("initializeBlockBatchModule", initializeBlockBatchModule);
+    safeRun("initializeAddTaskCardState", initializeAddTaskCardState);
+    safeRun("initializePreflightToggles", initializePreflightToggles);
+    safeRun("initializeDueTodayAccordionState", initializeDueTodayAccordionState);
+    safeRun("initializeAllTasksCardState", initializeAllTasksCardState);
+    safeRun("initializeAllTasksOverlay", initializeAllTasksOverlay);
+    safeRun("initializeFocusLaunchSheet", initializeFocusLaunchSheet);
+    safeRun("initializeQuickCaptureModal", initializeQuickCaptureModal);
+    safeRun("initializeSettingsMenu", initializeSettingsMenu);
+    safeRun("initializeTemplatesOverlay", initializeTemplatesOverlay);
+    safeRun("initializeConflictOverlay", initializeConflictOverlay);
 
 // === START: Accordions ===
 // Existing accordion wiring lives in renderDueTodayList and initializeAllTasksCardState.
 // Keep the two sections mutually exclusive by collapsing the other when one opens.
 // === END: Accordions ===
 
-    renderResourceLinks();
-    initializeResourceCreation();
-    initializeResourcesDrawer();
-    initializeSosPanel();
-    initializeCommandBarAutohide();
-    initializeDefuseOverlay();
-    initializeRoutineOverlay();
-    initializeCollapsibleModules();
-    initializeMorningLaunchModule();
-    initializeLaunchPadModule();
-    initializeSleepToolkitModule();
-    initializeNextBestEngine();
-    initializeConflictResolverModule();
-    initializeDefuseMode();
-    initializeDopamineModule();
-    wireWinLogHUD();
-    wireInsights();
-    recalculateAdaptiveBias();
-    initializeDistractionTools();
-    initializeGanttSnapshot();
-    initializeWorstDayMode();
-    initializeTaskBackupControls();
-    registerCategoryFilterControl();
-    registerTaskSortControl();
-    setupStartRewardObserver();
-    startReminderLoop();
-    renderTemplates();
+    safeRun("renderResourceLinks", renderResourceLinks);
+    safeRun("initializeResourceCreation", initializeResourceCreation);
+    safeRun("initializeResourcesDrawer", initializeResourcesDrawer);
+    safeRun("initializeSosPanel", initializeSosPanel);
+    safeRun("initializeCommandBarAutohide", initializeCommandBarAutohide);
+    safeRun("initializeDefuseOverlay", initializeDefuseOverlay);
+    safeRun("initializeRoutineOverlay", initializeRoutineOverlay);
+    safeRun("initializeCollapsibleModules", initializeCollapsibleModules);
+    safeRun("initializeMorningLaunchModule", initializeMorningLaunchModule);
+    safeRun("initializeLaunchPadModule", initializeLaunchPadModule);
+    safeRun("initializeSleepToolkitModule", initializeSleepToolkitModule);
+    safeRun("initializeNextBestEngine", initializeNextBestEngine);
+    safeRun("initializeConflictResolverModule", initializeConflictResolverModule);
+    safeRun("initializeDefuseMode", initializeDefuseMode);
+    safeRun("initializeDopamineModule", initializeDopamineModule);
+    safeRun("wireWinLogHUD", wireWinLogHUD);
+    safeRun("wireInsights", wireInsights);
+    safeRun("recalculateAdaptiveBias", recalculateAdaptiveBias);
+    safeRun("initializeDistractionTools", initializeDistractionTools);
+    safeRun("initializeGanttSnapshot", initializeGanttSnapshot);
+    safeRun("initializeWorstDayMode", initializeWorstDayMode);
+    safeRun("initializeTaskBackupControls", initializeTaskBackupControls);
+    safeRun("registerCategoryFilterControl", registerCategoryFilterControl);
+    safeRun("registerTaskSortControl", registerTaskSortControl);
+    safeRun("setupStartRewardObserver", setupStartRewardObserver);
+    safeRun("startReminderLoop", startReminderLoop);
+    safeRun("renderTemplates", renderTemplates);
     if (!hydrationOutcome?.scheduledUpdate) {
-      updateUI();
+      safeRun("updateUI", updateUI);
     }
-    updateSleepToolkitUI();
-    updateDerivedFields();
+    safeRun("updateSleepToolkitUI", updateSleepToolkitUI);
+    safeRun("updateDerivedFields", updateDerivedFields);
   });
   </script>
     <script>
