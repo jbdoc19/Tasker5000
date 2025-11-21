@@ -884,6 +884,28 @@
       text-transform: uppercase;
     }
 
+    .neuro-checklist__control select {
+      width: 100%;
+      min-width: 140px;
+      padding: 0.6rem 0.75rem;
+      background: rgba(13, 19, 25, 0.85);
+      color: var(--text-primary);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      border-radius: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .neuro-checklist__control select:focus-visible,
+    .neuro-checklist__control select:hover {
+      transform: translateY(-1px);
+      background: rgba(31, 42, 54, 0.9);
+      border-color: rgba(125, 196, 177, 0.55);
+      outline: none;
+    }
+
     .neuro-checklist__body {
       display: grid;
       gap: clamp(1rem, 3vw, 1.5rem);
