@@ -906,83 +906,6 @@
       outline: none;
     }
 
-    .neuro-checklist__control--dropdown {
-      align-items: stretch;
-      position: relative;
-      width: 100%;
-    }
-
-    .neuro-checklist__control--dropdown > button {
-      width: 100%;
-      background: rgba(13, 19, 25, 0.85);
-      border: 1px solid rgba(124, 144, 160, 0.35);
-      border-radius: 14px;
-      padding: 0.65rem 0.75rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: 0.01em;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      justify-content: center;
-      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
-    }
-
-    .neuro-checklist__control--dropdown > button:hover,
-    .neuro-checklist__control--dropdown > button:focus-visible {
-      transform: translateY(-1px);
-      background: rgba(31, 42, 54, 0.9);
-      border-color: rgba(125, 196, 177, 0.55);
-      outline: none;
-    }
-
-    .neuro-checklist__dropdown {
-      position: absolute;
-      inset: auto 0  auto;
-      top: calc(100% + 0.35rem);
-      background: rgba(10, 15, 21, 0.96);
-      border: 1px solid rgba(124, 144, 160, 0.35);
-      border-radius: 16px;
-      padding: 0.4rem;
-      display: none;
-      flex-direction: column;
-      gap: 0.3rem;
-      z-index: 4;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    .neuro-checklist__dropdown.is-open {
-      display: flex;
-    }
-
-    .neuro-checklist__dropdown-option {
-      width: 100%;
-      text-align: left;
-      padding: 0.65rem 0.75rem;
-      border-radius: 12px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text-primary);
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      text-transform: uppercase;
-      transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
-    }
-
-    .neuro-checklist__dropdown-option:hover,
-    .neuro-checklist__dropdown-option:focus-visible {
-      background: rgba(31, 42, 54, 0.9);
-      border-color: rgba(125, 196, 177, 0.55);
-      outline: none;
-      transform: translateY(-1px);
-    }
-
-    .neuro-checklist__dropdown-option.is-active {
-      background: rgba(45, 212, 195, 0.14);
-      border-color: rgba(45, 212, 195, 0.45);
-    }
-
     .neuro-checklist__body {
       display: grid;
       gap: clamp(1rem, 3vw, 1.5rem);
@@ -18701,34 +18624,20 @@ host.appendChild(row);
 
   const SOCIAL_SCORE_MAP = {
     home_solo: 0.0,
+    clinic_closed: 0.4,
     clinic_open_door: 0.7,
-    clinic_workroom: 0.5,
-    cafe: 0.4,
-    zoom_buddy: 1.0,
-    clinic_closed: 0.5,
     clinic_with_door_open: 0.7,
+    cafe: 0.8,
+    zoom_buddy: 1.0,
   };
-
-  const SOCIAL_CONTEXT_OPTIONS = [
-    { value: "home_solo", label: "Charting at home", score: 0.0 },
-    { value: "clinic_open_door", label: "Charting in exam room with door open", score: 0.7 },
-    { value: "clinic_workroom", label: "Charting in workroom", score: 0.5 },
-    { value: "cafe", label: "Charting in a cafe", score: 0.4 },
-    { value: "zoom_buddy", label: "Charting with a zoom buddy", score: 1.0 },
-  ];
 
   function getSocialContextScore() {
     const loc = SessionState.contextLocation || "home_solo";
     return SOCIAL_SCORE_MAP[loc] ?? 0;
   }
 
-  function getSocialContextOption(loc = SessionState.contextLocation || "home_solo") {
-    return SOCIAL_CONTEXT_OPTIONS.find(option => option.value === loc) || null;
-  }
-
   function formatSocialContextLabel(loc = SessionState.contextLocation || "home_solo") {
-    const option = getSocialContextOption(loc);
-    return option?.label || loc.replace(/_/g, " ");
+    return loc.replace(/_/g, " ");
   }
 
   function ensureChecklistLayout(card) {
@@ -18857,48 +18766,9 @@ host.appendChild(row);
       return { wrapper, button, caption };
     };
 
-    const createContextLocationControl = () => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "neuro-checklist__control neuro-checklist__control--dropdown";
-
-      const caption = document.createElement("span");
-      caption.dataset.contextLocationLabel = "";
-      caption.textContent = "👨‍💻 Context";
-
-      const button = document.createElement("button");
-      button.id = "contextLocationButton";
-      button.type = "button";
-      button.className = "neuro-checklist__control-button";
-      button.textContent = "👨‍💻";
-      button.setAttribute("aria-haspopup", "listbox");
-      button.setAttribute("aria-expanded", "false");
-
-      const menu = document.createElement("div");
-      menu.className = "neuro-checklist__dropdown";
-      menu.hidden = true;
-      menu.setAttribute("role", "listbox");
-      menu.setAttribute("aria-label", "Select context location");
-
-      SOCIAL_CONTEXT_OPTIONS.forEach(option => {
-        const optionButton = document.createElement("button");
-        optionButton.type = "button";
-        optionButton.className = "neuro-checklist__dropdown-option";
-        optionButton.dataset.value = option.value;
-        optionButton.textContent = `${option.label} (${option.score.toFixed(1)})`;
-        optionButton.setAttribute("role", "option");
-        optionButton.setAttribute("aria-pressed", "false");
-        menu.appendChild(optionButton);
-      });
-
-      wrapper.appendChild(button);
-      wrapper.appendChild(menu);
-      wrapper.appendChild(caption);
-      return { wrapper, button, menu, caption };
-    };
-
     const availability = createControl("capacityWrench", "🔧", "Availability");
     const energy = createControl("energyDial", "🔋", "Energy");
-    const contextLocation = createContextLocationControl();
+    const contextLocation = createControl("contextLocationButton", "👨‍💻", "Context");
 
     host.append(
       availability.wrapper,
@@ -18923,41 +18793,20 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    const toggleContextMenu = (forceState = null) => {
-      const shouldOpen = forceState ?? contextLocation.menu.hidden;
-      contextLocation.menu.hidden = !shouldOpen;
-      contextLocation.menu.classList.toggle("is-open", shouldOpen);
-      contextLocation.button.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
-      if (shouldOpen) {
-        const active = contextLocation.menu.querySelector(".neuro-checklist__dropdown-option.is-active");
-        active?.focus({ preventScroll: true });
-      }
-    };
+    const locationCaption = contextLocation.caption;
+    if (locationCaption) {
+      locationCaption.dataset.contextLocationLabel = "";
+    }
 
     contextLocation.button.addEventListener("click", () => {
-      toggleContextMenu();
-    });
-
-    contextLocation.menu.addEventListener("click", event => {
-      const optionButton = event.target?.closest(".neuro-checklist__dropdown-option");
-      if (!optionButton) return;
-      const normalized = (optionButton.dataset.value || "home_solo").trim();
-      SessionState.contextLocation = normalized || "home_solo";
+      const options = Object.keys(SOCIAL_SCORE_MAP).join(", ");
+      const current = SessionState.contextLocation || "home_solo";
+      const response = window.prompt(`Set your context location (${options})`, current);
+      if (response === null) return;
+      const normalized = response.trim().toLowerCase().replace(/\s+/g, "_") || "home_solo";
+      SessionState.contextLocation = normalized;
       updateContextLocationControls();
       applyChecklistControlsState();
-      toggleContextMenu(false);
-    });
-
-    document.addEventListener("click", event => {
-      if (!contextLocation.wrapper.contains(event.target)) {
-        toggleContextMenu(false);
-      }
-    });
-
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape") {
-        toggleContextMenu(false);
-      }
     });
 
     updateContextLocationControls();
@@ -19001,26 +18850,16 @@ host.appendChild(row);
   function updateContextLocationControls() {
     const button = document.getElementById("contextLocationButton");
     const caption = document.querySelector("[data-context-location-label]");
-    const menu = document.querySelector(".neuro-checklist__dropdown");
-    const desired = SessionState.contextLocation || "home_solo";
-    const friendly = formatSocialContextLabel(desired);
+    const friendly = formatSocialContextLabel();
     const score = Math.round(getSocialContextScore() * 100);
 
     if (caption) {
-      caption.textContent = `👨‍💻 Context (${friendly} — ${score}% boost)`;
+      caption.textContent = `Context (${friendly})`;
     }
 
     if (button) {
-      button.textContent = `👨‍💻 ${friendly}`;
       button.setAttribute("aria-label", `Context location — ${friendly} (${score}% social boost)`);
-    }
-
-    if (menu) {
-      menu.querySelectorAll(".neuro-checklist__dropdown-option").forEach(optionButton => {
-        const isActive = optionButton.dataset.value === desired;
-        optionButton.classList.toggle("is-active", isActive);
-        optionButton.setAttribute("aria-pressed", isActive ? "true" : "false");
-      });
+      button.classList.toggle("is-active", Boolean(SessionState.contextLocation));
     }
   }
 
