@@ -16838,17 +16838,46 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return baseScore * patientWeight * visitWeight * sameDayBonus * agingBoost;
   }
 
-  function computeTimeWeight(task) {
+  function isSparseChartInfo(task) {
+    if (!task) return true;
+    const candidateFields = [...chartFieldIds, "importance", "urgency", "visitType", "clinicSite", "patientType"];
+    const filledFields = candidateFields.reduce((count, field) => {
+      const value = task[field];
+      if (value === undefined || value === null) return count;
+      if (typeof value === "string" && value.trim() === "") return count;
+      if (typeof value === "number" && !Number.isFinite(value)) return count;
+      return count + 1;
+    }, 0);
+    return filledFields < 2;
+  }
+
+  function computeChartTimeAgeWeight(task) {
     if (!task) return 1;
-    if (isQuickTask(task)) return 1;
-    const isChart = isChartTask(task);
     const parsedDays = Number(task.daysSinceVisit);
     const daysSince = Number.isFinite(parsedDays)
       ? parsedDays
       : (task.dateOfService ? calculateDaysSince(task.dateOfService) : null);
+    if (daysSince === null || !Number.isFinite(daysSince)) return 1;
+
+    let multiplier = 1;
+    if (daysSince <= 7) {
+      multiplier = 1.5;
+    } else if (daysSince <= 30) {
+      multiplier = 1.3;
+    }
+
+    if (daysSince > 30 && isSparseChartInfo(task)) {
+      multiplier *= 1.5;
+    }
+
+    return multiplier;
+  }
+
+  function computeTimeWeight(task) {
+    if (!task) return 1;
+    if (isQuickTask(task)) return 1;
+    const isChart = isChartTask(task);
     const daysUntilDue = task.dueDate ? calculateDaysUntil(task.dueDate) : null;
-    const currentMonth = isDateInCurrentMonth(task.dateOfService)
-      || isDateInCurrentMonth(task.dueDate);
 
     if (!isChart) {
       if (daysUntilDue !== null && Number.isFinite(daysUntilDue) && daysUntilDue <= 3 && daysUntilDue >= 0) {
@@ -16857,26 +16886,7 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       return 1.0;
     }
 
-    if (daysSince !== null && Number.isFinite(daysSince)) {
-      if (daysSince > 95) return 0.5;
-      if (daysSince >= 90 && daysSince <= 95) return 2.0;
-      if (daysSince >= 0 && daysSince < 3) return 1.8;
-      if (daysSince >= 3 && currentMonth) return 1.3;
-    }
-
-    if (daysUntilDue !== null && Number.isFinite(daysUntilDue)) {
-      if (daysUntilDue <= 3 && daysUntilDue >= 0) {
-        return 1.8;
-      }
-      if (daysUntilDue < 0 && daysSince === null) {
-        return currentMonth ? 1.3 : 1.0;
-      }
-      if (currentMonth) {
-        return 1.3;
-      }
-    }
-
-    return 1.0;
+    return computeChartTimeAgeWeight(task);
   }
 
   function computePriority(t) {
