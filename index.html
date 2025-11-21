@@ -837,7 +837,7 @@
 
     .neuro-checklist__control-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: clamp(0.5rem, 2vw, 1rem);
       width: 100%;
       justify-items: center;
@@ -882,6 +882,105 @@
       font-weight: 600;
       letter-spacing: 0.02em;
       text-transform: uppercase;
+    }
+
+    .neuro-checklist__control select {
+      width: 100%;
+      min-width: 140px;
+      padding: 0.6rem 0.75rem;
+      background: rgba(13, 19, 25, 0.85);
+      color: var(--text-primary);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      border-radius: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .neuro-checklist__control select:focus-visible,
+    .neuro-checklist__control select:hover {
+      transform: translateY(-1px);
+      background: rgba(31, 42, 54, 0.9);
+      border-color: rgba(125, 196, 177, 0.55);
+      outline: none;
+    }
+
+    .neuro-checklist__control--dropdown {
+      align-items: stretch;
+      position: relative;
+      width: 100%;
+    }
+
+    .neuro-checklist__control--dropdown > button {
+      width: 100%;
+      background: rgba(13, 19, 25, 0.85);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      border-radius: 14px;
+      padding: 0.65rem 0.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .neuro-checklist__control--dropdown > button:hover,
+    .neuro-checklist__control--dropdown > button:focus-visible {
+      transform: translateY(-1px);
+      background: rgba(31, 42, 54, 0.9);
+      border-color: rgba(125, 196, 177, 0.55);
+      outline: none;
+    }
+
+    .neuro-checklist__dropdown {
+      position: absolute;
+      inset: auto 0  auto;
+      top: calc(100% + 0.35rem);
+      background: rgba(10, 15, 21, 0.96);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      border-radius: 16px;
+      padding: 0.4rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.3rem;
+      z-index: 4;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .neuro-checklist__dropdown.is-open {
+      display: flex;
+    }
+
+    .neuro-checklist__dropdown-option {
+      width: 100%;
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-primary);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+    }
+
+    .neuro-checklist__dropdown-option:hover,
+    .neuro-checklist__dropdown-option:focus-visible {
+      background: rgba(31, 42, 54, 0.9);
+      border-color: rgba(125, 196, 177, 0.55);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .neuro-checklist__dropdown-option.is-active {
+      background: rgba(45, 212, 195, 0.14);
+      border-color: rgba(45, 212, 195, 0.45);
     }
 
     .neuro-checklist__body {
@@ -8325,6 +8424,38 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
   transition: opacity 180ms ease, transform 180ms ease;
 }
 
+.focus-views {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.focus-view-toggle {
+  border: 1px solid rgba(125, 216, 143, 0.3);
+  background: rgba(125, 216, 143, 0.1);
+  color: #e6eef7;
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.focus-view-toggle.is-active {
+  background: rgba(125, 216, 143, 0.2);
+  border-color: rgba(125, 216, 143, 0.6);
+}
+
+.focus-view-toggle:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(125, 216, 143, 0.2);
+}
+
+.focus-view-toggle:focus-visible {
+  outline: 2px solid #7bd88f;
+  outline-offset: 2px;
+}
+
 .focus-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -9179,6 +9310,10 @@ body.all-tasks-overlay-active {
         <span class="cm-fill" style="width:21%"></span>
         <span class="cm-float" aria-live="polite">21% complete</span>
       </div>
+    </div>
+    <div class="focus-views" role="group" aria-label="Focus views">
+      <button id="focusViewButton" class="focus-view-toggle" type="button">🔎 Focus view</button>
+      <button id="visualWorkflowButton" class="focus-view-toggle" type="button">🌐 Visual workflow</button>
     </div>
   </div>
   <div id="focusBuddy" class="focus-buddy">
@@ -18552,6 +18687,50 @@ host.appendChild(row);
     return parts.join(" ");
   }
 
+  const SessionState = (typeof window !== "undefined" && window.SessionState)
+    ? window.SessionState
+    : {};
+
+  if (!SessionState.contextLocation) {
+    SessionState.contextLocation = "home_solo";
+  }
+
+  if (typeof window !== "undefined") {
+    window.SessionState = SessionState;
+  }
+
+  const SOCIAL_SCORE_MAP = {
+    home_solo: 0.0,
+    clinic_open_door: 0.7,
+    clinic_workroom: 0.5,
+    cafe: 0.4,
+    zoom_buddy: 1.0,
+    clinic_closed: 0.5,
+    clinic_with_door_open: 0.7,
+  };
+
+  const SOCIAL_CONTEXT_OPTIONS = [
+    { value: "home_solo", label: "Charting at home", score: 0.0 },
+    { value: "clinic_open_door", label: "Charting in exam room with door open", score: 0.7 },
+    { value: "clinic_workroom", label: "Charting in workroom", score: 0.5 },
+    { value: "cafe", label: "Charting in a cafe", score: 0.4 },
+    { value: "zoom_buddy", label: "Charting with a zoom buddy", score: 1.0 },
+  ];
+
+  function getSocialContextScore() {
+    const loc = SessionState.contextLocation || "home_solo";
+    return SOCIAL_SCORE_MAP[loc] ?? 0;
+  }
+
+  function getSocialContextOption(loc = SessionState.contextLocation || "home_solo") {
+    return SOCIAL_CONTEXT_OPTIONS.find(option => option.value === loc) || null;
+  }
+
+  function formatSocialContextLabel(loc = SessionState.contextLocation || "home_solo") {
+    const option = getSocialContextOption(loc);
+    return option?.label || loc.replace(/_/g, " ");
+  }
+
   function ensureChecklistLayout(card) {
     if (!card) return null;
     if (card.__checklistRefs) {
@@ -18675,19 +18854,56 @@ host.appendChild(row);
 
       wrapper.appendChild(button);
       wrapper.appendChild(caption);
-      return { wrapper, button };
+      return { wrapper, button, caption };
+    };
+
+    const createContextLocationControl = () => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "neuro-checklist__control neuro-checklist__control--dropdown";
+
+      const caption = document.createElement("span");
+      caption.dataset.contextLocationLabel = "";
+      caption.textContent = "👨‍💻 Context";
+
+      const button = document.createElement("button");
+      button.id = "contextLocationButton";
+      button.type = "button";
+      button.className = "neuro-checklist__control-button";
+      button.textContent = "👨‍💻";
+      button.setAttribute("aria-haspopup", "listbox");
+      button.setAttribute("aria-expanded", "false");
+
+      const menu = document.createElement("div");
+      menu.className = "neuro-checklist__dropdown";
+      menu.hidden = true;
+      menu.setAttribute("role", "listbox");
+      menu.setAttribute("aria-label", "Select context location");
+
+      SOCIAL_CONTEXT_OPTIONS.forEach(option => {
+        const optionButton = document.createElement("button");
+        optionButton.type = "button";
+        optionButton.className = "neuro-checklist__dropdown-option";
+        optionButton.dataset.value = option.value;
+        optionButton.textContent = `${option.label} (${option.score.toFixed(1)})`;
+        optionButton.setAttribute("role", "option");
+        optionButton.setAttribute("aria-pressed", "false");
+        menu.appendChild(optionButton);
+      });
+
+      wrapper.appendChild(button);
+      wrapper.appendChild(menu);
+      wrapper.appendChild(caption);
+      return { wrapper, button, menu, caption };
     };
 
     const availability = createControl("capacityWrench", "🔧", "Availability");
     const energy = createControl("energyDial", "🔋", "Energy");
-    const focusView = createControl("focusViewButton", "🔎", "Focus View");
-    const workflow = createControl("visualWorkflowButton", "🌐", "Visual Workflow");
+    const contextLocation = createContextLocationControl();
 
     host.append(
       availability.wrapper,
       energy.wrapper,
-      focusView.wrapper,
-      workflow.wrapper,
+      contextLocation.wrapper,
     );
 
     host.dataset.controlsMounted = "true";
@@ -18707,33 +18923,105 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    focusView.button.addEventListener("click", () => {
-      const shouldUpdate = checklistViewMode !== "list";
-      checklistViewMode = "list";
-      applyChecklistControlsState();
-      if (shouldUpdate) {
-        updateUI();
+    const toggleContextMenu = (forceState = null) => {
+      const shouldOpen = forceState ?? contextLocation.menu.hidden;
+      contextLocation.menu.hidden = !shouldOpen;
+      contextLocation.menu.classList.toggle("is-open", shouldOpen);
+      contextLocation.button.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      if (shouldOpen) {
+        const active = contextLocation.menu.querySelector(".neuro-checklist__dropdown-option.is-active");
+        active?.focus({ preventScroll: true });
       }
-      const refs = card.__checklistRefs;
-      const section = refs?.focusList?.closest("section");
-      if (section instanceof HTMLElement) {
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    contextLocation.button.addEventListener("click", () => {
+      toggleContextMenu();
+    });
+
+    contextLocation.menu.addEventListener("click", event => {
+      const optionButton = event.target?.closest(".neuro-checklist__dropdown-option");
+      if (!optionButton) return;
+      const normalized = (optionButton.dataset.value || "home_solo").trim();
+      SessionState.contextLocation = normalized || "home_solo";
+      updateContextLocationControls();
+      applyChecklistControlsState();
+      toggleContextMenu(false);
+    });
+
+    document.addEventListener("click", event => {
+      if (!contextLocation.wrapper.contains(event.target)) {
+        toggleContextMenu(false);
       }
     });
 
-    workflow.button.addEventListener("click", () => {
-      const shouldUpdate = checklistViewMode !== "timeline";
-      checklistViewMode = "timeline";
-      applyChecklistControlsState();
-      if (shouldUpdate) {
-        updateUI();
-      }
-      const refs = card.__checklistRefs;
-      const hostEl = refs?.itineraryContainer || refs?.itineraryTimeline;
-      if (hostEl instanceof HTMLElement) {
-        hostEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        toggleContextMenu(false);
       }
     });
+
+    updateContextLocationControls();
+  }
+
+  function setChecklistViewMode(mode) {
+    const card = document.getElementById("neuroChecklist");
+    const shouldUpdate = checklistViewMode !== mode;
+    checklistViewMode = mode;
+    applyChecklistControlsState();
+    if (shouldUpdate) {
+      updateUI();
+    }
+    const refs = card?.__checklistRefs;
+    let target = null;
+    if (mode === "list") {
+      target = refs?.focusList?.closest("section") || null;
+    }
+    if (mode === "timeline") {
+      target = refs?.itineraryContainer || refs?.itineraryTimeline || null;
+    }
+    if (target instanceof HTMLElement) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function wireChecklistViewButtons() {
+    const focusButton = document.getElementById("focusViewButton");
+    if (focusButton && !focusButton.dataset.wired) {
+      focusButton.dataset.wired = "true";
+      focusButton.addEventListener("click", () => setChecklistViewMode("list"));
+    }
+
+    const workflowButton = document.getElementById("visualWorkflowButton");
+    if (workflowButton && !workflowButton.dataset.wired) {
+      workflowButton.dataset.wired = "true";
+      workflowButton.addEventListener("click", () => setChecklistViewMode("timeline"));
+    }
+  }
+
+  function updateContextLocationControls() {
+    const button = document.getElementById("contextLocationButton");
+    const caption = document.querySelector("[data-context-location-label]");
+    const menu = document.querySelector(".neuro-checklist__dropdown");
+    const desired = SessionState.contextLocation || "home_solo";
+    const friendly = formatSocialContextLabel(desired);
+    const score = Math.round(getSocialContextScore() * 100);
+
+    if (caption) {
+      caption.textContent = `👨‍💻 Context (${friendly} — ${score}% boost)`;
+    }
+
+    if (button) {
+      button.textContent = `👨‍💻 ${friendly}`;
+      button.setAttribute("aria-label", `Context location — ${friendly} (${score}% social boost)`);
+    }
+
+    if (menu) {
+      menu.querySelectorAll(".neuro-checklist__dropdown-option").forEach(optionButton => {
+        const isActive = optionButton.dataset.value === desired;
+        optionButton.classList.toggle("is-active", isActive);
+        optionButton.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    }
   }
 
   function renderCapacityRows(sheet) {
@@ -19583,6 +19871,8 @@ host.appendChild(row);
       workflowButton.setAttribute("aria-label", "Visual workflow view");
     }
 
+    updateContextLocationControls();
+
     const capacityButton = document.getElementById("capacityWrench");
     if (capacityButton) {
       const labelSummary = metrics?.percentLabel
@@ -19964,6 +20254,7 @@ host.appendChild(row);
     } = refs;
 
     mountChecklistControls(card);
+    wireChecklistViewButtons();
     applyChecklistControlsState();
 
     const dailyContext = getDailyContext();
