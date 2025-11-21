@@ -8443,6 +8443,7 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
       background: rgba(17, 23, 30, 0.82);
       border: 1px solid rgba(147, 160, 170, 0.18);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      position: static;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -8524,12 +8525,12 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
 /* --- TASK FOCUS HEADER --- */
     .app-header {
       background: linear-gradient(120deg, rgba(20, 28, 36, 0.9), rgba(12, 16, 22, 0.85));
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 14px;
-      padding: clamp(1rem, 3vw, 1.2rem) clamp(1rem, 4vw, 1.4rem);
-      margin: 0 auto 1rem;
-      width: min(94vw, 480px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border-color);
+      border-radius: 16px;
+      padding: clamp(1.05rem, 3vw, 1.3rem) clamp(1.05rem, 4vw, 1.45rem);
+      margin: 0 auto clamp(0.75rem, 2vw, 1.15rem);
+      width: min(var(--focus-shell-width), 520px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
       position: relative;
       display: flex;
       flex-direction: column;
@@ -8790,13 +8791,13 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 3px;
+  height: 2px;
   width: 100%;
   background: linear-gradient(90deg, #2dd4c3, #7bd88f, #2dd4c3);
-  opacity: 0.85;
+  opacity: 0.8;
   background-size: 200% auto;
-  animation: slide-glow 6s linear infinite;
-  border-radius: 3px;
+  animation: slide-glow 8s linear infinite;
+  border-radius: 2px;
 }
 
 @keyframes slide-glow {
@@ -8821,7 +8822,6 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
 }
 
 /* === HOME SCREEN CARD SPACING === */
-.focus-command-deck,
 .quick-add,
 .quick-tasks,
 .title-card {
