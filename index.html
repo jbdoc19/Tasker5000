@@ -9113,7 +9113,7 @@ body.all-tasks-overlay-active {
         <div class="app-header__top">
           <div class="app-header__date-block">
             <span class="app-header__meta-label">Today</span>
-            <p id="headerDate" class="app-header__date"></p>
+            <time id="headerDate" class="app-header__date" datetime=""></time>
           </div>
           <div class="app-header__actions">
             <button
@@ -9140,7 +9140,7 @@ body.all-tasks-overlay-active {
         </div>
         <div class="app-header__main">
           <h1 class="app-header__title">Tasker 5000</h1>
-          <p class="billing-reminder" id="billingReminder"></p>
+          <small class="billing-reminder" id="billingReminder"></small>
           <p id="headerSubtitle" class="app-header__subtitle"></p>
         </div>
         <div id="settingsMenu" class="settings-menu" aria-hidden="true">
@@ -9156,7 +9156,12 @@ body.all-tasks-overlay-active {
           </button>
         </div>
       </header>
-      <section class="card neuro-checklist-card" id="neuroChecklist" aria-live="polite"></section>
+      <section
+        class="card neuro-checklist-card"
+        id="capacityCenter"
+        data-legacy-id="neuroChecklist"
+        aria-live="polite"
+      ></section>
     </div>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
@@ -18650,6 +18655,12 @@ host.appendChild(row);
     return getSocialContextOption(loc)?.label || loc.replace(/_/g, " ");
   }
 
+  function getChecklistCard() {
+    return document.getElementById("capacityCenter")
+      || document.getElementById("neuroChecklist")
+      || null;
+  }
+
   function ensureChecklistLayout(card) {
     if (!card) return null;
     if (card.__checklistRefs) {
@@ -18918,7 +18929,7 @@ host.appendChild(row);
   }
 
   function setChecklistViewMode(mode) {
-    const card = document.getElementById("neuroChecklist");
+    const card = getChecklistCard();
     const shouldUpdate = checklistViewMode !== mode;
     checklistViewMode = mode;
     applyChecklistControlsState();
@@ -19474,7 +19485,7 @@ host.appendChild(row);
   }
 
   function openEnergySheet() {
-    const card = document.getElementById("neuroChecklist");
+    const card = getChecklistCard();
     if (!card) {
       if (!openEnergySheet.__waitForCard) {
         const handleCardReady = () => {
@@ -19714,7 +19725,7 @@ host.appendChild(row);
   }
 
   function openCapacitySheet() {
-    const card = document.getElementById("neuroChecklist");
+    const card = getChecklistCard();
     if (!card) return;
     const sheet = ensureCapacitySheet(card);
     if (!sheet) return;
@@ -19788,7 +19799,7 @@ host.appendChild(row);
     const baseMinutes = metrics?.baseMinutes ?? 0;
     const netMinutes = metrics?.netMinutes ?? baseMinutes;
 
-    const card = document.getElementById("neuroChecklist");
+    const card = getChecklistCard();
     if (card) {
       const isTimeline = checklistViewMode === "timeline";
       const isList = checklistViewMode === "list";
@@ -20193,7 +20204,7 @@ host.appendChild(row);
   }
 
   function renderNeuroChecklist() {
-    const card = document.getElementById("neuroChecklist");
+    const card = getChecklistCard();
     if (!card) return;
     const refs = ensureChecklistLayout(card);
     if (!refs) return;
@@ -25018,14 +25029,17 @@ initializeFocusFabLongPress();
     const dateEl = $("headerDate");
     if (!dateEl) return;
     try {
-      const formatted = new Date().toLocaleDateString(undefined, {
+      const today = new Date();
+      const formatted = today.toLocaleDateString(undefined, {
         weekday: "long",
         month: "short",
         day: "numeric"
       });
       dateEl.textContent = formatted;
+      dateEl.setAttribute("datetime", today.toISOString().split("T")[0]);
     } catch (error) {
       dateEl.textContent = "";
+      dateEl.removeAttribute("datetime");
     }
   }
 
@@ -25406,12 +25420,13 @@ function safeRun(label, fn) {
   document.addEventListener("DOMContentLoaded", () => {
     // Debugging script for the 2x2 recovery routines grid layout
     const container = document.querySelector(".recovery-routines-container");
+    let containerStyles = null;
     if (!container) {
       console.error("Error: Rounded container for recovery routines is missing.");
     } else {
       console.log("Recovery routines container found:", container);
 
-      const containerStyles = getComputedStyle(container);
+      containerStyles = getComputedStyle(container);
       if (containerStyles.display !== "grid") {
         console.error(
           "Error: Container is not using grid layout. Current display property:",
@@ -25450,11 +25465,13 @@ function safeRun(label, fn) {
       }
     }
 
-    const outline = containerStyles.border || containerStyles.boxShadow;
-    if (!outline || outline === "none") {
-      console.error("Error: No outline is applied to the container.");
-    } else {
-      console.log("Outline applied to the container:", outline);
+    if (containerStyles) {
+      const outline = containerStyles.border || containerStyles.boxShadow;
+      if (!outline || outline === "none") {
+        console.error("Error: No outline is applied to the container.");
+      } else {
+        console.log("Outline applied to the container:", outline);
+      }
     }
 
     const overlay = document.querySelector(".all-tasks-overlay");
