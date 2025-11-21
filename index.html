@@ -18766,34 +18766,9 @@ host.appendChild(row);
       return { wrapper, button, caption };
     };
 
-    const createContextLocationControl = () => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "neuro-checklist__control";
-
-      const caption = document.createElement("span");
-      caption.dataset.contextLocationLabel = "";
-      caption.textContent = "👨‍💻 Context";
-
-      const select = document.createElement("select");
-      select.id = "contextLocationSelect";
-      select.name = "contextLocation";
-      select.setAttribute("aria-label", "Context location");
-
-      Object.keys(SOCIAL_SCORE_MAP).forEach(loc => {
-        const option = document.createElement("option");
-        option.value = loc;
-        option.textContent = formatSocialContextLabel(loc);
-        select.appendChild(option);
-      });
-
-      wrapper.appendChild(select);
-      wrapper.appendChild(caption);
-      return { wrapper, select, caption };
-    };
-
     const availability = createControl("capacityWrench", "🔧", "Availability");
     const energy = createControl("energyDial", "🔋", "Energy");
-    const contextLocation = createContextLocationControl();
+    const contextLocation = createControl("contextLocationButton", "👨‍💻", "Context");
 
     host.append(
       availability.wrapper,
@@ -18818,9 +18793,18 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    contextLocation.select.addEventListener("change", event => {
-      const normalized = (event.target?.value || "home_solo").trim().toLowerCase();
-      SessionState.contextLocation = normalized || "home_solo";
+    const locationCaption = contextLocation.caption;
+    if (locationCaption) {
+      locationCaption.dataset.contextLocationLabel = "";
+    }
+
+    contextLocation.button.addEventListener("click", () => {
+      const options = Object.keys(SOCIAL_SCORE_MAP).join(", ");
+      const current = SessionState.contextLocation || "home_solo";
+      const response = window.prompt(`Set your context location (${options})`, current);
+      if (response === null) return;
+      const normalized = response.trim().toLowerCase().replace(/\s+/g, "_") || "home_solo";
+      SessionState.contextLocation = normalized;
       updateContextLocationControls();
       applyChecklistControlsState();
     });
@@ -18864,24 +18848,18 @@ host.appendChild(row);
   }
 
   function updateContextLocationControls() {
-    const select = document.getElementById("contextLocationSelect");
+    const button = document.getElementById("contextLocationButton");
     const caption = document.querySelector("[data-context-location-label]");
     const friendly = formatSocialContextLabel();
     const score = Math.round(getSocialContextScore() * 100);
 
     if (caption) {
-      caption.textContent = `👨‍💻 Context (${friendly})`;
+      caption.textContent = `Context (${friendly})`;
     }
 
-    if (select) {
-      const desired = SessionState.contextLocation || "home_solo";
-      if (select.value !== desired) {
-        select.value = desired;
-        if (!select.value) {
-          select.value = "home_solo";
-        }
-      }
-      select.setAttribute("aria-label", `Context location — ${friendly} (${score}% social boost)`);
+    if (button) {
+      button.setAttribute("aria-label", `Context location — ${friendly} (${score}% social boost)`);
+      button.classList.toggle("is-active", Boolean(SessionState.contextLocation));
     }
   }
 
