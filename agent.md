@@ -1,0 +1,5 @@
+# Capacity Center Investigation
+
+- The Capacity Center is statically mounted inside the capture shell; the HTML includes a `<section id="capacityCenter">` immediately after the header within `#capture`, so if that container is missing or renamed in the host page the entire card will disappear because the script has no anchor to find or create it.【F:index.html†L9145-L9166】
+- Startup logic recreates or inserts the Capacity Center next to the Tasker header only when `#capture` exists, so removing that section prevents `ensureCapacityCenterCard` from running and leaves no checklist card in the UI.【F:index.html†L25061-L25158】
+- Even when the empty card exists, its controls and content are populated by `renderNeuroChecklist`, which is only executed through `updateUI`; this is skipped if earlier initialization fails or if hydration defers rendering, leaving the card blank. Check for errors before the guarded `updateUI` call in the DOMContentLoaded handler.【F:index.html†L20206-L20311】【F:index.html†L25458-L25471】
