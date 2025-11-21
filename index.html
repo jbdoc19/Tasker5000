@@ -837,7 +837,7 @@
 
     .neuro-checklist__control-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: clamp(0.5rem, 2vw, 1rem);
       width: 100%;
       justify-items: center;
@@ -8325,6 +8325,38 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
   transition: opacity 180ms ease, transform 180ms ease;
 }
 
+.focus-views {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.focus-view-toggle {
+  border: 1px solid rgba(125, 216, 143, 0.3);
+  background: rgba(125, 216, 143, 0.1);
+  color: #e6eef7;
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.focus-view-toggle.is-active {
+  background: rgba(125, 216, 143, 0.2);
+  border-color: rgba(125, 216, 143, 0.6);
+}
+
+.focus-view-toggle:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(125, 216, 143, 0.2);
+}
+
+.focus-view-toggle:focus-visible {
+  outline: 2px solid #7bd88f;
+  outline-offset: 2px;
+}
+
 .focus-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -9179,6 +9211,10 @@ body.all-tasks-overlay-active {
         <span class="cm-fill" style="width:21%"></span>
         <span class="cm-float" aria-live="polite">21% complete</span>
       </div>
+    </div>
+    <div class="focus-views" role="group" aria-label="Focus views">
+      <button id="focusViewButton" class="focus-view-toggle" type="button">🔎 Focus view</button>
+      <button id="visualWorkflowButton" class="focus-view-toggle" type="button">🌐 Visual workflow</button>
     </div>
   </div>
   <div id="focusBuddy" class="focus-buddy">
@@ -18552,6 +18588,36 @@ host.appendChild(row);
     return parts.join(" ");
   }
 
+  const SessionState = (typeof window !== "undefined" && window.SessionState)
+    ? window.SessionState
+    : {};
+
+  if (!SessionState.contextLocation) {
+    SessionState.contextLocation = "home_solo";
+  }
+
+  if (typeof window !== "undefined") {
+    window.SessionState = SessionState;
+  }
+
+  const SOCIAL_SCORE_MAP = {
+    home_solo: 0.0,
+    clinic_closed: 0.4,
+    clinic_open_door: 0.7,
+    clinic_with_door_open: 0.7,
+    cafe: 0.8,
+    zoom_buddy: 1.0,
+  };
+
+  function getSocialContextScore() {
+    const loc = SessionState.contextLocation || "home_solo";
+    return SOCIAL_SCORE_MAP[loc] ?? 0;
+  }
+
+  function formatSocialContextLabel(loc = SessionState.contextLocation || "home_solo") {
+    return loc.replace(/_/g, " ");
+  }
+
   function ensureChecklistLayout(card) {
     if (!card) return null;
     if (card.__checklistRefs) {
@@ -18675,19 +18741,17 @@ host.appendChild(row);
 
       wrapper.appendChild(button);
       wrapper.appendChild(caption);
-      return { wrapper, button };
+      return { wrapper, button, caption };
     };
 
     const availability = createControl("capacityWrench", "🔧", "Availability");
     const energy = createControl("energyDial", "🔋", "Energy");
-    const focusView = createControl("focusViewButton", "🔎", "Focus View");
-    const workflow = createControl("visualWorkflowButton", "🌐", "Visual Workflow");
+    const contextLocation = createControl("contextLocationButton", "👨‍💻", "Context");
 
     host.append(
       availability.wrapper,
       energy.wrapper,
-      focusView.wrapper,
-      workflow.wrapper,
+      contextLocation.wrapper,
     );
 
     host.dataset.controlsMounted = "true";
@@ -18707,33 +18771,74 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    focusView.button.addEventListener("click", () => {
-      const shouldUpdate = checklistViewMode !== "list";
-      checklistViewMode = "list";
+    const locationCaption = contextLocation.caption;
+    if (locationCaption) {
+      locationCaption.dataset.contextLocationLabel = "";
+    }
+
+    contextLocation.button.addEventListener("click", () => {
+      const options = Object.keys(SOCIAL_SCORE_MAP).join(", ");
+      const current = SessionState.contextLocation || "home_solo";
+      const response = window.prompt(`Set your context location (${options})`, current);
+      if (response === null) return;
+      const normalized = response.trim().toLowerCase().replace(/\s+/g, "_") || "home_solo";
+      SessionState.contextLocation = normalized;
+      updateContextLocationControls();
       applyChecklistControlsState();
-      if (shouldUpdate) {
-        updateUI();
-      }
-      const refs = card.__checklistRefs;
-      const section = refs?.focusList?.closest("section");
-      if (section instanceof HTMLElement) {
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
     });
 
-    workflow.button.addEventListener("click", () => {
-      const shouldUpdate = checklistViewMode !== "timeline";
-      checklistViewMode = "timeline";
-      applyChecklistControlsState();
-      if (shouldUpdate) {
-        updateUI();
-      }
-      const refs = card.__checklistRefs;
-      const hostEl = refs?.itineraryContainer || refs?.itineraryTimeline;
-      if (hostEl instanceof HTMLElement) {
-        hostEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    });
+    updateContextLocationControls();
+  }
+
+  function setChecklistViewMode(mode) {
+    const card = document.getElementById("neuroChecklist");
+    const shouldUpdate = checklistViewMode !== mode;
+    checklistViewMode = mode;
+    applyChecklistControlsState();
+    if (shouldUpdate) {
+      updateUI();
+    }
+    const refs = card?.__checklistRefs;
+    let target = null;
+    if (mode === "list") {
+      target = refs?.focusList?.closest("section") || null;
+    }
+    if (mode === "timeline") {
+      target = refs?.itineraryContainer || refs?.itineraryTimeline || null;
+    }
+    if (target instanceof HTMLElement) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function wireChecklistViewButtons() {
+    const focusButton = document.getElementById("focusViewButton");
+    if (focusButton && !focusButton.dataset.wired) {
+      focusButton.dataset.wired = "true";
+      focusButton.addEventListener("click", () => setChecklistViewMode("list"));
+    }
+
+    const workflowButton = document.getElementById("visualWorkflowButton");
+    if (workflowButton && !workflowButton.dataset.wired) {
+      workflowButton.dataset.wired = "true";
+      workflowButton.addEventListener("click", () => setChecklistViewMode("timeline"));
+    }
+  }
+
+  function updateContextLocationControls() {
+    const button = document.getElementById("contextLocationButton");
+    const caption = document.querySelector("[data-context-location-label]");
+    const friendly = formatSocialContextLabel();
+    const score = Math.round(getSocialContextScore() * 100);
+
+    if (caption) {
+      caption.textContent = `Context (${friendly})`;
+    }
+
+    if (button) {
+      button.setAttribute("aria-label", `Context location — ${friendly} (${score}% social boost)`);
+      button.classList.toggle("is-active", Boolean(SessionState.contextLocation));
+    }
   }
 
   function renderCapacityRows(sheet) {
@@ -19583,6 +19688,8 @@ host.appendChild(row);
       workflowButton.setAttribute("aria-label", "Visual workflow view");
     }
 
+    updateContextLocationControls();
+
     const capacityButton = document.getElementById("capacityWrench");
     if (capacityButton) {
       const labelSummary = metrics?.percentLabel
@@ -19964,6 +20071,7 @@ host.appendChild(row);
     } = refs;
 
     mountChecklistControls(card);
+    wireChecklistViewButtons();
     applyChecklistControlsState();
 
     const dailyContext = getDailyContext();
