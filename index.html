@@ -10885,7 +10885,15 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
       generateAdaptiveItinerary,
     });
   </script>
-  <script>
+  <script type="module">
+    import {
+      SOCIAL_CONTEXT_OPTIONS,
+      SessionState,
+      getMentalEnergyScore,
+      getSocialContextOption,
+      getSocialContextScore,
+    } from "./sessionState.js";
+
   const $ = id => document.getElementById(id);
 
   let openResourcesDrawer = () => {};
@@ -16798,21 +16806,25 @@ document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
     return isSameLocalDay(createdDate, now) ? 2 : 1;
   }
 
-  function computeRawPriorityScore(t) {
-    const importance = clampScale(t.importance, 1);
-    const urgency = clampScale(t.urgency, 3);
-    const novelty = clampScale(t.novelty, 1);
-    const interest = clampScale(t.interest, 1);
-    const pressure = Math.min(4.2, clampScale(t.externalPressure, 1));
-    const timeToStart = clampScale(t.timeToStart, 1);
-    const difficulty = clampScale(t.difficulty, 1);
+  function computeBaseScore(task) {
+    const importance = clampScale(task.importance, 1);
+    const urgency = clampScale(task.urgency, 3);
+    const novelty = clampScale(task.novelty, 1);
+    const interest = clampScale(task.interest, 1);
+    const pressure = Math.min(4.2, clampScale(task.externalPressure, 1));
+    const timeToStart = clampScale(task.timeToStart, 1);
+    const difficulty = clampScale(task.difficulty, 1);
     const dopamine = novelty + interest;
     const friction = (6 - timeToStart) + (6 - difficulty);
-    const baseScore = (importance * 2)
-         + (urgency * 2)
-         + (dopamine * 2)
-         + (pressure * 5)
-         + (friction * 1.5);
+    return (importance * 2)
+      + (urgency * 2)
+      + (dopamine * 2)
+      + (pressure * 5)
+      + (friction * 1.5);
+  }
+
+  function computeRawPriorityScore(t) {
+    const baseScore = computeBaseScore(t);
     const patientWeight = getPatientTypeWeight(t.patientType);
     const visitWeight = getVisitTypeWeight(t.visitType);
     const sameDayBonus = getSameDayBonus(t.clinicSite, t.createdAt);
@@ -18586,43 +18598,6 @@ host.appendChild(row);
       parts.push(`${mins}m`);
     }
     return parts.join(" ");
-  }
-
-  const SessionState = (typeof window !== "undefined" && window.SessionState)
-    ? window.SessionState
-    : {};
-
-  const SOCIAL_CONTEXT_OPTIONS = [
-    { value: "home_solo", label: "Charting at home", score: 0.0 },
-    { value: "clinic_open_door", label: "Charting in exam room with door open", score: 0.7 },
-    { value: "clinic_workroom", label: "Charting in workroom", score: 0.5 },
-    { value: "cafe", label: "Charting in a cafe", score: 0.4 },
-    { value: "zoom_buddy", label: "Charting with a zoom buddy", score: 1.0 },
-  ];
-
-  const SOCIAL_SCORE_MAP = {
-    home_solo: 0.0,
-    clinic_open_door: 0.7,
-    clinic_workroom: 0.5,
-    cafe: 0.4,
-    zoom_buddy: 1.0,
-  };
-
-  if (!SessionState.contextLocation) {
-    SessionState.contextLocation = SOCIAL_CONTEXT_OPTIONS[0].value;
-  }
-
-  if (typeof window !== "undefined") {
-    window.SessionState = SessionState;
-  }
-
-  function getSocialContextOption(loc = SessionState.contextLocation || SOCIAL_CONTEXT_OPTIONS[0].value) {
-    return SOCIAL_CONTEXT_OPTIONS.find(option => option.value === loc) || SOCIAL_CONTEXT_OPTIONS[0];
-  }
-
-  function getSocialContextScore() {
-    const loc = SessionState.contextLocation || SOCIAL_CONTEXT_OPTIONS[0].value;
-    return SOCIAL_SCORE_MAP[loc] ?? getSocialContextOption(loc)?.score ?? 0;
   }
 
   function formatSocialContextLabel(loc = SessionState.contextLocation || "home_solo") {
