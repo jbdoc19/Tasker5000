@@ -378,10 +378,10 @@
       position: relative;
       width: min(100%, var(--focus-shell-width));
       margin: clamp(0.75rem, 2vw, 1rem) auto 0;
-      padding: clamp(0.95rem, 2vw, 1.35rem);
+      padding: clamp(1.1rem, 2.5vw, 1.65rem);
       display: flex;
       flex-direction: column;
-      gap: clamp(0.65rem, 2vw, 1.1rem);
+      gap: clamp(0.85rem, 2.2vw, 1.4rem);
       background: #0b1120;
       border: 1px solid #1e293b;
       box-shadow: 0 20px 48px #000000;
@@ -837,7 +837,7 @@
 
     .neuro-checklist__control-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: clamp(0.5rem, 2vw, 1rem);
       width: 100%;
       justify-items: center;
@@ -882,6 +882,120 @@
       font-weight: 600;
       letter-spacing: 0.02em;
       text-transform: uppercase;
+    }
+
+    .neuro-checklist__control select {
+      width: 100%;
+      min-width: 140px;
+      padding: 0.6rem 0.75rem;
+      background: rgba(13, 19, 25, 0.85);
+      color: var(--text-primary);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      border-radius: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .neuro-checklist__control select:focus-visible,
+    .neuro-checklist__control select:hover {
+      transform: translateY(-1px);
+      background: rgba(31, 42, 54, 0.9);
+      border-color: rgba(125, 196, 177, 0.55);
+      outline: none;
+    }
+
+    .context-location {
+      width: 100%;
+      max-width: 260px;
+      position: relative;
+    }
+
+    .context-location__trigger {
+      width: 100%;
+      min-height: 52px;
+      padding: 0.65rem 0.75rem;
+      height: auto;
+      font-size: 0.95rem;
+      justify-content: space-between;
+      gap: 0.5rem;
+      background: rgba(13, 19, 25, 0.85);
+    }
+
+    .context-location__trigger span { text-transform: none; }
+
+    .context-location__boost {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .context-location__caret {
+      opacity: 0.8;
+      font-size: 0.85rem;
+    }
+
+    .context-location__caption {
+      display: inline-block;
+      text-transform: none;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .context-location__menu {
+      list-style: none;
+      margin: 0.35rem 0 0;
+      padding: 0.35rem;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      background: rgba(13, 19, 25, 0.95);
+      border: 1px solid rgba(124, 144, 160, 0.35);
+      border-radius: 14px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .context-location__menu[hidden] {
+      display: none;
+    }
+
+    .context-location__option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .context-location__option[aria-selected="true"] {
+      background: rgba(45, 212, 195, 0.1);
+      border: 1px solid rgba(45, 212, 195, 0.5);
+    }
+
+    .context-location__option:hover,
+    .context-location__option:focus-visible {
+      outline: none;
+      background: rgba(31, 42, 54, 0.9);
+    }
+
+    .context-location__option-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .context-location__option-score {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
     }
 
     .neuro-checklist__body {
@@ -8198,19 +8312,19 @@ box-shadow: 0 18px 40px rgb a(15,23,42,0.25);
       box-shadow: 0 0 0 1px rgba(45, 212, 195, 0.35), 0 16px 40px rgba(45, 212, 195, 0.35);
     }
     .focus-command-deck {
-      background: linear-gradient(145deg, rgba(15,18,26,0.98), rgba(12,22,20,0.9));
-      border: 1px solid rgba(147,160,170,0.22);
-      border-radius: 20px;
-      padding: 1.5rem;
-      width: var(--focus-shell-width);
-      margin: 1rem auto;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      color: #e6eef7;
-      font-family: "Inter", system-ui, sans-serif;
-    }
+  background: linear-gradient(145deg, rgba(15,18,26,0.98), rgba(12,22,20,0.9));
+  border: 1px solid rgba(147,160,170,0.22);
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: var(--focus-shell-width);
+  margin: 1rem auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: #e6eef7;
+  font-family: "Inter", system-ui, sans-serif;
+}
 
 .focus-title {
   font-size: clamp(1.4rem, 2.3vw, 1.6rem);
@@ -9109,11 +9223,11 @@ body.all-tasks-overlay-active {
 
   <section id="capture">
     <div class="app-shell">
-      <header class="app-header" id="taskerHeader">
+      <header class="app-header">
         <div class="app-header__top">
           <div class="app-header__date-block">
             <span class="app-header__meta-label">Today</span>
-            <time id="headerDate" class="app-header__date" datetime=""></time>
+            <p id="headerDate" class="app-header__date"></p>
           </div>
           <div class="app-header__actions">
             <button
@@ -9140,7 +9254,7 @@ body.all-tasks-overlay-active {
         </div>
         <div class="app-header__main">
           <h1 class="app-header__title">Tasker 5000</h1>
-          <small class="billing-reminder" id="billingReminder"></small>
+          <p class="billing-reminder" id="billingReminder"></p>
           <p id="headerSubtitle" class="app-header__subtitle"></p>
         </div>
         <div id="settingsMenu" class="settings-menu" aria-hidden="true">
@@ -9156,32 +9270,7 @@ body.all-tasks-overlay-active {
           </button>
         </div>
       </header>
-      <section
-        class="card neuro-checklist-card"
-        id="capacityCenter"
-        data-legacy-id="neuroChecklist"
-        aria-live="polite"
-      ></section>
-
-      <section class="card morning-launch-card" data-morning-launch aria-live="polite">
-        <header class="morning-launch__header">
-          <button
-            class="morning-launch__toggle"
-            type="button"
-            data-ml-toggle
-            aria-expanded="false"
-            aria-controls="morningLaunchPanel"
-          >
-            <span class="morning-launch__chevron" data-ml-toggle-icon aria-hidden="true">▸</span>
-            <span class="morning-launch__title">Morning Launch</span>
-          </button>
-          <p class="morning-launch__progress" data-ml-progress>0 / 5 steps ready</p>
-        </header>
-        <div id="morningLaunchPanel" class="morning-launch__panel" data-ml-panel hidden>
-          <p class="morning-launch__intro">Kickstart the day with five fast readiness checks.</p>
-          <ol class="morning-launch__list" data-ml-list></ol>
-        </div>
-      </section>
+      <section class="card neuro-checklist-card" id="neuroChecklist" aria-live="polite"></section>
     </div>
   </section>
 <!-- Legacy header block replaced by .focus-command-deck -->
@@ -9439,45 +9528,61 @@ body.all-tasks-overlay-active {
           </header>
           <div class="zone-body">
             <span id="tasks-zone" class="zone-anchor" aria-hidden="true"></span>
-            <section class="card due-today-card hidden" aria-live="polite" data-due-today-section>
-              <div class="section-heading">
-                <h2>Due today</h2>
-                <span class="chip chip-muted section-chip">Ready today</span>
-              </div>
-              <div class="due-today-accordion" data-open="false" data-accordion="dueToday">
-                <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
-                  <span data-due-today-summary-text>0 ready • est —</span>
-                  <span class="due-today-summary__icon" aria-hidden="true">▸</span>
-                </button>
-                <div class="due-today-list" hidden data-accordion-panel data-due-today-list></div>
-              </div>
-              <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
-            </section>
+      <section class="card due-today-card hidden" aria-live="polite" data-due-today-section>
+        <div class="section-heading">
+          <h2>Due today</h2>
+          <span class="chip chip-muted section-chip">Ready today</span>
+        </div>
+        <div class="due-today-accordion" data-open="false" data-accordion="dueToday">
+          <button class="due-today-summary" type="button" aria-expanded="false" data-accordion-summary>
+            <span data-due-today-summary-text>0 ready • est —</span>
+            <span class="due-today-summary__icon" aria-hidden="true">▸</span>
+          </button>
+          <div class="due-today-list" hidden data-accordion-panel data-due-today-list></div>
+        </div>
+        <p class="due-today-empty hidden" data-due-today-empty>Nothing due today. You're caught up.</p>
+      </section>
+<section id="winLogHUD" class="winlog-hud hidden" role="dialog" aria-modal="true" aria-labelledby="winLogTitle">
 
-            <section
-              id="winLogHUD"
-              class="winlog-hud hidden"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="winLogTitle"
-            >
-              <div class="winlog-card">
-                <h3 id="winLogTitle">Quick reflection</h3>
-                <p class="winlog-sub">What helped you restart?</p>
-                <div class="winlog-actions">
-                  <button data-log="timer">Timer</button>
-                  <button data-log="buddy">Buddy</button>
-                  <button data-log="ritual">Ritual</button>
-                  <button data-log="music">Music</button>
-                  <button data-log="other">Other</button>
-                </div>
-                <input id="winLogNote" type="text" placeholder="Optional note…" />
-                <div class="winlog-footer">
-                  <button id="winLogSave">Save</button>
-                  <button id="winLogDismiss" class="secondary">Dismiss</button>
-                </div>
-              </div>
-            </section>
+<div class="winlog-card">
+
+<h3 id="winLogTitle">Quick reflection</h3>
+
+<p class="winlog-sub">What helped you restart?</p>
+
+<div class="winlog-actions">
+
+<button data-log="timer">Timer</button>
+
+<button data-log="buddy">Buddy</button>
+
+<button data-log="ritual">Ritual</button>
+
+<button data-log="music">Music</button>
+
+<button data-log="other">Other</button>
+
+</div>
+
+<input id="winLogNote" type="text" placeholder="Optional note…" />
+
+<div class="winlog-footer">
+
+<button id="winLogSave">Save</button>
+
+<button id="winLogDismiss" class="secondary">Dismiss</button>
+document.querySelectorAll(".neuro-checklist__item-label").forEach(label=>{
+  label.addEventListener("click",()=>{
+    const duration=parseInt(label.textContent.match(/\d+/)?.[0]||25,10);
+    openOverlay("focusOverlay");        // existing helper
+    startFocusSprint(duration);
+  });
+});
+</div>
+
+</div>
+
+</section>
         <section
           id="routineOverlay"
           class="routine-overlay hidden"
@@ -10883,10 +10988,9 @@ body.all-tasks-overlay-active {
     </button>
   </nav>
 
-  <script type="module" src="./taskStorage.js"></script>
+  <script type="module" src="./taskStorage.js"></script>  
   <script type="module" src="./scheduleCard.js"></script>
   <script type="module" src="./scheduleBridge.js"></script>
-  <script type="module" src="./morningLaunch.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
     import generateAdaptiveItinerary from "./timeBlockEngine.js";
@@ -10895,16 +10999,7 @@ body.all-tasks-overlay-active {
       generateAdaptiveItinerary,
     });
   </script>
-  <script type="module">
-    import {
-      SOCIAL_CONTEXT_OPTIONS,
-      SessionState,
-      getMentalEnergyScore,
-      getSocialContextOption,
-      getSocialContextScore,
-    } from "./sessionState.js";
-    import { computeStateFitMultiplier } from "./stateFitMultiplier.js";
-
+  <script>
   const $ = id => document.getElementById(id);
 
   let openResourcesDrawer = () => {};
@@ -14898,15 +14993,6 @@ body.all-tasks-overlay-active {
     return Number.isFinite(value) && value > 0 ? value : Infinity;
   }
 
-  let sessionStatePriorityTimer = null;
-  function schedulePriorityRefresh() {
-    if (sessionStatePriorityTimer) return;
-    sessionStatePriorityTimer = setTimeout(() => {
-      sessionStatePriorityTimer = null;
-      updateUI();
-    }, 0);
-  }
-
   function alignEnergySliders(value, source = "next") {
     const resolved = clampScale(value, 3);
     if (syncingEnergySliders) {
@@ -14955,10 +15041,6 @@ body.all-tasks-overlay-active {
           sheetValue.textContent = `${resolved} • ${label}`;
         }
       }
-    }
-    if (SessionState.energyLevel !== resolved) {
-      SessionState.energyLevel = resolved;
-      schedulePriorityRefresh();
     }
     syncingEnergySliders = false;
     return resolved;
@@ -16830,113 +16912,80 @@ body.all-tasks-overlay-active {
     return isSameLocalDay(createdDate, now) ? 2 : 1;
   }
 
-  function computeBaseScore(task) {
-    const importance = clampScale(task.importance, 1);
-    const urgency = clampScale(task.urgency, 3);
-    const novelty = clampScale(task.novelty, 1);
-    const interest = clampScale(task.interest, 1);
-    const pressure = Math.min(4.2, clampScale(task.externalPressure, 1));
-    const timeToStart = clampScale(task.timeToStart, 1);
-    const difficulty = clampScale(task.difficulty, 1);
+  function computeRawPriorityScore(t) {
+    const importance = clampScale(t.importance, 1);
+    const urgency = clampScale(t.urgency, 3);
+    const novelty = clampScale(t.novelty, 1);
+    const interest = clampScale(t.interest, 1);
+    const pressure = Math.min(4.2, clampScale(t.externalPressure, 1));
+    const timeToStart = clampScale(t.timeToStart, 1);
+    const difficulty = clampScale(t.difficulty, 1);
     const dopamine = novelty + interest;
     const friction = (6 - timeToStart) + (6 - difficulty);
-    return (importance * 2)
-      + (urgency * 2)
-      + (dopamine * 2)
-      + (pressure * 5)
-      + (friction * 1.5);
-  }
-
-  function computeContextMultiplier(task) {
-    const patientWeight = getPatientTypeWeight(task?.patientType);
-    const visitWeight = getVisitTypeWeight(task?.visitType);
-    const sameDayBonus = getSameDayBonus(task?.clinicSite, task?.createdAt);
-    const daysSinceVisit = Number.isFinite(Number(task?.daysSinceVisit))
-      ? Number(task.daysSinceVisit)
-      : (task?.dateOfService ? calculateDaysSince(task.dateOfService) : null);
-    const daysUntilDue = task?.dueDate ? calculateDaysUntil(task.dueDate) : null;
+    const baseScore = (importance * 2)
+         + (urgency * 2)
+         + (dopamine * 2)
+         + (pressure * 5)
+         + (friction * 1.5);
+    const patientWeight = getPatientTypeWeight(t.patientType);
+    const visitWeight = getVisitTypeWeight(t.visitType);
+    const sameDayBonus = getSameDayBonus(t.clinicSite, t.createdAt);
+    const daysSinceVisit = Number.isFinite(Number(t.daysSinceVisit))
+      ? Number(t.daysSinceVisit)
+      : (t.dateOfService ? calculateDaysSince(t.dateOfService) : null);
+    const daysUntilDue = t.dueDate ? calculateDaysUntil(t.dueDate) : null;
     const overdueDays = Number.isFinite(daysUntilDue) && daysUntilDue < 0 ? Math.abs(daysUntilDue) : 0;
     const positiveAging = Number.isFinite(daysSinceVisit) && daysSinceVisit > 0 ? daysSinceVisit : 0;
     const agingBoost = 1 + Math.min(0.2, (positiveAging / 90) + (overdueDays / 30));
-    return patientWeight * visitWeight * sameDayBonus * agingBoost;
-  }
-
-  function computeRawPriorityScore(t) {
-    const baseScore = computeBaseScore(t);
-    return baseScore * computeContextMultiplier(t);
-  }
-
-  function isSparseChartInfo(task) {
-    if (!task) return true;
-    const candidateFields = [...chartFieldIds, "importance", "urgency", "visitType", "clinicSite", "patientType"];
-    const filledFields = candidateFields.reduce((count, field) => {
-      const value = task[field];
-      if (value === undefined || value === null) return count;
-      if (typeof value === "string" && value.trim() === "") return count;
-      if (typeof value === "number" && !Number.isFinite(value)) return count;
-      return count + 1;
-    }, 0);
-    return filledFields < 2;
-  }
-
-  function computeChartTimeAgeWeight(task) {
-    if (!task) return 1;
-    const parsedDays = Number(task.daysSinceVisit);
-    const daysSince = Number.isFinite(parsedDays)
-      ? parsedDays
-      : (task.dateOfService ? calculateDaysSince(task.dateOfService) : null);
-    if (daysSince === null || !Number.isFinite(daysSince)) return 1;
-
-    let multiplier = 1;
-    if (daysSince <= 7) {
-      multiplier = 1.5;
-    } else if (daysSince <= 30) {
-      multiplier = 1.3;
-    }
-
-    if (daysSince > 30 && isSparseChartInfo(task)) {
-      multiplier *= 1.5;
-    }
-
-    return multiplier;
-  }
-
-  function computeNonChartTimeWeight(task) {
-    if (!task) return 1;
-    if (isQuickTask(task)) return 1;
-    const daysUntilDue = task.dueDate ? calculateDaysUntil(task.dueDate) : null;
-    if (daysUntilDue !== null && Number.isFinite(daysUntilDue) && daysUntilDue <= 3 && daysUntilDue >= 0) {
-      return 1.2;
-    }
-    return 1.0;
+    return baseScore * patientWeight * visitWeight * sameDayBonus * agingBoost;
   }
 
   function computeTimeWeight(task) {
     if (!task) return 1;
     if (isQuickTask(task)) return 1;
     const isChart = isChartTask(task);
-    if (isChart) {
-      return computeChartTimeAgeWeight(task);
+    const parsedDays = Number(task.daysSinceVisit);
+    const daysSince = Number.isFinite(parsedDays)
+      ? parsedDays
+      : (task.dateOfService ? calculateDaysSince(task.dateOfService) : null);
+    const daysUntilDue = task.dueDate ? calculateDaysUntil(task.dueDate) : null;
+    const currentMonth = isDateInCurrentMonth(task.dateOfService)
+      || isDateInCurrentMonth(task.dueDate);
+
+    if (!isChart) {
+      if (daysUntilDue !== null && Number.isFinite(daysUntilDue) && daysUntilDue <= 3 && daysUntilDue >= 0) {
+        return 1.2;
+      }
+      return 1.0;
     }
-    return computeNonChartTimeWeight(task);
+
+    if (daysSince !== null && Number.isFinite(daysSince)) {
+      if (daysSince > 95) return 0.5;
+      if (daysSince >= 90 && daysSince <= 95) return 2.0;
+      if (daysSince >= 0 && daysSince < 3) return 1.8;
+      if (daysSince >= 3 && currentMonth) return 1.3;
+    }
+
+    if (daysUntilDue !== null && Number.isFinite(daysUntilDue)) {
+      if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+        return 1.8;
+      }
+      if (daysUntilDue < 0 && daysSince === null) {
+        return currentMonth ? 1.3 : 1.0;
+      }
+      if (currentMonth) {
+        return 1.3;
+      }
+    }
+
+    return 1.0;
   }
 
-  function computeCorePriority(task) {
-    if (!task) return 0;
-    if (isQuickTask(task)) return 1;
-    const baseScore = computeBaseScore(task);
-    const contextMultiplier = computeContextMultiplier(task);
-    const timeWeight = computeTimeWeight(task);
-    const stateFit = computeStateFitMultiplier(task);
-    return baseScore * contextMultiplier * timeWeight * stateFit;
-  }
-
-  function computeFinalPriority(t) {
-    if (!t) return 0;
+  function computePriority(t) {
     if (isQuickTask(t)) {
       return 1;
     }
-    const weightedBase = computeCorePriority(t);
+    const weightedBase = computeRawPriorityScore(t) * computeTimeWeight(t);
     if (Array.isArray(t.subTasks) && t.subTasks.length) {
       const remaining = t.subTasks.filter(s => !s.completed);
       if (remaining.length === 0) return 0;
@@ -16947,10 +16996,6 @@ body.all-tasks-overlay-active {
       return total / remaining.length;
     }
     return weightedBase;
-  }
-
-  function computePriority(t) {
-    return computeFinalPriority(t);
   }
 
   function recalcTaskPriority(task) {
@@ -17012,9 +17057,10 @@ body.all-tasks-overlay-active {
         : false;
       task.useChartTemplate = !hasCustomSteps;
     }
-    const base = computeCorePriority({ ...task, subTasks: [] });
+    const baseRaw = computeRawPriorityScore({ ...task, subTasks: [] });
     const timeWeight = computeTimeWeight(task);
     task.timeWeight = timeWeight;
+    const base = baseRaw * timeWeight;
     if (isChartTask(task)) {
       ensureChartSubTasks(task, { basePriority: base });
     }
@@ -18656,14 +18702,45 @@ host.appendChild(row);
     return parts.join(" ");
   }
 
-  function formatSocialContextLabel(loc = SessionState.contextLocation || "home_solo") {
-    return getSocialContextOption(loc)?.label || loc.replace(/_/g, " ");
+  const SessionState = (typeof window !== "undefined" && window.SessionState)
+    ? window.SessionState
+    : {};
+
+  const SOCIAL_CONTEXT_OPTIONS = [
+    { value: "home_solo", label: "Charting at home", score: 0.0 },
+    { value: "clinic_open_door", label: "Charting in exam room with door open", score: 0.7 },
+    { value: "clinic_workroom", label: "Charting in workroom", score: 0.5 },
+    { value: "cafe", label: "Charting in a cafe", score: 0.4 },
+    { value: "zoom_buddy", label: "Charting with a zoom buddy", score: 1.0 },
+  ];
+
+  const SOCIAL_SCORE_MAP = {
+    home_solo: 0.0,
+    clinic_open_door: 0.7,
+    clinic_workroom: 0.5,
+    cafe: 0.4,
+    zoom_buddy: 1.0,
+  };
+
+  if (!SessionState.contextLocation) {
+    SessionState.contextLocation = SOCIAL_CONTEXT_OPTIONS[0].value;
   }
 
-  function getChecklistCard() {
-    return document.getElementById("capacityCenter")
-      || document.getElementById("neuroChecklist")
-      || null;
+  if (typeof window !== "undefined") {
+    window.SessionState = SessionState;
+  }
+
+  function getSocialContextOption(loc = SessionState.contextLocation || SOCIAL_CONTEXT_OPTIONS[0].value) {
+    return SOCIAL_CONTEXT_OPTIONS.find(option => option.value === loc) || SOCIAL_CONTEXT_OPTIONS[0];
+  }
+
+  function getSocialContextScore() {
+    const loc = SessionState.contextLocation || SOCIAL_CONTEXT_OPTIONS[0].value;
+    return SOCIAL_SCORE_MAP[loc] ?? getSocialContextOption(loc)?.score ?? 0;
+  }
+
+  function formatSocialContextLabel(loc = SessionState.contextLocation || "home_solo") {
+    return getSocialContextOption(loc)?.label || loc.replace(/_/g, " ");
   }
 
   function ensureChecklistLayout(card) {
@@ -18792,107 +18869,109 @@ host.appendChild(row);
       return { wrapper, button, caption };
     };
 
-    const createContextLocationControl = () => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "neuro-checklist__control";
-      wrapper.style.position = "relative";
-
-      const button = document.createElement("button");
-      button.id = "contextLocationButton";
-      button.type = "button";
-      button.textContent = "👨‍💻";
-      button.setAttribute("aria-haspopup", "listbox");
-      button.setAttribute("aria-expanded", "false");
-
-      const caption = document.createElement("span");
-      caption.id = "contextLocationCaption";
-      caption.textContent = "Context"; // updated in updateContextLocationControls()
-      caption.style.textTransform = "none";
-      caption.style.textAlign = "center";
-
-      const menu = document.createElement("ul");
-      menu.id = "contextLocationMenu";
-      menu.setAttribute("role", "listbox");
-      menu.hidden = true;
-      menu.style.position = "absolute";
-      menu.style.top = "100%";
-      menu.style.left = "0";
-      menu.style.minWidth = "220px";
-      menu.style.maxHeight = "260px";
-      menu.style.overflowY = "auto";
-      menu.style.zIndex = "10";
-      menu.style.background = "rgba(13,19,25,0.95)";
-      menu.style.border = "1px solid rgba(124,144,160,0.35)";
-      menu.style.borderRadius = "14px";
-      menu.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4)";
-      menu.style.listStyle = "none";
-      menu.style.padding = "0.25rem 0";
-      menu.style.margin = "0";
-
-      const openMenu = () => {
-        menu.hidden = false;
-        button.setAttribute("aria-expanded", "true");
-      };
-
-      const closeMenu = () => {
-        menu.hidden = true;
-        button.setAttribute("aria-expanded", "false");
-      };
-
-      SOCIAL_CONTEXT_OPTIONS.forEach(opt => {
-        const li = document.createElement("li");
-        li.setAttribute("role", "option");
-        li.dataset.value = opt.value;
-        li.style.display = "flex";
-        li.style.justifyContent = "space-between";
-        li.style.gap = "0.5rem";
-        li.style.padding = "0.5rem 0.75rem";
-        li.style.cursor = "pointer";
-        li.tabIndex = -1;
-        li.textContent = `${opt.label} (${Math.round(opt.score * 100)}% boost)`;
-        li.onclick = () => {
-          SessionState.contextLocation = opt.value;
-          updateContextLocationControls();
-          applyChecklistControlsState();
-          schedulePriorityRefresh();
-          closeMenu();
-          button.focus({ preventScroll: true });
-        };
-        li.onkeydown = (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            li.click();
-          }
-          if (event.key === "Escape") {
-            closeMenu();
-            button.focus({ preventScroll: true });
-          }
-        };
-        li.onmouseover = () => li.style.background = "rgba(31,42,54,0.9)";
-        li.onmouseout = () => li.style.background = "transparent";
-        menu.appendChild(li);
-      });
-
-      button.onclick = () => {
-        if (menu.hidden) {
-          openMenu();
-        } else {
-          closeMenu();
-        }
-      };
-
-      wrapper.append(button, caption, menu);
-      return { wrapper, button, caption, menu, openMenu, closeMenu };
-    };
-
     const availability = createControl("capacityWrench", "🔧", "Availability");
     const energy = createControl("energyDial", "🔋", "Energy");
-    const contextLocation = createContextLocationControl();
+
+    const contextLocation = document.createElement("div");
+    contextLocation.className = "neuro-checklist__control context-location";
+
+    const contextButton = document.createElement("button");
+    contextButton.id = "contextLocationButton";
+    contextButton.type = "button";
+    contextButton.className = "context-location__trigger";
+    contextButton.setAttribute("aria-pressed", "false");
+    contextButton.setAttribute("aria-haspopup", "listbox");
+    contextButton.setAttribute("aria-expanded", "false");
+
+    const contextButtonLabel = document.createElement("span");
+    contextButtonLabel.dataset.contextLocationButtonLabel = "";
+
+    const contextButtonBoost = document.createElement("span");
+    contextButtonBoost.dataset.contextLocationButtonBoost = "";
+    contextButtonBoost.className = "context-location__boost";
+
+    const contextButtonCaret = document.createElement("span");
+    contextButtonCaret.className = "context-location__caret";
+    contextButtonCaret.setAttribute("aria-hidden", "true");
+    contextButtonCaret.textContent = "▾";
+
+    contextButton.append(contextButtonLabel, contextButtonBoost, contextButtonCaret);
+
+    const contextCaption = document.createElement("span");
+    contextCaption.dataset.contextLocationLabel = "";
+    contextCaption.className = "context-location__caption";
+
+    const contextMenu = document.createElement("ul");
+    contextMenu.id = "contextLocationMenu";
+    contextMenu.className = "context-location__menu";
+    contextMenu.setAttribute("role", "listbox");
+    contextMenu.hidden = true;
+
+    const closeContextMenu = () => {
+      contextMenu.hidden = true;
+      contextButton.setAttribute("aria-expanded", "false");
+    };
+
+    const openContextMenu = () => {
+      contextMenu.hidden = false;
+      contextButton.setAttribute("aria-expanded", "true");
+    };
+
+    const toggleContextMenu = (force) => {
+      const shouldOpen = typeof force === "boolean" ? force : contextMenu.hidden;
+      if (shouldOpen) {
+        openContextMenu();
+      } else {
+        closeContextMenu();
+      }
+    };
+
+    const selectContextLocation = (value) => {
+      SessionState.contextLocation = value;
+      updateContextLocationControls();
+      applyChecklistControlsState();
+      closeContextMenu();
+      contextButton.focus({ preventScroll: true });
+    };
+
+    SOCIAL_CONTEXT_OPTIONS.forEach(option => {
+      const item = document.createElement("li");
+      item.className = "context-location__option";
+      item.dataset.value = option.value;
+      item.setAttribute("role", "option");
+      item.tabIndex = -1;
+
+      const label = document.createElement("span");
+      label.className = "context-location__option-label";
+      label.textContent = option.label;
+
+      const score = document.createElement("span");
+      score.className = "context-location__option-score";
+      score.textContent = `${Math.round(option.score * 100)}% boost`;
+
+      item.append(label, score);
+
+      item.addEventListener("click", () => selectContextLocation(option.value));
+      item.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectContextLocation(option.value);
+        }
+        if (event.key === "Escape") {
+          closeContextMenu();
+          contextButton.focus({ preventScroll: true });
+        }
+      });
+
+      contextMenu.appendChild(item);
+    });
+
+    contextLocation.append(contextButton, contextCaption, contextMenu);
 
     host.append(
       availability.wrapper,
-      contextLocation.wrapper,
       energy.wrapper,
+      contextLocation,
     );
 
     host.dataset.controlsMounted = "true";
@@ -18912,21 +18991,25 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    contextLocation.button.addEventListener("keydown", (event) => {
+    contextButton.addEventListener("click", () => {
+      toggleContextMenu();
+    });
+
+    contextButton.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        contextLocation.closeMenu();
+        closeContextMenu();
       }
-      if (event.key === "ArrowDown" && contextLocation.menu.hidden) {
+      if (event.key === "ArrowDown" && contextMenu.hidden) {
         event.preventDefault();
-        contextLocation.openMenu();
-        const firstOption = contextLocation.menu.querySelector("[role='option']");
+        openContextMenu();
+        const firstOption = contextMenu.querySelector("[role='option']");
         firstOption?.focus({ preventScroll: true });
       }
     });
 
     document.addEventListener("click", (event) => {
-      if (!contextLocation.wrapper.contains(event.target)) {
-        contextLocation.closeMenu();
+      if (!contextLocation.contains(event.target)) {
+        closeContextMenu();
       }
     });
 
@@ -18934,7 +19017,7 @@ host.appendChild(row);
   }
 
   function setChecklistViewMode(mode) {
-    const card = getChecklistCard();
+    const card = document.getElementById("neuroChecklist");
     const shouldUpdate = checklistViewMode !== mode;
     checklistViewMode = mode;
     applyChecklistControlsState();
@@ -18970,15 +19053,24 @@ host.appendChild(row);
 
   function updateContextLocationControls() {
     const button = document.getElementById("contextLocationButton");
-    const caption = document.getElementById("contextLocationCaption");
+    const caption = document.querySelector("[data-context-location-label]");
+    const buttonLabel = document.querySelector("[data-context-location-button-label]");
+    const buttonBoost = document.querySelector("[data-context-location-button-boost]");
     const menu = document.getElementById("contextLocationMenu");
     const option = getSocialContextOption();
     const friendly = formatSocialContextLabel();
     const score = Math.round(getSocialContextScore() * 100);
 
     if (caption) {
-      caption.textContent = "Context";
-      caption.title = `${friendly} (${score}% boost)`;
+      caption.textContent = `Context — ${friendly} (${score}% boost)`;
+    }
+
+    if (buttonLabel) {
+      buttonLabel.textContent = friendly;
+    }
+
+    if (buttonBoost) {
+      buttonBoost.textContent = `${score}% boost`;
     }
 
     if (button) {
@@ -19490,7 +19582,7 @@ host.appendChild(row);
   }
 
   function openEnergySheet() {
-    const card = getChecklistCard();
+    const card = document.getElementById("neuroChecklist");
     if (!card) {
       if (!openEnergySheet.__waitForCard) {
         const handleCardReady = () => {
@@ -19730,7 +19822,7 @@ host.appendChild(row);
   }
 
   function openCapacitySheet() {
-    const card = getChecklistCard();
+    const card = document.getElementById("neuroChecklist");
     if (!card) return;
     const sheet = ensureCapacitySheet(card);
     if (!sheet) return;
@@ -19804,7 +19896,7 @@ host.appendChild(row);
     const baseMinutes = metrics?.baseMinutes ?? 0;
     const netMinutes = metrics?.netMinutes ?? baseMinutes;
 
-    const card = getChecklistCard();
+    const card = document.getElementById("neuroChecklist");
     if (card) {
       const isTimeline = checklistViewMode === "timeline";
       const isList = checklistViewMode === "list";
@@ -20209,7 +20301,7 @@ host.appendChild(row);
   }
 
   function renderNeuroChecklist() {
-    const card = getChecklistCard();
+    const card = document.getElementById("neuroChecklist");
     if (!card) return;
     const refs = ensureChecklistLayout(card);
     if (!refs) return;
@@ -20335,8 +20427,6 @@ host.appendChild(row);
       const itineraryTasks = activeTasks.map(task => {
         const estimate = estimateTaskMinutes(task);
         const safeMinutes = Number.isFinite(estimate) && estimate > 0 ? estimate : 30;
-        const finalPriority = computeFinalPriority(task);
-        task.priority = finalPriority;
         const descriptors = buildTaskDescriptors(task);
         const metaSet = new Set(descriptors);
         if (task.dueDate) {
@@ -20352,7 +20442,7 @@ host.appendChild(row);
           name: task.name || "Focused Block",
           minutes: safeMinutes,
           quickWin: isQuickTask(task),
-          yield: Number.isFinite(finalPriority) ? finalPriority : 1,
+          yield: Math.max(1, Math.round(Number(task.priority) || 1)),
           meta: Array.from(metaSet).filter(Boolean),
         };
       });
@@ -25034,17 +25124,14 @@ initializeFocusFabLongPress();
     const dateEl = $("headerDate");
     if (!dateEl) return;
     try {
-      const today = new Date();
-      const formatted = today.toLocaleDateString(undefined, {
+      const formatted = new Date().toLocaleDateString(undefined, {
         weekday: "long",
         month: "short",
         day: "numeric"
       });
       dateEl.textContent = formatted;
-      dateEl.setAttribute("datetime", today.toISOString().split("T")[0]);
     } catch (error) {
       dateEl.textContent = "";
-      dateEl.removeAttribute("datetime");
     }
   }
 
@@ -25061,105 +25148,6 @@ initializeFocusFabLongPress();
       day: "numeric"
     });
     reminder.innerHTML = `<span class="header-chip"><span class="header-chip__label">Eligibility cutoff</span><span class="header-chip__value">${formatted}</span></span>`;
-  }
-
-  function ensureCaptureShell() {
-    const capture = document.getElementById("capture");
-    if (!capture) return null;
-    let shell = capture.querySelector(".app-shell");
-    if (!shell) {
-      shell = document.createElement("div");
-      shell.className = "app-shell";
-      while (capture.firstChild) {
-        shell.appendChild(capture.firstChild);
-      }
-      capture.appendChild(shell);
-    }
-    return shell;
-  }
-
-  function ensureTaskerHeader(shell) {
-    if (!shell) return null;
-    let header = shell.querySelector("#taskerHeader");
-    if (header) return header;
-
-    header = document.createElement("header");
-    header.className = "app-header";
-    header.id = "taskerHeader";
-    header.innerHTML = `
-      <div class="app-header__top">
-        <div class="app-header__date-block">
-          <span class="app-header__meta-label">Today</span>
-          <time id="headerDate" class="app-header__date" datetime=""></time>
-        </div>
-        <div class="app-header__actions">
-          <button
-            id="settingsToggle"
-            class="settings-trigger"
-            type="button"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-controls="settingsMenu"
-            title="Open settings"
-          >
-            ⚙️
-          </button>
-          <button
-            id="headerQuickAddButton"
-            class="quick-add-button quick-add-button--plus app-header__quick-add"
-            type="button"
-            aria-label="Add a new task"
-            title="Add a task"
-          >
-            ➕️
-          </button>
-        </div>
-      </div>
-      <div class="app-header__main">
-        <h1 class="app-header__title">Tasker 5000</h1>
-        <small class="billing-reminder" id="billingReminder"></small>
-        <p id="headerSubtitle" class="app-header__subtitle"></p>
-      </div>
-      <div id="settingsMenu" class="settings-menu" aria-hidden="true">
-        <div class="settings-menu__section">
-          <label class="settings-menu__toggle" for="routineHapticsToggle">
-            <span>Enable haptic nudges</span>
-            <input type="checkbox" id="routineHapticsToggle" />
-          </label>
-        </div>
-        <button type="button" class="settings-menu__item" id="settingsTemplates">
-          <span aria-hidden="true">🧩</span>
-          <span>Templates</span>
-        </button>
-      </div>
-    `;
-
-    const capacityCard = shell.querySelector("#capacityCenter");
-    if (capacityCard) {
-      shell.insertBefore(header, capacityCard);
-    } else {
-      shell.prepend(header);
-    }
-    return header;
-  }
-
-  function ensureCapacityCenterCard(shell) {
-    if (!shell) return null;
-    let card = shell.querySelector("#capacityCenter");
-    if (!card) {
-      card = document.createElement("section");
-      card.className = "card neuro-checklist-card";
-      card.id = "capacityCenter";
-      card.dataset.legacyId = "neuroChecklist";
-      card.setAttribute("aria-live", "polite");
-      const header = shell.querySelector("#taskerHeader");
-      if (header && header.nextSibling) {
-        shell.insertBefore(card, header.nextSibling);
-      } else {
-        shell.appendChild(card);
-      }
-    }
-    return card;
   }
 
   function registerFieldListeners() {
@@ -25355,28 +25343,12 @@ function wireInsights() {
   if (btn) btn.addEventListener("click", openInsights);
   if (closeBtn) closeBtn.addEventListener("click", closeInsights);
 }
-
-  function safeRun(label, fn) {
-    try {
-      return fn();
-    } catch (error) {
-      console.error(`Tasker init error [${label}]`, error);
-      return null;
-    }
-  }
   window.addEventListener('DOMContentLoaded', () => {
-    const captureShell = ensureCaptureShell();
-    const header = ensureTaskerHeader(captureShell);
-    const capacityCard = ensureCapacityCenterCard(captureShell);
-    if (captureShell && header && capacityCard && header.nextSibling !== capacityCard) {
-      captureShell.insertBefore(capacityCard, header.nextSibling);
-    }
-
     const nextStepBtn = $("meltdownShieldNext");
     if (nextStepBtn) {
       nextStepBtn.addEventListener("click", completeCurrentMeltdownStep);
     }
-    safeRun("prepareAccordionContainers", prepareAccordionContainers);
+    prepareAccordionContainers();
     function showToast(message, duration = 2000) {
   const toast = document.createElement("div");
   toast.textContent = message;
@@ -25402,90 +25374,79 @@ function wireInsights() {
     setTimeout(() => toast.remove(), 300);
   }, duration);
     }
-    const hydrationOutcome = safeRun("hydrateTasksFromStorage", hydrateTasksFromStorage) || {};
-    safeRun("hydrateTemplatesFromStorage", hydrateTemplatesFromStorage);
-    safeRun("restoreBriefModePreference", restoreBriefModePreference);
-    safeRun("setupMomentumZones", setupMomentumZones);
-    safeRun("setupNextBestObserver", setupNextBestObserver);
-    safeRun("setupSmartCollapse", setupSmartCollapse);
-    safeRun("setupTaskGestures", setupTaskGestures);
-    safeRun("setupFocusOverlay", setupFocusOverlay);
-    safeRun("setupLazyMedia", setupLazyMedia);
-    safeRun("initializeChartFields", initializeChartFields);
-    safeRun("registerFieldListeners", registerFieldListeners);
-    safeRun("registerTaskListModeControl", registerTaskListModeControl);
-    safeRun("registerTimeBudgetControl", registerTimeBudgetControl);
-    safeRun("registerReadyToLaunchControl", registerReadyToLaunchControl);
-    safeRun("setDefaultFieldValues", setDefaultFieldValues);
-    safeRun("updateHeaderSubtitle", updateHeaderSubtitle);
-    safeRun("updateBillingReminder", updateBillingReminder);
-    safeRun("initializeSoundPreference", initializeSoundPreference);
-    safeRun("initializeFirstThreeWizard", initializeFirstThreeWizard);
-    safeRun("initializeTaskForm", initializeTaskForm);
-    safeRun("initializeQuickAddMenu", initializeQuickAddMenu);
-    safeRun("initializeQuickTaskShortcut", initializeQuickTaskShortcut);
-    safeRun("initializeShredTopTaskButton", initializeShredTopTaskButton);
-    safeRun("initializeBlockBatchModule", initializeBlockBatchModule);
-    safeRun("initializeAddTaskCardState", initializeAddTaskCardState);
-    safeRun("initializePreflightToggles", initializePreflightToggles);
-    safeRun("initializeDueTodayAccordionState", initializeDueTodayAccordionState);
-    safeRun("initializeAllTasksCardState", initializeAllTasksCardState);
-    safeRun("initializeAllTasksOverlay", initializeAllTasksOverlay);
-    safeRun("initializeFocusLaunchSheet", initializeFocusLaunchSheet);
-    safeRun("initializeQuickCaptureModal", initializeQuickCaptureModal);
-    safeRun("initializeSettingsMenu", initializeSettingsMenu);
-    safeRun("initializeTemplatesOverlay", initializeTemplatesOverlay);
-    safeRun("initializeConflictOverlay", initializeConflictOverlay);
+    const hydrationOutcome = hydrateTasksFromStorage();
+    hydrateTemplatesFromStorage();
+    restoreBriefModePreference();
+    setupMomentumZones();
+    setupNextBestObserver();
+    setupSmartCollapse();
+    setupTaskGestures();
+    setupFocusOverlay();
+    setupLazyMedia();
+    initializeChartFields();
+    registerFieldListeners();
+    registerTaskListModeControl();
+    registerTimeBudgetControl();
+    registerReadyToLaunchControl();
+    setDefaultFieldValues();
+    updateHeaderSubtitle();
+    updateBillingReminder();
+    initializeSoundPreference();
+    initializeFirstThreeWizard();
+    initializeTaskForm();
+    initializeQuickAddMenu();
+    initializeQuickTaskShortcut();
+    initializeShredTopTaskButton();
+    initializeBlockBatchModule();
+    initializeAddTaskCardState();
+    initializePreflightToggles();
+    initializeDueTodayAccordionState();
+    initializeAllTasksCardState();
+    initializeAllTasksOverlay();
+    initializeFocusLaunchSheet();
+    initializeQuickCaptureModal();
+    initializeSettingsMenu();
+    initializeTemplatesOverlay();
+    initializeConflictOverlay();
 
 // === START: Accordions ===
 // Existing accordion wiring lives in renderDueTodayList and initializeAllTasksCardState.
 // Keep the two sections mutually exclusive by collapsing the other when one opens.
 // === END: Accordions ===
 
-    safeRun("renderResourceLinks", renderResourceLinks);
-    safeRun("initializeResourceCreation", initializeResourceCreation);
-    safeRun("initializeResourcesDrawer", initializeResourcesDrawer);
-    safeRun("initializeSosPanel", initializeSosPanel);
-    safeRun("initializeCommandBarAutohide", initializeCommandBarAutohide);
-    safeRun("initializeDefuseOverlay", initializeDefuseOverlay);
-    safeRun("initializeRoutineOverlay", initializeRoutineOverlay);
-    safeRun("initializeCollapsibleModules", initializeCollapsibleModules);
-    safeRun("initializeMorningLaunchModule", initializeMorningLaunchModule);
-    safeRun("initializeLaunchPadModule", initializeLaunchPadModule);
-    safeRun("initializeSleepToolkitModule", initializeSleepToolkitModule);
-    safeRun("initializeNextBestEngine", initializeNextBestEngine);
-    safeRun("initializeConflictResolverModule", initializeConflictResolverModule);
-    safeRun("initializeDefuseMode", initializeDefuseMode);
-    safeRun("initializeDopamineModule", initializeDopamineModule);
-    safeRun("wireWinLogHUD", wireWinLogHUD);
-    safeRun("wireInsights", wireInsights);
-    safeRun("recalculateAdaptiveBias", recalculateAdaptiveBias);
-    safeRun("initializeDistractionTools", initializeDistractionTools);
-    safeRun("initializeGanttSnapshot", initializeGanttSnapshot);
-    safeRun("initializeWorstDayMode", initializeWorstDayMode);
-    safeRun("initializeTaskBackupControls", initializeTaskBackupControls);
-    safeRun("registerCategoryFilterControl", registerCategoryFilterControl);
-    safeRun("registerTaskSortControl", registerTaskSortControl);
-    safeRun("setupStartRewardObserver", setupStartRewardObserver);
-    safeRun("startReminderLoop", startReminderLoop);
-    safeRun("renderTemplates", renderTemplates);
+    renderResourceLinks();
+    initializeResourceCreation();
+    initializeResourcesDrawer();
+    initializeSosPanel();
+    initializeCommandBarAutohide();
+    initializeDefuseOverlay();
+    initializeRoutineOverlay();
+    initializeCollapsibleModules();
+    initializeMorningLaunchModule();
+    initializeLaunchPadModule();
+    initializeSleepToolkitModule();
+    initializeNextBestEngine();
+    initializeConflictResolverModule();
+    initializeDefuseMode();
+    initializeDopamineModule();
+    wireWinLogHUD();
+    wireInsights();
+    recalculateAdaptiveBias();
+    initializeDistractionTools();
+    initializeGanttSnapshot();
+    initializeWorstDayMode();
+    initializeTaskBackupControls();
+    registerCategoryFilterControl();
+    registerTaskSortControl();
+    setupStartRewardObserver();
+    startReminderLoop();
+    renderTemplates();
     if (!hydrationOutcome?.scheduledUpdate) {
-      safeRun("updateUI", updateUI);
+      updateUI();
     }
-    safeRun("updateSleepToolkitUI", updateSleepToolkitUI);
-    safeRun("updateDerivedFields", updateDerivedFields);
+    updateSleepToolkitUI();
+    updateDerivedFields();
   });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".neuro-checklist__item-label").forEach(label => {
-        label.addEventListener("click", () => {
-          const duration = parseInt(label.textContent.match(/\d+/)?.[0] || 25, 10);
-          openOverlay("focusOverlay");
-          startFocusSprint(duration);
-        });
-      });
-    });
   </script>
     <script>
   (function () {
@@ -25542,13 +25503,12 @@ function wireInsights() {
   document.addEventListener("DOMContentLoaded", () => {
     // Debugging script for the 2x2 recovery routines grid layout
     const container = document.querySelector(".recovery-routines-container");
-    let containerStyles = null;
     if (!container) {
       console.error("Error: Rounded container for recovery routines is missing.");
     } else {
       console.log("Recovery routines container found:", container);
 
-      containerStyles = getComputedStyle(container);
+      const containerStyles = getComputedStyle(container);
       if (containerStyles.display !== "grid") {
         console.error(
           "Error: Container is not using grid layout. Current display property:",
@@ -25587,13 +25547,11 @@ function wireInsights() {
       }
     }
 
-    if (containerStyles) {
-      const outline = containerStyles.border || containerStyles.boxShadow;
-      if (!outline || outline === "none") {
-        console.error("Error: No outline is applied to the container.");
-      } else {
-        console.log("Outline applied to the container:", outline);
-      }
+    const outline = containerStyles.border || containerStyles.boxShadow;
+    if (!outline || outline === "none") {
+      console.error("Error: No outline is applied to the container.");
+    } else {
+      console.log("Outline applied to the container:", outline);
     }
 
     const overlay = document.querySelector(".all-tasks-overlay");
