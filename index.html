@@ -884,120 +884,6 @@
       text-transform: uppercase;
     }
 
-    .neuro-checklist__control select {
-      width: 100%;
-      min-width: 140px;
-      padding: 0.6rem 0.75rem;
-      background: rgba(13, 19, 25, 0.85);
-      color: var(--text-primary);
-      border: 1px solid rgba(124, 144, 160, 0.35);
-      border-radius: 14px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
-    }
-
-    .neuro-checklist__control select:focus-visible,
-    .neuro-checklist__control select:hover {
-      transform: translateY(-1px);
-      background: rgba(31, 42, 54, 0.9);
-      border-color: rgba(125, 196, 177, 0.55);
-      outline: none;
-    }
-
-    .context-location {
-      width: 100%;
-      max-width: 260px;
-      position: relative;
-    }
-
-    .context-location__trigger {
-      width: 100%;
-      min-height: 52px;
-      padding: 0.65rem 0.75rem;
-      height: auto;
-      font-size: 0.95rem;
-      justify-content: space-between;
-      gap: 0.5rem;
-      background: rgba(13, 19, 25, 0.85);
-    }
-
-    .context-location__trigger span { text-transform: none; }
-
-    .context-location__boost {
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .context-location__caret {
-      opacity: 0.8;
-      font-size: 0.85rem;
-    }
-
-    .context-location__caption {
-      display: inline-block;
-      text-transform: none;
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      text-align: center;
-    }
-
-    .context-location__menu {
-      list-style: none;
-      margin: 0.35rem 0 0;
-      padding: 0.35rem;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      background: rgba(13, 19, 25, 0.95);
-      border: 1px solid rgba(124, 144, 160, 0.35);
-      border-radius: 14px;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
-      max-height: 300px;
-      overflow-y: auto;
-      z-index: 10;
-    }
-
-    .context-location__menu[hidden] {
-      display: none;
-    }
-
-    .context-location__option {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.55rem 0.65rem;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .context-location__option[aria-selected="true"] {
-      background: rgba(45, 212, 195, 0.1);
-      border: 1px solid rgba(45, 212, 195, 0.5);
-    }
-
-    .context-location__option:hover,
-    .context-location__option:focus-visible {
-      outline: none;
-      background: rgba(31, 42, 54, 0.9);
-    }
-
-    .context-location__option-label {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .context-location__option-score {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
     .neuro-checklist__body {
       display: grid;
       gap: clamp(1rem, 3vw, 1.5rem);
@@ -18869,109 +18755,106 @@ host.appendChild(row);
       return { wrapper, button, caption };
     };
 
-    const availability = createControl("capacityWrench", "🔧", "Availability");
-    const energy = createControl("energyDial", "🔋", "Energy");
+    const createContextLocationControl = () => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "neuro-checklist__control";
+      wrapper.style.position = "relative";
 
-    const contextLocation = document.createElement("div");
-    contextLocation.className = "neuro-checklist__control context-location";
+      const button = document.createElement("button");
+      button.id = "contextLocationButton";
+      button.type = "button";
+      button.textContent = "👨‍💻";
+      button.setAttribute("aria-haspopup", "listbox");
+      button.setAttribute("aria-expanded", "false");
 
-    const contextButton = document.createElement("button");
-    contextButton.id = "contextLocationButton";
-    contextButton.type = "button";
-    contextButton.className = "context-location__trigger";
-    contextButton.setAttribute("aria-pressed", "false");
-    contextButton.setAttribute("aria-haspopup", "listbox");
-    contextButton.setAttribute("aria-expanded", "false");
+      const caption = document.createElement("span");
+      caption.id = "contextLocationCaption";
+      caption.textContent = "Context"; // updated in updateContextLocationControls()
+      caption.style.textTransform = "none";
+      caption.style.textAlign = "center";
 
-    const contextButtonLabel = document.createElement("span");
-    contextButtonLabel.dataset.contextLocationButtonLabel = "";
+      const menu = document.createElement("ul");
+      menu.id = "contextLocationMenu";
+      menu.setAttribute("role", "listbox");
+      menu.hidden = true;
+      menu.style.position = "absolute";
+      menu.style.top = "100%";
+      menu.style.left = "0";
+      menu.style.minWidth = "220px";
+      menu.style.maxHeight = "260px";
+      menu.style.overflowY = "auto";
+      menu.style.zIndex = "10";
+      menu.style.background = "rgba(13,19,25,0.95)";
+      menu.style.border = "1px solid rgba(124,144,160,0.35)";
+      menu.style.borderRadius = "14px";
+      menu.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4)";
+      menu.style.listStyle = "none";
+      menu.style.padding = "0.25rem 0";
+      menu.style.margin = "0";
 
-    const contextButtonBoost = document.createElement("span");
-    contextButtonBoost.dataset.contextLocationButtonBoost = "";
-    contextButtonBoost.className = "context-location__boost";
+      const openMenu = () => {
+        menu.hidden = false;
+        button.setAttribute("aria-expanded", "true");
+      };
 
-    const contextButtonCaret = document.createElement("span");
-    contextButtonCaret.className = "context-location__caret";
-    contextButtonCaret.setAttribute("aria-hidden", "true");
-    contextButtonCaret.textContent = "▾";
+      const closeMenu = () => {
+        menu.hidden = true;
+        button.setAttribute("aria-expanded", "false");
+      };
 
-    contextButton.append(contextButtonLabel, contextButtonBoost, contextButtonCaret);
-
-    const contextCaption = document.createElement("span");
-    contextCaption.dataset.contextLocationLabel = "";
-    contextCaption.className = "context-location__caption";
-
-    const contextMenu = document.createElement("ul");
-    contextMenu.id = "contextLocationMenu";
-    contextMenu.className = "context-location__menu";
-    contextMenu.setAttribute("role", "listbox");
-    contextMenu.hidden = true;
-
-    const closeContextMenu = () => {
-      contextMenu.hidden = true;
-      contextButton.setAttribute("aria-expanded", "false");
-    };
-
-    const openContextMenu = () => {
-      contextMenu.hidden = false;
-      contextButton.setAttribute("aria-expanded", "true");
-    };
-
-    const toggleContextMenu = (force) => {
-      const shouldOpen = typeof force === "boolean" ? force : contextMenu.hidden;
-      if (shouldOpen) {
-        openContextMenu();
-      } else {
-        closeContextMenu();
-      }
-    };
-
-    const selectContextLocation = (value) => {
-      SessionState.contextLocation = value;
-      updateContextLocationControls();
-      applyChecklistControlsState();
-      closeContextMenu();
-      contextButton.focus({ preventScroll: true });
-    };
-
-    SOCIAL_CONTEXT_OPTIONS.forEach(option => {
-      const item = document.createElement("li");
-      item.className = "context-location__option";
-      item.dataset.value = option.value;
-      item.setAttribute("role", "option");
-      item.tabIndex = -1;
-
-      const label = document.createElement("span");
-      label.className = "context-location__option-label";
-      label.textContent = option.label;
-
-      const score = document.createElement("span");
-      score.className = "context-location__option-score";
-      score.textContent = `${Math.round(option.score * 100)}% boost`;
-
-      item.append(label, score);
-
-      item.addEventListener("click", () => selectContextLocation(option.value));
-      item.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          selectContextLocation(option.value);
-        }
-        if (event.key === "Escape") {
-          closeContextMenu();
-          contextButton.focus({ preventScroll: true });
-        }
+      SOCIAL_CONTEXT_OPTIONS.forEach(opt => {
+        const li = document.createElement("li");
+        li.setAttribute("role", "option");
+        li.dataset.value = opt.value;
+        li.style.display = "flex";
+        li.style.justifyContent = "space-between";
+        li.style.gap = "0.5rem";
+        li.style.padding = "0.5rem 0.75rem";
+        li.style.cursor = "pointer";
+        li.tabIndex = -1;
+        li.textContent = `${opt.label} (${Math.round(opt.score * 100)}% boost)`;
+        li.onclick = () => {
+          SessionState.contextLocation = opt.value;
+          updateContextLocationControls();
+          applyChecklistControlsState();
+          closeMenu();
+          button.focus({ preventScroll: true });
+        };
+        li.onkeydown = (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            li.click();
+          }
+          if (event.key === "Escape") {
+            closeMenu();
+            button.focus({ preventScroll: true });
+          }
+        };
+        li.onmouseover = () => li.style.background = "rgba(31,42,54,0.9)";
+        li.onmouseout = () => li.style.background = "transparent";
+        menu.appendChild(li);
       });
 
-      contextMenu.appendChild(item);
-    });
+      button.onclick = () => {
+        if (menu.hidden) {
+          openMenu();
+        } else {
+          closeMenu();
+        }
+      };
 
-    contextLocation.append(contextButton, contextCaption, contextMenu);
+      wrapper.append(button, caption, menu);
+      return { wrapper, button, caption, menu, openMenu, closeMenu };
+    };
+
+    const availability = createControl("capacityWrench", "🔧", "Availability");
+    const energy = createControl("energyDial", "🔋", "Energy");
+    const contextLocation = createContextLocationControl();
 
     host.append(
       availability.wrapper,
       energy.wrapper,
-      contextLocation,
+      contextLocation.wrapper,
     );
 
     host.dataset.controlsMounted = "true";
@@ -18991,25 +18874,21 @@ host.appendChild(row);
       openEnergySheet();
     });
 
-    contextButton.addEventListener("click", () => {
-      toggleContextMenu();
-    });
-
-    contextButton.addEventListener("keydown", (event) => {
+    contextLocation.button.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        closeContextMenu();
+        contextLocation.closeMenu();
       }
-      if (event.key === "ArrowDown" && contextMenu.hidden) {
+      if (event.key === "ArrowDown" && contextLocation.menu.hidden) {
         event.preventDefault();
-        openContextMenu();
-        const firstOption = contextMenu.querySelector("[role='option']");
+        contextLocation.openMenu();
+        const firstOption = contextLocation.menu.querySelector("[role='option']");
         firstOption?.focus({ preventScroll: true });
       }
     });
 
     document.addEventListener("click", (event) => {
-      if (!contextLocation.contains(event.target)) {
-        closeContextMenu();
+      if (!contextLocation.wrapper.contains(event.target)) {
+        contextLocation.closeMenu();
       }
     });
 
@@ -19053,9 +18932,7 @@ host.appendChild(row);
 
   function updateContextLocationControls() {
     const button = document.getElementById("contextLocationButton");
-    const caption = document.querySelector("[data-context-location-label]");
-    const buttonLabel = document.querySelector("[data-context-location-button-label]");
-    const buttonBoost = document.querySelector("[data-context-location-button-boost]");
+    const caption = document.getElementById("contextLocationCaption");
     const menu = document.getElementById("contextLocationMenu");
     const option = getSocialContextOption();
     const friendly = formatSocialContextLabel();
@@ -19063,14 +18940,6 @@ host.appendChild(row);
 
     if (caption) {
       caption.textContent = `Context — ${friendly} (${score}% boost)`;
-    }
-
-    if (buttonLabel) {
-      buttonLabel.textContent = friendly;
-    }
-
-    if (buttonBoost) {
-      buttonBoost.textContent = `${score}% boost`;
     }
 
     if (button) {
