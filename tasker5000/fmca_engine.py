@@ -63,12 +63,13 @@ def run_fmca_loop(batch: List[ChartTask], mode_controls: Dict):
             elif minutes_no_progress == 12:
                 timeline.append(accelerator(chart))
             elif minutes_no_progress >= mode_controls["swap_time"]:
-                if chart.required_today or chart.age_days >= 80:
-                    if chart.swap_count >= 1:
-                        timeline.append(escalate(chart))
-                        break
-                timeline.append(swap_3(chart, batch))
-                break  # After swap-3, move to next chart
+                # Check if this is a critical chart that needs escalation instead of swap
+                if (chart.required_today or chart.age_days >= 80) and chart.swap_count >= 1:
+                    timeline.append(escalate(chart))
+                    break
+                else:
+                    timeline.append(swap_3(chart, batch))
+                    break  # After swap-3, move to next chart
             else:
                 timeline.append({
                     "action": "working",

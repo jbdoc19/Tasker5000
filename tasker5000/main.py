@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import math
+from fmca_engine import ChartTask, run_fmca_loop
 
 app = FastAPI()
 
@@ -54,6 +55,17 @@ class CapacityInput(BaseModel):
     EHR_clunk: float
     availability_hours: float
 
+class TaskInput(BaseModel):
+    id: str
+    type: str  # 'attest' or 'full'
+    age_days: int
+    required_today: bool
+    swap_count: int = 0
+
+class WorkflowInput(BaseModel):
+    capacity: CapacityInput
+    tasks: List[TaskInput]
+
 @app.post("/compute_etaH")
 def compute_etaH(input: CapacityInput):
     Esustain = input.R_phys * input.R_ment
@@ -90,4 +102,48 @@ def compute_etaH(input: CapacityInput):
         "etaH": round(etaH, 3),
         "mode": mode,
         "controls": controls
+    }
+
+@app.post("/run_workflow")
+def run_workflow(input: WorkflowInput):
+    """
+    Complete Tasker5000 workflow:
+    1. Compute etaH and determine mode
+    2. Get mode controls
+    3. Run FMCA loop on task batch
+    """
+    # Step 1: Compute etaH and get mode controls
+    capacity_result = compute_etaH(input.capacity)
+    etaH = capacity_result["etaH"]
+    mode = capacity_result["mode"]
+    controls = capacity_result["controls"]
+    
+    # Step 2: Convert input tasks to ChartTask objects
+    chart_tasks = []
+    for task in input.tasks:
+        chart = ChartTask(
+            id=task.id,
+            type=task.type,
+            age_days=task.age_days,
+            required_today=task.required_today,
+            swap_count=task.swap_count
+        )
+        chart_tasks.append(chart)
+    
+    # Step 3: Run FMCA loop with mode controls
+    timeline = run_fmca_loop(chart_tasks, controls)
+    
+    # Return complete results
+    return {
+        "capacity_analysis": {
+            "etaH": etaH,
+            "mode": mode,
+            "controls": controls
+        },
+        "execution_timeline": timeline,
+        "summary": {
+            "total_tasks": len(chart_tasks),
+            "total_actions": len(timeline),
+            "mode": mode
+        }
     }
