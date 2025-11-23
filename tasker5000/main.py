@@ -2,8 +2,25 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
 import math
+from fmca_engine import ChartTask, run_fmca_loop
+
+mode = get_mode_band(etaH)
+controls = get_mode_controls(mode, input.availability_hours)
+
+# Simulate a test batch of 3 charts
+chart_batch = [
+    ChartTask(id="chart1", type="full", age_days=10, required_today=False),
+    ChartTask(id="chart2", type="attest", age_days=85, required_today=True),
+    ChartTask(id="chart3", type="full", age_days=20, required_today=False),
+]
+
+fmca_timeline = run_fmca_loop(chart_batch, controls)
+
 
 app = FastAPI()
+
+def read_root():
+    return {"message": "Hello World", "status": "FastAPI is running!"}
 
 def clamp(val, min_val, max_val):
     return max(min_val, min(val, max_val))
@@ -91,3 +108,6 @@ def compute_etaH(input: CapacityInput):
         "mode": mode,
         "controls": controls
     }
+# IMPORTANT: this must be OUTSIDE any function
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=3000, reload=True)
