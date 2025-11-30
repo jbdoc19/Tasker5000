@@ -87,6 +87,11 @@ class ChartUpdateRequest(BaseModel):
     next_steps: List[str] | None = None
 
 
+class ChartAction(BaseModel):
+    id: str
+    action: str
+
+
 BASE_DIR = Path(__file__).parent
 
 app = FastAPI()
@@ -222,6 +227,36 @@ def update_chart_endpoint(update: ChartUpdateRequest):
 
     return {
         "message": "Chart updated successfully",
+        "chart": chart.__dict__,
+        "charts": [c.__dict__ for c in get_all_charts()],
+    }
+
+
+@app.post("/chart_action")
+def chart_action(action: ChartAction):
+    chart = next((c for c in get_all_charts() if c.id == action.id), None)
+
+    if chart is None:
+        raise HTTPException(status_code=404, detail="Chart not found")
+
+    normalized_action = action.action.lower()
+
+    if normalized_action == "park":
+        chart.status = "parked"
+        chart.parked = True
+    elif normalized_action == "escalate":
+        chart.status = "escalated"
+        chart.parked = True
+    elif normalized_action == "resolve":
+        chart.status = "done"
+        chart.parked = False
+    else:
+        raise HTTPException(status_code=400, detail="Invalid chart action")
+
+    update_chart_state(chart)
+
+    return {
+        "message": "Chart action applied successfully",
         "chart": chart.__dict__,
         "charts": [c.__dict__ for c in get_all_charts()],
     }

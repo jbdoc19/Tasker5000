@@ -20,6 +20,7 @@ const samplePayload = {
 const apiBase = '';
 const apiUrl = `${apiBase}/compute_etaH`;
 const updateUrl = `${apiBase}/update_chart`;
+const chartActionUrl = `${apiBase}/chart_action`;
 const lanesUrl = `${apiBase}/lanes`;
 
 // Timer baselines (in seconds). Adjust here to customize sprint rhythm.
@@ -655,26 +656,61 @@ function handleChartControl(action) {
   const chart = getCurrentChart();
   const chartId = chart?.chart_id ?? chart?.id ?? 'chart1';
 
-  let updatePayload = null;
+  sendChartAction(chartId, action);
+}
 
-  if (action === 'park') {
-    updatePayload = {
-      status: 'parked',
-      blocker_note: 'Parked from HUD controls',
-      next_steps: ['Re-prioritize later today', 'Add labs if missing', 'Prep summary'],
-    };
-  } else if (action === 'escalate') {
-    updatePayload = {
-      status: 'escalated',
-      blocker_note: 'Escalated from HUD controls',
-    };
-  } else if (action === 'resolve') {
-    updatePayload = { status: 'resolved' };
+async function sendChartAction(chartId, action) {
+  statusMessage.textContent = 'Updating chart state...';
+
+  try {
+    const response = await fetch(chartActionUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: chartId, action }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Action failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    applyChartActionResponse(data, chartId);
+    await fetchLaneData();
+    statusMessage.textContent = data.message ?? 'Chart updated successfully.';
+  } catch (error) {
+    statusMessage.textContent = `Error updating chart: ${error.message}`;
+  }
+}
+
+function applyChartActionResponse(data, fallbackId) {
+  const updatedChart = data?.chart;
+  const charts = Array.isArray(data?.charts) ? data.charts : null;
+
+  if (charts) {
+    chartBatch = charts;
+  } else if (updatedChart) {
+    const updatedId = updatedChart.id ?? updatedChart.chart_id ?? fallbackId;
+    let replaced = false;
+
+    chartBatch = chartBatch.map((chart) => {
+      const currentId = chart.id ?? chart.chart_id;
+      if (currentId === updatedId) {
+        replaced = true;
+        return updatedChart;
+      }
+      return chart;
+    });
+
+    if (!replaced) {
+      chartBatch.push(updatedChart);
+    }
   }
 
-  if (!updatePayload) return;
+  if (chartBatch.length === 0) return;
 
-  triggerChartUpdate(chartId, updatePayload);
+  currentChartIndex = Math.min(currentChartIndex, Math.max(chartBatch.length - 1, 0));
+  renderCharts(chartBatch);
+  updateCarousel();
 }
 
 function toggleChartControlAvailability(enabled) {
