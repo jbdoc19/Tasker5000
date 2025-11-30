@@ -8,14 +8,47 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <header class="hud-bar" aria-label="Sprint heads-up display">
+    <div class="hud-section">
+      <div class="mode-banner" id="modeBanner">Mode: —</div>
+      <div class="hud-grid">
+        <div class="hud-item">
+          <p class="label">ηH</p>
+          <p id="etaValueHud" class="value">–</p>
+        </div>
+        <div class="hud-item timer">
+          <p class="label">Sprint</p>
+          <p id="sprintTimer" class="timer__value">25:00</p>
+        </div>
+        <div class="hud-item timer">
+          <p class="label">Micro</p>
+          <p id="microTimer" class="timer__value">05:00</p>
+          <p id="microAlert" class="timer__alert" aria-live="assertive"></p>
+        </div>
+        <div class="hud-item timer">
+          <p class="label">Swap-3</p>
+          <p id="swapTimer" class="timer__value">—</p>
+          <p id="swapAlert" class="timer__alert" aria-live="assertive"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-section hud-section--right">
+      <div class="lane-list" aria-label="Lane counts">
+        <span class="badge" id="attestCount">Attest-Only: —</span>
+        <span class="badge" id="deepFixCount">Deep Fix: —</span>
+        <span class="badge" id="parkedCount">Parked: —</span>
+        <span class="badge" id="sameDayCount">Same-Day Required: —</span>
+      </div>
+      <button id="startButton" class="button button--compact" type="button">🚀 Start Sprint</button>
+    </div>
+  </header>
+
   <main class="page">
     <header class="page__header">
       <h1 class="page__title">FastAPI Sprint Dashboard</h1>
       <p class="page__subtitle">Kick off a sprint and review the results.</p>
     </header>
-
-    <!-- Launch button -->
-    <button id="startButton" class="button">🚀 Start Sprint</button>
 
     <section class="card" aria-live="polite">
       <div class="card__row">
@@ -26,6 +59,20 @@
         <div>
           <p class="label">etaH</p>
           <p id="etaValue" class="value">–</p>
+        </div>
+      </div>
+      <div class="card__row hud-card__row">
+        <div>
+          <p class="label">Sprint Timer</p>
+          <p id="sprintTimerCard" class="value">25:00</p>
+        </div>
+        <div>
+          <p class="label">Micro Timer</p>
+          <p id="microTimerCard" class="value">05:00</p>
+        </div>
+        <div>
+          <p class="label">Swap-3 Countdown</p>
+          <p id="swapTimerCard" class="value">—</p>
         </div>
       </div>
     </section>
