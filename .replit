@@ -1,5 +1,10 @@
+modules = ["python-3.11"]
 [agent]
 expertMode = true
+
+[[ports]]
+localPort = 5000
+externalPort = 80
 
 [[ports]]
 localPort = 33563
@@ -8,6 +13,10 @@ externalPort = 3001
 [[ports]]
 localPort = 33919
 externalPort = 5000
+
+[[ports]]
+localPort = 34479
+externalPort = 8080
 
 [[ports]]
 localPort = 34511
@@ -48,3 +57,30 @@ externalPort = 5173
 [[ports]]
 localPort = 46235
 externalPort = 6000
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Tasker5000 Server"
+
+[[workflows.workflow]]
+name = "Tasker5000 Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd tasker5000 && uvicorn main:app --host 0.0.0.0 --port 5000"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"

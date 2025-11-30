@@ -3,6 +3,7 @@ from typing import List
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from chart_state import build_smart_batch, get_all_charts, seed_chart, update_chart_state
@@ -87,9 +88,115 @@ class ChartUpdateRequest(BaseModel):
 app = FastAPI()
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def read_root():
-    return {"message": "Hello World", "status": "FastAPI is running!"}
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasker5000 - Productivity Capacity Engine</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+        }
+        .description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 40px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #e94560;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(233, 69, 96, 0.3);
+        }
+        .btn-secondary {
+            background: #16213e;
+            border: 2px solid #e94560;
+        }
+        .endpoints {
+            margin-top: 40px;
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .endpoints h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+        }
+        .endpoint {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .method {
+            color: #4ade80;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tasker5000</h1>
+        <p class="subtitle">Productivity Capacity Engine</p>
+        <p class="description">
+            An intelligent system that calculates your effective work capacity (etaH) 
+            based on physical energy, mental state, workload, and environmental factors. 
+            Get personalized productivity recommendations and task management controls.
+        </p>
+        <a href="/docs" class="btn">API Documentation</a>
+        <a href="/lanes" class="btn btn-secondary">View Chart Lanes</a>
+        <div class="endpoints">
+            <h3>Available Endpoints</h3>
+            <div class="endpoint"><span class="method">POST</span> /compute_etaH - Calculate capacity</div>
+            <div class="endpoint"><span class="method">POST</span> /fmca_demo - Run FMCA demo</div>
+            <div class="endpoint"><span class="method">POST</span> /update_chart - Update chart status</div>
+            <div class="endpoint"><span class="method">GET</span> /lanes - Get chart lanes</div>
+        </div>
+    </div>
+</body>
+</html>
+"""
 
 
 def calculate_etaH(payload: CapacityInput):
@@ -281,14 +388,4 @@ def fmca_demo(request: FMCARequest):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=3000, reload=True)
-
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import os
-
-app.mount("/static", StaticFiles(directory=".", html=True), name="static")
-
-@app.get("/")
-def serve_ui():
-    return FileResponse("index.html")
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
