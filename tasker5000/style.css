@@ -25,6 +25,53 @@ body {
   padding-top: 6rem;
 }
 
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.25rem 0;
+}
+
+.nav__brand {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.nav__title {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.nav__tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.nav__links {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.nav__link {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.nav__link:hover {
+  background: rgba(124, 58, 237, 0.25);
+  border-color: rgba(124, 58, 237, 0.45);
+}
+
 .hud-bar {
   position: sticky;
   top: 0;
@@ -101,6 +148,12 @@ body {
   flex-wrap: wrap;
 }
 
+.hud-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .mode-banner {
   display: inline-flex;
   align-items: center;
@@ -171,6 +224,57 @@ body {
 .button:active {
   transform: translateY(1px);
   box-shadow: 0 6px 18px rgba(124, 58, 237, 0.2);
+}
+
+.capacity-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.capacity-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.capacity-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.input-group input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.input-group input[type='number'] {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  color: var(--text);
+}
+
+.input-value {
+  font-weight: 700;
+}
+
+.input-help {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .card {
@@ -329,6 +433,12 @@ body {
   font-weight: 600;
 }
 
+.chart-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .timeline-log {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.75rem;
@@ -358,6 +468,12 @@ body {
 
 .pill-button:hover {
   background: rgba(124, 58, 237, 0.2);
+}
+
+.pill-button--disabled,
+.pill-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .chart-item {

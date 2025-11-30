@@ -17,7 +17,7 @@ const samplePayload = {
   availability_hours: 6,
 };
 
-const apiBase = 'http://localhost:3000';
+const apiBase = '';
 const apiUrl = `${apiBase}/compute_etaH`;
 const updateUrl = `${apiBase}/update_chart`;
 const lanesUrl = `${apiBase}/lanes`;
@@ -34,6 +34,14 @@ const swapThresholds = {
 };
 
 const startButton = document.getElementById('startButton');
+const fetchLanesButton = document.getElementById('fetchLanesButton');
+const capacityForm = document.getElementById('capacityForm');
+const energyInput = document.getElementById('energyInput');
+const mentalInput = document.getElementById('mentalInput');
+const difficultyInput = document.getElementById('difficultyInput');
+const backlogInput = document.getElementById('backlogInput');
+const anxietyInput = document.getElementById('anxietyInput');
+const availabilityInput = document.getElementById('availabilityInput');
 const modeValue = document.getElementById('modeValue');
 const etaValue = document.getElementById('etaValue');
 const modeBanner = document.getElementById('modeBanner');
@@ -62,6 +70,14 @@ const reinitButton = document.getElementById('reinitButton');
 const carouselStatus = document.getElementById('carouselStatus');
 const fmcaTimelineList = document.getElementById('fmcaTimelineList');
 const fmcaTimelinePanel = document.getElementById('fmcaTimelinePanel');
+const chartControlButtons = document.querySelectorAll('[data-chart-action]');
+
+const inputValueLabels = {
+  energy: document.getElementById('energyValue'),
+  mental: document.getElementById('mentalValue'),
+  difficulty: document.getElementById('difficultyValue'),
+  anxiety: document.getElementById('anxietyValue'),
+};
 
 let currentTimeline = [];
 let lastRequestPayload = { ...samplePayload };
@@ -81,11 +97,76 @@ const timerState = {
   swap: { interval: null, duration: defaultSwapDuration, remaining: defaultSwapDuration },
 };
 
-startButton.addEventListener('click', () => {
+async function handleStartSprint(event) {
+  event?.preventDefault();
   startAllTimers(currentMode);
-  computeAndRender(samplePayload);
-  fetchLaneCounts();
-});
+  await computeAndRender(getPayloadFromForm());
+  await fetchLaneCounts();
+}
+
+function attachInputListeners() {
+  const pairs = [
+    { input: energyInput, key: 'energy' },
+    { input: mentalInput, key: 'mental' },
+    { input: difficultyInput, key: 'difficulty' },
+    { input: anxietyInput, key: 'anxiety' },
+  ];
+
+  pairs.forEach(({ input, key }) => {
+    input?.addEventListener('input', () => updateInputLabel(input, key));
+  });
+}
+
+function hydrateFormInputs(payload) {
+  if (energyInput) energyInput.value = payload.R_phys ?? 0.8;
+  if (mentalInput) mentalInput.value = payload.R_ment ?? 0.9;
+  if (difficultyInput) difficultyInput.value = payload.Dtask ?? 0.5;
+  if (backlogInput) backlogInput.value = payload.L ?? 5;
+  if (anxietyInput) anxietyInput.value = payload.Aanxiety ?? 0.05;
+  if (availabilityInput) availabilityInput.value = payload.availability_hours ?? 6;
+
+  updateInputLabel(energyInput, 'energy');
+  updateInputLabel(mentalInput, 'mental');
+  updateInputLabel(difficultyInput, 'difficulty');
+  updateInputLabel(anxietyInput, 'anxiety');
+}
+
+function getPayloadFromForm() {
+  const payload = { ...samplePayload };
+
+  payload.R_phys = safeNumber(energyInput?.value, payload.R_phys);
+  payload.R_ment = safeNumber(mentalInput?.value, payload.R_ment);
+  payload.Dtask = safeNumber(difficultyInput?.value, payload.Dtask);
+  payload.L = safeInteger(backlogInput?.value, payload.L);
+
+  const anxiety = safeNumber(anxietyInput?.value, payload.Aanxiety);
+  payload.Aanxiety = anxiety;
+  payload.Gguilt = anxiety;
+
+  payload.availability_hours = safeNumber(availabilityInput?.value, payload.availability_hours);
+
+  lastRequestPayload = { ...payload };
+  return payload;
+}
+
+function updateInputLabel(input, key) {
+  if (!input || !key || !inputValueLabels[key]) return;
+  inputValueLabels[key].textContent = Number.parseFloat(input.value).toFixed(2);
+}
+
+function safeNumber(value, fallback) {
+  const num = Number.parseFloat(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function safeInteger(value, fallback) {
+  const num = Number.parseInt(value, 10);
+  return Number.isInteger(num) ? num : fallback;
+}
+
+startButton?.addEventListener('click', handleStartSprint);
+capacityForm?.addEventListener('submit', handleStartSprint);
+fetchLanesButton?.addEventListener('click', () => fetchLaneCounts());
 
 nextChartButton?.addEventListener('click', () => {
   handleNextChart();
@@ -96,9 +177,15 @@ reinitButton?.addEventListener('click', () => {
   computeAndRender(lastRequestPayload);
 });
 
+chartControlButtons?.forEach((button) => {
+  button.addEventListener('click', () => handleChartControl(button.dataset.chartAction));
+});
+
 document.addEventListener('DOMContentLoaded', () => {
+  hydrateFormInputs(samplePayload);
+  attachInputListeners();
   syncTimerDisplays();
-  computeAndRender(samplePayload);
+  computeAndRender(getPayloadFromForm());
   fetchLaneCounts();
 });
 
@@ -200,7 +287,7 @@ function startAllTimers(mode) {
 
 async function computeAndRender(payload) {
   statusMessage.textContent = 'Sending request...';
-  startButton.disabled = true;
+  if (startButton) startButton.disabled = true;
   lastRequestPayload = { ...payload };
 
   try {
@@ -220,7 +307,7 @@ async function computeAndRender(payload) {
   } catch (error) {
     statusMessage.textContent = `Error: ${error.message}`;
   } finally {
-    startButton.disabled = false;
+    if (startButton) startButton.disabled = false;
   }
 }
 
@@ -421,6 +508,49 @@ function hydrateBatch(charts) {
   updateCarousel();
 }
 
+function getCurrentChart() {
+  return chartBatch[currentChartIndex] || chartBatch[0];
+}
+
+function handleChartControl(action) {
+  if (!action) return;
+  if (!chartBatch.length) {
+    carouselStatus.textContent = 'Load a sprint before managing charts.';
+    return;
+  }
+
+  const chart = getCurrentChart();
+  const chartId = chart?.chart_id ?? chart?.id ?? 'chart1';
+
+  let updatePayload = null;
+
+  if (action === 'park') {
+    updatePayload = {
+      status: 'parked',
+      blocker_note: 'Parked from HUD controls',
+      next_steps: ['Re-prioritize later today', 'Add labs if missing', 'Prep summary'],
+    };
+  } else if (action === 'escalate') {
+    updatePayload = {
+      status: 'escalated',
+      blocker_note: 'Escalated from HUD controls',
+    };
+  } else if (action === 'resolve') {
+    updatePayload = { status: 'resolved' };
+  }
+
+  if (!updatePayload) return;
+
+  triggerChartUpdate(chartId, updatePayload);
+}
+
+function toggleChartControlAvailability(enabled) {
+  chartControlButtons?.forEach((button) => {
+    button.disabled = !enabled;
+    button.classList.toggle('pill-button--disabled', !enabled);
+  });
+}
+
 function updateCarousel() {
   if (!chartCard || !carouselStatus) return;
 
@@ -429,6 +559,7 @@ function updateCarousel() {
     chartMeta.textContent = '';
     fmcaAction.textContent = 'FMCA action: —';
     carouselStatus.textContent = 'Load a sprint to begin.';
+    toggleChartControlAvailability(false);
     updateNextButtonState();
     return;
   }
@@ -473,6 +604,7 @@ function updateCarousel() {
   }
 
   carouselStatus.textContent = `Chart ${currentChartIndex + 1} of ${chartBatch.length}`;
+  toggleChartControlAvailability(true);
   updateNextButtonState();
 }
 
@@ -566,7 +698,9 @@ function buildActionButton(step, index) {
 }
 
 async function triggerChartUpdate(chartId, updatePayload, index) {
-  const step = currentTimeline[index];
+  const timelineIndex = typeof index === 'number' ? index : null;
+  const step = typeof timelineIndex === 'number' ? currentTimeline[timelineIndex] : null;
+
   if (step) {
     step.user_state = updatePayload.blocker_note || updatePayload.status;
     renderTimeline(currentTimeline);
@@ -587,6 +721,7 @@ async function triggerChartUpdate(chartId, updatePayload, index) {
 
     await response.json();
     await computeAndRender(lastRequestPayload);
+    await fetchLaneCounts();
   } catch (error) {
     statusMessage.textContent = `Error updating chart: ${error.message}`;
   }
