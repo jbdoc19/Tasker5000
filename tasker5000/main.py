@@ -2,13 +2,17 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
 import math
+import uvicorn
 
 app = FastAPI()
+
+def read_root():
+    return {"message": "Hello World", "status": "FastAPI is running!"}
 
 def clamp(val, min_val, max_val):
     return max(min_val, min(val, max_val))
 
-def norm(x):  # Soft normalization (can customize)
+def norm(x):
     return min(max(x, 0), 1)
 
 def Qoverload(N_vis):
@@ -91,3 +95,22 @@ def compute_etaH(input: CapacityInput):
         "mode": mode,
         "controls": controls
     }
+
+# FastAPI static file handling
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+# Mount static files from current directory
+app.mount("/static", StaticFiles(directory=".", html=True), name="static")
+
+# Serve index.html as the homepage
+@app.get("/")
+def serve_ui():
+    return FileResponse("index.html")
+
+# App runner (this part can stay at the very bottom)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=3000, reload=True)
+if __name__  == "__main__"
