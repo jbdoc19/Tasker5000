@@ -20,10 +20,36 @@ const samplePayload = {
 const apiBase = 'http://localhost:3000';
 const apiUrl = `${apiBase}/compute_etaH`;
 const updateUrl = `${apiBase}/update_chart`;
+const lanesUrl = `${apiBase}/lanes`;
+
+// Timer baselines (in seconds). Adjust here to customize sprint rhythm.
+const SPRINT_DURATION = 25 * 60; // 25 minutes
+const MICRO_DURATION = 5 * 60; // 5 minutes
+const defaultSwapDuration = 12 * 60; // fallback swap-3 threshold
+const swapThresholds = {
+  recovery: 20 * 60,
+  turtle: 18 * 60,
+  cruise: 15 * 60,
+  unicorn: 12 * 60,
+};
 
 const startButton = document.getElementById('startButton');
 const modeValue = document.getElementById('modeValue');
 const etaValue = document.getElementById('etaValue');
+const modeBanner = document.getElementById('modeBanner');
+const etaValueHud = document.getElementById('etaValueHud');
+const sprintTimerDisplay = document.getElementById('sprintTimer');
+const microTimerDisplay = document.getElementById('microTimer');
+const swapTimerDisplay = document.getElementById('swapTimer');
+const sprintTimerCardDisplay = document.getElementById('sprintTimerCard');
+const microTimerCardDisplay = document.getElementById('microTimerCard');
+const swapTimerCardDisplay = document.getElementById('swapTimerCard');
+const microAlert = document.getElementById('microAlert');
+const swapAlert = document.getElementById('swapAlert');
+const attestCount = document.getElementById('attestCount');
+const deepFixCount = document.getElementById('deepFixCount');
+const parkedCount = document.getElementById('parkedCount');
+const sameDayCount = document.getElementById('sameDayCount');
 const controlsJson = document.getElementById('controlsJson');
 const chartsList = document.getElementById('chartsList');
 const timelineList = document.getElementById('timelineList');
@@ -31,10 +57,127 @@ const statusMessage = document.getElementById('statusMessage');
 
 let currentTimeline = [];
 let lastRequestPayload = { ...samplePayload };
+let currentMode = '';
+
+const timerDisplays = {
+  sprint: [sprintTimerDisplay, sprintTimerCardDisplay],
+  micro: [microTimerDisplay, microTimerCardDisplay],
+  swap: [swapTimerDisplay, swapTimerCardDisplay],
+};
+
+const timerState = {
+  sprint: { interval: null, duration: SPRINT_DURATION, remaining: SPRINT_DURATION },
+  micro: { interval: null, duration: MICRO_DURATION, remaining: MICRO_DURATION },
+  swap: { interval: null, duration: defaultSwapDuration, remaining: defaultSwapDuration },
+};
 
 startButton.addEventListener('click', () => {
+  startAllTimers(currentMode);
   computeAndRender(samplePayload);
+  fetchLaneCounts();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  syncTimerDisplays();
+  computeAndRender(samplePayload);
+  fetchLaneCounts();
+});
+
+function syncTimerDisplays() {
+  updateTimerDisplays('sprint', formatTime(timerState.sprint.remaining));
+  updateTimerDisplays('micro', formatTime(timerState.micro.remaining));
+  updateTimerDisplays('swap', formatTime(timerState.swap.remaining));
+}
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const seconds = Math.max(totalSeconds % 60, 0)
+    .toString()
+    .padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+function updateTimerDisplays(key, label) {
+  const displays = timerDisplays[key];
+  if (!displays) return;
+
+  displays.forEach((display) => {
+    if (display) display.textContent = label;
+  });
+}
+
+function resetInterval(key) {
+  if (timerState[key]?.interval) {
+    clearInterval(timerState[key].interval);
+    timerState[key].interval = null;
+  }
+}
+
+function flashAlert(target, message) {
+  if (!target) return;
+  target.textContent = message;
+  target.classList.add('is-alert');
+  setTimeout(() => target.classList.remove('is-alert'), 2000);
+}
+
+function getSwapDurationForMode(mode) {
+  const normalized = (mode || '').toLowerCase();
+  return swapThresholds[normalized] ?? defaultSwapDuration;
+}
+
+function setSwapDurationFromMode(mode) {
+  timerState.swap.duration = getSwapDurationForMode(mode);
+  timerState.swap.remaining = timerState.swap.duration;
+  updateTimerDisplays('swap', formatTime(timerState.swap.duration));
+}
+
+function startCountdown(key, onZero) {
+  const timer = timerState[key];
+  if (!timer) return;
+
+  resetInterval(key);
+  updateTimerDisplays(key, formatTime(timer.duration));
+  timer.remaining = timer.duration;
+
+  timer.interval = setInterval(() => {
+    timer.remaining -= 1;
+
+    if (timer.remaining <= 0) {
+      onZero?.();
+      timer.remaining = timer.duration;
+    }
+
+    updateTimerDisplays(key, formatTime(timer.remaining));
+  }, 1000);
+}
+
+function startAllTimers(mode) {
+  setSwapDurationFromMode(mode);
+
+  if (microAlert) {
+    microAlert.textContent = '';
+    microAlert.classList.remove('is-alert');
+  }
+
+  if (swapAlert) {
+    swapAlert.textContent = '';
+    swapAlert.classList.remove('is-alert');
+  }
+
+  startCountdown('sprint', () => {
+    flashAlert(statusMessage, 'Sprint complete — restarting timer.');
+  });
+
+  startCountdown('micro', () => {
+    flashAlert(microAlert, 'Micro-Unstick!');
+  });
+
+  startCountdown('swap', () => {
+    flashAlert(swapAlert, 'Trigger Swap-3!');
+  });
+}
 
 async function computeAndRender(payload) {
   statusMessage.textContent = 'Sending request...';
@@ -63,15 +206,74 @@ async function computeAndRender(payload) {
 }
 
 function renderResponse(data) {
-  // Update simple values
-  modeValue.textContent = data.mode ?? '—';
-  etaValue.textContent = data.etaH ?? '—';
+  // Update simple values and HUD
+  updateModeDisplay(data.mode);
+  updateEtaDisplay(data.etaH);
 
   // Pretty-print controls
   controlsJson.textContent = JSON.stringify(data.controls ?? {}, null, 2);
 
   renderCharts(data.charts);
   renderTimeline(data.timeline);
+}
+
+function updateModeDisplay(mode) {
+  const safeMode = mode ?? '—';
+  currentMode = safeMode;
+
+  modeValue.textContent = safeMode;
+  if (modeBanner) {
+    modeBanner.textContent = `Mode: ${safeMode}`;
+  }
+
+  setSwapDurationFromMode(safeMode);
+
+  if (timerState.swap.interval) {
+    startCountdown('swap', () => {
+      flashAlert(swapAlert, 'Trigger Swap-3!');
+    });
+  }
+}
+
+function updateEtaDisplay(eta) {
+  const label = eta ?? '—';
+  etaValue.textContent = label;
+  if (etaValueHud) {
+    etaValueHud.textContent = label;
+  }
+}
+
+function updateLaneBadges(lanes) {
+  const counts = lanes || {};
+
+  setBadgeText(attestCount, 'Attest-Only', counts.attest_only ?? counts.attestOnly);
+  setBadgeText(deepFixCount, 'Deep Fix', counts.deep_fix ?? counts.deepFix);
+  setBadgeText(parkedCount, 'Parked', counts.parked);
+  setBadgeText(sameDayCount, 'Same-Day Required', counts.same_day_required ?? counts.sameDayRequired);
+}
+
+function setBadgeText(element, label, value) {
+  if (!element) return;
+  const displayValue = typeof value === 'number' ? value : value ?? '—';
+  element.textContent = `${label}: ${displayValue}`;
+}
+
+async function fetchLaneCounts() {
+  statusMessage.textContent = 'Refreshing lane counts...';
+
+  try {
+    const response = await fetch(lanesUrl);
+
+    if (!response.ok) {
+      throw new Error(`Lane request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    updateLaneBadges(data);
+    statusMessage.textContent = 'Lane counts updated.';
+  } catch (error) {
+    statusMessage.textContent = `Lane fetch error: ${error.message}`;
+  }
 }
 
 function renderCharts(charts) {
