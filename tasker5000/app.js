@@ -54,10 +54,20 @@ const controlsJson = document.getElementById('controlsJson');
 const chartsList = document.getElementById('chartsList');
 const timelineList = document.getElementById('timelineList');
 const statusMessage = document.getElementById('statusMessage');
+const chartCard = document.getElementById('chartCard');
+const chartMeta = document.getElementById('chartMeta');
+const fmcaAction = document.getElementById('fmcaAction');
+const nextChartButton = document.getElementById('nextChartButton');
+const reinitButton = document.getElementById('reinitButton');
+const carouselStatus = document.getElementById('carouselStatus');
+const fmcaTimelineList = document.getElementById('fmcaTimelineList');
+const fmcaTimelinePanel = document.getElementById('fmcaTimelinePanel');
 
 let currentTimeline = [];
 let lastRequestPayload = { ...samplePayload };
 let currentMode = '';
+let chartBatch = [];
+let currentChartIndex = 0;
 
 const timerDisplays = {
   sprint: [sprintTimerDisplay, sprintTimerCardDisplay],
@@ -75,6 +85,15 @@ startButton.addEventListener('click', () => {
   startAllTimers(currentMode);
   computeAndRender(samplePayload);
   fetchLaneCounts();
+});
+
+nextChartButton?.addEventListener('click', () => {
+  handleNextChart();
+});
+
+reinitButton?.addEventListener('click', () => {
+  statusMessage.textContent = 'Re-initializing sprint...';
+  computeAndRender(lastRequestPayload);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -213,8 +232,10 @@ function renderResponse(data) {
   // Pretty-print controls
   controlsJson.textContent = JSON.stringify(data.controls ?? {}, null, 2);
 
-  renderCharts(data.charts);
   renderTimeline(data.timeline);
+  hydrateBatch(data.charts);
+  renderCharts(data.charts);
+  renderFmcaTimeline(data.timeline);
 }
 
 function updateModeDisplay(mode) {
@@ -362,6 +383,144 @@ function renderTimeline(timeline) {
 
     timelineList.appendChild(li);
   });
+}
+
+function renderFmcaTimeline(timeline) {
+  if (!fmcaTimelineList) return;
+  fmcaTimelineList.innerHTML = '';
+
+  const steps = Array.isArray(timeline) ? timeline.slice(-5).reverse() : [];
+
+  if (steps.length === 0) {
+    fmcaTimelineList.textContent = 'No FMCA events yet.';
+    return;
+  }
+
+  steps.forEach((step, index) => {
+    const li = document.createElement('li');
+    li.classList.add('timeline-item');
+
+    const actionLabel = step.action ?? `Event ${index + 1}`;
+    const chartId = step.chart_id ? ` • Chart ${step.chart_id}` : '';
+    const text = document.createElement('p');
+    text.classList.add('timeline-item__text');
+    text.textContent = `${actionLabel}${chartId}`;
+
+    li.appendChild(text);
+    fmcaTimelineList.appendChild(li);
+  });
+
+  if (fmcaTimelinePanel) {
+    fmcaTimelinePanel.open = true;
+  }
+}
+
+function hydrateBatch(charts) {
+  chartBatch = Array.isArray(charts) ? charts : [];
+  currentChartIndex = 0;
+  updateCarousel();
+}
+
+function updateCarousel() {
+  if (!chartCard || !carouselStatus) return;
+
+  if (!chartBatch.length) {
+    chartCard.innerHTML = '<p class="label">Current Chart</p><p class="value">No charts loaded yet.</p>';
+    chartMeta.textContent = '';
+    fmcaAction.textContent = 'FMCA action: —';
+    carouselStatus.textContent = 'Load a sprint to begin.';
+    updateNextButtonState();
+    return;
+  }
+
+  const chart = chartBatch[currentChartIndex] || {};
+  const chartId = chart.chart_id ?? chart.id ?? `chart-${currentChartIndex + 1}`;
+  const status = (chart.status ?? 'unknown').toString();
+  const swaps = chart.swap_count ?? chart.swaps ?? '—';
+
+  const normalizedStatus = status.toLowerCase();
+  const statusClass =
+    normalizedStatus === 'escalated'
+      ? 'chart-item__status chart-item__status--escalated'
+      : normalizedStatus === 'resolved'
+      ? 'chart-item__status chart-item__status--resolved'
+      : 'chart-item__status';
+
+  const typeLabel = chart.type ?? chart.chart_type ?? 'unknown';
+  const age = chart.age_days ?? chart.age ?? '—';
+  const requiresToday = chart.required_today ?? chart.requiredToday;
+  const requiredLabel =
+    typeof requiresToday === 'boolean' ? (requiresToday ? 'Yes' : 'No') : requiresToday ?? '—';
+
+  chartCard.innerHTML = `
+    <div class="chart-card__header">
+      <span class="chart-card__id">${chartId}</span>
+      <span class="${statusClass}">${status}</span>
+    </div>
+    <p class="chart-item__meta">Swaps: ${swaps}</p>
+  `;
+
+  if (chartMeta) {
+    chartMeta.innerHTML = `
+      <span class="chart-card__pill">Type: ${typeLabel}</span>
+      <span class="chart-card__pill">Age: ${age} days</span>
+      <span class="chart-card__pill">Required Today: ${requiredLabel}</span>
+    `;
+  }
+
+  if (fmcaAction) {
+    fmcaAction.textContent = `FMCA action: ${getChartActionLabel(chart)}`;
+  }
+
+  carouselStatus.textContent = `Chart ${currentChartIndex + 1} of ${chartBatch.length}`;
+  updateNextButtonState();
+}
+
+function getChartActionLabel(chart) {
+  if (!chart) return '—';
+  const directAction = chart.fmca_action ?? chart.action;
+
+  if (directAction) {
+    return formatActionLabel(directAction);
+  }
+
+  const chartId = chart.chart_id ?? chart.id;
+  const fromTimeline = findActionFromTimeline(chartId);
+  return fromTimeline ? formatActionLabel(fromTimeline) : '—';
+}
+
+function findActionFromTimeline(chartId) {
+  if (!chartId || !currentTimeline.length) return null;
+  const reversed = [...currentTimeline].reverse();
+  const match = reversed.find((step) => step.chart_id === chartId && step.action);
+  return match?.action ?? null;
+}
+
+function formatActionLabel(action) {
+  return action.toString().replace(/_/g, ' ');
+}
+
+function handleNextChart() {
+  if (!chartBatch.length) {
+    carouselStatus.textContent = 'No batch loaded. Re-init to fetch charts.';
+    return;
+  }
+
+  if (currentChartIndex < chartBatch.length - 1) {
+    currentChartIndex += 1;
+    updateCarousel();
+  } else {
+    carouselStatus.textContent = 'End of batch reached. Re-init for a new plan.';
+    updateNextButtonState();
+  }
+}
+
+function updateNextButtonState() {
+  if (!nextChartButton) return;
+
+  const atEnd = currentChartIndex >= chartBatch.length - 1;
+  nextChartButton.disabled = !chartBatch.length || atEnd;
+  nextChartButton.textContent = atEnd && chartBatch.length ? 'Batch Complete' : 'Next Step →';
 }
 
 function buildActionButton(step, index) {

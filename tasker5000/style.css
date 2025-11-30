@@ -122,6 +122,17 @@ body {
   align-self: flex-start;
 }
 
+.button--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  box-shadow: none;
+}
+
+.button--ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .page {
   max-width: 720px;
   margin: 0 auto;
@@ -170,9 +181,29 @@ body {
   margin-top: 1rem;
 }
 
+.card--panel {
+  border-color: rgba(124, 58, 237, 0.2);
+  box-shadow: 0 15px 45px rgba(124, 58, 237, 0.08);
+}
+
 .hud-card__row {
   margin-top: 0.5rem;
   flex-wrap: wrap;
+}
+
+.card__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.card__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .card__row {
@@ -249,6 +280,72 @@ body {
   flex: 1;
 }
 
+.chart-carousel {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.chart-card {
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.chart-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.chart-card__id {
+  font-weight: 800;
+}
+
+.chart-card__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.chart-card__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.9rem;
+}
+
+.chart-card__action {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.timeline-log {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.timeline-log__summary {
+  cursor: pointer;
+  margin: 0;
+  font-weight: 700;
+}
+
+.timeline-log__list {
+  margin-top: 0.65rem;
+}
+
 .pill-button {
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(124, 58, 237, 0.1);
@@ -307,6 +404,10 @@ body {
 .chart-item__meta {
   margin: 0;
   color: var(--muted);
+}
+
+.status--inline {
+  margin-top: 0.5rem;
 }
 
 .chart-item--parked {
