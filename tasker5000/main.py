@@ -209,3 +209,14 @@ def fmca_demo(request: FMCARequest):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=3000, reload=True)
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+app.mount("/static", StaticFiles(directory=".", html=True), name="static")
+
+@app.get("/")
+def serve_ui():
+    return FileResponse("index.html")
+
