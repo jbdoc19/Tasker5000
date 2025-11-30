@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FastAPI Sprint Launcher</title>
+  <!-- Minimal, mobile-first stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="page__header">
+      <h1 class="page__title">FastAPI Sprint Dashboard</h1>
+      <p class="page__subtitle">Kick off a sprint and review the results.</p>
+    </header>
+
+    <!-- Launch button -->
+    <button id="startButton" class="button">🚀 Start Sprint</button>
+
+    <section class="card" aria-live="polite">
+      <div class="card__row">
+        <div>
+          <p class="label">Mode</p>
+          <p id="modeValue" class="value">–</p>
+        </div>
+        <div>
+          <p class="label">etaH</p>
+          <p id="etaValue" class="value">–</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Controls</h2>
+      <!-- Pre element makes the JSON easy to read and copy -->
+      <pre id="controlsJson" class="code">Waiting for response…</pre>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Charts</h2>
+      <ul id="chartsList" class="list">No charts yet.</ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Timeline</h2>
+      <ul id="timelineList" class="list">No steps yet.</ul>
+    </section>
+
+    <p id="statusMessage" class="status">Ready.</p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
