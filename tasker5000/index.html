@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FastAPI Sprint Launcher</title>
+  <!-- Minimal, mobile-first stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hud-bar" aria-label="Sprint heads-up display">
+    <div class="hud-section">
+      <div class="mode-banner" id="modeBanner">Mode: —</div>
+      <div class="hud-grid">
+        <div class="hud-item">
+          <p class="label">ηH</p>
+          <p id="etaValueHud" class="value">–</p>
+        </div>
+        <div class="hud-item timer">
+          <p class="label">Sprint</p>
+          <p id="sprintTimer" class="timer__value">25:00</p>
+        </div>
+        <div class="hud-item timer">
+          <p class="label">Micro</p>
+          <p id="microTimer" class="timer__value">05:00</p>
+          <p id="microAlert" class="timer__alert" aria-live="assertive"></p>
+        </div>
+        <div class="hud-item timer">
+          <p class="label">Swap-3</p>
+          <p id="swapTimer" class="timer__value">—</p>
+          <p id="swapAlert" class="timer__alert" aria-live="assertive"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-section hud-section--right">
+      <div class="lane-list" aria-label="Lane counts">
+        <span class="badge" id="attestCount">Attest-Only: —</span>
+        <span class="badge" id="deepFixCount">Deep Fix: —</span>
+        <span class="badge" id="parkedCount">Parked: —</span>
+        <span class="badge" id="sameDayCount">Same-Day Required: —</span>
+      </div>
+      <button id="startButton" class="button button--compact" type="button">🚀 Start Sprint</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <header class="page__header">
+      <h1 class="page__title">FastAPI Sprint Dashboard</h1>
+      <p class="page__subtitle">Kick off a sprint and review the results.</p>
+    </header>
+
+    <section class="card" aria-live="polite">
+      <div class="card__row">
+        <div>
+          <p class="label">Mode</p>
+          <p id="modeValue" class="value">–</p>
+        </div>
+        <div>
+          <p class="label">etaH</p>
+          <p id="etaValue" class="value">–</p>
+        </div>
+      </div>
+      <div class="card__row hud-card__row">
+        <div>
+          <p class="label">Sprint Timer</p>
+          <p id="sprintTimerCard" class="value">25:00</p>
+        </div>
+        <div>
+          <p class="label">Micro Timer</p>
+          <p id="microTimerCard" class="value">05:00</p>
+        </div>
+        <div>
+          <p class="label">Swap-3 Countdown</p>
+          <p id="swapTimerCard" class="value">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Controls</h2>
+      <!-- Pre element makes the JSON easy to read and copy -->
+      <pre id="controlsJson" class="code">Waiting for response…</pre>
+    </section>
+
+    <section class="card card--panel" id="chartCarouselSection">
+      <div class="card__title-row">
+        <h2 class="card__title">Chart Carousel</h2>
+        <div class="card__actions">
+          <button id="reinitButton" class="button button--ghost" type="button">🔄 Re-init</button>
+          <button id="nextChartButton" class="button button--compact" type="button">Next Step →</button>
+        </div>
+      </div>
+
+      <div id="chartCarousel" class="chart-carousel" aria-live="polite">
+        <div class="chart-card" id="chartCard">
+          <p class="label">Current Chart</p>
+          <p class="value">No charts loaded yet.</p>
+        </div>
+        <div class="chart-card__meta" id="chartMeta"></div>
+        <p id="fmcaAction" class="chart-card__action">FMCA action: —</p>
+      </div>
+
+      <details class="timeline-log" id="fmcaTimelinePanel">
+        <summary class="timeline-log__summary">FMCA Timeline (last 5)</summary>
+        <ul id="fmcaTimelineList" class="list list--timeline timeline-log__list">No FMCA events yet.</ul>
+      </details>
+
+      <p id="carouselStatus" class="status status--inline">Load a sprint to begin.</p>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Charts</h2>
+      <ul id="chartsList" class="list list--stacked">No charts yet.</ul>
+    </section>
+
+    <section class="card timeline-card">
+      <div class="timeline-card__heading">
+        <h2 class="card__title">Timeline</h2>
+        <p class="card__hint">Actions from FMCA will appear here after you start.</p>
+      </div>
+      <ul id="timelineList" class="list list--timeline">No steps yet.</ul>
+    </section>
+
+    <p id="statusMessage" class="status">Ready.</p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

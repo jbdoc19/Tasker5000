@@ -57,7 +57,8 @@ def run_fmca_loop(batch: List[ChartTask], mode_controls: Dict):
     for chart in batch:
         minutes_no_progress = 0
 
-        while chart.status == 'active':
+        # Charts can be freshly marked as in_progress when added to the batch.
+        while chart.status in ('active', 'in_progress'):
             if minutes_no_progress == 5:
                 timeline.append(micro_unstick(chart))
             elif minutes_no_progress == 12:
