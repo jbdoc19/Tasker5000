@@ -2,7 +2,7 @@ import math
 from typing import List
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
@@ -88,9 +88,9 @@ class ChartUpdateRequest(BaseModel):
 app = FastAPI()
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def read_root():
-    return """
+    html_content = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -197,6 +197,11 @@ def read_root():
 </body>
 </html>
 """
+    return Response(
+        content=html_content,
+        media_type="text/html",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+    )
 
 
 def calculate_etaH(payload: CapacityInput):
