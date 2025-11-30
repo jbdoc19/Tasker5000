@@ -1,0 +1,116 @@
+## Direct Answer
+
+**Friction-Minimizing Chart Algorithm (FMCA)** — a tiny, repeatable loop that prevents time blindness and stalls.
+
+**Timers**
+
+* Sprint = 25–30 min.
+* Micro-timer = 5 min “no progress” check.
+* Swap trigger = 15 min on a single chart without progress.
+
+**What counts as “progress”**: attestation signed, one section finished (HPI/PE/A&P), or a concrete decision logged (e.g., “Need labs → parked”).
+
+**State Machine**
+
+1. **Start** → Pull 8 batched charts (attest-only first). Begin Sprint timer and Micro-timer.
+2. **5-min no-progress?** Run **Micro-Unstick (60–90 sec)**:
+   a) Define finish line in one sentence.
+   b) Commit smallest step (dictate 2 sentences or tick 1 checklist item).
+   c) Resume; reset Micro-timer.
+3. **12-min still slow?** Run **Accelerator**:
+   a) Use template/snippet, or copy forward problem list.
+   b) If info missing, insert a TODO placeholder and proceed.
+   c) Reset Micro-timer.
+4. **15-min stuck?** **Swap-3 Protocol**:
+   a) **Park** current chart: add a one-line blocker note and a 3-item next-step checklist.
+   b) Pull **three attest-only** charts and finish all three back-to-back.
+   c) Return to the parked chart with a fresh **10-min cap**.
+5. **Still stuck after return?** **Escalate**: park it again, schedule a **20-min Deep Fix** block later (not now), and continue the batch.
+6. **Sprint end**: log wins, sip water, **2-min Reset** (stand, breathe, quick stretch), preload next batch of 8.
+
+**Hard rules**
+
+* Max **two mixed sprints** in a row; then do one easy sprint (attest-only).
+* **Same-day required** or **≥80 days old**: allow only one Swap-3 cycle before Escalate.
+* Daily cap = **4 sprints**. If energy remains, do a 15–20 min Lane B nibble only.
+
+---
+
+## Structured Algorithm (compact pseudocode ≤30 LOC)
+
+// FMCA core loop (pilot: manual timers)
+
+```
+SPRINT( batch[<=8] ):
+  set sprint_timer=25m; set micro_timer=5m
+  for chart in batch:
+    while not DONE(chart) and sprint_timer>0:
+      if micro_timer==0:
+        MICRO_UNSTICK(chart); micro_timer=5m
+      if AGE(chart)>=80d OR SAME_DAY_REQUIRED(chart):
+        swap_limit=1 else swap_limit=∞
+      if NO_PROGRESS(chart) for 12m: ACCELERATOR(chart)
+      if NO_PROGRESS(chart) for 15m:
+        if swap_count(chart) < swap_limit:
+          PARK(chart); COMPLETE_THREE_ATTEST_ONLY(); swap_count+=1; cap_next(chart,10m)
+        else:
+          PARK(chart); SCHEDULE_DEEP_FIX(chart,20m); BREAK
+      WORK_NEXT_ATOMIC_STEP(chart)
+  WIN_LOG(); RESET_2MIN(); PRELOAD_NEXT_BATCH()
+```
+
+Helper rules:
+
+* `DONE` = signed or all planned sections complete.
+* `NO_PROGRESS` = no section finished and no decision logged since last check.
+* `COMPLETE_THREE_ATTEST_ONLY` pulls top 3 easy charts from Lane A.
+
+---
+
+## ADHD-aligned design tweaks (keep it smooth)
+
+* **Start here:** set a 15-minute **Swap-3** alarm per chart during mixed sprints.
+* Pre-tag “attest-only” so Swap-3 is one tap, not a scavenger hunt.
+* Keep each batch **single-clinic/same-date** to reduce context switches.
+* Write the **one-line blocker** before you park any chart; future you will thank present you.
+* Force a **2-min Reset** between sprints to prevent silent burnout creep.
+
+---
+
+## Momentum & Micro-Wins
+
+* This turns “stuck” into a mechanical event, not a referendum on you.
+* Swap-3 converts stall energy into three quick completions and visible progress.
+* **Next atomic task (<2 min):** create a saved filter “Attest-Only Lane A” so Swap-3 is instant.
+
+---
+
+## Validation Checklist & Acceptance Tests
+
+**Checklist**
+
+1. Micro-timer (5 min) and Swap timer (15 min) visible during sprints.
+2. “Attest-Only Lane A” filter exists and returns ≥10 items.
+3. Parking a chart requires a blocker note + 3 next steps.
+4. After Swap-3, app returns you to the parked chart with a 10-min cap.
+5. Daily log shows: sprints run, swaps triggered, completions, and zero-progress intervals.
+
+**Acceptance tests**
+
+* Let a chart idle 15 min → three attest-only items appear and can be completed sequentially.
+* Mark an encounter as Same-Day Required → only one Swap-3 allowed before mandatory Escalate.
+* End a sprint → Win Log saved and next 8 are preloaded from the same clinic/date.
+
+---
+
+## Bullet Recap
+
+* Use 5-min Micro-Unstick, 12-min Accelerator, 15-min Swap-3.
+* Park with context (1-line blocker + 3 steps), then come back with a 10-min cap.
+* Limit mixed sprints; insert easy sprints; enforce 2-min Resets and a 4-sprint day.
+
+**Q1:** Do you want me to set the Swap-3 threshold at 12 minutes for craniofacial charts to be stricter?
+**Q2:** Should the Deep Fix blocks auto-bundle by clinic so you clear similar blockers together?
+**Q3:** For the Win Log, prefer a simple count (done/parked/swaps) or a tiny sparkline of completions by hour?
+
+✅ Implemented / 🔁 Skipped / ❓ Blocked
