@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from chart_state import seed_chart, get_all_charts, update_chart_state
+from chart_state import build_smart_batch, get_all_charts, seed_chart, update_chart_state
 from fmca_engine import ChartTask, run_fmca_loop
 
 
@@ -122,6 +122,7 @@ def calculate_etaH(payload: CapacityInput):
     etaH = Scommit * Sopen * payload.dplan * Sstart * Esustain * (1 - Ftask)
     mode = get_mode_band(etaH)
     controls = get_mode_controls(mode, payload.availability_hours)
+    controls["mode"] = mode
     return etaH, mode, controls
 
 
@@ -179,7 +180,7 @@ def build_stateful_batch():
 def compute_etaH_endpoint(input: CapacityInput):
     etaH, mode, controls = calculate_etaH(input)
 
-    batch = build_stateful_batch()
+    batch = build_smart_batch(controls)
     fmca_timeline = run_fmca_loop(batch, controls)
 
     for chart in batch:
@@ -189,6 +190,7 @@ def compute_etaH_endpoint(input: CapacityInput):
         "etaH": round(etaH, 3),
         "mode": mode,
         "controls": controls,
+        "selected_charts": [chart.__dict__ for chart in batch],
         "charts": [chart.__dict__ for chart in get_all_charts()],
         "timeline": fmca_timeline,
     }
