@@ -219,6 +219,47 @@ def update_chart_endpoint(update: ChartUpdateRequest):
     }
 
 
+@app.get("/lanes")
+def get_chart_lanes():
+    charts = get_all_charts()
+
+    lanes = {
+        "attest_only": [],
+        "deep_fix_queue": [],
+        "parked": [],
+        "same_day_required": [],
+        "high_friction": [],
+    }
+
+    for chart in charts:
+        chart_lanes = []
+
+        if chart.type == "attest" and chart.status == "active":
+            lanes["attest_only"].append(chart)
+            chart_lanes.append("attest_only")
+
+        if chart.status == "escalated":
+            lanes["deep_fix_queue"].append(chart)
+            chart_lanes.append("deep_fix_queue")
+
+        if chart.status == "parked":
+            lanes["parked"].append(chart)
+            chart_lanes.append("parked")
+
+        if chart.required_today and chart.status == "active":
+            lanes["same_day_required"].append(chart)
+            chart_lanes.append("same_day_required")
+
+        if chart.swap_count >= 2 or chart.age_days >= 90:
+            lanes["high_friction"].append(chart)
+            chart_lanes.append("high_friction")
+
+        if chart_lanes:
+            chart.lanes = chart_lanes
+
+    return {lane: [c.__dict__.copy() for c in lane_charts] for lane, lane_charts in lanes.items()}
+
+
 @app.post("/fmca_demo")
 def fmca_demo(request: FMCARequest):
     etaH, mode, controls = calculate_etaH(request.capacity)
