@@ -59,6 +59,7 @@ const deepFixCount = document.getElementById('deepFixCount');
 const parkedCount = document.getElementById('parkedCount');
 const sameDayCount = document.getElementById('sameDayCount');
 const controlsJson = document.getElementById('controlsJson');
+const lanesBoard = document.getElementById('lanesBoard');
 const chartsList = document.getElementById('chartsList');
 const timelineList = document.getElementById('timelineList');
 const statusMessage = document.getElementById('statusMessage');
@@ -101,7 +102,7 @@ async function handleStartSprint(event) {
   event?.preventDefault();
   startAllTimers(currentMode);
   await computeAndRender(getPayloadFromForm());
-  await fetchLaneCounts();
+  await fetchLaneData();
 }
 
 function attachInputListeners() {
@@ -166,15 +167,16 @@ function safeInteger(value, fallback) {
 
 startButton?.addEventListener('click', handleStartSprint);
 capacityForm?.addEventListener('submit', handleStartSprint);
-fetchLanesButton?.addEventListener('click', () => fetchLaneCounts());
+fetchLanesButton?.addEventListener('click', () => fetchLaneData());
 
 nextChartButton?.addEventListener('click', () => {
   handleNextChart();
 });
 
-reinitButton?.addEventListener('click', () => {
+reinitButton?.addEventListener('click', async () => {
   statusMessage.textContent = 'Re-initializing sprint...';
-  computeAndRender(lastRequestPayload);
+  await computeAndRender(lastRequestPayload);
+  await fetchLaneData();
 });
 
 chartControlButtons?.forEach((button) => {
@@ -186,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
   attachInputListeners();
   syncTimerDisplays();
   computeAndRender(getPayloadFromForm());
-  fetchLaneCounts();
+  fetchLaneData();
 });
 
 function syncTimerDisplays() {
@@ -352,12 +354,17 @@ function updateEtaDisplay(eta) {
 }
 
 function updateLaneBadges(lanes) {
-  const counts = lanes || {};
+  const counts = {
+    attest_only: getLaneCount(lanes, 'attest_only', 'attestOnly'),
+    deep_fix_queue: getLaneCount(lanes, 'deep_fix_queue', 'deepFix'),
+    parked: getLaneCount(lanes, 'parked'),
+    same_day_required: getLaneCount(lanes, 'same_day_required', 'sameDayRequired'),
+  };
 
-  setBadgeText(attestCount, 'Attest-Only', counts.attest_only ?? counts.attestOnly);
-  setBadgeText(deepFixCount, 'Deep Fix', counts.deep_fix ?? counts.deepFix);
+  setBadgeText(attestCount, 'Attest-Only', counts.attest_only);
+  setBadgeText(deepFixCount, 'Deep Fix', counts.deep_fix_queue);
   setBadgeText(parkedCount, 'Parked', counts.parked);
-  setBadgeText(sameDayCount, 'Same-Day Required', counts.same_day_required ?? counts.sameDayRequired);
+  setBadgeText(sameDayCount, 'Same-Day Required', counts.same_day_required);
 }
 
 function setBadgeText(element, label, value) {
@@ -366,7 +373,133 @@ function setBadgeText(element, label, value) {
   element.textContent = `${label}: ${displayValue}`;
 }
 
-async function fetchLaneCounts() {
+function getLaneCount(data, key, altKey) {
+  const value = data?.[key] ?? (altKey ? data?.[altKey] : undefined);
+  if (Array.isArray(value)) return value.length;
+  if (typeof value === 'number') return value;
+  return null;
+}
+
+function formatLaneLabel(label) {
+  if (!label) return 'Unknown lane';
+  return label
+    .toString()
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function buildMetaPill(label, extraClasses = []) {
+  const pill = document.createElement('span');
+  pill.classList.add('chart-card__pill', ...extraClasses);
+  pill.textContent = label;
+  return pill;
+}
+
+function buildChartCard(chart, laneLabel = '') {
+  const chartId = chart?.chart_id ?? chart?.id ?? 'Unknown chart';
+  const status = formatActionLabel(chart?.status ?? 'unknown');
+  const age = chart?.age_days ?? chart?.ageDays ?? '—';
+  const requiredToday = chart?.required_today ?? chart?.requiredToday ?? false;
+  const lanes = Array.isArray(chart?.lanes) ? chart.lanes : laneLabel ? [laneLabel] : [];
+
+  const card = document.createElement('div');
+  card.classList.add('chart-card');
+
+  const header = document.createElement('div');
+  header.classList.add('chart-card__header');
+
+  const idSpan = document.createElement('span');
+  idSpan.classList.add('chart-card__id');
+  idSpan.textContent = chartId;
+
+  const statusPill = buildMetaPill(status, ['pill--muted']);
+
+  header.appendChild(idSpan);
+  header.appendChild(statusPill);
+  card.appendChild(header);
+
+  const meta = document.createElement('div');
+  meta.classList.add('chart-card__meta');
+
+  const laneLabelText = lanes.length ? lanes.map(formatLaneLabel).join(', ') : 'None';
+  meta.appendChild(buildMetaPill(`Lane: ${laneLabelText}`));
+  meta.appendChild(buildMetaPill(`Age: ${age} days`));
+
+  const requiredClass = requiredToday ? ['pill--accent'] : ['pill--muted'];
+  meta.appendChild(buildMetaPill(`Today: ${requiredToday ? 'Yes' : 'No'}`, requiredClass));
+
+  card.appendChild(meta);
+
+  return card;
+}
+
+function getActionHighlightClass(action) {
+  const normalized = (action || '').toString().toLowerCase();
+
+  if (normalized === 'micro_unstick') return 'pill--warning';
+  if (normalized === 'accelerator') return 'pill--success';
+  if (normalized === 'swap_3') return 'pill--accent';
+  if (normalized === 'escalate' || normalized === 'escalated') return 'pill--danger';
+  return null;
+}
+
+function createActionBadge(action) {
+  const badge = document.createElement('span');
+  badge.classList.add('chart-card__pill');
+  badge.textContent = formatActionLabel(action ?? 'Action');
+
+  const highlight = getActionHighlightClass(action);
+  if (highlight) {
+    badge.classList.add(highlight);
+  }
+
+  return badge;
+}
+
+function renderLaneSections(lanes) {
+  if (!lanesBoard) return;
+
+  lanesBoard.innerHTML = '';
+  const laneEntries = lanes && typeof lanes === 'object' ? Object.entries(lanes) : [];
+
+  if (!laneEntries.length) {
+    lanesBoard.textContent = 'No lane data available yet.';
+    return;
+  }
+
+  laneEntries.forEach(([laneKey, charts]) => {
+    const laneBlock = document.createElement('details');
+    laneBlock.classList.add('timeline-log');
+    laneBlock.open = true;
+
+    const summary = document.createElement('summary');
+    summary.classList.add('timeline-log__summary');
+    const chartCount = Array.isArray(charts) ? charts.length : 0;
+    summary.textContent = `${formatLaneLabel(laneKey)} (${chartCount})`;
+
+    const laneList = document.createElement('div');
+    laneList.classList.add('list', 'list--stacked', 'timeline-log__list');
+
+    if (Array.isArray(charts) && charts.length) {
+      charts.forEach((chart) => {
+        const card = buildChartCard(chart, formatLaneLabel(laneKey));
+        laneList.appendChild(card);
+      });
+    } else {
+      const emptyState = document.createElement('p');
+      emptyState.classList.add('status', 'status--inline');
+      emptyState.textContent = 'No charts in this lane yet.';
+      laneList.appendChild(emptyState);
+    }
+
+    laneBlock.appendChild(summary);
+    laneBlock.appendChild(laneList);
+    lanesBoard.appendChild(laneBlock);
+  });
+}
+
+async function fetchLaneData() {
   statusMessage.textContent = 'Refreshing lane counts...';
 
   try {
@@ -378,7 +511,8 @@ async function fetchLaneCounts() {
 
     const data = await response.json();
     updateLaneBadges(data);
-    statusMessage.textContent = 'Lane counts updated.';
+    renderLaneSections(data);
+    statusMessage.textContent = 'Lane boards updated.';
   } catch (error) {
     statusMessage.textContent = `Lane fetch error: ${error.message}`;
   }
@@ -390,48 +524,16 @@ function renderCharts(charts) {
   if (Array.isArray(charts) && charts.length) {
     charts.forEach((chart, index) => {
       const li = document.createElement('li');
-      const chartId = chart.chart_id ?? chart.id ?? `chart-${index + 1}`;
-      const status = (chart.status ?? 'unknown').toString();
-      const swaps = chart.swap_count ?? chart.swaps ?? '—';
+      const card = buildChartCard(chart);
+      const swaps = chart.swap_count ?? chart.swaps;
 
-      li.classList.add('chart-item');
-
-      const statusBadge = document.createElement('span');
-      statusBadge.classList.add('chart-item__status');
-
-      const normalizedStatus = status.toLowerCase();
-
-      if (normalizedStatus === 'parked') {
-        li.classList.add('chart-item--parked');
-        statusBadge.classList.add('chart-item__status--muted');
-        statusBadge.textContent = 'Parked';
-      } else if (normalizedStatus === 'escalated') {
-        statusBadge.classList.add('chart-item__status--escalated');
-        statusBadge.textContent = 'Escalated';
-      } else if (normalizedStatus === 'resolved') {
-        statusBadge.classList.add('chart-item__status--resolved');
-        statusBadge.textContent = 'Resolved ✓';
-      } else {
-        statusBadge.textContent = status;
+      if (swaps !== undefined) {
+        const swapPill = buildMetaPill(`Swaps: ${swaps}`, ['pill--muted']);
+        const meta = card.querySelector('.chart-card__meta');
+        if (meta) meta.appendChild(swapPill);
       }
 
-      const row = document.createElement('div');
-      row.classList.add('chart-item__row');
-
-      const idLabel = document.createElement('span');
-      idLabel.classList.add('chart-item__id');
-      idLabel.textContent = chartId;
-
-      row.appendChild(idLabel);
-      row.appendChild(statusBadge);
-
-      const swapLabel = document.createElement('p');
-      swapLabel.classList.add('chart-item__meta');
-      swapLabel.textContent = `Swaps: ${swaps}`;
-
-      li.appendChild(row);
-      li.appendChild(swapLabel);
-
+      li.appendChild(card);
       chartsList.appendChild(li);
     });
   } else {
@@ -440,6 +542,7 @@ function renderCharts(charts) {
 }
 
 function renderTimeline(timeline) {
+  if (!timelineList) return;
   timelineList.innerHTML = '';
   currentTimeline = Array.isArray(timeline) ? [...timeline] : [];
 
@@ -450,22 +553,48 @@ function renderTimeline(timeline) {
 
   currentTimeline.forEach((step, index) => {
     const li = document.createElement('li');
-    li.classList.add('timeline-item');
+    li.classList.add('chart-card');
+
+    const header = document.createElement('div');
+    header.classList.add('chart-card__header');
 
     const actionLabel = step.action ?? `Step ${index + 1}`;
-    const message = step.message && step.message !== actionLabel ? `: ${step.message}` : '';
-    const chartRef = step.chart_id ? ` (chart ${step.chart_id})` : '';
-    const userNote = step.user_state ? ` — ${step.user_state}` : '';
+    const actionBadge = createActionBadge(actionLabel);
+    header.appendChild(actionBadge);
 
-    const text = document.createElement('p');
-    text.classList.add('timeline-item__text');
-    text.textContent = `${actionLabel}${chartRef}${message}${userNote}`;
+    if (step.chart_id) {
+      header.appendChild(buildMetaPill(`Chart: ${step.chart_id}`, ['pill--muted']));
+    }
 
-    li.appendChild(text);
+    li.appendChild(header);
+
+    const meta = document.createElement('div');
+    meta.classList.add('chart-card__meta');
+
+    if (step.message) {
+      meta.appendChild(buildMetaPill(step.message));
+    }
+
+    if (step.user_state) {
+      meta.appendChild(buildMetaPill(step.user_state, ['pill--muted']));
+    }
+
+    if (meta.children.length) {
+      li.appendChild(meta);
+    }
+
+    const details = document.createElement('p');
+    details.classList.add('chart-card__action');
+    const fallback = step.note || step.description || '';
+    details.textContent = fallback || formatActionLabel(actionLabel);
+    li.appendChild(details);
 
     const actionButton = buildActionButton(step, index);
     if (actionButton) {
-      li.appendChild(actionButton);
+      const controlBar = document.createElement('div');
+      controlBar.classList.add('chart-controls');
+      controlBar.appendChild(actionButton);
+      li.appendChild(controlBar);
     }
 
     timelineList.appendChild(li);
@@ -485,15 +614,19 @@ function renderFmcaTimeline(timeline) {
 
   steps.forEach((step, index) => {
     const li = document.createElement('li');
-    li.classList.add('timeline-item');
+    li.classList.add('chart-card');
+
+    const header = document.createElement('div');
+    header.classList.add('chart-card__header');
 
     const actionLabel = step.action ?? `Event ${index + 1}`;
-    const chartId = step.chart_id ? ` • Chart ${step.chart_id}` : '';
-    const text = document.createElement('p');
-    text.classList.add('timeline-item__text');
-    text.textContent = `${actionLabel}${chartId}`;
+    header.appendChild(createActionBadge(actionLabel));
 
-    li.appendChild(text);
+    if (step.chart_id) {
+      header.appendChild(buildMetaPill(`Chart: ${step.chart_id}`, ['pill--muted']));
+    }
+
+    li.appendChild(header);
     fmcaTimelineList.appendChild(li);
   });
 
@@ -721,7 +854,7 @@ async function triggerChartUpdate(chartId, updatePayload, index) {
 
     await response.json();
     await computeAndRender(lastRequestPayload);
-    await fetchLaneCounts();
+    await fetchLaneData();
   } catch (error) {
     statusMessage.textContent = `Error updating chart: ${error.message}`;
   }
