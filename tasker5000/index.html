@@ -83,6 +83,32 @@
       <pre id="controlsJson" class="code">Waiting for response…</pre>
     </section>
 
+    <section class="card card--panel" id="chartCarouselSection">
+      <div class="card__title-row">
+        <h2 class="card__title">Chart Carousel</h2>
+        <div class="card__actions">
+          <button id="reinitButton" class="button button--ghost" type="button">🔄 Re-init</button>
+          <button id="nextChartButton" class="button button--compact" type="button">Next Step →</button>
+        </div>
+      </div>
+
+      <div id="chartCarousel" class="chart-carousel" aria-live="polite">
+        <div class="chart-card" id="chartCard">
+          <p class="label">Current Chart</p>
+          <p class="value">No charts loaded yet.</p>
+        </div>
+        <div class="chart-card__meta" id="chartMeta"></div>
+        <p id="fmcaAction" class="chart-card__action">FMCA action: —</p>
+      </div>
+
+      <details class="timeline-log" id="fmcaTimelinePanel">
+        <summary class="timeline-log__summary">FMCA Timeline (last 5)</summary>
+        <ul id="fmcaTimelineList" class="list list--timeline timeline-log__list">No FMCA events yet.</ul>
+      </details>
+
+      <p id="carouselStatus" class="status status--inline">Load a sprint to begin.</p>
+    </section>
+
     <section class="card">
       <h2 class="card__title">Charts</h2>
       <ul id="chartsList" class="list list--stacked">No charts yet.</ul>
