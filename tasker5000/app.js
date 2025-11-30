@@ -27,6 +27,8 @@ const chartsList = document.getElementById('chartsList');
 const timelineList = document.getElementById('timelineList');
 const statusMessage = document.getElementById('statusMessage');
 
+let currentTimeline = [];
+
 startButton.addEventListener('click', async () => {
   statusMessage.textContent = 'Sending request...';
   startButton.disabled = true;
@@ -60,33 +62,112 @@ function renderResponse(data) {
   // Pretty-print controls
   controlsJson.textContent = JSON.stringify(data.controls ?? {}, null, 2);
 
-  // Render charts list
+  renderCharts(data.charts);
+  renderTimeline(data.timeline);
+}
+
+function renderCharts(charts) {
   chartsList.innerHTML = '';
-  if (Array.isArray(data.charts) && data.charts.length) {
-    data.charts.forEach((chart, index) => {
+
+  if (Array.isArray(charts) && charts.length) {
+    charts.forEach((chart, index) => {
       const li = document.createElement('li');
       const chartId = chart.chart_id ?? chart.id ?? `chart-${index + 1}`;
-      const status = chart.status ?? 'unknown';
+      const status = (chart.status ?? 'unknown').toString();
       const swaps = chart.swap_count ?? chart.swaps ?? '—';
-      li.textContent = `${chartId} — status: ${status}, swaps: ${swaps}`;
+
+      li.classList.add('chart-item');
+
+      // This class makes it easy to customize parked styling later.
+      if (status.toLowerCase() === 'parked') {
+        li.classList.add('chart-item--parked');
+      }
+
+      li.innerHTML = `
+        <div class="chart-item__row">
+          <span class="chart-item__id">${chartId}</span>
+          <span class="chart-item__status">${status}</span>
+        </div>
+        <p class="chart-item__meta">Swaps: ${swaps}</p>
+      `;
+
       chartsList.appendChild(li);
     });
   } else {
     chartsList.textContent = 'No charts returned yet.';
   }
+}
 
-  // Render timeline as bullet points
+function renderTimeline(timeline) {
   timelineList.innerHTML = '';
-  if (Array.isArray(data.timeline) && data.timeline.length) {
-    data.timeline.forEach((step, index) => {
-      const li = document.createElement('li');
-      const action = step.action ?? step.message ?? `Step ${index + 1}`;
-      const message = step.message && step.message !== action ? `: ${step.message}` : '';
-      const chartRef = step.chart_id ? ` (chart ${step.chart_id})` : '';
-      li.textContent = `${action}${chartRef}${message}`;
-      timelineList.appendChild(li);
-    });
-  } else {
+  currentTimeline = Array.isArray(timeline) ? [...timeline] : [];
+
+  if (currentTimeline.length === 0) {
     timelineList.textContent = 'No timeline steps yet.';
+    return;
   }
+
+  currentTimeline.forEach((step, index) => {
+    const li = document.createElement('li');
+    li.classList.add('timeline-item');
+
+    const actionLabel = step.action ?? `Step ${index + 1}`;
+    const message = step.message && step.message !== actionLabel ? `: ${step.message}` : '';
+    const chartRef = step.chart_id ? ` (chart ${step.chart_id})` : '';
+    const userNote = step.user_state ? ` — ${step.user_state}` : '';
+
+    const text = document.createElement('p');
+    text.classList.add('timeline-item__text');
+    text.textContent = `${actionLabel}${chartRef}${message}${userNote}`;
+
+    li.appendChild(text);
+
+    const actionButton = buildActionButton(step.action, index);
+    if (actionButton) {
+      li.appendChild(actionButton);
+    }
+
+    timelineList.appendChild(li);
+  });
+}
+
+function buildActionButton(actionName, index) {
+  if (!actionName) return null;
+
+  const normalized = actionName.toLowerCase();
+  let label = '';
+  let nextState = '';
+
+  if (normalized === 'working') {
+    label = 'Park';
+    nextState = 'user parked';
+  } else if (normalized === 'swap_3') {
+    label = 'Escalate';
+    nextState = 'manual escalate';
+  } else if (normalized === 'micro_unstick' || normalized === 'accelerator') {
+    label = 'Resolve';
+    nextState = 'user resolved';
+  }
+
+  if (!label) return null;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.classList.add('pill-button');
+  button.textContent = label;
+
+  // To customize button behavior later, adjust the update string below
+  // or swap the handler for your own implementation.
+  button.addEventListener('click', () => updateTimelineItem(index, nextState));
+
+  return button;
+}
+
+function updateTimelineItem(index, note) {
+  const step = currentTimeline[index];
+  if (!step) return;
+
+  // Store the user-driven note so future renders preserve the change.
+  step.user_state = note;
+  renderTimeline(currentTimeline);
 }

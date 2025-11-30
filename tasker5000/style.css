@@ -107,6 +107,88 @@ body {
   padding: 0.75rem;
 }
 
+.list--stacked li + li {
+  margin-top: 0.25rem;
+}
+
+.list--timeline {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.timeline-card__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.card__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.timeline-item__text {
+  margin: 0;
+  flex: 1;
+}
+
+.pill-button {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(124, 58, 237, 0.1);
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.pill-button:hover {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.chart-item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.chart-item__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-item__id {
+  font-weight: 700;
+}
+
+.chart-item__status {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.chart-item__meta {
+  margin: 0;
+  color: var(--muted);
+}
+
+.chart-item--parked {
+  border-color: rgba(244, 114, 182, 0.5);
+  box-shadow: 0 0 0 1px rgba(244, 114, 182, 0.25);
+  background: rgba(244, 114, 182, 0.1);
+}
+
 .code {
   margin: 0;
   padding: 0.75rem;
