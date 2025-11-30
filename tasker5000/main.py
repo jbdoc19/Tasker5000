@@ -5,6 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+from chart_state import seed_chart, get_all_charts, update_chart_state
 from fmca_engine import ChartTask, run_fmca_loop
 
 
@@ -118,16 +119,23 @@ def calculate_etaH(payload: CapacityInput):
 
 
 def build_chart_batch(chart_inputs: List[ChartInput]):
-    return [
-        ChartTask(
-            id=chart.id,
-            type=chart.type,
-            age_days=chart.age_days,
-            required_today=chart.required_today,
-            swap_count=chart.swap_count,
+    batch = []
+    for chart in chart_inputs:
+        seeded_chart = seed_chart(
+            ChartTask(
+                id=chart.id,
+                type=chart.type,
+                age_days=chart.age_days,
+                required_today=chart.required_today,
+                swap_count=chart.swap_count,
+            )
         )
-        for chart in chart_inputs
-    ]
+        seeded_chart.type = chart.type
+        seeded_chart.age_days = chart.age_days
+        seeded_chart.required_today = chart.required_today
+        seeded_chart.swap_count = max(seeded_chart.swap_count, chart.swap_count)
+        batch.append(seeded_chart)
+    return batch
 
 
 def default_chart_inputs():
@@ -138,14 +146,44 @@ def default_chart_inputs():
     ]
 
 
+# Chart seeding
+seed_chart(ChartTask(id="chart1", type="full", age_days=10, required_today=False))
+seed_chart(ChartTask(id="chart2", type="attest", age_days=85, required_today=True))
+seed_chart(ChartTask(id="chart3", type="attest", age_days=5, required_today=False))
+seed_chart(ChartTask(id="chart4", type="full", age_days=90, required_today=True))
+seed_chart(ChartTask(id="chart5", type="full", age_days=15, required_today=False))
+seed_chart(ChartTask(id="chart6", type="attest", age_days=3, required_today=False))
+
+
+def build_stateful_batch():
+    batch = []
+    for chart in get_all_charts():
+        if chart.status == "parked":
+            if chart.required_today or chart.age_days >= 80:
+                chart.status = "active"
+                chart.parked = False
+            else:
+                continue
+        batch.append(chart)
+    return batch
+
+
 @app.post("/compute_etaH")
 def compute_etaH_endpoint(input: CapacityInput):
     etaH, mode, controls = calculate_etaH(input)
 
+    batch = build_stateful_batch()
+    fmca_timeline = run_fmca_loop(batch, controls)
+
+    for chart in batch:
+        update_chart_state(chart)
+
     return {
         "etaH": round(etaH, 3),
         "mode": mode,
-        "controls": controls
+        "controls": controls,
+        "charts": [chart.__dict__ for chart in get_all_charts()],
+        "timeline": fmca_timeline,
     }
 
 
@@ -156,6 +194,9 @@ def fmca_demo(request: FMCARequest):
 
     chart_batch = build_chart_batch(charts)
     fmca_timeline = run_fmca_loop(chart_batch, controls)
+
+    for chart in chart_batch:
+        update_chart_state(chart)
 
     return {
         "etaH": round(etaH, 3),
