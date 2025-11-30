@@ -142,6 +142,14 @@
       <pre id="controlsJson" class="code">Waiting for response…</pre>
     </section>
 
+    <section class="card card--panel" id="lanes">
+      <div class="card__title-row">
+        <h2 class="card__title">Lane boards</h2>
+        <p class="card__hint">Charts grouped by FMCA lane assignments.</p>
+      </div>
+      <div id="lanesBoard" class="list list--stacked">Loading lanes…</div>
+    </section>
+
     <section class="card card--panel" id="chartCarouselSection">
       <div class="card__title-row">
         <h2 class="card__title">Chart Carousel</h2>
@@ -186,7 +194,10 @@
         <h2 class="card__title">Sprint Timeline</h2>
         <p class="card__hint">Actions from FMCA will appear here after you start.</p>
       </div>
-      <ul id="timelineList" class="list list--timeline">No steps yet.</ul>
+      <div class="timeline-log">
+        <p class="timeline-log__summary">Full FMCA action log</p>
+        <ul id="timelineList" class="list list--timeline timeline-log__list">No steps yet.</ul>
+      </div>
     </section>
 
     <p id="statusMessage" class="status">Ready.</p>
