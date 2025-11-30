@@ -17,7 +17,9 @@ const samplePayload = {
   availability_hours: 6,
 };
 
-const apiUrl = 'http://localhost:3000/compute_etaH';
+const apiBase = 'http://localhost:3000';
+const apiUrl = `${apiBase}/compute_etaH`;
+const updateUrl = `${apiBase}/update_chart`;
 
 const startButton = document.getElementById('startButton');
 const modeValue = document.getElementById('modeValue');
@@ -28,16 +30,22 @@ const timelineList = document.getElementById('timelineList');
 const statusMessage = document.getElementById('statusMessage');
 
 let currentTimeline = [];
+let lastRequestPayload = { ...samplePayload };
 
-startButton.addEventListener('click', async () => {
+startButton.addEventListener('click', () => {
+  computeAndRender(samplePayload);
+});
+
+async function computeAndRender(payload) {
   statusMessage.textContent = 'Sending request...';
   startButton.disabled = true;
+  lastRequestPayload = { ...payload };
 
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(samplePayload),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -52,7 +60,7 @@ startButton.addEventListener('click', async () => {
   } finally {
     startButton.disabled = false;
   }
-});
+}
 
 function renderResponse(data) {
   // Update simple values
@@ -78,18 +86,41 @@ function renderCharts(charts) {
 
       li.classList.add('chart-item');
 
-      // This class makes it easy to customize parked styling later.
-      if (status.toLowerCase() === 'parked') {
+      const statusBadge = document.createElement('span');
+      statusBadge.classList.add('chart-item__status');
+
+      const normalizedStatus = status.toLowerCase();
+
+      if (normalizedStatus === 'parked') {
         li.classList.add('chart-item--parked');
+        statusBadge.classList.add('chart-item__status--muted');
+        statusBadge.textContent = 'Parked';
+      } else if (normalizedStatus === 'escalated') {
+        statusBadge.classList.add('chart-item__status--escalated');
+        statusBadge.textContent = 'Escalated';
+      } else if (normalizedStatus === 'resolved') {
+        statusBadge.classList.add('chart-item__status--resolved');
+        statusBadge.textContent = 'Resolved ✓';
+      } else {
+        statusBadge.textContent = status;
       }
 
-      li.innerHTML = `
-        <div class="chart-item__row">
-          <span class="chart-item__id">${chartId}</span>
-          <span class="chart-item__status">${status}</span>
-        </div>
-        <p class="chart-item__meta">Swaps: ${swaps}</p>
-      `;
+      const row = document.createElement('div');
+      row.classList.add('chart-item__row');
+
+      const idLabel = document.createElement('span');
+      idLabel.classList.add('chart-item__id');
+      idLabel.textContent = chartId;
+
+      row.appendChild(idLabel);
+      row.appendChild(statusBadge);
+
+      const swapLabel = document.createElement('p');
+      swapLabel.classList.add('chart-item__meta');
+      swapLabel.textContent = `Swaps: ${swaps}`;
+
+      li.appendChild(row);
+      li.appendChild(swapLabel);
 
       chartsList.appendChild(li);
     });
@@ -122,7 +153,7 @@ function renderTimeline(timeline) {
 
     li.appendChild(text);
 
-    const actionButton = buildActionButton(step.action, index);
+    const actionButton = buildActionButton(step, index);
     if (actionButton) {
       li.appendChild(actionButton);
     }
@@ -131,43 +162,71 @@ function renderTimeline(timeline) {
   });
 }
 
-function buildActionButton(actionName, index) {
-  if (!actionName) return null;
+function buildActionButton(step, index) {
+  if (!step || !step.action) return null;
 
-  const normalized = actionName.toLowerCase();
+  const normalized = step.action.toLowerCase();
   let label = '';
-  let nextState = '';
+  let nextPayload = null;
 
   if (normalized === 'working') {
     label = 'Park';
-    nextState = 'user parked';
+    nextPayload = {
+      status: 'parked',
+      blocker_note: 'Parked by user',
+      next_steps: ['Step 1', 'Step 2', 'Step 3'],
+    };
   } else if (normalized === 'swap_3') {
     label = 'Escalate';
-    nextState = 'manual escalate';
+    nextPayload = {
+      status: 'escalated',
+      blocker_note: 'Escalated by user',
+    };
   } else if (normalized === 'micro_unstick' || normalized === 'accelerator') {
     label = 'Resolve';
-    nextState = 'user resolved';
+    nextPayload = {
+      status: 'resolved',
+    };
   }
 
-  if (!label) return null;
+  if (!label || !nextPayload) return null;
 
   const button = document.createElement('button');
   button.type = 'button';
   button.classList.add('pill-button');
   button.textContent = label;
 
-  // To customize button behavior later, adjust the update string below
-  // or swap the handler for your own implementation.
-  button.addEventListener('click', () => updateTimelineItem(index, nextState));
+  button.addEventListener('click', () => {
+    const chartId = step.chart_id || 'chart1';
+    triggerChartUpdate(chartId, nextPayload, index);
+  });
 
   return button;
 }
 
-function updateTimelineItem(index, note) {
+async function triggerChartUpdate(chartId, updatePayload, index) {
   const step = currentTimeline[index];
-  if (!step) return;
+  if (step) {
+    step.user_state = updatePayload.blocker_note || updatePayload.status;
+    renderTimeline(currentTimeline);
+  }
 
-  // Store the user-driven note so future renders preserve the change.
-  step.user_state = note;
-  renderTimeline(currentTimeline);
+  statusMessage.textContent = 'Updating chart state...';
+
+  try {
+    const response = await fetch(updateUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chart_id: chartId, ...updatePayload }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Update failed: ${response.status}`);
+    }
+
+    await response.json();
+    await computeAndRender(lastRequestPayload);
+  } catch (error) {
+    statusMessage.textContent = `Error updating chart: ${error.message}`;
+  }
 }

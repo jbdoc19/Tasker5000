@@ -2,7 +2,7 @@ import math
 from typing import List
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from chart_state import seed_chart, get_all_charts, update_chart_state
@@ -75,6 +75,13 @@ class ChartInput(BaseModel):
 class FMCARequest(BaseModel):
     capacity: CapacityInput
     charts: List[ChartInput] = Field(default_factory=list)
+
+
+class ChartUpdateRequest(BaseModel):
+    chart_id: str
+    status: str
+    blocker_note: str | None = None
+    next_steps: List[str] | None = None
 
 
 app = FastAPI()
@@ -184,6 +191,29 @@ def compute_etaH_endpoint(input: CapacityInput):
         "controls": controls,
         "charts": [chart.__dict__ for chart in get_all_charts()],
         "timeline": fmca_timeline,
+    }
+
+
+@app.post("/update_chart")
+def update_chart_endpoint(update: ChartUpdateRequest):
+    chart = next((c for c in get_all_charts() if c.id == update.chart_id), None)
+
+    if chart is None:
+        raise HTTPException(status_code=404, detail="Chart not found")
+
+    chart.status = update.status
+    chart.blocker_note = update.blocker_note or ""
+    if update.next_steps is not None:
+        chart.next_steps = update.next_steps
+
+    chart.parked = chart.status == "parked"
+
+    update_chart_state(chart)
+
+    return {
+        "message": "Chart updated successfully",
+        "chart": chart.__dict__,
+        "charts": [c.__dict__ for c in get_all_charts()],
     }
 
 
