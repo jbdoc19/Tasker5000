@@ -48,3 +48,32 @@ Hybrid Execution — Sprint 0
 - `micro_unstick()`, `accelerator()`, `swap_3()`, `escalate()`: action handlers
 ✅ Next: bind with `etaH` output to select correct mode threshold
 
+
+Sprint 2
+
+Connect /compute_etaH output to run_fmca_loop()
+
+Accept live state input + batch → return FMCA execution plan
+
+Deploy that as /start_fmca_session POST endpoint
+
+You’ll hit it like:
+
+POST /start_fmca_session
+{
+  "capacity_input": { ... },
+  "chart_batch": [ { id, type, age_days, required_today }, ... ]
+}
+
+SPRINT 3 — State Memory + Parked Chart Queue
+🎯 Objective:
+
+Persist decisions across sessions.
+This means charts that were Parked or Escalated stay remembered — so next time you hit /compute_etaH, they’re:
+
+Excluded from top-priority batch (unless forced by age)
+
+Tracked for how many times they’ve been swapped
+
+Eventually escalated if they keep stalling
+
