@@ -467,6 +467,21 @@ main.page {
   gap: 0.25rem;
 }
 
+.chart-card--parked {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.chart-card--escalated {
+  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.chart-card--resolved {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.12);
+}
+
 .chart-card__header {
   display: flex;
   align-items: center;

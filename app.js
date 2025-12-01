@@ -27,6 +27,14 @@ const chartBatch = document.getElementById('chart-batch');
 const timelineList = document.getElementById('timelineList');
 const statusMessage = document.getElementById('statusMessage');
 
+const chartStatusMap = new Map();
+
+const STATUS_CLASSES = [
+  'chart-card--parked',
+  'chart-card--escalated',
+  'chart-card--resolved',
+];
+
 startButton.addEventListener('click', async () => {
   statusMessage.textContent = 'Sending request...';
   startButton.disabled = true;
@@ -95,9 +103,12 @@ function renderCharts(charts) {
 
     const chartId = chart.chart_id ?? chart.id ?? `chart-${index + 1}`;
     const type = chart.type ?? 'unknown';
-    const status = chart.status ?? 'unknown';
+    const status = chartStatusMap.get(chartId) ?? chart.status ?? 'unknown';
     const ageDays = chart.age_days ?? chart.age ?? null;
     const requiredToday = chart.required_today ?? chart.requiredToday;
+
+    chartStatusMap.set(chartId, status);
+    card.dataset.chartId = chartId;
 
     const title = document.createElement('h4');
     title.textContent = `Chart ID: ${chartId}`;
@@ -109,6 +120,7 @@ function renderCharts(charts) {
     typeEl.textContent = `Type: ${type}`;
 
     const statusEl = document.createElement('span');
+    statusEl.className = 'chart-card__pill status-text';
     statusEl.textContent = `Status: ${status}`;
 
     meta.append(typeEl, statusEl);
@@ -144,5 +156,34 @@ function renderCharts(charts) {
 
     card.append(title, meta, actions);
     chartBatch.appendChild(card);
+
+    applyStatusToCard(card, statusEl, chartId, status);
+
+    parkBtn.addEventListener('click', () => applyStatusToCard(card, statusEl, chartId, 'parked'));
+    escalateBtn.addEventListener('click', () =>
+      applyStatusToCard(card, statusEl, chartId, 'escalated')
+    );
+    resolveBtn.addEventListener('click', () => applyStatusToCard(card, statusEl, chartId, 'resolved'));
   });
+}
+
+function applyStatusToCard(card, statusEl, chartId, newStatus) {
+  chartStatusMap.set(chartId, newStatus);
+  if (statusEl) {
+    statusEl.textContent = `Status: ${newStatus}`;
+  }
+
+  STATUS_CLASSES.forEach((className) => card.classList.remove(className));
+  const statusClass = `chart-card--${newStatus}`;
+
+  if (newStatus === 'resolved') {
+    card.classList.add(statusClass);
+    chartStatusMap.delete(chartId);
+    card.remove();
+    return;
+  }
+
+  if (STATUS_CLASSES.includes(statusClass)) {
+    card.classList.add(statusClass);
+  }
 }
