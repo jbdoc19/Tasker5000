@@ -1,7 +1,6 @@
 import math
 from typing import List
 
-import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -105,6 +104,18 @@ def read_root():
     return FileResponse(BASE_DIR / "index.html")
 
 
+@app.post("/add_chart")
+async def add_chart(chart: ChartInput):
+    new_chart = ChartTask(
+        id=chart.id,
+        type=chart.type,
+        age_days=chart.age_days,
+        required_today=chart.required_today,
+    )
+    seed_chart(new_chart)
+    return {"success": True, "chart": new_chart.__dict__}
+
+
 def calculate_etaH(payload: CapacityInput):
     Esustain = payload.R_phys * payload.R_ment
     Bbacklog = min(1, payload.L / 80)
@@ -189,8 +200,7 @@ def build_stateful_batch():
     return batch
 
 
-@app.post("/compute_etaH")
-def compute_etaH_endpoint(input: CapacityInput):
+def compute_etaH(input: CapacityInput):
     etaH, mode, controls = calculate_etaH(input)
 
     batch = build_smart_batch(controls)
@@ -207,6 +217,11 @@ def compute_etaH_endpoint(input: CapacityInput):
         "charts": [chart.__dict__ for chart in get_all_charts()],
         "timeline": fmca_timeline,
     }
+
+
+@app.post("/compute_etaH")
+def compute_etaH_endpoint(input: CapacityInput):
+    return compute_etaH(input)
 
 
 @app.post("/update_chart")
@@ -336,4 +351,6 @@ def fmca_demo(request: FMCARequest):
 
 
 if __name__ == "__main__":
+    import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
