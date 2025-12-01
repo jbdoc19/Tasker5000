@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FMCA Guided Mode</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="guide-header">
+    <div>
+      <p class="eyebrow">Friction-Minimizing Chart Algorithm</p>
+      <h1>Guided FMCA Mode</h1>
+      <p class="muted">Click through the interactive flowchart to track progress and decisions.</p>
+    </div>
+    <a class="ghost-button" href="/">⬅️ Back to dashboard</a>
+  </header>
+
+  <main class="guide-layout">
+    <section class="flow-panel">
+      <div class="flow-grid" aria-live="polite">
+        <div class="node step" data-step-id="start" data-next="pull" data-connect-down="true">
+          <h2>Start</h2>
+          <p>Kick off the FMCA sprint.</p>
+        </div>
+
+        <div class="node step" data-step-id="pull" data-next="timer" data-connect-down="true">
+          <h2>Pull 8 batched charts</h2>
+          <p>Load the fresh batch for this sprint.</p>
+        </div>
+
+        <div class="node step" data-step-id="timer" data-next="check5" data-connect-down="true">
+          <h2>Begin Sprint timer</h2>
+          <p>Start the sprint timer and micro-timer.</p>
+        </div>
+
+        <div class="node decision" data-step-id="check5" aria-label="5-minute decision">
+          <h2>5 min elapsed without progress?</h2>
+          <div class="decision-actions">
+            <button class="pill yes" data-target="micro">Yes → Micro-Unstick</button>
+            <button class="pill no" data-target="continue">No → Continue</button>
+          </div>
+        </div>
+
+        <div class="node step" data-step-id="micro" data-next="stuck" data-connect-down="true">
+          <h2>Micro-Unstick</h2>
+          <p>Define finish-line, smallest step, resume.</p>
+        </div>
+
+        <div class="node step" data-step-id="continue" data-next="stuck" data-connect-down="true">
+          <h2>Continue</h2>
+          <p>Stay in flow and keep moving.</p>
+        </div>
+
+        <div class="node decision" data-step-id="stuck" aria-label="Still stuck decision">
+          <h2>Still stuck?</h2>
+          <div class="decision-actions">
+            <button class="pill yes" data-target="swap3">Yes → Swap-3 Protocol</button>
+            <button class="pill no" data-target="sprintEnd">No → Sprint End</button>
+          </div>
+        </div>
+
+        <div class="node step" data-step-id="swap3" data-next="sprintEnd" data-connect-down="true">
+          <h2>Swap-3 Protocol</h2>
+          <p>Park current chart, add blockers, pull 3 att/southly, finish them.</p>
+        </div>
+
+        <div class="node step" data-step-id="sprintEnd" data-next="escalate" data-connect-down="true">
+          <h2>Sprint End</h2>
+          <p>Log wins, reset timers, preload next batch.</p>
+        </div>
+
+        <div class="node step" data-step-id="escalate" data-next="finalSprintEnd" data-connect-down="true">
+          <h2>Escalate</h2>
+          <p>Park chart with blockers/next steps.</p>
+        </div>
+
+        <div class="node step" data-step-id="finalSprintEnd">
+          <h2>Final Sprint End</h2>
+          <p>Review log and close the sprint.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="status-panel">
+      <div class="panel-card">
+        <p class="eyebrow">Current step</p>
+        <h3 id="currentStepLabel">Start</h3>
+        <p class="muted" id="currentStepDetail">Kick off the FMCA sprint.</p>
+        <div class="progress-bar" aria-hidden="true">
+          <div class="progress-bar__value" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="panel-card log-card">
+        <div class="panel-card__header">
+          <div>
+            <p class="eyebrow">Sprint log</p>
+            <h3>Completed actions</h3>
+          </div>
+          <button class="ghost-button ghost-button--small" id="resetFlow">↺ Reset</button>
+        </div>
+        <ol id="logList" class="log-list" aria-live="polite"></ol>
+      </div>
+
+      <div class="panel-card summary-card" id="summaryCard" hidden>
+        <p class="eyebrow">Sprint recap</p>
+        <h3>Completion summary</h3>
+        <ul id="summaryList"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/static/fmca_guide.js"></script>
+</body>
+</html>
