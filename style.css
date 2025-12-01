@@ -122,6 +122,78 @@ body {
   font-size: 0.9rem;
 }
 
+.muted {
+  color: var(--muted);
+  margin: 0;
+}
+
+.chart-batch {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.9rem;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chart-card h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chart-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.chart-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.chart-action {
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.chart-action:active {
+  transform: translateY(1px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-park {
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.btn-escalate {
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.btn-resolve {
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
 @media (min-width: 640px) {
   .button {
     width: auto;
