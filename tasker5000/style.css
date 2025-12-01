@@ -16,6 +16,11 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--hud-height) + 1rem);
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -73,7 +78,9 @@ body {
 }
 
 .hud-bar {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -191,8 +198,10 @@ body {
 }
 
 main.page {
-  padding-top: var(--hud-height);
+  padding-top: calc(var(--hud-height) + 0.5rem);
   min-height: calc(100vh - var(--hud-height));
+  position: relative;
+  z-index: 1;
 }
 
 .page__header {
@@ -232,6 +241,8 @@ main.page {
 .capacity-form {
   display: grid;
   gap: 0.85rem;
+  position: relative;
+  z-index: 2;
 }
 
 .capacity-form__grid {
@@ -268,6 +279,7 @@ main.page {
   border-radius: 0.5rem;
   padding: 0.4rem 0.5rem;
   color: var(--text);
+  width: 100%;
 }
 
 .input-value {
@@ -286,6 +298,8 @@ main.page {
   border-radius: 1rem;
   padding: 1rem;
   margin-top: 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .card--panel {
@@ -576,6 +590,16 @@ main.page {
   margin-top: 1rem;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.anchor-target {
+  scroll-margin-top: calc(var(--hud-height) + 0.75rem);
+  padding-top: 0.15rem;
+}
+
+input,
+button {
+  min-height: 44px;
 }
 
 .is-alert {
