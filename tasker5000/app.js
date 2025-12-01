@@ -23,6 +23,7 @@ const updateUrl = `${apiBase}/update_chart`;
 const chartActionUrl = `${apiBase}/chart_action`;
 const lanesUrl = `${apiBase}/lanes`;
 const addChartUrl = `${apiBase}/add_chart`;
+const addBatchUrl = `${apiBase}/add_batch`;
 
 // Timer baselines (in seconds). Adjust here to customize sprint rhythm.
 const SPRINT_DURATION = 25 * 60; // 25 minutes
@@ -77,8 +78,15 @@ const chartControlButtons = document.querySelectorAll('[data-chart-action]');
 const addChartForm = document.getElementById('add-chart-form');
 const newChartIdInput = document.getElementById('new-id');
 const newChartTypeInput = document.getElementById('new-type');
-const newChartAgeInput = document.getElementById('new-age');
+const newChartDosInput = document.getElementById('new-dos');
 const newChartRequiredInput = document.getElementById('new-required');
+const batchForm = document.getElementById('batch-form');
+const templateTypeInput = document.getElementById('template-type');
+const templateRequiredInput = document.getElementById('template-required');
+const templateDosInput = document.getElementById('template-dos');
+const templateIdsInput = document.getElementById('template-ids');
+
+const TEMPLATE_STORAGE_KEY = 'tasker5000-batch-template';
 
 const inputValueLabels = {
   energy: document.getElementById('energyValue'),
@@ -172,19 +180,60 @@ function safeInteger(value, fallback) {
   return Number.isInteger(num) ? num : fallback;
 }
 
+function getTodayIsoDate() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function hydrateDateInputs() {
+  const today = getTodayIsoDate();
+  if (newChartDosInput && !newChartDosInput.value) newChartDosInput.value = today;
+  if (templateDosInput && !templateDosInput.value) templateDosInput.value = today;
+}
+
+function loadTemplateFromStorage() {
+  try {
+    const raw = localStorage.getItem(TEMPLATE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn('Unable to load template from storage', error);
+    return null;
+  }
+}
+
+function saveTemplateToStorage(template) {
+  try {
+    localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(template));
+  } catch (error) {
+    console.warn('Unable to save template to storage', error);
+  }
+}
+
+function applyTemplateToForm(template) {
+  if (!template) return;
+  if (templateTypeInput) templateTypeInput.value = template.type || templateTypeInput.value;
+  if (templateDosInput) templateDosInput.value = template.date_of_service || templateDosInput.value;
+  if (templateRequiredInput) templateRequiredInput.checked = Boolean(template.required_today);
+  if (templateIdsInput && Array.isArray(template.ids)) templateIdsInput.value = template.ids.join('\n');
+}
+
 async function handleAddChartSubmit(event) {
   event.preventDefault();
 
   const chartData = {
     id: (newChartIdInput?.value || '').trim(),
     type: (newChartTypeInput?.value || 'full').toLowerCase(),
-    age_days: safeInteger(newChartAgeInput?.value, 0),
+    date_of_service: newChartDosInput?.value || '',
     required_today: Boolean(newChartRequiredInput?.checked),
     swap_count: 0,
   };
 
   if (!chartData.id) {
     statusMessage.textContent = 'Please enter a chart ID.';
+    return;
+  }
+
+  if (!chartData.date_of_service) {
+    statusMessage.textContent = 'Please select a Date of Service.';
     return;
   }
 
@@ -222,11 +271,74 @@ async function handleAddChartSubmit(event) {
   }
 }
 
+async function handleBatchSubmit(event) {
+  event.preventDefault();
+
+  const ids = (templateIdsInput?.value || '')
+    .trim()
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const type = (templateTypeInput?.value || 'full').toLowerCase();
+  const required = Boolean(templateRequiredInput?.checked);
+  const dos = templateDosInput?.value || '';
+
+  if (!ids.length) {
+    statusMessage.textContent = 'Please enter at least one chart ID.';
+    return;
+  }
+
+  if (!dos) {
+    statusMessage.textContent = 'Please select a Date of Service for the template.';
+    return;
+  }
+
+  const payload = ids.map((id) => ({
+    id,
+    type,
+    required_today: required,
+    date_of_service: dos,
+    swap_count: 0,
+  }));
+
+  saveTemplateToStorage({
+    type,
+    required_today: required,
+    date_of_service: dos,
+    ids,
+  });
+
+  statusMessage.textContent = 'Adding batch to FMCA memory...';
+
+  try {
+    const response = await fetch(addBatchUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(`Batch add failed: ${response.status}`);
+    }
+
+    statusMessage.textContent = 'Batch added. Refreshing FMCA timeline...';
+    await computeAndRender(lastRequestPayload);
+    await fetchLaneData();
+    statusMessage.textContent = 'Batch added and FMCA refreshed.';
+  } catch (error) {
+    statusMessage.textContent = `Batch add error: ${error.message}`;
+  }
+}
+
 startButton?.addEventListener('click', handleStartSprint);
 capacityForm?.addEventListener('submit', handleStartSprint);
 fetchLanesButton?.addEventListener('click', () => fetchLaneData());
 
 addChartForm?.addEventListener('submit', handleAddChartSubmit);
+batchForm?.addEventListener('submit', handleBatchSubmit);
 
 nextChartButton?.addEventListener('click', () => {
   handleNextChart();
@@ -244,6 +356,8 @@ chartControlButtons?.forEach((button) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   hydrateFormInputs(samplePayload);
+  hydrateDateInputs();
+  applyTemplateToForm(loadTemplateFromStorage());
   attachInputListeners();
   syncTimerDisplays();
   computeAndRender(getPayloadFromForm());
