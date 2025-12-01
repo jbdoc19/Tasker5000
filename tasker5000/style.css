@@ -9,6 +9,7 @@
   --success: #22c55e;
   --warning: #fbbf24;
   --danger: #ef4444;
+  --hud-height: 6.5rem;
 }
 
 * {
@@ -22,7 +23,6 @@ body {
   color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
-  padding-top: 6.5rem;
 }
 
 .nav {
@@ -73,12 +73,8 @@ body {
 }
 
 .hud-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  position: relative;
   display: flex;
-  height: auto;
-  min-height: 6.5rem;
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
@@ -192,6 +188,11 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 1.25rem;
+}
+
+main.page {
+  padding-top: var(--hud-height);
+  min-height: calc(100vh - var(--hud-height));
 }
 
 .page__header {
