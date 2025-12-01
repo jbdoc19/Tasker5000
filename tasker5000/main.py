@@ -2,7 +2,7 @@ import math
 from typing import List
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -210,23 +210,35 @@ def compute_etaH_endpoint(input: CapacityInput):
 
 
 @app.post("/update_chart")
-def update_chart_endpoint(update: ChartUpdateRequest):
-    chart = next((c for c in get_all_charts() if c.id == update.chart_id), None)
+async def update_chart(request: Request):
+    data = await request.json()
+    chart_id = data.get("id") or data.get("chart_id")
+    status = data.get("status")
+
+    if not chart_id or status is None:
+        raise HTTPException(status_code=400, detail="Chart id and status are required")
+
+    chart = next((c for c in get_all_charts() if c.id == chart_id), None)
 
     if chart is None:
         raise HTTPException(status_code=404, detail="Chart not found")
 
-    chart.status = update.status
-    chart.blocker_note = update.blocker_note or ""
-    if update.next_steps is not None:
-        chart.next_steps = update.next_steps
+    chart.status = status
+    chart.blocker_note = data.get("blocker_note") or chart.blocker_note
+    next_steps = data.get("next_steps")
+    if next_steps is not None:
+        chart.next_steps = next_steps
 
     chart.parked = chart.status == "parked"
+    if status == "resolved":
+        chart.parked = False
 
     update_chart_state(chart)
 
     return {
-        "message": "Chart updated successfully",
+        "success": True,
+        "id": chart_id,
+        "new_status": status,
         "chart": chart.__dict__,
         "charts": [c.__dict__ for c in get_all_charts()],
     }

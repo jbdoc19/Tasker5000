@@ -18,6 +18,7 @@ const samplePayload = {
 };
 
 const apiUrl = 'http://localhost:3000/compute_etaH';
+const updateUrl = 'http://localhost:3000/update_chart';
 
 const startButton = document.getElementById('startButton');
 const modeValue = document.getElementById('modeValue');
@@ -108,6 +109,7 @@ function renderCharts(charts) {
     const requiredToday = chart.required_today ?? chart.requiredToday;
 
     chartStatusMap.set(chartId, status);
+    card.id = chartId;
     card.dataset.chartId = chartId;
 
     const title = document.createElement('h4');
@@ -159,11 +161,11 @@ function renderCharts(charts) {
 
     applyStatusToCard(card, statusEl, chartId, status);
 
-    parkBtn.addEventListener('click', () => applyStatusToCard(card, statusEl, chartId, 'parked'));
+    parkBtn.addEventListener('click', () => updateChartStatus(card, statusEl, chartId, 'parked'));
     escalateBtn.addEventListener('click', () =>
-      applyStatusToCard(card, statusEl, chartId, 'escalated')
+      updateChartStatus(card, statusEl, chartId, 'escalated')
     );
-    resolveBtn.addEventListener('click', () => applyStatusToCard(card, statusEl, chartId, 'resolved'));
+    resolveBtn.addEventListener('click', () => updateChartStatus(card, statusEl, chartId, 'resolved'));
   });
 }
 
@@ -185,5 +187,23 @@ function applyStatusToCard(card, statusEl, chartId, newStatus) {
 
   if (STATUS_CLASSES.includes(statusClass)) {
     card.classList.add(statusClass);
+  }
+}
+
+async function updateChartStatus(card, statusEl, chartId, newStatus) {
+  applyStatusToCard(card, statusEl, chartId, newStatus);
+
+  try {
+    const response = await fetch(updateUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: chartId, status: newStatus }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to persist status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error updating chart status:', error);
   }
 }
