@@ -22,6 +22,7 @@ const apiUrl = `${apiBase}/compute_etaH`;
 const updateUrl = `${apiBase}/update_chart`;
 const chartActionUrl = `${apiBase}/chart_action`;
 const lanesUrl = `${apiBase}/lanes`;
+const addChartUrl = `${apiBase}/add_chart`;
 
 // Timer baselines (in seconds). Adjust here to customize sprint rhythm.
 const SPRINT_DURATION = 25 * 60; // 25 minutes
@@ -73,6 +74,11 @@ const carouselStatus = document.getElementById('carouselStatus');
 const fmcaTimelineList = document.getElementById('fmcaTimelineList');
 const fmcaTimelinePanel = document.getElementById('fmcaTimelinePanel');
 const chartControlButtons = document.querySelectorAll('[data-chart-action]');
+const addChartForm = document.getElementById('add-chart-form');
+const newChartIdInput = document.getElementById('new-id');
+const newChartTypeInput = document.getElementById('new-type');
+const newChartAgeInput = document.getElementById('new-age');
+const newChartRequiredInput = document.getElementById('new-required');
 
 const inputValueLabels = {
   energy: document.getElementById('energyValue'),
@@ -166,9 +172,61 @@ function safeInteger(value, fallback) {
   return Number.isInteger(num) ? num : fallback;
 }
 
+async function handleAddChartSubmit(event) {
+  event.preventDefault();
+
+  const chartData = {
+    id: (newChartIdInput?.value || '').trim(),
+    type: (newChartTypeInput?.value || 'full').toLowerCase(),
+    age_days: safeInteger(newChartAgeInput?.value, 0),
+    required_today: Boolean(newChartRequiredInput?.checked),
+    swap_count: 0,
+  };
+
+  if (!chartData.id) {
+    statusMessage.textContent = 'Please enter a chart ID.';
+    return;
+  }
+
+  statusMessage.textContent = 'Adding chart to FMCA memory...';
+
+  try {
+    const response = await fetch(addChartUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(chartData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Add chart failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error('Backend rejected the chart.');
+    }
+
+    addChartForm?.reset();
+    if (newChartTypeInput) newChartTypeInput.value = 'full';
+    if (newChartRequiredInput) newChartRequiredInput.checked = false;
+
+    statusMessage.textContent = 'Chart added. Refreshing FMCA timeline...';
+
+    await computeAndRender(lastRequestPayload);
+    await fetchLaneData();
+
+    statusMessage.textContent = 'Chart added and FMCA refreshed.';
+  } catch (error) {
+    statusMessage.textContent = `Add chart error: ${error.message}`;
+  }
+}
+
 startButton?.addEventListener('click', handleStartSprint);
 capacityForm?.addEventListener('submit', handleStartSprint);
 fetchLanesButton?.addEventListener('click', () => fetchLaneData());
+
+addChartForm?.addEventListener('submit', handleAddChartSubmit);
 
 nextChartButton?.addEventListener('click', () => {
   handleNextChart();

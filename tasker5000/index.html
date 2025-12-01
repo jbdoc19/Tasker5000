@@ -150,6 +150,40 @@
       <div id="lanesBoard" class="list list--stacked">Loading lanes…</div>
     </section>
 
+    <section class="card card--panel" id="addChartSection">
+      <div class="card__title-row">
+        <h2 class="card__title">Add New Chart</h2>
+        <p class="card__hint">Seed a chart into FMCA and refresh recommendations.</p>
+      </div>
+      <form id="add-chart-form" class="add-chart-form">
+        <div class="add-chart-form__grid">
+          <label class="input-group">
+            <span class="label">Chart ID</span>
+            <input type="text" id="new-id" placeholder="chart7" required aria-label="Chart ID" />
+          </label>
+          <label class="input-group">
+            <span class="label">Type</span>
+            <select id="new-type" aria-label="Chart type">
+              <option value="full">Full</option>
+              <option value="attest">Attest</option>
+            </select>
+          </label>
+          <label class="input-group">
+            <span class="label">Age in Days</span>
+            <input type="number" id="new-age" placeholder="15" min="0" required aria-label="Age in days" />
+          </label>
+          <label class="input-group input-group--inline">
+            <input type="checkbox" id="new-required" aria-label="Required today" />
+            <span class="label">Required today?</span>
+          </label>
+        </div>
+        <div class="capacity-form__actions">
+          <button type="submit" class="button">➕ Add Chart</button>
+          <p class="status status--inline">Charts are immediately stored in memory and included in the next FMCA run.</p>
+        </div>
+      </form>
+    </section>
+
     <section class="card card--panel" id="chartCarouselSection">
       <div class="card__title-row">
         <h2 class="card__title">Chart Carousel</h2>
