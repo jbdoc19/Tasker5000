@@ -169,8 +169,8 @@
             </select>
           </label>
           <label class="input-group">
-            <span class="label">Age in Days</span>
-            <input type="number" id="new-age" placeholder="15" min="0" required aria-label="Age in days" />
+            <span class="label">Date of Service</span>
+            <input type="date" id="new-dos" required aria-label="Date of service" />
           </label>
           <label class="input-group input-group--inline">
             <input type="checkbox" id="new-required" aria-label="Required today" />
@@ -180,6 +180,37 @@
         <div class="capacity-form__actions">
           <button type="submit" class="button">➕ Add Chart</button>
           <p class="status status--inline">Charts are immediately stored in memory and included in the next FMCA run.</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="card card--panel" id="batchTemplateSection">
+      <div class="card__title-row">
+        <h2 class="card__title">Batch Template</h2>
+        <p class="card__hint">Define a reusable template and add multiple charts at once.</p>
+      </div>
+      <form id="batch-form" class="add-chart-form">
+        <div class="add-chart-form__grid">
+          <label class="input-group">
+            <span class="label">Chart Type</span>
+            <input type="text" id="template-type" placeholder="Chart Type (attest/full)" required />
+          </label>
+          <label class="input-group input-group--inline">
+            <input type="checkbox" id="template-required" />
+            <span class="label">Required Today?</span>
+          </label>
+          <label class="input-group">
+            <span class="label">Date of Service</span>
+            <input type="date" id="template-dos" required />
+          </label>
+        </div>
+        <label class="input-group">
+          <span class="label">Chart IDs</span>
+          <textarea id="template-ids" placeholder="Enter chart IDs, one per line"></textarea>
+        </label>
+        <div class="capacity-form__actions">
+          <button type="submit" class="button">➕ Add Charts</button>
+          <p class="status status--inline">Templates auto-save locally for quick reuse.</p>
         </div>
       </form>
     </section>

@@ -1,4 +1,5 @@
 import math
+from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import FastAPI, HTTPException, Request
@@ -69,9 +70,35 @@ class CapacityInput(BaseModel):
 class ChartInput(BaseModel):
     id: str
     type: str
-    age_days: int
+    date_of_service: str
     required_today: bool = False
     swap_count: int = 0
+
+    @property
+    def age_days(self):
+        dos = datetime.strptime(self.date_of_service, "%Y-%m-%d")
+        return (datetime.today() - dos).days
+
+
+def days_ago(days: int) -> str:
+    return (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+
+
+def chart_from_days(chart_id: str, chart_type: str, age_days: int, required_today: bool, swap_count: int = 0) -> ChartTask:
+    chart_input = ChartInput(
+        id=chart_id,
+        type=chart_type,
+        date_of_service=days_ago(age_days),
+        required_today=required_today,
+        swap_count=swap_count,
+    )
+    return ChartTask(
+        id=chart_input.id,
+        type=chart_input.type,
+        age_days=chart_input.age_days,
+        required_today=chart_input.required_today,
+        swap_count=chart_input.swap_count,
+    )
 
 
 class FMCARequest(BaseModel):
@@ -111,9 +138,28 @@ async def add_chart(chart: ChartInput):
         type=chart.type,
         age_days=chart.age_days,
         required_today=chart.required_today,
+        swap_count=chart.swap_count,
     )
     seed_chart(new_chart)
     return {"success": True, "chart": new_chart.__dict__}
+
+
+@app.post("/add_batch")
+async def add_batch(charts: List[ChartInput]):
+    for chart in charts:
+        new_chart = ChartTask(
+            id=chart.id,
+            type=chart.type,
+            age_days=chart.age_days,
+            required_today=chart.required_today,
+            swap_count=chart.swap_count,
+        )
+        seed_chart(new_chart)
+
+    return {
+        "success": True,
+        "charts": [c.__dict__ for c in get_all_charts()],
+    }
 
 
 def calculate_etaH(payload: CapacityInput):
@@ -172,19 +218,19 @@ def build_chart_batch(chart_inputs: List[ChartInput]):
 
 def default_chart_inputs():
     return [
-        ChartInput(id="chart1", type="full", age_days=10, required_today=False),
-        ChartInput(id="chart2", type="attest", age_days=85, required_today=True),
-        ChartInput(id="chart3", type="full", age_days=20, required_today=False),
+        ChartInput(id="chart1", type="full", date_of_service=days_ago(10), required_today=False),
+        ChartInput(id="chart2", type="attest", date_of_service=days_ago(85), required_today=True),
+        ChartInput(id="chart3", type="full", date_of_service=days_ago(20), required_today=False),
     ]
 
 
 # Chart seeding
-seed_chart(ChartTask(id="chart1", type="full", age_days=10, required_today=False))
-seed_chart(ChartTask(id="chart2", type="attest", age_days=85, required_today=True))
-seed_chart(ChartTask(id="chart3", type="attest", age_days=5, required_today=False))
-seed_chart(ChartTask(id="chart4", type="full", age_days=90, required_today=True))
-seed_chart(ChartTask(id="chart5", type="full", age_days=15, required_today=False))
-seed_chart(ChartTask(id="chart6", type="attest", age_days=3, required_today=False))
+seed_chart(chart_from_days("chart1", "full", 10, False))
+seed_chart(chart_from_days("chart2", "attest", 85, True))
+seed_chart(chart_from_days("chart3", "attest", 5, False))
+seed_chart(chart_from_days("chart4", "full", 90, True))
+seed_chart(chart_from_days("chart5", "full", 15, False))
+seed_chart(chart_from_days("chart6", "attest", 3, False))
 
 
 def build_stateful_batch():
