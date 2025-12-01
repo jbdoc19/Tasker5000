@@ -1,8 +1,9 @@
 # Strategy
 
 This document provides an overview of the Tasker5000 system, including its objectives and guiding principles.
+Use it as the canonical place to capture major updates, goals, and the files that keep this project running.
 tasker5000/
-├── STRATEGY.md              # Overview of system
+├── STRATEGY.md              # Overview of system + major updates/goals log
 ├── PROMPTS.md               # Codex/GPT prompt history
 ├── PROGRESS_LOG.md          # What’s working, what’s not
 ├── VERSIONS/                # Snapshots of key components
@@ -22,6 +23,16 @@ Hybrid Execution — Sprint 0
 - Codex for generation
 - GitHub + VS Code for code commits
 - System logic split into two engines: Capacity Engine (ηH) + FMCA Loop
+
+
+## Major Updates Log
+- **2024-06-30** — Added explicit major updates/goals tracking to STRATEGY.md so it can serve as the single source of truth for system direction and history.
+
+
+## Goals
+- Finalize ηH output integration with FMCA thresholds to enable mode-aware execution.
+- Define escalation criteria and success metrics for Swap-3 and Accelerator timers.
+- Draft user-facing README that summarizes interaction model and provides quickstart steps.
 
 
 ## Sprint 1 — FMCA Execution Engine
