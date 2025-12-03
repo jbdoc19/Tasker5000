@@ -837,10 +837,12 @@
 
     .neuro-checklist__control-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: clamp(0.5rem, 2vw, 1rem);
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+      grid-auto-rows: max-content;
+      gap: clamp(0.75rem, 3vw, 1.25rem);
       width: 100%;
       justify-items: center;
+      align-items: start;
     }
 
     .neuro-checklist__control {
@@ -908,7 +910,7 @@
 
     .context-location {
       width: 100%;
-      max-width: 260px;
+      max-width: none;
       position: relative;
     }
 
@@ -959,10 +961,18 @@
       max-height: 300px;
       overflow-y: auto;
       z-index: 10;
+      display: none;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 120ms ease, visibility 120ms ease;
     }
 
-    .context-location__menu[hidden] {
-      display: none;
+    .context-location__menu.is-open {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
 
     .context-location__option {
@@ -18907,14 +18917,18 @@ host.appendChild(row);
     contextMenu.setAttribute("role", "listbox");
     contextMenu.hidden = true;
 
+    const syncContextMenuState = (isOpen) => {
+      contextMenu.hidden = !isOpen;
+      contextMenu.classList.toggle("is-open", isOpen);
+      contextButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    };
+
     const closeContextMenu = () => {
-      contextMenu.hidden = true;
-      contextButton.setAttribute("aria-expanded", "false");
+      syncContextMenuState(false);
     };
 
     const openContextMenu = () => {
-      contextMenu.hidden = false;
-      contextButton.setAttribute("aria-expanded", "true");
+      syncContextMenuState(true);
     };
 
     const toggleContextMenu = (force) => {
@@ -18970,8 +18984,8 @@ host.appendChild(row);
 
     host.append(
       availability.wrapper,
-      energy.wrapper,
       contextLocation,
+      energy.wrapper,
     );
 
     host.dataset.controlsMounted = "true";
