@@ -10753,6 +10753,15 @@
     };
   }
 
+  function isHpiStep(sub) {
+    return Boolean(sub && String(sub.name).toLowerCase() === HPI_STEP_NAME.toLowerCase());
+  }
+
+  function getTotalHpiDurationMs(hpiSubSteps) {
+    if (!Array.isArray(hpiSubSteps)) return 0;
+    return hpiSubSteps.reduce((sum, s) => sum + (Number(s.activeDurationMs) || 0), 0);
+  }
+
   function createHpiSubStep(name) {
     return {
       id: generateSubTaskId(),
@@ -10768,7 +10777,7 @@
   }
 
   function ensureHpiSubSteps(sub) {
-    if (!sub || String(sub.name).toLowerCase() !== HPI_STEP_NAME.toLowerCase()) return false;
+    if (!isHpiStep(sub)) return false;
     let changed = false;
     if (!Array.isArray(sub.hpiSubSteps) || sub.hpiSubSteps.length === 0) {
       sub.hpiSubSteps = HPI_SUB_STEPS.map(name => createHpiSubStep(name));
@@ -11915,7 +11924,7 @@
     const allDone = hpiSubSteps.length > 0 && hpiSubSteps.every(s => s.completed);
     const parentSubIdx = task.subTasks.findIndex(s => s.id === parentSub.id);
     if (allDone && !parentSub.completed && parentSubIdx !== -1) {
-      const totalHpiMs = hpiSubSteps.reduce((sum, s) => sum + (Number(s.activeDurationMs) || 0), 0);
+      const totalHpiMs = getTotalHpiDurationMs(hpiSubSteps);
       if (!parentSub.startTime) {
         parentSub.startTime = new Date().toISOString();
       }
@@ -11941,7 +11950,7 @@
 
     const progressEl = document.createElement("div");
     if (allDone) {
-      const totalMs = hpiSubSteps.reduce((sum, s) => sum + (Number(s.activeDurationMs) || 0), 0);
+      const totalMs = getTotalHpiDurationMs(hpiSubSteps);
       progressEl.className = "hpi-progress hpi-progress--done";
       progressEl.textContent = `✅ ${formatElapsedMs(totalMs)} total`;
     } else {
@@ -12049,13 +12058,12 @@
 
       const nameSpan = document.createElement("span");
       nameSpan.className = "subtask-name";
-      const isHpiStep = String(sub.name).toLowerCase() === HPI_STEP_NAME.toLowerCase();
-      if (isHpiStep && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
+      const isHpi = isHpiStep(sub);
+      if (isHpi && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
         const done = sub.hpiSubSteps.filter(s => s.completed).length;
         const total = sub.hpiSubSteps.length;
         if (done === total) {
-          const totalMs = sub.hpiSubSteps.reduce((acc, s) => acc + (Number(s.activeDurationMs) || 0), 0);
-          nameSpan.textContent = `${sub.name} — ✅ ${formatElapsedMs(totalMs)} total`;
+          nameSpan.textContent = `${sub.name} — ✅ ${formatElapsedMs(getTotalHpiDurationMs(sub.hpiSubSteps))} total`;
         } else {
           nameSpan.textContent = `${sub.name} (${done}/${total})`;
         }
@@ -12123,7 +12131,7 @@
       row.appendChild(actions);
       row.dataset.paused = sub.isPaused ? "true" : "false";
       container.appendChild(row);
-      if (isHpiStep && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
+      if (isHpi && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
         container.appendChild(renderHpiSubStepsBlock(task, sub, subIndex, taskIndex));
       }
     });
