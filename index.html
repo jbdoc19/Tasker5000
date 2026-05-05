@@ -5821,6 +5821,7 @@
           <div class="all-tasks-panel" hidden data-accordion-panel data-all-tasks-panel>
             <div class="task-panel-actions">
               <button id="openAddTaskPanel" class="btn btn-primary" type="button">Add task</button>
+              <button id="resetPatientChartsButton" class="btn btn-ghost" type="button">Reset patient chart list</button>
             </div>
             <div class="task-list-header" id="taskListHeader">
               <label class="task-view-label" for="taskViewMode">View</label>
@@ -6387,8 +6388,7 @@
                   <option value="Chart">Chart</option>
                   <option value="Inbox">Inbox</option>
                   <option value="Calls">Calls</option>
-                  <option value="Teaching">Teaching</option>
-                  <option value="Personal">Personal</option>
+                                    <option value="Personal">Personal</option>
                 </select>
               </label>
               <label for="blockBatchAuthor">Chart Author
@@ -6568,8 +6568,7 @@
               <option value="Chart">Chart</option>
               <option value="Inbox">Inbox</option>
               <option value="Calls">Calls</option>
-              <option value="Teaching">Teaching</option>
-              <option value="Personal">Personal</option>
+                            <option value="Personal">Personal</option>
             </select>
           </label>
           <div class="task-inline-actions" aria-label="Task helpers">
@@ -7039,7 +7038,7 @@
   <script>
   const $ = id => document.getElementById(id);
 
-  const categories = ["General","Admin","Chart","Inbox","Calls","Teaching","Personal"];
+  const categories = ["General","Admin","Chart","Inbox","Calls","Personal"];
   let activeCategory = "All";
   const TASK_LIST_MODES = { ACTIVE: "active", COMPLETED: "completed" };
   let taskListMode = TASK_LIST_MODES.ACTIVE;
@@ -13495,7 +13494,7 @@
     if (!evaluation) return false;
     const difficulty = Number(evaluation.task?.difficulty || 3);
     const category = evaluation.task?.category || "";
-    return difficulty >= 4 || evaluation.chunk.minutes >= 18 || ["Calls", "Teaching"].includes(category);
+    return difficulty >= 4 || evaluation.chunk.minutes >= 18 || ["Calls"].includes(category);
   }
 
   function evaluateTaskForNextBest(task, inputs) {
@@ -16019,6 +16018,10 @@
     if (openCardBtn) {
       openCardBtn.addEventListener("click", () => setAddTaskCardCollapsed(false));
     }
+    const resetChartsBtn = $("resetPatientChartsButton");
+    if (resetChartsBtn) {
+      resetChartsBtn.addEventListener("click", resetPatientChartList);
+    }
     const closeBtn = $("addTaskClose");
     if (closeBtn) {
       closeBtn.addEventListener("click", () => setAddTaskCardCollapsed(true));
@@ -16417,6 +16420,15 @@ initializeFocusFabLongPress();
     tasks = [];
     localStorage.removeItem("tasks");
     updateUI();
+  }
+
+  function resetPatientChartList() {
+    if (!confirm("Reset the entire task list and start a fresh patient panel?")) return;
+    cancelEdit();
+    tasks = [];
+    localStorage.removeItem("tasks");
+    updateUI();
+    showToast("Patient panel reset", "Task list cleared. You can now add fresh charts.");
   }
 
   function saveAsTemplate() {
