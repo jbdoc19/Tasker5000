@@ -2388,6 +2388,24 @@
     .chart-step-controls button {
       font-size: 0.85rem;
     }
+    .hpi-substeps-block {
+      margin-top: 0.4rem;
+      padding-left: 1rem;
+      border-left: 2px solid rgba(45, 212, 195, 0.35);
+      width: 100%;
+    }
+    .hpi-progress {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .hpi-progress--done {
+      color: var(--hero-teal);
+    }
+    .hpi-substep-row {
+      margin: 0.2rem 0;
+    }
     #focusTimer {
       font-size: 1.2rem;
       margin-bottom: 0.5rem;
@@ -5821,7 +5839,7 @@
           <div class="all-tasks-panel" hidden data-accordion-panel data-all-tasks-panel>
             <div class="task-panel-actions">
               <button id="openAddTaskPanel" class="btn btn-primary" type="button">Add task</button>
-              <button id="resetPatientChartsButton" class="btn btn-ghost" type="button">Reset patient chart list</button>
+              <button id="resetPatientChartsButton" class="btn btn-ghost" type="button">🗑️ Reset All Tasks</button>
             </div>
             <div class="task-list-header" id="taskListHeader">
               <label class="task-view-label" for="taskViewMode">View</label>
@@ -6959,6 +6977,7 @@
         </div>
       </div>
       <footer class="focus-overlay__actions">
+        <button id="focusHomeButton" type="button" class="btn btn-ghost">🏠 Home</button>
         <button id="focusExtendButton" type="button" class="btn btn-secondary">Add 5 more min</button>
         <button id="focusAbortButton" type="button" class="btn btn-ghost">Abort</button>
         <button id="focusCompleteButton" type="button" class="btn hero-cta">Task complete</button>
@@ -7048,6 +7067,7 @@
   const runningTimers = new Map();
   let sprintDurationMinutes = null;
   let sprintEndTime = null;
+  let focusHistoryPushed = false;
   let nextTaskId = null;
   let lastFocusedBeforeTemplateModal = null;
   const MODULE_STATE_PREFIX = "moduleState_";
@@ -8449,6 +8469,11 @@
   }
 
   function setupFocusOverlay() {
+    const homeBtn = $("focusHomeButton");
+    if (homeBtn) {
+      homeBtn.addEventListener("click", () => backToCapture());
+    }
+
     const extendBtn = $("focusExtendButton");
     if (extendBtn) {
       extendBtn.addEventListener("click", () => extendSprintBy(5));
@@ -8466,6 +8491,13 @@
     if (completeBtn) {
       completeBtn.addEventListener("click", () => completeTask());
     }
+
+    window.addEventListener("popstate", () => {
+      if (focusHistoryPushed && document.body.classList.contains("focus-overlay-active")) {
+        focusHistoryPushed = false;
+        backToCapture();
+      }
+    });
 
     const overlay = $("focus");
     if (overlay) {
@@ -10501,6 +10533,21 @@
     "Enter billing code",
     "Sign off"
   ];
+  const HPI_STEP_NAME = "Review/modify HPI";
+  const HPI_SUB_STEPS = [
+    "Intro/New patient",
+    "Interval Hx",
+    "Nutrition",
+    "Sleep",
+    "Elimination",
+    "Development/Growth/Puberty",
+    "Behavior",
+    "Physical Activity",
+    "Oral health",
+    "Family/social hx",
+    "SDOH",
+    "HEADDS"
+  ];
   const RESIDENT_ATTESTATION_STEP = "Add Attestation";
   let currentFocusTaskIndex = null;
 
@@ -10704,6 +10751,38 @@
       isFirstThree: Boolean(options.isFirstThree),
       deferredUntilUnlock: Boolean(options.deferredUntilUnlock)
     };
+  }
+
+  function createHpiSubStep(name) {
+    return {
+      id: generateSubTaskId(),
+      name,
+      completed: false,
+      startTime: null,
+      completionTime: null,
+      durationMinutes: null,
+      activeDurationMs: 0,
+      lastResumedAt: null,
+      isPaused: false
+    };
+  }
+
+  function ensureHpiSubSteps(sub) {
+    if (!sub || String(sub.name).toLowerCase() !== HPI_STEP_NAME.toLowerCase()) return false;
+    let changed = false;
+    if (!Array.isArray(sub.hpiSubSteps) || sub.hpiSubSteps.length === 0) {
+      sub.hpiSubSteps = HPI_SUB_STEPS.map(name => createHpiSubStep(name));
+      changed = true;
+    } else {
+      const existingNames = new Set(sub.hpiSubSteps.map(s => String(s.name).toLowerCase()));
+      HPI_SUB_STEPS.forEach(name => {
+        if (!existingNames.has(name.toLowerCase())) {
+          sub.hpiSubSteps.push(createHpiSubStep(name));
+          changed = true;
+        }
+      });
+    }
+    return changed;
   }
 
   function normalizeSubTask(sub, basePriority) {
@@ -11533,6 +11612,9 @@
       } else if (sub.deferredUntilUnlock) {
         sub.deferredUntilUnlock = false;
       }
+      if (ensureHpiSubSteps(sub)) {
+        changed = true;
+      }
     });
 
     return changed;
@@ -11738,6 +11820,202 @@
     refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
   }
 
+  function addSubTaskToTask(taskIndex, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    const name = prompt("New step name");
+    if (!name) return;
+    const base = computePriority({ ...task, subTasks: [] });
+    if (!Array.isArray(task.subTasks)) {
+      task.subTasks = [];
+    }
+    task.subTasks.push(createSubTask(name.trim(), base, {
+      deferredUntilUnlock: task.firstThreeMode && !task.firstThreeUnlocked
+    }));
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function startHpiSubStep(taskIndex, parentSub, hpiSubIdx, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    const hpiSub = Array.isArray(parentSub.hpiSubSteps) ? parentSub.hpiSubSteps[hpiSubIdx] : null;
+    if (!hpiSub) return;
+    const nowIso = new Date().toISOString();
+    hpiSub.startTime = nowIso;
+    hpiSub.lastResumedAt = nowIso;
+    hpiSub.activeDurationMs = 0;
+    hpiSub.isPaused = false;
+    hpiSub.completed = false;
+    hpiSub.completionTime = null;
+    hpiSub.durationMinutes = null;
+    stopTimerForSubTask(hpiSub.id);
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function pauseHpiSubStep(taskIndex, parentSub, hpiSubIdx, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    const hpiSub = Array.isArray(parentSub.hpiSubSteps) ? parentSub.hpiSubSteps[hpiSubIdx] : null;
+    if (!hpiSub || !hpiSub.startTime || hpiSub.completed || hpiSub.isPaused) return;
+    const resumeReference = hpiSub.lastResumedAt || hpiSub.startTime;
+    const resumeDate = new Date(resumeReference);
+    const base = Math.max(0, Number(hpiSub.activeDurationMs) || 0);
+    const additional = Number.isNaN(resumeDate.getTime()) ? 0 : Math.max(0, Date.now() - resumeDate.getTime());
+    hpiSub.activeDurationMs = base + additional;
+    hpiSub.lastResumedAt = null;
+    hpiSub.isPaused = true;
+    stopTimerForSubTask(hpiSub.id);
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function resumeHpiSubStep(taskIndex, parentSub, hpiSubIdx, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    const hpiSub = Array.isArray(parentSub.hpiSubSteps) ? parentSub.hpiSubSteps[hpiSubIdx] : null;
+    if (!hpiSub || hpiSub.completed) return;
+    const nowIso = new Date().toISOString();
+    if (!hpiSub.startTime) {
+      hpiSub.startTime = nowIso;
+      hpiSub.activeDurationMs = Math.max(0, Number(hpiSub.activeDurationMs) || 0);
+    }
+    hpiSub.lastResumedAt = nowIso;
+    hpiSub.isPaused = false;
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function toggleHpiSubStepCompletion(taskIndex, parentSub, hpiSubIdx, isCompleted, options = {}) {
+    const { task, taskIndex: resolvedIndex } = resolveTaskAndSub(taskIndex, null, options);
+    if (!task) return;
+    const hpiSub = Array.isArray(parentSub.hpiSubSteps) ? parentSub.hpiSubSteps[hpiSubIdx] : null;
+    if (!hpiSub) return;
+    if (isCompleted) {
+      if (!hpiSub.startTime) {
+        const nowIso = new Date().toISOString();
+        hpiSub.startTime = nowIso;
+        hpiSub.lastResumedAt = nowIso;
+        hpiSub.activeDurationMs = 0;
+      }
+      const elapsedMs = getSubTaskElapsedMs(hpiSub);
+      hpiSub.completed = true;
+      hpiSub.completionTime = new Date().toISOString();
+      hpiSub.durationMinutes = Number.isFinite(elapsedMs) && elapsedMs > 0 ? Number((elapsedMs / 60000).toFixed(2)) : 0;
+      hpiSub.activeDurationMs = Math.max(0, elapsedMs);
+      hpiSub.lastResumedAt = null;
+      hpiSub.isPaused = false;
+      stopTimerForSubTask(hpiSub.id);
+    } else {
+      hpiSub.completed = false;
+      hpiSub.completionTime = null;
+      hpiSub.durationMinutes = null;
+      hpiSub.isPaused = false;
+      hpiSub.lastResumedAt = null;
+      stopTimerForSubTask(hpiSub.id);
+    }
+    const hpiSubSteps = parentSub.hpiSubSteps || [];
+    const allDone = hpiSubSteps.length > 0 && hpiSubSteps.every(s => s.completed);
+    const parentSubIdx = task.subTasks.findIndex(s => s.id === parentSub.id);
+    if (allDone && !parentSub.completed && parentSubIdx !== -1) {
+      const totalHpiMs = hpiSubSteps.reduce((sum, s) => sum + (Number(s.activeDurationMs) || 0), 0);
+      if (!parentSub.startTime) {
+        parentSub.startTime = new Date().toISOString();
+      }
+      parentSub.activeDurationMs = totalHpiMs;
+      toggleSubTaskCompletion(resolvedIndex, parentSubIdx, true, { ...options, taskId: task.id, subId: parentSub.id });
+      return;
+    }
+    if (!isCompleted && parentSub.completed && parentSubIdx !== -1) {
+      toggleSubTaskCompletion(resolvedIndex, parentSubIdx, false, { ...options, taskId: task.id, subId: parentSub.id });
+      return;
+    }
+    refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
+  }
+
+  function renderHpiSubStepsBlock(task, parentSub, subIndex, taskIndex) {
+    const hpiSubSteps = parentSub.hpiSubSteps || [];
+    const block = document.createElement("div");
+    block.className = "hpi-substeps-block";
+
+    const completedCount = hpiSubSteps.filter(s => s.completed).length;
+    const totalCount = hpiSubSteps.length;
+    const allDone = totalCount > 0 && completedCount === totalCount;
+
+    const progressEl = document.createElement("div");
+    if (allDone) {
+      const totalMs = hpiSubSteps.reduce((sum, s) => sum + (Number(s.activeDurationMs) || 0), 0);
+      progressEl.className = "hpi-progress hpi-progress--done";
+      progressEl.textContent = `✅ ${formatElapsedMs(totalMs)} total`;
+    } else {
+      progressEl.className = "hpi-progress";
+      progressEl.textContent = `${completedCount}/${totalCount} done`;
+    }
+    block.appendChild(progressEl);
+
+    hpiSubSteps.forEach((hpiSub, hpiSubIdx) => {
+      const row = document.createElement("div");
+      row.className = "subtask-row hpi-substep-row focus-overlay__task";
+      if (hpiSub.completed) row.classList.add("completed");
+
+      const titleWrapper = document.createElement("label");
+      titleWrapper.className = "task-title";
+
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.checked = hpiSub.completed;
+      chk.onchange = event => toggleHpiSubStepCompletion(taskIndex, parentSub, hpiSubIdx, event.target.checked, { focusOnly: true, taskId: task.id });
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "subtask-name";
+      nameSpan.textContent = hpiSub.name;
+
+      titleWrapper.appendChild(chk);
+      titleWrapper.appendChild(nameSpan);
+
+      const actions = document.createElement("div");
+      actions.className = "subtask-actions task-actions";
+
+      const startBtn = document.createElement("button");
+      startBtn.type = "button";
+      startBtn.textContent = hpiSub.startTime ? "🔁" : "▶️";
+      startBtn.title = "Start or restart timer";
+      startBtn.setAttribute("aria-label", hpiSub.startTime ? "Restart timer" : "Start timer");
+      startBtn.onclick = () => startHpiSubStep(taskIndex, parentSub, hpiSubIdx, { focusOnly: true, taskId: task.id });
+      actions.appendChild(startBtn);
+
+      const pauseBtn = document.createElement("button");
+      pauseBtn.type = "button";
+      const updatePauseHpiBtn = () => {
+        const paused = Boolean(hpiSub.isPaused);
+        pauseBtn.textContent = paused ? "Resume" : "Pause";
+        pauseBtn.title = paused ? "Resume step timer" : "Pause step timer";
+        pauseBtn.setAttribute("aria-label", paused ? "Resume step timer" : "Pause step timer");
+        pauseBtn.setAttribute("aria-pressed", paused ? "true" : "false");
+        pauseBtn.disabled = !hpiSub.startTime || hpiSub.completed;
+      };
+      pauseBtn.onclick = () => {
+        if (!hpiSub.startTime || hpiSub.completed) return;
+        if (hpiSub.isPaused) {
+          resumeHpiSubStep(taskIndex, parentSub, hpiSubIdx, { focusOnly: true, taskId: task.id });
+        } else {
+          pauseHpiSubStep(taskIndex, parentSub, hpiSubIdx, { focusOnly: true, taskId: task.id });
+        }
+      };
+      updatePauseHpiBtn();
+      actions.appendChild(pauseBtn);
+
+      const timer = document.createElement("span");
+      timer.className = "timer-label task-counter";
+      trackTimer(hpiSub, timer);
+
+      row.appendChild(titleWrapper);
+      row.appendChild(timer);
+      row.appendChild(actions);
+      row.dataset.paused = hpiSub.isPaused ? "true" : "false";
+      block.appendChild(row);
+    });
+
+    return block;
+  }
+
   function renderChartTask(task, taskIndex) {
     const container = document.createElement("div");
     container.style.width = "100%";
@@ -11771,7 +12049,19 @@
 
       const nameSpan = document.createElement("span");
       nameSpan.className = "subtask-name";
-      nameSpan.textContent = sub.name;
+      const isHpiStep = String(sub.name).toLowerCase() === HPI_STEP_NAME.toLowerCase();
+      if (isHpiStep && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
+        const done = sub.hpiSubSteps.filter(s => s.completed).length;
+        const total = sub.hpiSubSteps.length;
+        if (done === total) {
+          const totalMs = sub.hpiSubSteps.reduce((acc, s) => acc + (Number(s.activeDurationMs) || 0), 0);
+          nameSpan.textContent = `${sub.name} — ✅ ${formatElapsedMs(totalMs)} total`;
+        } else {
+          nameSpan.textContent = `${sub.name} (${done}/${total})`;
+        }
+      } else {
+        nameSpan.textContent = sub.name;
+      }
 
       titleWrapper.appendChild(chk);
       titleWrapper.appendChild(nameSpan);
@@ -11833,6 +12123,9 @@
       row.appendChild(actions);
       row.dataset.paused = sub.isPaused ? "true" : "false";
       container.appendChild(row);
+      if (isHpiStep && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
+        container.appendChild(renderHpiSubStepsBlock(task, sub, subIndex, taskIndex));
+      }
     });
 
     if (hiddenCount > 0) {
@@ -11862,6 +12155,18 @@
         sub.activeDurationMs = 0;
         sub.lastResumedAt = null;
         sub.isPaused = false;
+        if (Array.isArray(sub.hpiSubSteps)) {
+          sub.hpiSubSteps.forEach(hpiSub => {
+            stopTimerForSubTask(hpiSub.id);
+            hpiSub.startTime = null;
+            hpiSub.completionTime = null;
+            hpiSub.durationMinutes = null;
+            hpiSub.completed = false;
+            hpiSub.activeDurationMs = 0;
+            hpiSub.lastResumedAt = null;
+            hpiSub.isPaused = false;
+          });
+        }
       });
       refreshAfterSubTaskChange(taskIndex, { focusOnly: true, taskId: task.id });
     };
@@ -16256,6 +16561,8 @@ initializeFocusFabLongPress();
       }
     }
     document.body.classList.add("focus-overlay-active");
+    history.pushState({ overlay: 'focus' }, '');
+    focusHistoryPushed = true;
     const energyLevel = clampScale(getEnergyLevel(), 3);
     const timeBudget = getTimeBudgetMinutes();
     lastFocusEnergyLevel = energyLevel;
@@ -16356,7 +16663,12 @@ initializeFocusFabLongPress();
     task.completedAt = nowIso;
     updateChartDurationForTask(task);
     if (Array.isArray(task.subTasks)) {
-      task.subTasks.forEach(sub => stopTimerForSubTask(sub.id));
+      task.subTasks.forEach(sub => {
+        stopTimerForSubTask(sub.id);
+        if (Array.isArray(sub.hpiSubSteps)) {
+          sub.hpiSubSteps.forEach(hpiSub => stopTimerForSubTask(hpiSub.id));
+        }
+      });
     }
     persist();
     recordTaskCompletion(task);
@@ -16412,6 +16724,11 @@ initializeFocusFabLongPress();
     setSprintVisualState(false);
     setFocusLaunchOpen(false);
     updateUI();
+    const wasHistoryPushed = focusHistoryPushed;
+    focusHistoryPushed = false;
+    if (wasHistoryPushed) {
+      history.back();
+    }
   }
 
   function reset() {
@@ -16423,12 +16740,12 @@ initializeFocusFabLongPress();
   }
 
   function resetPatientChartList() {
-    if (!confirm("Reset the entire task list and start a fresh patient panel?")) return;
+    if (!confirm("This will permanently delete all tasks. Are you sure?")) return;
     cancelEdit();
     tasks = [];
     localStorage.removeItem("tasks");
     updateUI();
-    showToast("Patient panel reset", "Task list cleared. You can now add fresh charts.");
+    showToast("Tasks reset", "All tasks cleared. Ready for a fresh start.");
   }
 
   function saveAsTemplate() {
