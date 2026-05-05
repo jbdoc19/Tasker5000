@@ -8492,6 +8492,9 @@
       completeBtn.addEventListener("click", () => completeTask());
     }
 
+    // Register the popstate listener once (setupFocusOverlay is called once from DOMContentLoaded).
+    // When the phone back button is pressed while the focus overlay is open,
+    // this handler closes the overlay instead of exiting the app.
     window.addEventListener("popstate", () => {
       if (focusHistoryPushed && document.body.classList.contains("focus-overlay-active")) {
         focusHistoryPushed = false;
@@ -10753,13 +10756,19 @@
     };
   }
 
+  const HPI_STEP_NAME_LOWER = HPI_STEP_NAME.toLowerCase();
+
   function isHpiStep(sub) {
-    return Boolean(sub && String(sub.name).toLowerCase() === HPI_STEP_NAME.toLowerCase());
+    return Boolean(sub && String(sub.name).toLowerCase() === HPI_STEP_NAME_LOWER);
+  }
+
+  function hasHpiSubSteps(sub) {
+    return isHpiStep(sub) && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0;
   }
 
   function getTotalHpiDurationMs(hpiSubSteps) {
     if (!Array.isArray(hpiSubSteps)) return 0;
-    return hpiSubSteps.reduce((sum, s) => sum + (Number(s.activeDurationMs) || 0), 0);
+    return hpiSubSteps.reduce((sum, s) => sum + Math.max(0, Number(s.activeDurationMs) || 0), 0);
   }
 
   function createHpiSubStep(name) {
@@ -11922,19 +11931,24 @@
     }
     const hpiSubSteps = parentSub.hpiSubSteps || [];
     const allDone = hpiSubSteps.length > 0 && hpiSubSteps.every(s => s.completed);
-    const parentSubIdx = task.subTasks.findIndex(s => s.id === parentSub.id);
-    if (allDone && !parentSub.completed && parentSubIdx !== -1) {
-      const totalHpiMs = getTotalHpiDurationMs(hpiSubSteps);
-      if (!parentSub.startTime) {
-        parentSub.startTime = new Date().toISOString();
+    if (allDone && !parentSub.completed) {
+      const parentSubIdx = task.subTasks.findIndex(s => s.id === parentSub.id);
+      if (parentSubIdx !== -1) {
+        const totalHpiMs = getTotalHpiDurationMs(hpiSubSteps);
+        if (!parentSub.startTime) {
+          parentSub.startTime = new Date().toISOString();
+        }
+        parentSub.activeDurationMs = totalHpiMs;
+        toggleSubTaskCompletion(resolvedIndex, parentSubIdx, true, { ...options, taskId: task.id, subId: parentSub.id });
+        return;
       }
-      parentSub.activeDurationMs = totalHpiMs;
-      toggleSubTaskCompletion(resolvedIndex, parentSubIdx, true, { ...options, taskId: task.id, subId: parentSub.id });
-      return;
     }
-    if (!isCompleted && parentSub.completed && parentSubIdx !== -1) {
-      toggleSubTaskCompletion(resolvedIndex, parentSubIdx, false, { ...options, taskId: task.id, subId: parentSub.id });
-      return;
+    if (!isCompleted && parentSub.completed) {
+      const parentSubIdx = task.subTasks.findIndex(s => s.id === parentSub.id);
+      if (parentSubIdx !== -1) {
+        toggleSubTaskCompletion(resolvedIndex, parentSubIdx, false, { ...options, taskId: task.id, subId: parentSub.id });
+        return;
+      }
     }
     refreshAfterSubTaskChange(resolvedIndex, { ...options, focusOnly: true, taskId: task.id });
   }
@@ -12058,8 +12072,8 @@
 
       const nameSpan = document.createElement("span");
       nameSpan.className = "subtask-name";
-      const isHpi = isHpiStep(sub);
-      if (isHpi && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
+      const isHpi = hasHpiSubSteps(sub);
+      if (isHpi) {
         const done = sub.hpiSubSteps.filter(s => s.completed).length;
         const total = sub.hpiSubSteps.length;
         if (done === total) {
@@ -12131,7 +12145,7 @@
       row.appendChild(actions);
       row.dataset.paused = sub.isPaused ? "true" : "false";
       container.appendChild(row);
-      if (isHpi && Array.isArray(sub.hpiSubSteps) && sub.hpiSubSteps.length > 0) {
+      if (isHpi) {
         container.appendChild(renderHpiSubStepsBlock(task, sub, subIndex, taskIndex));
       }
     });
